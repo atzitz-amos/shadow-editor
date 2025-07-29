@@ -164,10 +164,12 @@
     padding-left: calc(max(20px - var(--editor-gutter-num-size) / 2, 10px));
 }
 
-.editor .line-number {
-    text-align: right;
+.editor .gutter-line-number {
     width: var(--editor-gutter-num-size);
-    margin-top: 2px;
+
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
 }
 
 .editor .editor-active-line {

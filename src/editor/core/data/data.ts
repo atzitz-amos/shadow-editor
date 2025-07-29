@@ -1,6 +1,6 @@
 import {RawEditorData} from "./raw";
 import {InlineComponent} from "../../ui/components/Inline";
-import {EditorComponentsData} from "./edac";
+import {EDAC, EditorComponentsData} from "./edac";
 import {TextContext, TextRange} from "../Position";
 import {SRTree} from "../lang/parser/SRTree";
 
@@ -40,8 +40,8 @@ export class EditorData {
         this.edac.set(range, components);
     }
 
-    take(n: number, from: Offset, lineBreaks: Offset[]): HTMLSpanElement[][] {
-        let result: HTMLSpanElement[][] = [];
+    take(n: number, from: Offset, lineBreaks: Offset[]): EDAC[] {
+        let result: EDAC[] = [];
 
         for (let i = 0; i < n; i++) {
             result.push(this.getLine(from + i, lineBreaks));
@@ -49,12 +49,20 @@ export class EditorData {
         return result;
     }
 
-    getLine(line: number, lineBreaks: Offset[]): HTMLSpanElement[] {
+    getLine(line: number, lineBreaks: Offset[]): EDAC {
         if (lineBreaks.length <= line) {
-            return [];
+            return {
+                gutter: [],
+                content: [],
+                line: line
+            };
         } else {
             let range = new TextRange(lineBreaks[line], lineBreaks[line + 1] || this.raw.length());
-            return this.edac.toRenderables(this.edac.query(range), lineBreaks[line]);
+            return {
+                content: this.edac.toRenderables(this.edac.query(range), lineBreaks[line]),
+                gutter: this.edac.gutterToRenderables(line),
+                line: line
+            };
         }
     }
 }

@@ -1,10 +1,25 @@
 import {TextRange} from "../Position";
 import {InlineComponent} from "../../ui/components/Inline";
+import {GutterComponent} from "../../ui/gutter/components/component";
+import {GutterLine} from "../../ui/gutter/components/line";
+
+export type EDAC = {
+    gutter: HTMLSpanElement[];
+    content: HTMLSpanElement[];
+    line: number;
+}
+
+type Event = {
+    pos: Offset,
+    type: 'start' | 'end',
+    component: InlineComponent
+}
 
 /**
  * Store the ranges of the components*/
 export class EditorComponentsData {
     components: InlineComponent[] = [];
+    gutterComponents: GutterComponent[] = [];
 
     add(component: InlineComponent) {
         this.components.push(component);
@@ -29,7 +44,7 @@ export class EditorComponentsData {
         components ??= this.components;
         if (!components.length) return [];
 
-        let events = components.flatMap(component => {
+        let events: Event[] = components.flatMap(component => {
             return [
                 {pos: component.range.begin, type: 'start', component},
                 {pos: component.range.end, type: 'end', component}
@@ -84,10 +99,9 @@ export class EditorComponentsData {
     query(range: TextRange): InlineComponent[] {
         return this.components.filter(component => range.contains(component.range));
     }
-}
 
-type Event = {
-    pos: Offset,
-    type: 'start' | 'end',
-    component: InlineComponent
+    gutterToRenderables(line: number): HTMLSpanElement[] {
+        let components = this.gutterComponents.filter(component => component.line === line);
+        return [new GutterLine(line)].concat(components).map(c => c.render());
+    }
 }

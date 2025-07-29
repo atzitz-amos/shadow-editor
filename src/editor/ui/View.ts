@@ -22,7 +22,7 @@ export enum ScrollMode {
     Instant
 }
 
-export class View implements Renderable {
+export class View {
     editor: Editor;
 
     view: HTMLDivElement;
@@ -144,17 +144,26 @@ export class View implements Renderable {
         let scrollLines = this.scroll.scrollYLines;
         let scrollOffset = this.scroll.scrollYOffset;
 
+
         let data = this.editor.take(this.visualLineCount, scrollLines);
         for (let i = 0; i < this.visualLineCount; i++) {
-            this.layers.text.renderLine(i, data[i] || []);
+            this.layers.text.renderLine(i, data[i].content);
+            this.gutter.renderLine(i, data[i].gutter);
         }
+
+        this.gutter.digits = Math.floor(Math.log10(this.editor.getLineCount())) + 1
 
         if (scrollOffset) {
             if (scrollLines > 0) {
-                this.layers.text.renderEdgeLine(0, this.editor.getLine(scrollLines - 1));
+                let line = this.editor.getLine(scrollLines - 1);
+                this.layers.text.renderEdgeLine(0, line.content);
+                this.gutter.renderEdgeLine(0, line.gutter);
             }
             if (scrollLines + this.visualLineCount < this.editor.getLineCount()) {
-                this.layers.text.renderEdgeLine(1, this.editor.getLine(scrollLines + this.visualLineCount));
+                let line = this.editor.getLine(scrollLines + this.visualLineCount);
+
+                this.layers.text.renderEdgeLine(1, line.content);
+                this.gutter.renderEdgeLine(1, line.gutter);
             }
         }
         this.setCSSProperties(this.view, {"--editor-scroll-offsetY": HTMLUtils.px(scrollOffset || this.getLineHeight())});

@@ -31,6 +31,7 @@ import {TokenStream} from "./core/lang/lexer/TokenStream";
 import {SRCodeBlock} from "./core/lang/parser/ast";
 import {IScope} from "./core/lang/Scoping";
 import {Actions} from "./core/actions/Actions";
+import {EDAC} from "./core/data/edac";
 
 export class Editor extends AbstractVisualEventListener {
     static ID = 0;
@@ -84,7 +85,7 @@ export class Editor extends AbstractVisualEventListener {
 
         setInterval(() => {
             EditorInstance.with(this, () => {
-                this.view.render();
+               this.view.render();
             });
         }, 20);
 
@@ -340,11 +341,11 @@ export class Editor extends AbstractVisualEventListener {
         this.data.setComponentsAtRange(ctx.scope.range, highlightedTokens);
     }
 
-    take(n: number, from: number) {
+    take(n: number, from: number): EDAC[] {
         return this.data.take(n, from, this.offsetManager.lineBreaks);
     }
 
-    getLine(line: number): HTMLSpanElement[] {
+    getLine(line: number): EDAC {
         return this.data.getLine(line, this.offsetManager.lineBreaks);
     }
 

@@ -3,7 +3,7 @@ import {Caret} from "../core/Caret";
 import {HTMLUtils} from "../utils/HTMLUtils";
 
 
-abstract class AbstractLayer implements Renderable {
+abstract class AbstractLayer {
     protected view: View;
     protected element: HTMLDivElement;
 
@@ -213,7 +213,7 @@ export class ErrorLayer extends AbstractLayer {
     }
 }
 
-export class Layers implements Renderable {
+export class Layers {
     public layers_el: HTMLDivElement;
 
     public text: TextLayer;

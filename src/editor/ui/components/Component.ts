@@ -1,6 +1,6 @@
 import {View} from "../View";
 
-export interface Component extends Renderable {
+export interface Component {
     render(): HTMLElement;
 
     getWidth(view: View): number;
