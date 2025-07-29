@@ -1,30 +1,34 @@
-import {VisitorHighlighter, VisitorHighlighterImplementor} from "../../core/lang/highlight/Highlighter";
 import {DefaultTokenType} from "./Lexer";
-import {IHighlightedToken} from "../../core/lang/highlight/HighlightedToken";
 import {Token} from "../../core/lang/lexer/TokenStream";
 import {View} from "../../ui/View";
 
-import {createElement} from "../../utils";
+import {TextRange} from "../../core/Position";
+import {IHighlightedToken} from "../../core/lang/highlighter/HighlightedToken";
+import {VisitorHighlighter, VisitorHighlighterImplementor} from "../../core/lang/highlighter/IHighlighter";
+import {HTMLUtils} from "../../utils/HTMLUtils";
 
 export class DefaultLangHT implements IHighlightedToken {
     token: Token<DefaultTokenType>;
+    range: TextRange;
 
     span: HTMLSpanElement | null = null;
 
+    className = "default-lang-token";
+    content: string;
+
+
     constructor(token: Token<DefaultTokenType>) {
         this.token = token;
+        this.range = token.range.clone();
+        this.content = token.value;
     }
 
     getWidth(view: View): number {
         return this.token.value.length * view.getCharSize();
     }
 
-    getRange(): [Offset, Offset] {
-        return [this.token.start, this.token.end];
-    }
-
     render(): HTMLSpanElement {
-        this.span = createElement("span");
+        this.span = HTMLUtils.createElement("span");
         this.span.textContent = this.token.value;
         return this.span;
     }
@@ -42,7 +46,7 @@ export class DefaultLangHT implements IHighlightedToken {
 }
 
 
-export class DefaultHighlighter extends VisitorHighlighter<DefaultTokenType, DefaultLangHT> implements VisitorHighlighterImplementor<DefaultTokenType, DefaultLangHT> {
+export class DefaultHighlighter extends VisitorHighlighter<DefaultTokenType> implements VisitorHighlighterImplementor<DefaultTokenType> {
     _impl = this;
 
     visitEOL(token: Token<DefaultTokenType>): DefaultLangHT | null {

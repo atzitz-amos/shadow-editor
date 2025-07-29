@@ -5,7 +5,8 @@
 
 .editor * {
     font-family: 'JetBrains', 'monospace';
-    letter-spacing: 2px;
+    font-size: var(--editor-font-size);
+    letter-spacing: 0.3px;
     white-space: pre;
     tab-size: 4;
     user-select: none;
@@ -55,7 +56,7 @@
 
     box-sizing: border-box;
 
-    --editor-scroll-offsetY: 0;
+    --editor-scroll-offsetY: 0px;
 }
 
 .editor .editor-gutter {
@@ -142,22 +143,23 @@
 .editor .editor-active-line,
 .editor .editor-gutter-line {
     position: relative;
+    top: calc(-1 * var(--editor-scroll-offsetY));
     left: 0;
+
     width: 100%;
     height: var(--editor-line-height);
     max-height: var(--editor-line-height);
     min-height: var(--editor-line-height);
+
     padding-left: 2px;
 }
 
 .editor .editor-line {
     justify-content: flex-start;
     align-items: center;
-    top: calc(-1 * var(--editor-line-height) + var(--editor-scroll-offsetY));
 }
 
 .editor .editor-gutter-line {
-    top: calc(-1 * var(--editor-line-height) + var(--editor-scroll-offsetY));
     width: 100%;
     padding-left: calc(max(20px - var(--editor-gutter-num-size) / 2, 10px));
 }
@@ -199,4 +201,8 @@
 
 .selection-end {
     left: 0;
+}
+
+.editor-ht {
+    box-sizing: content-box;
 }

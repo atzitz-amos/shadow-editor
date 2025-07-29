@@ -6,18 +6,35 @@
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
         <title>Editor Test</title>
         <link rel="stylesheet" href="src/editor.css">
+        <link rel="stylesheet" href="src/editor/lang/js/js.css">
     </head>
     <body>
         <div class="editor-c"></div>
         <script type="module">
             import {Editor} from './src/editor/Editor.ts';
-            import {JSLangPlugin} from './src/editor/plugins/js_lang/JSLang.ts';
+            import {JSLangPlugin} from './src/editor/lang/js/jsLang.ts';
+            import {JSLexer} from "./src/editor/lang/js/jsLexer";
+            import {JsParser} from "./src/editor/lang/js/jsParser";
+            import {JSParsingUtils} from "./src/editor/lang/js/jsUtils";
+            import {JSScope} from "./src/editor/lang/js/jsScope";
+            import {EditorInstance} from "./src/editor/EditorInstance";
+            import {TextRangeManager} from "./src/editor/core/Position";
+            import {EditorComponentsData} from "./src/editor/core/data/edac";
+            import {HighlightedToken} from "./src/editor/core/lang/highlighter/HighlightedToken";
 
             const editor = new Editor();
             editor.registerPlugin(new JSLangPlugin());
             editor.attach(document.querySelector('.editor-c'));
 
             window.editor = editor;
+            window.EditorInstance = EditorInstance;
+            window.js = new JSLexer();
+            window.JSParsingUtils = JSParsingUtils;
+            window.TextRangeManager = TextRangeManager;
+            window.EditorComponentsData = EditorComponentsData;
+            window.HighlightedToken = HighlightedToken;
+            window.p = x => console.log(JSParsingUtils.toHumanReadableString(parser.parse(null, js.asTokenStream(x))))
+            window.parser = new JsParser();
         </script>
     </body>
 </html>

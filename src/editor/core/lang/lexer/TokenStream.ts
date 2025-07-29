@@ -1,21 +1,32 @@
-import {ILexer} from "./Lexer";
+import {ILexer} from "./ILexer";
+import {TextRange} from "../../Position";
 
 export class Token<Type> {
+    isError = false;
+
     type: Type;
     value: string;
-    start: Offset;
-    end: Offset;
+    range: TextRange;
 
     isSpecial: boolean;
     isComment: boolean;
 
-    constructor(type: Type, value: string, start: Offset, end: Offset, isSpecial: boolean = false, isComment: boolean = false) {
+    constructor(type: Type, value: string, range: TextRange, isSpecial: boolean = false, isComment: boolean = false) {
         this.type = type;
         this.value = value;
-        this.start = start;
-        this.end = end;
+        this.range = range;
         this.isSpecial = isSpecial;
         this.isComment = isComment;
+    }
+}
+
+export class ErrorToken<Type> extends Token<Type> {
+    isError = true;
+    msg: string;
+
+    constructor(type: Type, value: string, msg: string, range: TextRange) {
+        super(type, value, range, false, false);
+        this.msg = msg;
     }
 }
 
@@ -23,9 +34,7 @@ export class Source {
     src: string;
     index: Offset = 0;
 
-    cache: string = '';
-    cacheIndex: Offset = 0;
-
+    followupError: Token<any> | null = null;
 
     constructor(text: string) {
         this.src = text;
@@ -49,20 +58,6 @@ export class Source {
         return this.src[this.index + 1] || null;
     }
 
-    save(): string {
-        if (this.isCacheEmpty()) {
-            this.cacheIndex = this.index;
-        }
-        this.cache += this.seek();
-        return this.cache;
-    }
-
-    clearCache(): string {
-        const cache = this.cache;
-        this.cache = '';
-        return cache;
-    }
-
     find(char: string): Offset {
         return this.src.indexOf(char, this.index + 1);
     }
@@ -83,8 +78,10 @@ export class Source {
         return this.index >= this.src.length;
     }
 
-    isCacheEmpty(): boolean {
-        return this.cache === '';
+    clearError() {
+        let error = this.followupError;
+        this.followupError = null;
+        return error;
     }
 }
 
@@ -101,15 +98,21 @@ export abstract class TokenStream<Type> {
 
     abstract seek(): Token<Type> | null;
 
+    abstract seekIncludeSpecial(): Token<Type> | null;
+
     abstract seekN(n: number): Token<Type> | null;
 
     abstract seekPrevious(): Token<Type> | null;
 
     abstract consume(): Token<Type> | null;
 
+    abstract exhaust(): Token<Type>[];
+
     abstract includeComments(): void;
 
     abstract includeSpecial(): void;
+
+    abstract clone(): TokenStream<Type>;
 }
 
 export class StaticTokenStream<Type> extends TokenStream<Type> {
@@ -121,12 +124,20 @@ export class StaticTokenStream<Type> extends TokenStream<Type> {
         this.tokens = tokens;
     }
 
+    clone(): TokenStream<Type> {
+        return new StaticTokenStream<Type>(this.tokens.slice());
+    }
+
     isEmpty(): boolean {
         return this.index >= this.tokens.length;
     }
 
     seek(): Token<Type> | null {
         return this.seekN(0);
+    }
+
+    seekIncludeSpecial(): Token<Type> | null {
+        return this.tokens[this.index];
     }
 
     seekN(n: number): Token<Type> | null {
@@ -151,6 +162,14 @@ export class StaticTokenStream<Type> extends TokenStream<Type> {
         return token;
     }
 
+    exhaust(): Token<Type>[] {
+        let index = this.index;
+        while (!this.isEmpty()) {
+            this.consume();
+        }
+        return this.tokens.slice(index);
+    }
+
     includeComments(): void {
         this.skipComments = false;
     }
@@ -164,9 +183,9 @@ export class StaticTokenStream<Type> extends TokenStream<Type> {
 export class LazyTokenStream<Type> extends TokenStream<Type> {
     private readonly lexer: ILexer<Type>;
     private readonly src: Source;
-
     private tokens: Token<Type>[] = [];
     private index = 0;
+
     private computed = 0;
 
     constructor(lexer: ILexer<Type>, text: string, skipSpecial: boolean = true) {
@@ -178,8 +197,17 @@ export class LazyTokenStream<Type> extends TokenStream<Type> {
         this.skipSpecial = skipSpecial;
     }
 
+    clone() {
+        const clone = new LazyTokenStream<Type>(this.lexer, this.src.src, this.skipSpecial);
+        clone.index = this.index;
+        clone.computed = this.computed;
+        clone.tokens = [...this.tokens];
+        if (!this.skipComments) clone.includeComments();
+        return clone;
+    }
+
     isEmpty(): boolean {
-        return this.src.isEmpty();
+        return this.src.isEmpty() && !this.src.followupError;
     }
 
     consume(): Token<Type> | null {
@@ -193,6 +221,15 @@ export class LazyTokenStream<Type> extends TokenStream<Type> {
         return this.seekN(0);
     }
 
+    seekIncludeSpecial(): Token<Type> | null {
+        let skip = this.skipSpecial;
+        this.skipSpecial = false; // Temporarily disable skipping special tokens
+        let token = this.seek();
+        this.skipSpecial = skip; // Restore the original state
+
+        return token;
+    }
+
     seekN(n: number): Token<Type> | null {
         while (this.computed <= n) {
             this.compute();
@@ -202,6 +239,14 @@ export class LazyTokenStream<Type> extends TokenStream<Type> {
 
     seekPrevious(): Token<Type> | null {
         return this.seekN(-1);
+    }
+
+    exhaust(): Token<Type>[] {
+        let index = this.index;
+        while (!this.isEmpty()) {
+            this.compute();
+        }
+        return this.tokens.slice(index);
     }
 
     includeComments() {

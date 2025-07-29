@@ -1,29 +1,8 @@
 import {Editor} from "../../Editor";
 import {PluginManager} from "../../plugins/Plugins";
-import {Keybinding} from "./keybinding";
-
-export type VisualEvent =
-    "onAttached"
-    | "onRender"
-    | "onKeyDown"
-    | "onKeyUp"
-    | "onInput"
-    | "onMouseDown"
-    | "onMouseUp"
-    | "onFocus"
-    | "onBlur"
-    | "onMouseMove"
-    | "onScroll";
-
-
-export type EditorEvent = "";
-
-export type PluginEvent = "onRegistered";
-
-export type GeneralEvent = VisualEvent | EditorEvent | PluginEvent;
-
-
-export type ListenerType = ((editor: Editor, ...args: any[]) => void);
+import {Keybind} from "./keybind";
+import {Caret} from "../Caret";
+import {Position} from "../Position";
 
 export interface VisualEventListener {
     onAttached(editor: Editor, root: HTMLElement): void;
@@ -50,11 +29,13 @@ export interface VisualEventListener {
 }
 
 export interface EditorEventListener {
+    onCaretMove(editor: Editor, caret: Caret, oldPos: Position, newPos: Position): void;
 
+    onCaretRemove(editor: Editor, caret: Caret): void;
 }
 
 export interface PluginEventListener {
-    onRegistered(pluginManager: PluginManager): void;
+    onRegistered(editor: Editor, pluginManager: PluginManager): void;
 }
 
 export abstract class AbstractVisualEventListener implements VisualEventListener {
@@ -93,18 +74,39 @@ export abstract class AbstractVisualEventListener implements VisualEventListener
 }
 
 export abstract class AbstractEditorEventListener implements EditorEventListener {
-}
+    onCaretRemove(editor: Editor, caret: Caret): void {
+    }
 
-export abstract class AbstractPluginEventListener implements PluginEventListener {
-    onRegistered(pluginManager: PluginManager): void {
+    onCaretMove(editor: Editor, caret: Caret, oldPos: Position, newPos: Position): void {
     }
 }
 
+export abstract class AbstractPluginEventListener implements PluginEventListener {
+    onRegistered(editor: Editor, pluginManager: PluginManager): void {
+    }
+}
+
+export interface GeneralEventListener extends VisualEventListener, EditorEventListener, PluginEventListener {
+}
+
+
+export type VisualEvent = keyof VisualEventListener;
+
+export type EditorEvent = keyof EditorEventListener;
+
+export type PluginEvent = keyof PluginEventListener;
+
+export type GeneralEvent = keyof GeneralEventListener;
+
+export type ListenerType = (...args: any[]) => void;
+
+type Tail<T extends any[]> = T extends [any, ...infer R] ? R : never;
+export type EventArgs<T extends GeneralEvent> = Tail<Parameters<GeneralEventListener[T]>>;
 
 export class EventManager {
     private visualListeners: VisualEventListener[] = [];
     private editorListeners: EditorEventListener[] = [];
-    private keybindingListeners: Map<Keybinding, ListenerType> = new Map();
+    private keybindingListeners: Map<Keybind, ListenerType> = new Map();
 
     addVisualEventListener(listener: VisualEventListener) {
         this.visualListeners.push(listener);
@@ -114,33 +116,37 @@ export class EventManager {
         this.editorListeners.push(listener);
     }
 
-    addKeybindingListener(keybinding: Keybinding, listener: ListenerType) {
+    addKeybindingListener(keybinding: Keybind, listener: ListenerType) {
         this.keybindingListeners.set(keybinding, listener);
     }
 
     fireKeybinding(event: KeyboardEvent, editor: Editor) {
-        for (let [keybinding, listener] of this.keybindingListeners.entries()) {
-            if (keybinding.matches(event)) {
+        for (let [keybind, listener] of this.keybindingListeners.entries()) {
+            if (this.matches(keybind, event)) {
                 listener.apply(null, [editor, event]);
             }
         }
     }
 
-    fire(event: GeneralEvent, editor: Editor, ...args: any[]) {
-        if (this.visualListeners.length > 0 && (event as VisualEvent)) {
-            for (const listener of this.visualListeners) {
-                const method = listener[event as VisualEvent] as ListenerType;
-                if (method) {
-                    method.apply(listener, [editor, ...args]);
-                }
-            }
-        } else if (this.editorListeners.length > 0 && (event as EditorEvent)) {
-            for (const listener of this.editorListeners) {
-                const method = listener[event as EditorEvent] as ListenerType;
-                if (method) {
-                    method.apply(listener, [editor, ...args]);
-                }
+    fire(event: GeneralEvent, ...args: any[]): void {
+        for (const listener of this.visualListeners) {
+            const method = listener[event as VisualEvent] as ListenerType;
+            if (method) {
+                method.apply(listener, args);
             }
         }
+        for (const listener of this.editorListeners) {
+            const method = listener[event as EditorEvent] as ListenerType;
+            if (method) {
+                method.apply(listener, args);
+            }
+        }
+    }
+
+    private matches(keybind: Keybind, event: KeyboardEvent) {
+        return event.key === keybind.key
+            && (keybind.ctrl ? event.ctrlKey : true)
+            && (keybind.alt ? event.altKey : true)
+            && (keybind.shift ? event.shiftKey : true);
     }
 }

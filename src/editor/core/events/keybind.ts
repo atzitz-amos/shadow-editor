@@ -71,42 +71,9 @@ export enum Key {
     INSERT = "Insert",
 }
 
-export class Keybinding {
-    public key: Key;
-    public modifiers: Modifier[];
-
-    private constructor(key: Key, modifiers: Modifier[] = []) {
-        this.key = key;
-        this.modifiers = modifiers;
-    }
-
-    public static of(...keys: (Modifier | Key)[]): Keybinding {
-        let key: Key;
-        const modifiersList: Modifier[] = [];
-        for (const item of keys) {
-            if (item instanceof Modifier) {
-                modifiersList.push(item);
-            } else {
-                key = item;
-            }
-        }
-        return new Keybinding(key, modifiersList);
-    }
-
-    public matches(event: KeyboardEvent): boolean {
-        const keyMatch = event.key.toUpperCase() === this.key;
-        const modifierMatch = this.modifiers.every(modifier => {
-            switch (modifier) {
-                case Modifier.CTRL:
-                    return event.ctrlKey;
-                case Modifier.SHIFT:
-                    return event.shiftKey;
-                case Modifier.ALT:
-                    return event.altKey;
-                default:
-                    return false;
-            }
-        });
-        return keyMatch && modifierMatch;
-    }
+export type Keybind = {
+    key: Key;
+    ctrl?: boolean;
+    shift?: boolean;
+    alt?: boolean;
 }

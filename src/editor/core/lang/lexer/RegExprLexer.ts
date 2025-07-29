@@ -1,5 +1,6 @@
 import {Source, Token, TokenStream} from "./TokenStream";
-import {ILexer} from "./Lexer";
+import {ILexer} from "./ILexer";
+import {TextRange} from "../../Position";
 
 export type RegExpTokenType<Type> = {
     type: Type,
@@ -44,7 +45,7 @@ export abstract class RegExpLexer<Type> implements ILexer<Type> {
 
     tokenize(source: Source): Token<Type> {
         if (source.isEmpty()) {
-            return new Token(this.EOF, '', source.index, source.index, false, false);
+            return new Token(this.EOF, '', new TextRange(source.index, source.index), false, false);
         }
         for (const tt of this.compiledMatchers) {
             tt.matcher.lastIndex = source.index;
@@ -58,8 +59,7 @@ export abstract class RegExpLexer<Type> implements ILexer<Type> {
                     return new Token(
                         tt.type,
                         value,
-                        source.index - match[0].length,
-                        source.index,
+                        new TextRange(source.index - match[0].length, source.index),
                         isSpecial,
                         isComment
                     );

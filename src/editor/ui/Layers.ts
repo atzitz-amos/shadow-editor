@@ -1,6 +1,6 @@
-import {createElement, px} from "../utils";
 import {View} from "./View";
 import {Caret} from "../core/Caret";
+import {HTMLUtils} from "../utils/HTMLUtils";
 
 
 abstract class AbstractLayer implements Renderable {
@@ -17,13 +17,28 @@ abstract class AbstractLayer implements Renderable {
 }
 
 export class TextLayer extends AbstractLayer {
+    visualLineCount: number;
+
+    lines: HTMLDivElement[];
+    edgelines: HTMLDivElement[];
+
     constructor(view: View, root: HTMLElement) {
         super();
         this.view = view;
-        this.element = createElement('div.editor-layer.layer-inner', root) as HTMLDivElement;
+        this.element = HTMLUtils.createElement('div.editor-layer.layer-inner', root) as HTMLDivElement;
     }
 
     init() {
+        this.visualLineCount = this.view.visualLineCount;
+        this.lines = [];
+
+        let firstEdgeline = HTMLUtils.createElement('div.editor-line.editor-line-edge', this.element) as HTMLDivElement;
+        for (let i = 0; i < this.visualLineCount; i++) {
+            this.lines.push(HTMLUtils.createElement("div.editor-line.line-" + i, this.element) as HTMLDivElement);
+        }
+        let secondEdgeline = HTMLUtils.createElement('div.editor-line.editor-line-edge', this.element) as HTMLDivElement;
+
+        this.edgelines = [firstEdgeline, secondEdgeline];
     }
 
     destroy(): void {
@@ -33,6 +48,16 @@ export class TextLayer extends AbstractLayer {
     }
 
     update(): void {
+    }
+
+    renderLine(n: number, content: HTMLSpanElement[]) {
+        this.lines[n].innerHTML = '';
+        this.lines[n].append(...content);
+    }
+
+    renderEdgeLine(n: number, content: HTMLSpanElement[]) {
+        this.edgelines[n].innerHTML = '';
+        this.edgelines[n].append(...content);
     }
 }
 
@@ -44,10 +69,10 @@ export class CaretLayer extends AbstractLayer {
     constructor(view: View, root: HTMLElement) {
         super();
         this.view = view;
-        this.element = createElement('div.editor-layer.layer-caret', root) as HTMLDivElement;
+        this.element = HTMLUtils.createElement('div.editor-layer.layer-caret', root) as HTMLDivElement;
 
-        this._caret = createElement('div.editor-caret#caret-0', this.element) as HTMLDivElement;
-        this._input = createElement('input.editor-input', this.element) as HTMLInputElement;
+        this._caret = HTMLUtils.createElement('div.editor-caret#caret-0', this.element) as HTMLDivElement;
+        this._input = HTMLUtils.createElement('input.editor-input', this.element) as HTMLInputElement;
 
         this._blink = setInterval(() => this.blink(), 750);
     }
@@ -71,7 +96,7 @@ export class CaretLayer extends AbstractLayer {
     }
 
     setupEventListeners() {
-        this._input.addEventListener('input', (e: Event) => {
+        this._input.addEventListener('input', (e: any) => {
             this.view.editor.fire('onInput', e);
             this.blinkReset();
         });
@@ -84,13 +109,13 @@ export class CaretLayer extends AbstractLayer {
             this.view.editor.fire('onKeyUp', e);
         });
 
-        this._input.addEventListener('focus', () => {
-            this.view.editor.fire('onFocus');
+        this._input.addEventListener('focus', e => {
+            this.view.editor.fire('onFocus', e);
             this.blinkReset();
         });
 
-        this._input.addEventListener('blur', () => {
-            this.view.editor.fire('onBlur');
+        this._input.addEventListener('blur', e => {
+            this.view.editor.fire('onBlur', e);
             this.blinkReset();
         });
     }
@@ -105,8 +130,8 @@ export class CaretLayer extends AbstractLayer {
     update(): void {
         this.view.editor.caretModel.forEachCaret(caret => {
             let caretEl = this.getCaretElement(caret);
-            caretEl.style.top = px(caret.position.toLogical().y * this.view.editor.properties.view!.lineHeight!);
-            caretEl.style.left = px(caret.position.toLogical().x * this.view.getCharSize());
+            caretEl.style.top = HTMLUtils.px(caret.position.toVisual().y);
+            caretEl.style.left = HTMLUtils.px(caret.position.toVisual().x);
         });
     }
 
@@ -123,7 +148,7 @@ class SelectionLayer extends AbstractLayer {
     constructor(view: View, root: HTMLElement) {
         super();
         this.view = view;
-        this.element = createElement('div.editor-layer.layer-selection', root) as HTMLDivElement;
+        this.element = HTMLUtils.createElement('div.editor-layer.layer-selection', root) as HTMLDivElement;
     }
 
     init() {
@@ -146,9 +171,9 @@ export class ActiveLineLayer extends AbstractLayer {
     constructor(view: View, root: HTMLElement) {
         super();
         this.view = view;
-        this.element = createElement('div.editor-layer.layer-active-line', root) as HTMLDivElement;
+        this.element = HTMLUtils.createElement('div.editor-layer.layer-active-line', root) as HTMLDivElement;
 
-        this._activeLine = createElement('div.editor-active-line', this.element) as HTMLDivElement;
+        this._activeLine = HTMLUtils.createElement('div.editor-active-line', this.element) as HTMLDivElement;
     }
 
     init() {
@@ -159,9 +184,12 @@ export class ActiveLineLayer extends AbstractLayer {
     }
 
     render(): void {
+        this.update();
     }
 
     update(): void {
+        let pos: number = this.view.editor.caretModel.primary.position.toVisual().y;
+        this._activeLine.style.top = HTMLUtils.px(pos);
     }
 }
 
@@ -169,7 +197,7 @@ export class ErrorLayer extends AbstractLayer {
     constructor(view: View, root: HTMLElement) {
         super();
         this.view = view;
-        this.element = createElement('div.editor-layer.layer-error', root) as HTMLDivElement;
+        this.element = HTMLUtils.createElement('div.editor-layer.layer-error', root) as HTMLDivElement;
     }
 
     init(): void {
@@ -194,7 +222,7 @@ export class Layers implements Renderable {
     public activeLine: ActiveLineLayer;
 
     constructor(view: View) {
-        this.layers_el = createElement('div.editor-layers', view.view) as HTMLDivElement;
+        this.layers_el = HTMLUtils.createElement('div.editor-layers', view.view) as HTMLDivElement;
 
         this.text = new TextLayer(view, this.layers_el);
         this.caret = new CaretLayer(view, this.layers_el);

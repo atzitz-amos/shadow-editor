@@ -1,4 +1,4 @@
-import {PositionTuple} from "./Position";
+import {PositionTuple, TextRangeManager} from "./Position";
 import {EditorData} from "./data/data";
 
 export class OffsetManager {
@@ -12,26 +12,27 @@ export class OffsetManager {
 
     public offsetToLogical(offset: number): PositionTuple {
         let lineBreak = this.findFirstAfter(this.lineBreaks, offset);
-        let y = lineBreak === -1 ? 0 : lineBreak - 1;
+        let y = lineBreak === -1 ? this.lineBreaks.length - 1 : lineBreak - 1;
         let x = offset - this.lineBreaks[y];
         return new PositionTuple(x, y);
     }
 
     public absoluteToLogical(absolute: PositionTuple): PositionTuple {
-        return;
+        return absolute;
     }
 
     public logicalToAbsolute(logical: PositionTuple): PositionTuple {
-        return;
+        return logical;
     }
 
     public calculateOffset(logical: PositionTuple): number {
         return this.lineBreaks[logical.y] + logical.x;
-
     }
 
     offset(at: Offset, n: number): void {
         this._offsetList(this.lineBreaks, at, n);
+
+        TextRangeManager.INSTANCE.updateRanges(at, n);
     }
 
     recomputeNewLines(at: Offset, text: string): void {
@@ -44,29 +45,22 @@ export class OffsetManager {
         }
     }
 
-    /** Return the content surrounding the `at` position such that the relexing / reparsing of that area is sufficient. */
-    withContext(at: Offset): TextContext {
-        return {
-            begin: this.lineBegin(at),
-            end: this.lineEnd(at),
-            text: this.withLine(at)
-        };  // TODO
-    }
-
     lineBegin(at: Offset): Offset {
-        let firstIndex = this.findFirstAfter(this.lineBreaks, at) - 1;
-        if (firstIndex === -2) {
-            firstIndex = 0;
+        for (let i = 1; i < this.lineBreaks.length; i++) {
+            if (at < this.lineBreaks[i]) {
+                return this.lineBreaks[i - 1];
+            }
         }
-        return this.lineBreaks[firstIndex];
+        return this.lineBreaks[this.lineBreaks.length - 1];
     }
 
     lineEnd(at: Offset): Offset {
-        let firstIndex = this.findFirstAfter(this.lineBreaks, at);
-        if (firstIndex === -1) {
-            return this.data.raw.length(); // Return the end of the document if no line break is found
+        for (let i = 1; i < this.lineBreaks.length; i++) {
+            if (at < this.lineBreaks[i]) {
+                return this.lineBreaks[i] - 1;
+            }
         }
-        return this.lineBreaks[firstIndex];
+        return this.data.raw.length(); // Return the end of the document if no line break is found
     }
 
     withLine(at: Offset): string {

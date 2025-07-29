@@ -1,0 +1,24 @@
+
+.js-syntax-error {
+    box-shadow: 0 1px 0 #f00;
+}
+
+.js-identifier {
+    color: #fc8cff;
+}
+
+.js-keyword {
+    color: #f8a541;
+}
+
+.js-string {
+    color: #5ed551;
+}
+
+.js-number {
+    color: #5bbbff;
+}
+
+.js-default, .js-operator {
+    color: #dedede;
+}

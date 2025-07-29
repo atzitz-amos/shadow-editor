@@ -1,7 +1,8 @@
 import {PluginEventListener} from "../core/events/events";
 import {Editor} from "../Editor";
-import {ILexer} from "../core/lang/lexer/Lexer";
-import {IHighlighter} from "../core/lang/highlight/Highlighter";
+import {ILexer} from "../core/lang/lexer/ILexer";
+import {IHighlighter} from "../core/lang/highlighter/IHighlighter";
+import {IParser} from "../core/lang/parser/IParser";
 
 export interface Plugin extends PluginEventListener {
     name: string;
@@ -18,7 +19,7 @@ export class PluginManager {
     plugins: Record<string, Plugin>;
 
     lexerProviderMap: Map<string, () => ILexer<any>> = new Map();
-    highlighterProviderMap: Map<string, () => IHighlighter<any, any>> = new Map();
+    highlighterProviderMap: Map<string, () => IHighlighter<any>> = new Map();
     parserProviderMap: Map<string, () => any> = new Map(); // TODO
 
     constructor(editorInstance: Editor) {
@@ -28,13 +29,13 @@ export class PluginManager {
 
     register(plugin: Plugin) {
         this.plugins[plugin.name] = plugin;
-        plugin.onRegistered(this);
+        plugin.onRegistered(this.editor, this);
     }
 
     registerFileTypeAssociation(
         fileType: string,
         lexerProvider: () => ILexer<any>,
-        highlighterProvider?: () => IHighlighter<any, any>,
+        highlighterProvider?: () => IHighlighter<any>,
         parserProvider?: () => any
     ) {
         this.lexerProviderMap.set(fileType, lexerProvider);
@@ -54,7 +55,7 @@ export class PluginManager {
         return undefined;
     }
 
-    getHighlighterForFileType(fileType: string): IHighlighter<any, any> | undefined {
+    getHighlighterForFileType(fileType: string): IHighlighter<any> | undefined {
         const provider = this.highlighterProviderMap.get(fileType);
         if (provider) {
             return provider();
@@ -62,7 +63,7 @@ export class PluginManager {
         return undefined;
     }
 
-    getParserForFileType(fileType: string): any | undefined {
+    getParserForFileType(fileType: string): IParser<any> | undefined {
         const provider = this.parserProviderMap.get(fileType);
         if (provider) {
             return provider();

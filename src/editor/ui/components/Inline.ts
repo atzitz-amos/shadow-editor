@@ -1,7 +1,9 @@
 import {Component} from "./Component";
+import {TextRange} from "../../core/Position";
 
 export interface InlineComponent extends Component {
-    render(): HTMLSpanElement;
+    className: string;
+    content: string;
 
-    getRange(): [Offset, Offset];
+    range: TextRange;
 }

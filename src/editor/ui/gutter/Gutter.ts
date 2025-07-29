@@ -1,5 +1,5 @@
 import {View} from "../View";
-import {createElement, px} from "../../utils";
+import {HTMLUtils} from "../../utils/HTMLUtils";
 
 export class Gutter implements Renderable {
     view: View;
@@ -7,7 +7,7 @@ export class Gutter implements Renderable {
 
     constructor(view: View) {
         this.view = view;
-        this.element = createElement("div.editor-gutter", view.view) as HTMLDivElement;
+        this.element = HTMLUtils.createElement("div.editor-gutter", view.view) as HTMLDivElement;
     }
 
     get numberLength() {
@@ -23,7 +23,7 @@ export class Gutter implements Renderable {
     }
 
     update() {
-        this.element.style.setProperty('--editor-gutter-num-size', px(this.numberLength * this.view.getCharSize()));
+        this.element.style.setProperty('--editor-gutter-num-size', HTMLUtils.px(this.numberLength * this.view.getCharSize()));
     }
 
     destroy(): void {

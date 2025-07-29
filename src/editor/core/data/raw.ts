@@ -1,4 +1,6 @@
 // Rope Node class
+import {TextRange} from "../Position";
+
 class RopeNode {
     weight: number;
     left: RopeNode | null;
@@ -69,11 +71,12 @@ export class RawEditorData {
         this.root = left.root;
     }
 
-    delete(start: number, length: number): void {
+    delete(start: number, length: number): string {
         const [left, temp] = this.split(start);
-        const [, right] = temp.split(length);
+        const [value, right] = temp.split(length);
         left.concat(right);
         this.root = left.root;
+        return value.toString();
     }
 
     length(): number {
@@ -88,6 +91,10 @@ export class RawEditorData {
             throw new Error("Invalid range for substring");
         }
         return this._toString(this.root).substring(start, end);
+    }
+
+    getTextInRange(range: TextRange): string {
+        return this.substring(range.begin, range.end);
     }
 
     private _index(node: RopeNode, i: number): string {
