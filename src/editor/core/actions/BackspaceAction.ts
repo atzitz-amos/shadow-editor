@@ -16,8 +16,11 @@ export class BackspaceAction extends AbstractAction {
 
     run(editor: Editor, event: KeyboardEvent) {
         editor.caretModel.forEachCaret(caret => {
-            editor.deleteAt(caret.position.offset - 1)
-            caret.shift(-1);
+            if (caret.selectionModel.isSelectionActive) editor.deleteSelection(caret);
+            else {
+                editor.deleteAt(caret.position.offset - 1);
+                caret.shift(-1);
+            }
         });
         editor.view.resetBlink();
     }

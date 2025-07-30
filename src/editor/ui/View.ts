@@ -34,8 +34,11 @@ export class View {
     // Properties
     getCharSize: () => number;
     getLineHeight: () => number;
+    getViewWidth: () => number;
+    getViewHeight: () => number;
 
     visualLineCount: number;
+    visualCharCount: number;
 
     constructor(editor: Editor) {
         this.editor = editor;
@@ -208,6 +211,11 @@ export class View {
         this.layers.caret.blinkReset();
     }
 
+    offScreen(pos: Position): boolean {
+        let visual = pos.toVisual();
+        return visual.x < 0 || visual.x >= this.getViewWidth() || visual.y < 0 || visual.y >= this.getViewHeight();
+    }
+
     private scrollIntoViewAlong(position: number, scrollStart: number, scrollEnd: number): number | null {
         if (position > scrollStart && position < scrollEnd) {
             return null;  // Already in view
@@ -263,7 +271,10 @@ export class View {
 
         this.getCharSize = _sizer(this);
         this.getLineHeight = () => P.lineHeight!;
+        this.getViewWidth = () => P.width!;
+        this.getViewHeight = () => P.height!;
         this.visualLineCount = Math.floor(P.height! / this.getLineHeight())
+        this.visualCharCount = Math.floor(P.width! / this.getCharSize());
 
         this.setCSSProperties(this.view, {
             '--editor-scroll-offsetY': HTMLUtils.px(this.getLineHeight()),

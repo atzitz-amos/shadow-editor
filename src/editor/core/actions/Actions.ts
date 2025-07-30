@@ -11,6 +11,7 @@ import {
     MoveCaretUpAction
 } from "./MoveCaret";
 import {TabAction} from "./TabAction";
+import {SelectAllAction} from "./SelectActions";
 
 
 export class Actions {
@@ -30,6 +31,7 @@ export class Actions {
         this.addAction(new DeleteAction());
         this.addAction(new TabAction());
         this.addAction(new BackspaceAction());
+        this.addAction(new SelectAllAction());
     }
 
     addAction(action: AbstractAction): void {

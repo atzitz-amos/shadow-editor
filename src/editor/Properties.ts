@@ -34,7 +34,7 @@ export const defaults = {
         rootBorderColor: '#93969f',
         gutterColor: '#93969f',
         caretColor: '#ffffff',
-        selectionColor: '#3a3d44',
+        selectionColor: '#214283',
         activeLineColor: '#2b2e38',
     }
 }

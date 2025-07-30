@@ -16,9 +16,8 @@
             import {JSLexer} from "./src/editor/lang/js/jsLexer";
             import {JsParser} from "./src/editor/lang/js/jsParser";
             import {JSParsingUtils} from "./src/editor/lang/js/jsUtils";
-            import {JSScope} from "./src/editor/lang/js/jsScope";
             import {EditorInstance} from "./src/editor/EditorInstance";
-            import {TextRangeManager} from "./src/editor/core/Position";
+            import {TextRange} from "./src/editor/core/Position";
             import {EditorComponentsData} from "./src/editor/core/data/edac";
             import {HighlightedToken} from "./src/editor/core/lang/highlighter/HighlightedToken";
 
@@ -30,7 +29,7 @@
             window.EditorInstance = EditorInstance;
             window.js = new JSLexer();
             window.JSParsingUtils = JSParsingUtils;
-            window.TextRangeManager = TextRangeManager;
+            window.TextRange = TextRange;
             window.EditorComponentsData = EditorComponentsData;
             window.HighlightedToken = HighlightedToken;
             window.p = x => console.log(JSParsingUtils.toHumanReadableString(parser.parse(null, js.asTokenStream(x))))

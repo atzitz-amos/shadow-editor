@@ -4,8 +4,8 @@ import {HTMLUtils} from "../utils/HTMLUtils";
 
 
 abstract class AbstractLayer {
-    protected view: View;
-    protected element: HTMLDivElement;
+    view: View;
+    element: HTMLDivElement;
 
     abstract init(): void;
 
@@ -144,7 +144,70 @@ export class CaretLayer extends AbstractLayer {
     }
 }
 
+class CaretSelectionElement {
+    view: View;
+    caret: Caret;
+
+    selectionStartEl: HTMLDivElement;
+    selectionBodyEl: HTMLDivElement;
+    selectionEndEl: HTMLDivElement;
+
+    constructor(layer: SelectionLayer, caret: Caret) {
+        this.view = layer.view;
+        this.caret = caret;
+
+        this.selectionStartEl = HTMLUtils.createElement('div.editor-selection.selection-start', layer.element) as HTMLDivElement;
+        this.selectionBodyEl = HTMLUtils.createElement('div.editor-selection.selection-body', layer.element) as HTMLDivElement;
+        this.selectionEndEl = HTMLUtils.createElement('div.editor-selection.selection-end', layer.element) as HTMLDivElement;
+    }
+
+    render() {
+        this.selectionStartEl.style.display = 'none';
+        this.selectionBodyEl.style.display = 'none';
+        this.selectionEndEl.style.display = 'none';
+
+        let selection = this.caret.selectionModel;
+        if (selection.isSelectionActive && selection.start && selection.end) {
+
+            let start = selection.start.toVisual()
+            let end = selection.end.toVisual();
+
+            let sx = start.x, sy = start.y, ex = end.x, ey = end.y;
+            if (sy > ey) {
+                [sy, ey] = [ey, sy];
+                [sx, ex] = [ex, sx];
+            } else if (sy === ey && sx > ex) {
+                [sx, ex] = [ex, sx];
+            }
+
+            let lineCount = (ey - sy) / this.view.getLineHeight();
+
+            if (sy === ey) {
+                this.selectionStartEl.style.display = 'block';
+                this.selectionStartEl.style.left = HTMLUtils.px(sx);
+                this.selectionStartEl.style.top = HTMLUtils.px(sy);
+                this.selectionStartEl.style.width = HTMLUtils.px(ex - sx);
+            } else {
+                this.selectionStartEl.style.display = 'block';
+                this.selectionStartEl.style.left = HTMLUtils.px(sx);
+                this.selectionStartEl.style.top = HTMLUtils.px(sy);
+                this.selectionStartEl.style.width = HTMLUtils.px(this.view.getViewWidth());
+                if (lineCount > 1) {
+                    this.selectionBodyEl.style.display = 'block';
+                    this.selectionBodyEl.style.top = HTMLUtils.px(sy + this.view.getLineHeight());
+                    this.selectionBodyEl.style.height = HTMLUtils.px((lineCount - 1) * this.view.getLineHeight());
+                }
+                this.selectionEndEl.style.display = 'block';
+                this.selectionEndEl.style.top = HTMLUtils.px(ey);
+                this.selectionEndEl.style.width = HTMLUtils.px(ex);
+            }
+        }
+    }
+}
+
 class SelectionLayer extends AbstractLayer {
+    selectionElements: Map<number, CaretSelectionElement> = new Map();
+
     constructor(view: View, root: HTMLElement) {
         super();
         this.view = view;
@@ -152,16 +215,20 @@ class SelectionLayer extends AbstractLayer {
     }
 
     init() {
-
+        this.view.editor.caretModel.forEachCaret(caret => {
+            this.selectionElements.set(caret.id, new CaretSelectionElement(this, caret));
+        });
     }
 
     destroy(): void {
     }
 
     render(): void {
+        this.update();
     }
 
     update(): void {
+        this.selectionElements.forEach(el => el.render())
     }
 }
 

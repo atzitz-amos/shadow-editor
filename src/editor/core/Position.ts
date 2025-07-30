@@ -109,6 +109,10 @@ export class Position {
     isBOL() {
         return this.editor.offsetManager.lineBegin(this._offset) === this._offset;
     }
+
+    clone() {
+        return new Position(this.editor, this._offset);
+    }
 }
 
 export type HasRange = { range: TextRange };

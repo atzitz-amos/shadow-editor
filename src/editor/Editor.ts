@@ -16,8 +16,8 @@ import {
 } from "./core/events/events";
 import {Position, PositionTuple, TextRange} from "./core/Position";
 import {OffsetManager} from "./core/OffsetManager";
-import {CaretModel} from "./core/Caret";
-import {Key, Keybind} from "./core/events/keybind";
+import {Caret, CaretModel} from "./core/Caret";
+import {Key, Keybind, ModifierKeyHolder} from "./core/events/keybind";
 
 import {DefaultLexer} from "./lang/default/Lexer";
 import {DefaultHighlighter} from "./lang/default/Highlighter";
@@ -78,6 +78,7 @@ export class Editor extends AbstractVisualEventListener {
 
         this.view = new View(this);
         this.offsetManager = new OffsetManager(this.data);
+
         this.caretModel = new CaretModel(this);
 
         this.actions = new Actions(this);
@@ -85,7 +86,7 @@ export class Editor extends AbstractVisualEventListener {
 
         setInterval(() => {
             EditorInstance.with(this, () => {
-               this.view.render();
+                this.view.render();
             });
         }, 20);
 
@@ -260,7 +261,6 @@ export class Editor extends AbstractVisualEventListener {
         else if (logical.y >= this.getLineCount()) logical.y = this.getLineCount() - 1;
 
         logical.x = Math.max(0, Math.min(logical.x, this.getLineLength(logical.y)));
-        this.caretModel.clearAll();
         this.caretModel.primary.moveToLogical(logical);
 
         this.view.resetBlink();
@@ -269,6 +269,10 @@ export class Editor extends AbstractVisualEventListener {
     type(char: string) {
         EditorInstance.with(this, () => {
             this.caretModel.forEachCaret(caret => {
+                if (caret.selectionModel.isSelectionActive) {
+                    this.deleteSelection(caret);
+                }
+
                 this.insertText(caret.position.toOffset(), char)
                 caret.shift();
                 this.view.resetBlink();
@@ -304,22 +308,17 @@ export class Editor extends AbstractVisualEventListener {
         this.data.setComponentsAtRange(ctx.scope.range, highlightedTokens);
     }
 
-    deleteAt(offset: Offset) {
+    deleteAt(offset: Offset, n: number = 1) {
         if (offset < 0 || offset >= this.data.raw.length()) {
             return;
         }
 
         // Delete the character at the specified offset
-        let char = this.data.raw.delete(offset, 1);
+        let text = this.data.raw.delete(offset, n);
 
         // Update the offsets of all ranges in the editor and recompute new line breaks
-        this.offsetManager.offset(offset, -1);
-        if (char === '\n') {
-            let index = this.offsetManager.lineBreaks.indexOf(offset);
-            if (index !== -1) {
-                this.offsetManager.lineBreaks.splice(index, 1);
-            }
-        }
+        this.offsetManager.recomputeNewLines(offset, text, true);
+        this.offsetManager.offset(offset, -n);
 
         // Get the current lexer and highlighter
         let lexer = this.getCurrentLexer();
@@ -339,6 +338,18 @@ export class Editor extends AbstractVisualEventListener {
         // Perform syntax highlighting on the tokens
         let highlightedTokens = highlighter.highlight(tokens);
         this.data.setComponentsAtRange(ctx.scope.range, highlightedTokens);
+    }
+
+    deleteSelection(caret: Caret) {
+        let selection = caret.selectionModel;
+        if (!selection.isSelectionActive) return;
+
+        let start = selection.getStart().toOffset();
+        let end = selection.getEnd().toOffset();
+
+        this.deleteAt(start, end - start);
+
+        caret.moveToLogical(Position.fromOffset(this, start));
     }
 
     take(n: number, from: number): EDAC[] {
@@ -364,26 +375,39 @@ export class Editor extends AbstractVisualEventListener {
      |      Event Listeners      |
      +---------------------------+    */
 
+    onKeyUp(editor: Editor, event: KeyboardEvent) {
+        ModifierKeyHolder.getInstance().clear();
+    }
+
     onKeyDown(editor: Editor, event: KeyboardEvent) {
         if (event.key === Key.ENTER) {
+            ModifierKeyHolder.getInstance().clear();
             return this.type('\n');
         }
+        ModifierKeyHolder.getInstance().set(event);
         this.fireKeybinding(event);
     }
 
     onMouseDown(editor: Editor, event: MouseEvent) {
+        ModifierKeyHolder.getInstance().set(event);
+
+        this.caretModel.removeAll();
         this.moveCursorToMouseEvent(event);
     }
 
     onMouseUp(editor: Editor, event: MouseEvent) {
-
+        ModifierKeyHolder.getInstance().clear();
     }
 
     onMouseMove(editor: Editor, event: MouseEvent) {
-
+        if (ModifierKeyHolder.isMouseDown) {
+            ModifierKeyHolder.getInstance().setIsDragging(true);
+            this.moveCursorToMouseEvent(event);
+        }
     }
 
     onInput(editor: Editor, event: InputEvent) {
+        ModifierKeyHolder.getInstance().clear();
         if (event.data) this.type(event.data);
     }
 

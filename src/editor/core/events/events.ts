@@ -1,6 +1,6 @@
 import {Editor} from "../../Editor";
 import {PluginManager} from "../../plugins/Plugins";
-import {Keybind} from "./keybind";
+import {Keybind, ModifierKeyHolder} from "./keybind";
 import {Caret} from "../Caret";
 import {Position} from "../Position";
 
@@ -87,6 +87,50 @@ export abstract class AbstractPluginEventListener implements PluginEventListener
 }
 
 export interface GeneralEventListener extends VisualEventListener, EditorEventListener, PluginEventListener {
+}
+
+export abstract class AbstractGeneralEventListener implements GeneralEventListener {
+    onAttached(editor: Editor, root: HTMLElement): void {
+    }
+
+    onRender(editor: Editor): void {
+    }
+
+    onInput(editor: Editor, event: InputEvent): void {
+    }
+
+    onKeyDown(editor: Editor, event: KeyboardEvent): void {
+    }
+
+    onKeyUp(editor: Editor, event: KeyboardEvent): void {
+    }
+
+    onMouseDown(editor: Editor, event: MouseEvent): void {
+    }
+
+    onMouseMove(editor: Editor, event: MouseEvent): void {
+    }
+
+    onMouseUp(editor: Editor, event: MouseEvent): void {
+    }
+
+    onScroll(editor: Editor, event: WheelEvent): void {
+    }
+
+    onFocus(editor: Editor, event: FocusEvent): void {
+    }
+
+    onBlur(editor: Editor, event: FocusEvent): void {
+    }
+
+    onCaretMove(editor: Editor, caret: Caret, oldPos: Position, newPos: Position): void {
+    }
+
+    onCaretRemove(editor: Editor, caret: Caret): void {
+    }
+
+    onRegistered(editor: Editor, pluginManager: PluginManager): void {
+    }
 }
 
 

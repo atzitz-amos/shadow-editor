@@ -1,5 +1,6 @@
 import {Editor} from "../Editor";
 import {Position, PositionTuple} from "./Position";
+import {SelectionModel} from "./Selection";
 
 
 export class Caret {
@@ -11,10 +12,14 @@ export class Caret {
     editor: Editor;
     vertMovementPos: Offset = 0;
 
+    selectionModel: SelectionModel;
+
     constructor(editor: Editor, isPrimary: boolean, position: Position) {
         this.editor = editor;
         this.isPrimary = isPrimary;
         this.position = position;
+
+        this.selectionModel = new SelectionModel(this);
     }
 
     moveToLogical(x: number, y: number): void;
@@ -91,7 +96,7 @@ export class CaretModel {
         this.forEachCaret(caret => caret.shift(offset));
     }
 
-    clearAll() {
+    removeAll() {
         for (let i = 0; i < this.carets.length; i++) {
             if (!this.carets[i].isPrimary) {
                 this.carets[i].remove();

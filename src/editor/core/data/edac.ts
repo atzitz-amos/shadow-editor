@@ -29,7 +29,7 @@ export class EditorComponentsData {
 
     set(range: TextRange, components: Iterable<InlineComponent>) {
         // Remove existing components in the range
-        this.components = this.components.filter(x => !x.range.overlaps(range));
+        this.components = []; // TODO
 
         for (const component of components) {
             this.add(component);
@@ -103,5 +103,9 @@ export class EditorComponentsData {
     gutterToRenderables(line: number): HTMLSpanElement[] {
         let components = this.gutterComponents.filter(component => component.line === line);
         return [new GutterLine(line)].concat(components).map(c => c.render());
+    }
+
+    clearRange(range: TextRange) {
+        this.components = this.components.filter(component => !component.range.overlaps(range));
     }
 }

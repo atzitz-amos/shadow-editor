@@ -35,13 +35,17 @@ export class OffsetManager {
         TextRangeManager.INSTANCE.updateRanges(at, n);
     }
 
-    recomputeNewLines(at: Offset, text: string): void {
+    recomputeNewLines(at: Offset, text: string, deletion: boolean = false): void {
         let firstIndex = this.findFirstAfter(this.lineBreaks, at);
         if (firstIndex === -1) firstIndex = this.lineBreaks.length;
         for (const match of text.matchAll(/\r\n|\n|\r/g)) {
-            let lineBreakOffset = at + match.index! + match[0].length;
-            this.lineBreaks.splice(firstIndex, 0, lineBreakOffset);
-            firstIndex++;
+            if (deletion) {
+                this.lineBreaks.splice(this.lineBreaks.indexOf(at + match.index! + match[0].length), 1);
+            } else {
+                let lineBreakOffset = at + match.index! + match[0].length;
+                this.lineBreaks.splice(firstIndex, 0, lineBreakOffset);
+                firstIndex++;
+            }
         }
     }
 

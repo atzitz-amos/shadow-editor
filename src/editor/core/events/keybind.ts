@@ -1,3 +1,5 @@
+import {EditorInstance} from "../../EditorInstance";
+
 export enum Modifier {
     CTRL,
     SHIFT,
@@ -15,32 +17,32 @@ export enum Key {
     NUM7 = "7",
     NUM8 = "8",
     NUM9 = "9",
-    A = "A",
-    B = "B",
-    C = "C",
-    D = "D",
-    E = "E",
-    F = "F",
-    G = "G",
-    H = "H",
-    I = "I",
-    J = "J",
-    K = "K",
-    L = "L",
-    M = "M",
-    N = "N",
-    O = "O",
-    P = "P",
-    Q = "Q",
-    R = "R",
-    S = "S",
-    T = "T",
-    U = "U",
-    V = "V",
-    W = "W",
-    X = "X",
-    Y = "Y",
-    Z = "Z",
+    A = "a",
+    B = "b",
+    C = "c",
+    D = "d",
+    E = "e",
+    F = "f",
+    G = "g",
+    H = "h",
+    I = "i",
+    J = "j",
+    K = "k",
+    L = "l",
+    M = "m",
+    N = "n",
+    O = "o",
+    P = "p",
+    Q = "q",
+    R = "r",
+    S = "s",
+    T = "t",
+    U = "u",
+    V = "v",
+    W = "w",
+    X = "x",
+    Y = "y",
+    Z = "z",
     ESCAPE = "Escape",
     BACKSPACE = "Backspace",
     DELETE = "Delete",
@@ -73,7 +75,63 @@ export enum Key {
 
 export type Keybind = {
     key: Key;
-    ctrl?: boolean;
-    shift?: boolean;
-    alt?: boolean;
+    ctrl?: boolean | null;
+    shift?: boolean | null;
+    alt?: boolean | null;
+}
+
+export class ModifierKeyHolder {
+    static instances: Map<number, ModifierKeyHolder> = new Map();
+    isCtrlPressed: boolean = false;
+    isAltPressed: boolean = false;
+    isShiftPressed: boolean = false;
+    isMouseDown: boolean = false;
+    isDragging: boolean = false;
+
+    static get isCtrlPressed(): boolean {
+        return this.getInstance().isCtrlPressed;
+    };
+
+    static get isAltPressed(): boolean {
+        return this.getInstance().isAltPressed;
+    }
+
+    static get isShiftPressed(): boolean {
+        return this.getInstance().isShiftPressed;
+    };
+
+    static get isMouseDown(): boolean {
+        return this.getInstance().isMouseDown;
+    }
+
+    static get isDragging(): boolean {
+        return this.getInstance().isDragging;
+    }
+
+    static getInstance(): ModifierKeyHolder {
+        let id = EditorInstance.INSTANCE.id;
+        if (!this.instances.has(id)) {
+            this.instances.set(id, new ModifierKeyHolder());
+        }
+        return this.instances.get(id)!;
+    }
+
+    set(event: { shiftKey?: boolean, ctrlKey?: boolean, altKey?: boolean, button?: number }): void {
+        this.isCtrlPressed = event.ctrlKey ?? false;
+        this.isAltPressed = event.altKey ?? false;
+        this.isShiftPressed = event.shiftKey ?? false;
+        this.isMouseDown = event.button !== undefined && event.button === 0;
+    }
+
+    setIsDragging(isDragging: boolean): void {
+        this.isDragging = isDragging;
+    }
+
+    clear(): void {
+        this.isCtrlPressed = false;
+        this.isAltPressed = false;
+        this.isShiftPressed = false;
+        this.isMouseDown = false;
+        this.isDragging = false;
+    }
 }
