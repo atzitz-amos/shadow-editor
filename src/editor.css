@@ -6,6 +6,7 @@
 .editor * {
     font-family: 'JetBrains', 'monospace';
     font-size: var(--editor-font-size);
+    font-variant: no-contextual !important;
     letter-spacing: 0.3px;
     white-space: pre;
     tab-size: 4;
