@@ -22,6 +22,7 @@ export class Caret {
         this.selectionModel = new SelectionModel(this);
     }
 
+
     moveToLogical(x: number, y: number): void;
     moveToLogical(logical: PositionTuple): void;
     moveToLogical(pos: number | PositionTuple, y?: number) {
@@ -34,26 +35,37 @@ export class Caret {
         let old = this.position;
         this.position = position;
 
-        this.editor.fire("onCaretMove", this, old, position);
+        this.onCaretMove(old, position);
+    }
+
+    onCaretMove(old: Position, new_: Position) {
+        this.editor.fire("onCaretMove", this, old, new_);
+
+        this.selectionModel.onCaretMove();
     }
 
     moveToAbsolute(x: number, y: number): void;
-    moveToAbsolute(absolute: Position): void;
-    moveToAbsolute(pos: number | Position, y?: number) {
+    moveToAbsolute(absolute: PositionTuple): void;
+    moveToAbsolute(pos: number | PositionTuple, y?: number) {
+        let position: Position;
         if (typeof pos === "number") {
-            pos = this.position.createAbsolute(pos, y as int);
+            position = this.position.createAbsolute(pos, y as int);
         } else {
-            pos = this.position.createAbsolute(pos.x, pos.y);
+            position = this.position.createAbsolute(pos.x, pos.y);
         }
+        this.setPosition(position)
+    }
+
+    setPosition(position: Position) {
         let old = this.position;
-        this.position = pos;
-        this.editor.fire("onCaretMove", this, old, pos);
+        this.position = position;
+        this.onCaretMove(old, position);
     }
 
     shift(offset: Offset = 1): void {
         let oldOffset = this.position.offset;
         this.position.offset += offset;
-        this.editor.fire("onCaretMove", this, Position.fromOffset(this.editor, oldOffset), this.position);
+        this.onCaretMove(Position.fromOffset(this.editor, oldOffset), this.position);
         this.vertMovementPos = 0;
     }
 

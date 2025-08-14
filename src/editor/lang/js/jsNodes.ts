@@ -39,10 +39,11 @@ export enum JSNodeType {
 }
 
 export abstract class JSSrNode implements SRNode {
+    declares: string[] = [];
+
     range: TextRange;
     language = "js";
     parent: SRNode | null = null;
-
     abstract nodeType: JSNodeType;
 
     protected constructor() {
@@ -63,6 +64,19 @@ export abstract class JSSrNode implements SRNode {
             }
         }
         return children;
+    }
+
+    getNodeContent(): (Token<any> | SRNode)[] {
+        const result: (Token<any> | SRNode)[] = [];
+        for (let key of this.declares) {
+            let props = this[key];
+            if (props instanceof Token) {
+                result.push(props as Token<any>);
+            } else if (props instanceof JSSrNode) {
+                result.push(props as JSSrNode);
+            }
+        }
+        return result;
     }
 }
 
@@ -88,24 +102,29 @@ export class JSCodeBlock extends JSSrNode implements SRCodeBlock {
     isWellFormed(): boolean {
         return this.children.every(child => child.isWellFormed());
     }
+
+    getNodeContent(): (Token<any> | SRNode)[] {
+        return this.children;
+    }
 }
 
 export abstract class JSStmt extends JSSrNode {
     range: TextRange;
     nodeType = JSNodeType.Stmt;
 
-    constructor(range: TextRange) {
+    protected constructor(range: TextRange) {
         super();
         this.range = range;
     }
 }
 
 export class JSDeclStmt extends JSStmt {
+    declares = ["kind", "name", "eq", "decl"];
+
     kind: Token<JS>;
     name: Token<JS>;
     eq?: Token<JS>;
     decl?: JSExpr;
-
     nodeType = JSNodeType.DeclStmt;
 
     constructor(kind: Token<JS>,
@@ -137,9 +156,10 @@ export class JSDeclStmt extends JSStmt {
 }
 
 export class JSReturnStmt extends JSStmt {
+    declares = ["keyword", "expr"];
+
     keyword: Token<JS> | null;
     expr: JSExpr | null;
-
     nodeType = JSNodeType.ReturnStmt;
 
     constructor(keyword: Token<JS> | null, expr: JSExpr | null) {
@@ -158,10 +178,11 @@ export class JSReturnStmt extends JSStmt {
 }
 
 export class JSBody extends JSSrNode {
+    declares = ["openBrace", "body", "closeBrace"];
+
     openBrace: Token<JS> | null;
     body: JSCodeBlock;
     closeBrace: Token<JS> | null;
-
     nodeType = JSNodeType.Body;
 
     constructor(openBrace: Token<JS> | null, body: JSCodeBlock, closeBrace: Token<JS> | null) {
@@ -184,6 +205,8 @@ export class JSBody extends JSSrNode {
 }
 
 export class JSParameters extends JSSrNode {
+    declares = [];
+
     params: JSParam[];
     commas: Token<JS>[] = [];
 
@@ -203,14 +226,26 @@ export class JSParameters extends JSSrNode {
     isWellFormed(): boolean {
         return this.params.every(param => param.isWellFormed());
     }
+
+    getNodeContent(): (Token<any> | SRNode)[] {
+        let result: (Token<any> | SRNode)[] = [];
+        for (let i = 0; i < this.params.length; i++) {
+            result.push(this.params[i]);
+            if (i < this.commas.length) {
+                result.push(this.commas[i]);
+            }
+        }
+        return result;
+    }
 }
 
 export class JSParam extends JSSrNode {
+    declares = ["restToken", "name", "eqSign", "defaultValue"];
+
     restToken: Token<JS> | null;
     name: Token<JS>;
     eqSign?: Token<JS>;
     defaultValue?: JSExpr;
-
     nodeType = JSNodeType.Param;
 
     constructor(name: Token<JS>,
@@ -244,6 +279,8 @@ export class JSParam extends JSSrNode {
 }
 
 export class JSFuncDecl extends JSStmt {
+    declares = ["keyword", "name", "openParen", "params", "closeParen", "body"];
+
     keyword: Token<JS>;
     name: Token<JS> | null;
     openParen: Token<JS> | null;
@@ -289,6 +326,8 @@ export class JSFuncDecl extends JSStmt {
 }
 
 export class JSExpr extends JSSrNode {
+    declares = ["error"];
+
     error: Token<JS> | null;
 
     nodeType = JSNodeType.Expr;
@@ -330,9 +369,22 @@ export class JSExprCommaExpr extends JSExpr {
     isWellFormed(): boolean {
         return this.values.every(value => value.isWellFormed());
     }
+
+    getNodeContent(): (Token<any> | SRNode)[] {
+        let result: (Token<any> | SRNode)[] = [];
+        for (let i = 0; i < this.values.length; i++) {
+            result.push(this.values[i]);
+            if (i < this.commas.length) {
+                result.push(this.commas[i]);
+            }
+        }
+        return result;
+    }
 }
 
 export class JSNumberLiteral extends JSExpr {
+    declares = ["value"];
+
     value: Token<JS>;
 
     nodeType = JSNodeType.NumberLiteral;
@@ -353,6 +405,8 @@ export class JSNumberLiteral extends JSExpr {
 }
 
 export class JSStringLiteral extends JSExpr {
+    declares = ["value"];
+
     value: Token<JS>;
 
     nodeType = JSNodeType.StringLiteral;
@@ -399,9 +453,26 @@ export class JSArrayLiteral extends JSExpr {
             this.values.every(value => value.isWellFormed()) &&
             JSParsingUtils.isValidToken(this.closeBracket);
     }
+
+    getNodeContent(): (Token<any> | SRNode)[] {
+        let result: (Token<any> | SRNode)[] = [];
+        result.push(this.openBracket);
+        for (let i = 0; i < this.values.length; i++) {
+            result.push(this.values[i]);
+            if (i < this.commas.length) {
+                result.push(this.commas[i]);
+            }
+        }
+        if (this.closeBracket) {
+            result.push(this.closeBracket);
+        }
+        return result;
+    }
 }
 
 export class JSObjectProperty extends JSSrNode {
+    declares = ["key", "colon", "value"];
+
     key: Token<JS>;  // Either an identifier or a string literal
     colon: Token<JS> | null;
     value: JSSrNode | null;
@@ -437,6 +508,8 @@ export class JSObjectProperty extends JSSrNode {
 }
 
 export class JSObjectPropertyFunction extends JSObjectProperty {
+    declares = ["func"];
+
     func: JSFuncDecl;
 
     nodeType = JSNodeType.ObjectLiteralPropertyFunction;
@@ -495,9 +568,26 @@ export class JSObjectLiteral extends JSExpr {
             return s;
         }
     }
+
+    getNodeContent(): (Token<any> | SRNode)[] {
+        let result: (Token<any> | SRNode)[] = [];
+        result.push(this.openBrace);
+        for (let i = 0; i < this.properties.length; i++) {
+            result.push(this.properties[i]);
+            if (i < this.commas.length) {
+                result.push(this.commas[i]);
+            }
+        }
+        if (this.closeBrace) {
+            result.push(this.closeBrace);
+        }
+        return result;
+    }
 }
 
 export class JSIdentifier extends JSExpr {
+    declares = ["token"];
+
     token: Token<JS>;
     nodeType = JSNodeType.Identifier;
 
@@ -527,6 +617,8 @@ export class JSSpecialIdentifier extends JSIdentifier {
 }
 
 export class JSMemberAccess extends JSExpr {
+    declares = ["base", "dot", "member"];
+
     base: JSExpr;
     dot: Token<JS>;
     member: JSExpr;
@@ -551,6 +643,8 @@ export class JSMemberAccess extends JSExpr {
 }
 
 export class JSAssignExpr extends JSExpr {
+    declares = ["left", "operator", "right"];
+
     left: JSExpr;
     operator: Token<JS>;
     right: JSExpr | null;
@@ -576,6 +670,8 @@ export class JSAssignExpr extends JSExpr {
 }
 
 export class JSUnaryExpr extends JSExpr {
+    declares = ["operator", "operand"];
+
     operator: Token<JS>;
     operand: JSSrNode;
 
@@ -598,6 +694,8 @@ export class JSUnaryExpr extends JSExpr {
 }
 
 export class JSBinaryExpr extends JSExpr {
+    declares = ["left", "operator", "right"];
+
     left: JSSrNode;
     operator: Token<JS>;
     right: JSSrNode;
@@ -624,6 +722,8 @@ export class JSBinaryExpr extends JSExpr {
 }
 
 export class JSTernaryExpr extends JSExpr {
+    declares = ["condition", "questionMark", "trueExpr", "colon", "falseExpr"];
+
     condition: JSExpr;
     questionMark: Token<JS>;
     trueExpr: JSExpr;
@@ -658,6 +758,8 @@ export class JSTernaryExpr extends JSExpr {
 }
 
 export class JSCallExpr extends JSExpr {
+    declares = ["callee", "openParen", "args", "closeParen"];
+
     callee: JSExpr;
     openParen: Token<JS> | null;
     args: JSArgs | null;
@@ -690,6 +792,8 @@ export class JSCallExpr extends JSExpr {
 }
 
 export class JSArrayAccess extends JSExpr {
+    declares = ["base", "openBracket", "index", "closeBracket"];
+
     base: JSExpr;
     openBracket: Token<JS>;
     index: JSExpr | null;
@@ -722,6 +826,8 @@ export class JSArrayAccess extends JSExpr {
 }
 
 export class JSNewExpr extends JSCallExpr {
+    declares = ["keyword", "callee", "openParen", "args", "closeParen"];
+
     keyword: Token<JS>;
 
     nodeType = JSNodeType.NewExpr;
@@ -751,6 +857,8 @@ export class JSNewExpr extends JSCallExpr {
 }
 
 export class JSArgs extends JSExpr {
+    declares = ["values", "comma"];
+
     values: JSExpr[];
     comma: Token<JS>[];
 
@@ -774,6 +882,8 @@ export class JSArgs extends JSExpr {
 }
 
 export class JSLambda extends JSExpr {
+    declares = ["params", "arrow", "body"];
+
     params: JSParameters;
     arrow: Token<JS>;
     body: JSBody | null;
@@ -806,6 +916,8 @@ export class JSLambda extends JSExpr {
 }
 
 export class JsExprGroup extends JSExpr {
+    declares = ["openParen", "expr", "closeParen"];
+
     openParen: Token<JS>;
     expr: JSExpr;
     closeParen: Token<JS> | null;

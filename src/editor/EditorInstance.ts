@@ -5,23 +5,23 @@ export class EditorInstance {
     private static waiting: any[] = [];
     private static _count = 0;
 
-    private static _INSTANCE: Editor | null = null;
+    private static _Instance: Editor | null = null;
 
 
-    static get INSTANCE(): Editor {
-        if (!EditorInstance._INSTANCE) {
+    static get Instance(): Editor {
+        if (!EditorInstance._Instance) {
             throw new Error("Editor instance not acquired yet. Please call EditorInstance.acquire(editor) first.");
         }
-        return EditorInstance._INSTANCE;
+        return EditorInstance._Instance;
     }
 
     static async acquireAsync(editor: Editor): Promise<void> {
-        if (!this._INSTANCE && !this._isLocked) {
+        if (!this._Instance && !this._isLocked) {
             this._isLocked = true;
-            this._INSTANCE = editor;
+            this._Instance = editor;
             this._count = 0;
         } else {
-            if (this._INSTANCE === editor) {
+            if (this._Instance === editor) {
                 this._count++;
                 return; // No need to wait if the desired editor is already acquired
             }
@@ -36,10 +36,10 @@ export class EditorInstance {
         }
         if (!this.waiting.length) {
             this._isLocked = false;
-            this._INSTANCE = null;
+            this._Instance = null;
         } else {
             const [nextEditor, resolve] = this.waiting.shift()!;
-            this._INSTANCE = nextEditor;
+            this._Instance = nextEditor;
             resolve();
         }
     }
@@ -59,11 +59,11 @@ export class EditorInstance {
             throw new Error("Error: Couldn't acquire editor instance in time. This is probably caused by an abnormal delay in an asynchronously running operation.");
         }
 
-        this._INSTANCE = editor;
+        this._Instance = editor;
     }
 
     private static waitForFlagSync(maxWaitMs = 2000) {
-        if (!this._INSTANCE && !this._isLocked) {
+        if (!this._Instance && !this._isLocked) {
             return true;
         }
 
@@ -71,7 +71,7 @@ export class EditorInstance {
 
         const start = Date.now();
         while (Date.now() - start < maxWaitMs) {
-            if (!this._INSTANCE && !this._isLocked) {
+            if (!this._Instance && !this._isLocked) {
                 return true;
             }
         }

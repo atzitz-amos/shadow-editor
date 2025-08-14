@@ -1,12 +1,21 @@
 import {View} from "../../View";
 import {GutterComponent} from "./component";
+import {Registry} from "../../../core/Registry";
+import {Editor} from "../../../Editor";
 
 export class GutterLine implements GutterComponent {
+    id: string;
+
     line: number;
     element: HTMLSpanElement;
 
     constructor(line: number) {
+        this.id = Registry.getComponentId("gutter-line");
+
         this.line = line;
+    }
+
+    onDestroy(editor: Editor): void {
     }
 
 

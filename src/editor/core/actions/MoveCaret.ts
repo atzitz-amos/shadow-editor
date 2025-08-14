@@ -21,7 +21,6 @@ export class MoveCaretLeftAction extends AbstractAction {
         key: Key.ARROW_LEFT,
         ctrl: false,
         alt: false,
-        shift: false
     };
 
     run(editor: Editor, event: KeyboardEvent) {
@@ -47,7 +46,7 @@ export class MoveCaretRightAction extends AbstractAction {
         key: Key.ARROW_RIGHT,
         ctrl: false,
         alt: false,
-        shift: false
+
     };
 
     run(editor: Editor, event: KeyboardEvent) {
@@ -72,7 +71,7 @@ export class MoveCaretUpAction extends AbstractAction {
         key: Key.ARROW_UP,
         ctrl: false,
         alt: false,
-        shift: false
+
     };
 
     run(editor: Editor, event: KeyboardEvent) {
@@ -83,7 +82,6 @@ export class MoveCaretUpAction extends AbstractAction {
             }
 
             if (caret.position.y === 0) return;
-
 
             caret.setVertMovementPos();
             let pos = editor.createLogical(
@@ -102,9 +100,8 @@ export class MoveCaretDownAction extends AbstractAction {
 
     keybinding = {
         key: Key.ARROW_DOWN,
-        ctrl: null,
+        ctrl: false,
         alt: false,
-        shift: null
     };
 
     run(editor: Editor, event: KeyboardEvent) {
@@ -113,7 +110,7 @@ export class MoveCaretDownAction extends AbstractAction {
             if (!event.shiftKey && caret.selectionModel.direction !== SelectionDirection.UNKNOWN) {
                 handleClearSelection(caret, caret.selectionModel.direction === SelectionDirection.LEFT);
             }
-            
+
             if (caret.position.y >= editor.getLineCount() - 1) return;
 
             caret.setVertMovementPos();
@@ -133,8 +130,7 @@ export class MoveCaretToStartAction extends AbstractAction {
     keybinding = {
         key: Key.HOME,
         ctrl: false,
-        alt: false,
-        shift: false
+        alt: false
     };
 
     run(editor: Editor, event: KeyboardEvent) {
@@ -153,8 +149,7 @@ export class MoveCaretToEndAction extends AbstractAction {
     keybinding = {
         key: Key.END,
         ctrl: false,
-        alt: false,
-        shift: false
+        alt: false
     };
 
     run(editor: Editor, event: KeyboardEvent) {

@@ -132,10 +132,10 @@ export class TextRangeManager {
     });
 
     static get INSTANCE(): TextRangeManager {
-        if (!TextRangeManager._INSTANCES.has(EditorInstance.INSTANCE.id)) {
-            TextRangeManager._INSTANCES.set(EditorInstance.INSTANCE.id, new TextRangeManager());
+        if (!TextRangeManager._INSTANCES.has(EditorInstance.Instance.id)) {
+            TextRangeManager._INSTANCES.set(EditorInstance.Instance.id, new TextRangeManager());
         }
-        return TextRangeManager._INSTANCES.get(EditorInstance.INSTANCE.id)!;
+        return TextRangeManager._INSTANCES.get(EditorInstance.Instance.id)!;
     }
 
     add(range: TextRange) {

@@ -1,7 +1,7 @@
 import {View} from "./ui/View";
 import {Project} from "./project/Project";
 import {ProjectFile} from "./project/File";
-import {Plugin, PluginManager} from "./plugins/Plugins"
+import {IPlugin, PluginManager} from "./plugins/Plugins"
 import {EditorProperties} from "./Properties";
 import {EditorData} from "./core/data/data";
 import {RawEditorData} from "./core/data/raw";
@@ -11,6 +11,9 @@ import {
     EventArgs,
     EventManager,
     GeneralEvent,
+    LangEvent,
+    LangEventArgs,
+    LangEventListener,
     ListenerType,
     VisualEventListener
 } from "./core/events/events";
@@ -20,7 +23,6 @@ import {Caret, CaretModel} from "./core/Caret";
 import {Key, Keybind, ModifierKeyHolder} from "./core/events/keybind";
 
 import {DefaultLexer} from "./lang/default/Lexer";
-import {DefaultHighlighter} from "./lang/default/Highlighter";
 import {HTMLUtils} from "./utils/HTMLUtils";
 import {SRTree} from "./core/lang/parser/SRTree";
 import {ILexer} from "./core/lang/lexer/ILexer";
@@ -32,6 +34,8 @@ import {SRCodeBlock} from "./core/lang/parser/ast";
 import {IScope} from "./core/lang/Scoping";
 import {Actions} from "./core/actions/Actions";
 import {EDAC} from "./core/data/edac";
+import {InlineError} from "./ui/components/inline/InlineError";
+import {Popup} from "./ui/components/inline/popup/Popup";
 
 export class Editor extends AbstractVisualEventListener {
     static ID = 0;
@@ -56,9 +60,11 @@ export class Editor extends AbstractVisualEventListener {
     perfCheckRunning: boolean = false;
 
     private readonly defaultLexer = new DefaultLexer();
-    private readonly defaultHighlighter = new DefaultHighlighter();
+    private readonly defaultHighlighter;  // TODO
 
-    constructor(project?: Project, options?: EditorProperties) {
+    private renderingProcess: any;
+
+    constructor(project?: Project | null, options?: EditorProperties) {
         super();
 
         this.id = Editor.ID++;
@@ -73,7 +79,7 @@ export class Editor extends AbstractVisualEventListener {
         this.eventsManager = new EventManager();
         this.eventsManager.addVisualEventListener(this);
 
-        this.data = new EditorData(this.file.read());
+        this.data = new EditorData(this, this.file.read());
         this.data.setLanguage(this.file.type);
 
         this.view = new View(this);
@@ -84,12 +90,16 @@ export class Editor extends AbstractVisualEventListener {
         this.actions = new Actions(this);
         this.plugins = new PluginManager(this);
 
-        setInterval(() => {
+        this.renderingProcess = setInterval(() => {
             EditorInstance.with(this, () => {
                 this.view.render();
             });
         }, 20);
 
+    }
+
+    get lang(): string {
+        return this.data.language;
     }
 
     attach(element: HTMLElement) {
@@ -112,11 +122,19 @@ export class Editor extends AbstractVisualEventListener {
         EditorInstance.with(this, () => this.eventsManager.fire(event, this, ...args));
     }
 
+    fireLangEvent<event extends LangEvent>(event: event, ...args: LangEventArgs<event>) {
+        EditorInstance.with(this, () => this.eventsManager.fireLangEvent(this.lang, event, this, ...args));
+    }
+
     fireKeybinding(keyboardEvent: KeyboardEvent) {
         EditorInstance.with(this, () => this.eventsManager.fireKeybinding(keyboardEvent, this));
     }
 
-    registerPlugin(plugin: Plugin) {
+    fireMouseKeybinding(mouseEvent: MouseEvent) {
+        EditorInstance.with(this, () => this.eventsManager.fireMouseKeybinding(mouseEvent, this));
+    }
+
+    registerPlugin(plugin: IPlugin) {
         EditorInstance.with(this, () => {
             this.plugins.register(plugin);
         });
@@ -128,6 +146,14 @@ export class Editor extends AbstractVisualEventListener {
 
     addEditorEventListener(listener: EditorEventListener) {
         this.eventsManager.addEditorEventListener(listener);
+    }
+
+    addLangEventListener(lang: string, listener: LangEventListener) {
+        this.eventsManager.addLangEventListener(lang, listener);
+    }
+
+    removeVisualEventListener(listener: VisualEventListener) {
+        this.eventsManager.removeVisualEventListener(listener);
     }
 
     registerKeybinding(keybinding: Keybind, listener: ListenerType) {
@@ -239,6 +265,7 @@ export class Editor extends AbstractVisualEventListener {
         return Position.fromVisual(this, x, y);
     }
 
+
     getFullRange() {
         return new TextRange(0, this.data.raw.length());
     }
@@ -246,7 +273,6 @@ export class Editor extends AbstractVisualEventListener {
     isValidOffset(offset: Offset): boolean {
         return offset >= 0 && offset <= this.data.raw.length();
     }
-
 
     /**
      +---------------------------+
@@ -298,14 +324,19 @@ export class Editor extends AbstractVisualEventListener {
 
         // Reparse the context with the new text
         let tokens = lexer.asTokenStream(ctx.text);
+        let nodes = this.parse(ctx.scope, tokens).children;
         this.data.srTree.patch(
             ctx.containingNode,
-            this.parse(ctx.scope, tokens).children,
+            nodes,
         );
 
         // Perform syntax highlighting on the tokens
         let highlightedTokens = highlighter.highlight(tokens);
         this.data.setComponentsAtRange(ctx.scope.range, highlightedTokens);
+
+        this.fireLangEvent("onSrLoaded", ctx, nodes, tokens);
+
+        this.view.triggerRepaint();
     }
 
     deleteAt(offset: Offset, n: number = 1) {
@@ -330,14 +361,18 @@ export class Editor extends AbstractVisualEventListener {
 
         // Reparse the context with the new text
         let tokens = lexer.asTokenStream(ctx.text);
+        let nodes = this.parse(ctx.scope, tokens).children;
         this.data.srTree.patch(
             ctx.containingNode,
-            this.parse(ctx.scope, tokens).children,
+            nodes,
         );
 
         // Perform syntax highlighting on the tokens
-        let highlightedTokens = highlighter.highlight(tokens);
-        this.data.setComponentsAtRange(ctx.scope.range, highlightedTokens);
+        this.data.setComponentsAtRange(ctx.scope.range, highlighter.highlight(tokens.clone()));
+
+        this.fireLangEvent("onSrLoaded", ctx, nodes, tokens);
+
+        this.view.triggerRepaint();
     }
 
     deleteSelection(caret: Caret) {
@@ -366,8 +401,30 @@ export class Editor extends AbstractVisualEventListener {
 
     getLineLength(line: number) {
         let start = this.offsetManager.lineBreaks[line];
-        let end = this.offsetManager.lineBreaks[line + 1] - 1 || this.data.raw.length();
+        let end = (line + 1 < this.offsetManager.lineBreaks.length) ? (this.offsetManager.lineBreaks[line + 1] - 1) : this.data.raw.length();
         return end - start;
+    }
+
+    getWordAt(at: Offset, sep: RegExp = /\s/): TextRange {
+        return this.data.getWordAt(at, sep, this.offsetManager);
+    }
+
+    /**
+     +-----------------------+
+     |       Components      |
+     +-----------------------+    */
+
+    addErrorAt(range: TextRange, type: string, value: string, msg: string) {
+        this.data.registerError(new InlineError(range, type, value, msg));
+    }
+
+    openPopup(sourceX: number, sourceY: number, popup: Popup) {
+        if (!popup.isRendered) {
+            this.view.renderPopup(popup);
+        }
+        if (!popup.isShown) {
+            this.view.showPopup(popup, sourceX, sourceY);
+        }
     }
 
     /**
@@ -376,7 +433,7 @@ export class Editor extends AbstractVisualEventListener {
      +---------------------------+    */
 
     onKeyUp(editor: Editor, event: KeyboardEvent) {
-        ModifierKeyHolder.getInstance().clear();
+        ModifierKeyHolder.getInstance().set(event);
     }
 
     onKeyDown(editor: Editor, event: KeyboardEvent) {
@@ -393,10 +450,12 @@ export class Editor extends AbstractVisualEventListener {
 
         this.caretModel.removeAll();
         this.moveCursorToMouseEvent(event);
+
+        this.fireMouseKeybinding(event);
     }
 
     onMouseUp(editor: Editor, event: MouseEvent) {
-        ModifierKeyHolder.getInstance().clear();
+        ModifierKeyHolder.getInstance().set(event);
     }
 
     onMouseMove(editor: Editor, event: MouseEvent) {
@@ -431,5 +490,17 @@ export class Editor extends AbstractVisualEventListener {
 
     perfCheckEnd() {
         this.perfCheckRunning = false;
+    }
+
+    pauseRender() {
+        clearInterval(this.renderingProcess);
+    }
+
+    resumeRender() {
+        this.renderingProcess = setInterval(() => {
+            EditorInstance.with(this, () => {
+                this.view.render();
+            });
+        }, 20);
     }
 }

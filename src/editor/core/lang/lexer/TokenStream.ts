@@ -207,7 +207,7 @@ export class LazyTokenStream<Type> extends TokenStream<Type> {
     }
 
     isEmpty(): boolean {
-        return this.src.isEmpty() && !this.src.followupError;
+        return this.index >= this.tokens.length && this.src.isEmpty();
     }
 
     consume(): Token<Type> | null {

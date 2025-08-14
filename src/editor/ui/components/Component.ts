@@ -1,7 +1,7 @@
-import {View} from "../View";
+import {Editor} from "../../Editor";
 
 export interface Component {
-    render(): HTMLElement;
+    id: string;
 
-    getWidth(view: View): number;
+    onDestroy(editor: Editor): void;
 }

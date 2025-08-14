@@ -71,6 +71,12 @@ export enum Key {
     TILDE = "~",
     CAPS_LOCK = "CapsLock",
     INSERT = "Insert",
+    LeftClick = "LClick",
+    LeftDoubleClick = "LDoubleClick",
+    LeftTripleClick = "LTripleClick",
+    MIDDLE_CLICK = "MiddleClick",
+    RCLICK = "RClick",
+    RDOUBLE_CLICK = "RDoubleClick",
 }
 
 export type Keybind = {
@@ -109,7 +115,7 @@ export class ModifierKeyHolder {
     }
 
     static getInstance(): ModifierKeyHolder {
-        let id = EditorInstance.INSTANCE.id;
+        let id = EditorInstance.Instance.id;
         if (!this.instances.has(id)) {
             this.instances.set(id, new ModifierKeyHolder());
         }

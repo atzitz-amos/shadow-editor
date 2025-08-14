@@ -19,3 +19,21 @@ export class SelectAllAction extends AbstractAction {
         editor.view.resetBlink();
     }
 }
+
+export class SelectDoubleClickAction extends AbstractAction {
+    static readonly DELIMITER = /[\s.,;:!?(){}[\]<>]/;
+
+    name = 'SelectDoubleClick';
+    description = 'Select word under the caret.';
+    keybinding = {
+        key: Key.LeftDoubleClick,
+        shift: false
+    }
+
+    run(editor: Editor) {
+        const position = editor.caretModel.primary.position;
+        const wordRange = editor.getWordAt(position.offset, SelectDoubleClickAction.DELIMITER);
+        editor.caretModel.primary.selectionModel.set(wordRange.begin, wordRange.end);
+        editor.view.resetBlink();
+    }
+}

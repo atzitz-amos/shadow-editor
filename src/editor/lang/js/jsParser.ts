@@ -1,5 +1,4 @@
 import {ErrorToken, Token, TokenStream} from "../../core/lang/lexer/TokenStream";
-import {SRCodeBlock} from "../../core/lang/parser/ast";
 import {IParser} from "../../core/lang/parser/IParser";
 import {JS} from "./jsLexer";
 import {ScopeManager} from "../../core/lang/Scoping";
@@ -276,7 +275,7 @@ class JsParserImpl {
         let result: JSParam[] = [];
         let commas: Token<JS>[] = [];
 
-        while (!this.input.isEmpty() && this.input.seek()!.type != JS.RPAREN) {
+        while (!this.input.isEmpty() && this.input.seek()!.type != JS.RPAREN && this.input.seek()!.type != JS.EOF) {
             result.push(this.parseParam());
             if (this.input.seek()?.type === JS.Punctuation && this.input.seek()?.value === ",") {
                 commas.push(this.eat(JS.Punctuation)!);
@@ -730,7 +729,7 @@ export class JsParser implements IParser<JS> {
         return new JSScopeManager();
     }
 
-    parse(scope: JSScope, input: TokenStream<JS>): SRCodeBlock {
+    parse(scope: JSScope, input: TokenStream<JS>): JSCodeBlock {
         return new JsParserImpl(scope, input).parseBlock();
     }
 }

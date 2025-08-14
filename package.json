@@ -8,7 +8,7 @@
     "preview": "vite preview"
   },
   "keywords": [],
-  "author": "",
+  "author": "Amos Atzitz",
   "license": "ISC",
   "devDependencies": {
     "ts-node": "^10.9.2",

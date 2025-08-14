@@ -1,14 +1,19 @@
-import {PluginEventListener} from "../core/events/events";
+import {AbstractGeneralEventListener, GeneralEventListener} from "../core/events/events";
 import {Editor} from "../Editor";
 import {ILexer} from "../core/lang/lexer/ILexer";
 import {IHighlighter} from "../core/lang/highlighter/IHighlighter";
 import {IParser} from "../core/lang/parser/IParser";
 
-export interface Plugin extends PluginEventListener {
+export interface IPlugin extends GeneralEventListener {
     name: string;
     description: string;
 }
 
+
+export abstract class EditorPlugin extends AbstractGeneralEventListener implements IPlugin {
+    name: string;
+    description: string;
+}
 
 /**
  * Just so plugin don't need to implement EVERY listener.
@@ -16,7 +21,7 @@ export interface Plugin extends PluginEventListener {
 
 export class PluginManager {
     editor: Editor;
-    plugins: Record<string, Plugin>;
+    plugins: Record<string, IPlugin>;
 
     lexerProviderMap: Map<string, () => ILexer<any>> = new Map();
     highlighterProviderMap: Map<string, () => IHighlighter<any>> = new Map();
@@ -27,9 +32,12 @@ export class PluginManager {
         this.plugins = {};
     }
 
-    register(plugin: Plugin) {
+    register(plugin: IPlugin) {
         this.plugins[plugin.name] = plugin;
         plugin.onRegistered(this.editor, this);
+
+        this.editor.addEditorEventListener(plugin);
+        this.editor.addVisualEventListener(plugin);
     }
 
     registerFileTypeAssociation(

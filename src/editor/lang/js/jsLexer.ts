@@ -102,7 +102,7 @@ export class JSLexer implements ILexer<JS> {
         }
 
         while (true) {
-            if (src.isEmpty()) return new Token(JS.EOF, "EOF", new TextRange(src.index, src.index));
+            if (src.isEmpty()) return new Token(JS.EOF, "", new TextRange(src.index, src.index + 1));
             let char = src.consume() as string;
             if (char === "\n") {
                 return new Token(JS.EOL, "\n", TextRange.around(src.index - 1), true)
@@ -115,7 +115,7 @@ export class JSLexer implements ILexer<JS> {
                 return new Token(JS.Number, num, new TextRange(src.index - num.length, src.index));
             } else if (this.isAlphanumeric(char)) {
                 let identifier = char;
-                while (!src.isEmpty() && this.isAlphanumeric(src.seek()!)) {
+                while (!src.isEmpty() && (this.isAlphanumeric(src.seek()!) || (src.seek()! >= '0' && src.seek()! <= '9'))) {
                     identifier += src.consume();
                 }
                 if (JSLexer.KEYWORDS.includes(identifier)) {

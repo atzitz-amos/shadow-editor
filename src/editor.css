@@ -103,9 +103,10 @@
 }
 
 .editor .layer-inner {
-    z-index: 3;
+    z-index: 10;
     flex-direction: column;
     color: white;
+    background: transparent;
 }
 
 .editor .layer-caret {
@@ -208,4 +209,37 @@
 
 .editor-ht {
     box-sizing: content-box;
+}
+
+.editor-popup {
+    position: absolute;
+    z-index: 1000;
+    background: #383b3f;
+    translate: 0 -2px;
+    padding: 5px;
+    border-radius: 6px;
+    color: #bfbfbf;
+    font-size: 0.8em;
+    border: 1px solid #696666;
+}
+
+.editor-popup, .editor-popup * {
+    user-select: auto;
+}
+
+.md * {
+    margin: 0;
+    letter-spacing: normal;
+}
+
+.md .h1 {
+    font-size: 1.2em;
+}
+
+.md .h2 {
+    font-size: 1em;
+}
+
+.md .h3 {
+    font-size: 0.9em;
 }

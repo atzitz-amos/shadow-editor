@@ -1,4 +1,5 @@
 import {TextRange} from "../../Position";
+import {Token} from "../lexer/TokenStream";
 
 /**
  * Represents a node in the Abstract Syntax Tree (AST).
@@ -8,9 +9,13 @@ export interface SRNode {
     language?: string;
     parent: SRNode | null;
 
+    nodeType: string;
+
     isWellFormed(): boolean;
 
     getAllNodeChildren(): SRNode[];
+
+    getNodeContent(): (Token<any> | SRNode)[];
 }
 
 /**

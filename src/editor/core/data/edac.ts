@@ -1,7 +1,9 @@
 import {TextRange} from "../Position";
-import {InlineComponent} from "../../ui/components/Inline";
+import {InlineComponent} from "../../ui/components/inline/Inline";
 import {GutterComponent} from "../../ui/gutter/components/component";
 import {GutterLine} from "../../ui/gutter/components/line";
+import {InlineError} from "../../ui/components/inline/InlineError";
+import {Editor} from "../../Editor";
 
 export type EDAC = {
     gutter: HTMLSpanElement[];
@@ -18,8 +20,15 @@ type Event = {
 /**
  * Store the ranges of the components*/
 export class EditorComponentsData {
+    editor: Editor;
+
     components: InlineComponent[] = [];
     gutterComponents: GutterComponent[] = [];
+
+    constructor(editor: Editor) {
+        this.editor = editor;
+    }
+
 
     add(component: InlineComponent) {
         this.components.push(component);
@@ -29,7 +38,8 @@ export class EditorComponentsData {
 
     set(range: TextRange, components: Iterable<InlineComponent>) {
         // Remove existing components in the range
-        this.components = []; // TODO
+        let c = this.components;
+        this.clearRange(range);
 
         for (const component of components) {
             this.add(component);
@@ -69,8 +79,8 @@ export class EditorComponentsData {
                     // Merge classNames from all active components
                     const mergedClass = active.map(c => c.className).join(' ').trim();
 
-                    // Assume we take content from topmost component (last pushed)
-                    const top = active[active.length - 1];
+                    // Assume we take content from bottommost component (first pushed)
+                    const top = active[0];
                     const relativeStart = Math.max(prevPos, top.range.begin);
                     const relativeEnd = Math.min(currPos, top.range.end);
                     const content = top.content.slice(relativeStart - top.range.begin, relativeEnd - top.range.begin);
@@ -78,6 +88,9 @@ export class EditorComponentsData {
                     const span = document.createElement('span');
                     span.className = mergedClass;
                     span.textContent = content;
+
+                    active.forEach(x => x.onRender(this.editor, span));
+
                     spans.push(span);
                 }
             }
@@ -102,10 +115,35 @@ export class EditorComponentsData {
 
     gutterToRenderables(line: number): HTMLSpanElement[] {
         let components = this.gutterComponents.filter(component => component.line === line);
-        return [new GutterLine(line)].concat(components).map(c => c.render());
+        return components.concat([new GutterLine(line)]).map(c => c.render());
     }
 
     clearRange(range: TextRange) {
-        this.components = this.components.filter(component => !component.range.overlaps(range));
+        let newComponents: InlineComponent[] = [], newGutterComponents: GutterComponent[] = [];
+
+        for (let component of this.components) {
+            if (component.range.overlaps(range)) {
+                component.onDestroy(this.editor);
+            } else {
+                newComponents.push(component)
+            }
+        }
+
+        for (let component of this.gutterComponents) {
+            let begin = this.editor.createPositionFromOffset(range.begin);
+            let end = this.editor.createPositionFromOffset(range.end);
+            if (component.line >= begin.y && component.line <= end.y) {
+                component.onDestroy(this.editor);
+            } else {
+                newGutterComponents.push(component)
+            }
+        }
+
+        this.components = newComponents;
+        this.gutterComponents = newGutterComponents;
+    }
+
+    registerError(error: InlineError) {
+        this.components.push(error);
     }
 }

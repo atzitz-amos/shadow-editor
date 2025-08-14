@@ -1,6 +1,4 @@
 import {Position} from "./Position";
-import {Editor} from "../Editor";
-import {EditorEventListener} from "./events/events";
 import {Caret} from "./Caret";
 import {ModifierKeyHolder} from "./events/keybind";
 
@@ -11,7 +9,7 @@ export enum SelectionDirection {
     UNKNOWN
 }
 
-export class SelectionModel implements EditorEventListener {
+export class SelectionModel {
     isSelectionActive: boolean;
     caret: Caret;
 
@@ -21,8 +19,6 @@ export class SelectionModel implements EditorEventListener {
     constructor(caret: Caret) {
         this.caret = caret;
         this.isSelectionActive = false;
-
-        this.caret.editor.addEditorEventListener(this);
     }
 
     get direction(): SelectionDirection {
@@ -52,23 +48,17 @@ export class SelectionModel implements EditorEventListener {
         this.isSelectionActive = false;
         this.setStart(this.caret.position);
         this.end = null;
-
-        console.log("Selection cleared.");
     }
 
-    onCaretMove(editor: Editor, caret: Caret, oldPos: Position, newPos: Position): void {
+    onCaretMove(): void {
         if (!ModifierKeyHolder.isShiftPressed && !ModifierKeyHolder.isDragging) {
-            this.setStart(caret.position)
+            this.setStart(this.caret.position)
             return this.clear();
         }
-        this.setEnd(caret.position);
+        this.setEnd(this.caret.position);
         if (!this.isSelectionActive) {
             this.setActive(true);
         }
-    }
-
-    onCaretRemove(editor: Editor, caret: Caret): void {
-        throw new Error("Method not implemented.");
     }
 
     getStart(): Position {
@@ -91,7 +81,5 @@ export class SelectionModel implements EditorEventListener {
         this.start = Position.fromOffset(this.caret.editor, start);
         this.end = Position.fromOffset(this.caret.editor, end);
         this.isSelectionActive = true;
-
-        console.log(`Selection set from ${start} to ${end}.`);
     }
 }

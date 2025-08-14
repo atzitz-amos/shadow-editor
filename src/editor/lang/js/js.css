@@ -1,10 +1,36 @@
 
-.js-syntax-error {
-    box-shadow: 0 1px 0 #f00;
+.js-error-marker {
+    /*box-shadow: 0 1px 0 #f00;*/
+    position: relative;
+
+    display: inline-block;
+    z-index: 0;
+}
+
+.js-error-marker::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0; /* stick to bottom of text */
+    width: 100%;
+    height: 18px; /* matches SVG’s wave height in ems */
+
+    background-image: url("../../../res/error_waves.svg");
+    background-repeat: repeat-x;
+    background-size: auto 100%; /* scale to text width, keep aspect ratio */
+    background-position: center bottom; /* align wave to bottom edge */
+
+    translate: 0 14px;
+
+    z-index: -1;
 }
 
 .js-identifier {
     color: #fc8cff;
+}
+
+.js-function-name {
+    color: #18a5e1;
 }
 
 .js-keyword {
@@ -19,6 +45,16 @@
     color: #5bbbff;
 }
 
+.js-syntax-error {
+    color: #eb4c53;
+}
+
 .js-default, .js-operator {
     color: #dedede;
+}
+
+.js-link-hover {
+    color: #2e88e1;
+    text-decoration: underline;
+    cursor: pointer;
 }

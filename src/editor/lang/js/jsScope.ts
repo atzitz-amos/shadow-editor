@@ -16,12 +16,12 @@ export class JSScopeManager implements ScopeManager {
     }
 
     fullRange(): TextRange {
-        return EditorInstance.INSTANCE.getFullRange();
+        return EditorInstance.Instance.getFullRange();
     }
 
     getContainingNodeAt(at: Offset): SRCodeBlock | null {
         let scope = this.getScopeAt(at);
-        if (scope.kind === ScopeKind.FUNCTION) {
+        if (scope.kind === JSScopeKind.FUNCTION) {
             return (scope as JSFunctionScope).func.body?.body || null;
         }
         return null;
@@ -45,7 +45,7 @@ export class JSScopeManager implements ScopeManager {
     }
 }
 
-export enum ScopeKind {
+export enum JSScopeKind {
     GLOBAL = "global",
     FUNCTION = "function",
     BLOCK = "block"
@@ -55,7 +55,7 @@ export class JSReference implements ILanguageReference {
     decl: JSFuncDecl | JSDeclStmt;
     loc: TextRange;
     scope: JSScope;
-    scopeKind: ScopeKind;
+    scopeKind: JSScopeKind;
 
     constructor(decl: JSFuncDecl | JSDeclStmt, scope: JSScope) {
         this.decl = decl;
@@ -70,7 +70,7 @@ export class JSScope implements IScope {
     range: TextRange;
     children: JSScope[] = [];
     parent: JSScope | null;
-    kind: ScopeKind;
+    kind: JSScopeKind;
 
     declarations: Map<string, JSReference> = new Map();
 
@@ -83,7 +83,7 @@ export class JSScope implements IScope {
     }
 
     isVirtual(): boolean {
-        return this.kind === ScopeKind.BLOCK && !!this.parent && this.parent.kind !== ScopeKind.BLOCK;
+        return this.kind === JSScopeKind.BLOCK && !!this.parent && this.parent.kind !== JSScopeKind.BLOCK;
     }
 
     newBlockScope(): JSBlockScope {
@@ -133,7 +133,7 @@ export class JSScope implements IScope {
 }
 
 export class JSGlobalScope extends JSScope {
-    kind = ScopeKind.GLOBAL;
+    kind = JSScopeKind.GLOBAL;
 
     constructor(manager: JSScopeManager) {
         super(null);
@@ -143,12 +143,12 @@ export class JSGlobalScope extends JSScope {
 }
 
 export class JSFunctionScope extends JSScope {
-    kind = ScopeKind.FUNCTION;
+    kind = JSScopeKind.FUNCTION;
     func: JSFuncDecl | JSLambda;
 }
 
 export class JSBlockScope extends JSScope {
-    kind = ScopeKind.BLOCK;
+    kind = JSScopeKind.BLOCK;
     block: JSCodeBlock;
 
 }
