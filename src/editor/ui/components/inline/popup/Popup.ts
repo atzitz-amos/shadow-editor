@@ -3,6 +3,7 @@ import {View} from "../../../View";
 import {InlineComponent} from "../Inline"
 import {Registry} from "../../../../core/Registry";
 import {Editor} from "../../../../Editor";
+import {HTMLUtils} from "../../../../utils/HTMLUtils";
 
 export abstract class Popup implements Component {
     id: string;
@@ -24,10 +25,9 @@ export abstract class Popup implements Component {
 
     isInBound(x: number, y: number): boolean {
         if (!this.isShown || !this.element) return false;
-        let bbox = this.element.getBoundingClientRect();
-        let oBbox = this.owner.element?.getBoundingClientRect();
-        return (bbox.left <= x && bbox.right >= x && bbox.top <= y && bbox.bottom >= y)
-            || (oBbox && oBbox.left <= x && oBbox.right >= x && oBbox.top <= y && oBbox.bottom >= y)!;
+        let owner = this.owner.element;
+        return HTMLUtils.isInBound(this.element, x, y)
+            || (owner && HTMLUtils.isInBound(owner, x, y))!;
     }
 
     close(): void {
@@ -35,18 +35,12 @@ export abstract class Popup implements Component {
         this.element.style.display = "none";
     }
 
-    abstract render(view: View): HTMLDivElement;
-
     show(): void {
         this.isShown = true;
         this.element.style.display = "flex";
     }
 
-    awaitClosure(): void {
-        this.element.addEventListener("mouseleave", e => {
-            this.close();
-        });
-    }
+    abstract render(view: View): HTMLDivElement;
 }
 
 export type PopupBuilder = {

@@ -5,6 +5,7 @@ import {MessageBox} from "./popup/MessageBox";
 import {Popup, PopupBuilder} from "./popup/Popup";
 import {Markdown} from "../markdown/Parser"
 import {Editor} from "../../../Editor";
+import {HTMLUtils} from "../../../utils/HTMLUtils";
 
 
 export class InlineError implements InlineComponent, PopupBuilder {
@@ -37,7 +38,10 @@ export class InlineError implements InlineComponent, PopupBuilder {
         this.element = element;
 
         element.addEventListener("mouseover", e => {
-            editor.openPopup(e.x, e.y, Registry.getPopup(this));
+            setTimeout(() => {
+                if (HTMLUtils.isInBound(this.element, e.x, e.y, 2))
+                    editor.openPopup(e.x, e.y, Registry.getPopup(this));
+            }, 800);
         });
 
         element.addEventListener("click", () => {

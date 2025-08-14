@@ -36,4 +36,9 @@ export class HTMLUtils {
     static px(value: number | string): string {
         return `${value}px`;
     }
+
+    static isInBound(element: HTMLElement, x: number, y: number, epsilon = 5) {
+        let bbox = element.getBoundingClientRect();
+        return bbox.left - epsilon <= x && bbox.right + epsilon >= x && bbox.top - epsilon <= y && bbox.bottom + epsilon >= y;
+    }
 }

@@ -40,7 +40,7 @@ import {JSBlockScope, JSFunctionScope, JSScope, JSScopeManager} from "./jsScope"
 
 /**
  * Implements the Javascript Parser <br>
- * This class does NOT support concurrent usage, so be sure to always use `JsParser.parse` and never call directly this implementation */
+ * This class does NOT support concurrent usage, so be sure to always use `JSParser.parse` and never call directly this implementation */
 class JsParserImpl {
     input: TokenStream<JS>;
     scope: JSScope;
@@ -56,6 +56,8 @@ class JsParserImpl {
         return this.input.seek()!.range.begin;
     }
 
+    /**
+     * Main parser code. Responsible for parsing any group of statements. */
     parseBlock(): JSCodeBlock {
         let result: JSSrNode[] = [];
 
@@ -723,7 +725,8 @@ class JsParserImpl {
 
 /**
  * Represent the JSParser. Responsible for managing JSScopes, JSSrNodes, etc... */
-export class JsParser implements IParser<JS> {
+export class JSParser implements IParser<JS> {
+
 
     createScopeManager(): ScopeManager {
         return new JSScopeManager();

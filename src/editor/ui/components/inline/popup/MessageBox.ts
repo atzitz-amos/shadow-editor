@@ -17,12 +17,6 @@ export class MessageBox extends Popup {
         this.element = document.createElement("div");
         this.element.className = "editor-popup popup-message-box md";
 
-        this.element.addEventListener("mousedown", e => {
-            e.stopImmediatePropagation();
-        })
-
-        this.awaitClosure();
-
         let children = this.msg.toHTML();
         for (let child of children) {
             this.element.appendChild(child);

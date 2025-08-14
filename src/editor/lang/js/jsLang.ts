@@ -1,7 +1,7 @@
 import {EditorPlugin, PluginManager} from "../../plugins/Plugins";
 import {JS, JSLexer} from "./jsLexer";
 import {JSHighlighter} from "./jsHighlighter";
-import {JsParser} from "./jsParser";
+import {JSParser} from "./jsParser";
 import {Editor} from "../../Editor";
 import {TextContext} from "../../core/Position";
 import {SRNode} from "../../core/lang/parser/ast";
@@ -26,7 +26,7 @@ export class JSLangPlugin extends EditorPlugin implements LangEventListener {
             "js",
             () => new JSLexer(),
             () => new JSHighlighter(),
-            () => new JsParser()
+            () => new JSParser()
         );
 
         editor.addLangEventListener("js", this);

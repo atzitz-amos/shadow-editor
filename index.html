@@ -14,7 +14,7 @@
             import {Editor} from './src/editor/Editor.ts';
             import {JSLangPlugin} from './src/editor/lang/js/jsLang.ts';
             import {JSLexer} from "./src/editor/lang/js/jsLexer";
-            import {JsParser} from "./src/editor/lang/js/jsParser";
+            import {JSParser} from "./src/editor/lang/js/jsParser";
             import {JSParsingUtils} from "./src/editor/lang/js/jsUtils";
             import {EditorInstance} from "./src/editor/EditorInstance";
             import {TextRange} from "./src/editor/core/Position";
@@ -33,7 +33,7 @@
             window.EditorComponentsData = EditorComponentsData;
             window.HighlightedToken = HighlightedToken;
             window.p = x => console.log(JSParsingUtils.toHumanReadableString(parser.parse(null, js.asTokenStream(x))))
-            window.parser = new JsParser();
+            window.parser = new JSParser();
         </script>
     </body>
 </html>

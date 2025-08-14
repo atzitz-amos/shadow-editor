@@ -1,5 +1,3 @@
-import {EditorInstance} from "../../EditorInstance";
-
 export enum Modifier {
     CTRL,
     SHIFT,
@@ -87,7 +85,7 @@ export type Keybind = {
 }
 
 export class ModifierKeyHolder {
-    static instances: Map<number, ModifierKeyHolder> = new Map();
+    static INSTANCE: ModifierKeyHolder;
     isCtrlPressed: boolean = false;
     isAltPressed: boolean = false;
     isShiftPressed: boolean = false;
@@ -115,11 +113,10 @@ export class ModifierKeyHolder {
     }
 
     static getInstance(): ModifierKeyHolder {
-        let id = EditorInstance.Instance.id;
-        if (!this.instances.has(id)) {
-            this.instances.set(id, new ModifierKeyHolder());
+        if (!this.INSTANCE) {
+            this.INSTANCE = new ModifierKeyHolder();
         }
-        return this.instances.get(id)!;
+        return this.INSTANCE;
     }
 
     set(event: { shiftKey?: boolean, ctrlKey?: boolean, altKey?: boolean, button?: number }): void {
@@ -138,6 +135,5 @@ export class ModifierKeyHolder {
         this.isAltPressed = false;
         this.isShiftPressed = false;
         this.isMouseDown = false;
-        this.isDragging = false;
     }
 }

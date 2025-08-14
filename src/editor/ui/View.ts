@@ -43,6 +43,7 @@ export class View {
     visualCharCount: number;
 
     // Data
+    popups: Popup[] = [];
     lines: EDAC[];
 
     isDirty: boolean = true;
@@ -62,6 +63,14 @@ export class View {
             onMouseDown(editor: Editor, event: MouseEvent) {
                 event.preventDefault();
                 editor.view.focus();
+            }
+
+            onMouseMove(editor: Editor, event: MouseEvent) {
+                for (let popup of editor.view.popups) {
+                    if (!popup.isInBound(event.x, event.y)) {
+                        popup.close();
+                    }
+                }
             }
 
             onScroll(editor: Editor, event: WheelEvent) {
@@ -215,9 +224,11 @@ export class View {
         this.view.remove();
     }
 
-    renderPopup(popup: Popup) {
+    addPopup(popup: Popup) {
         let element = popup.render(this);
         this.layers.layers_el.appendChild(element);
+
+        this.popups.push(popup);
     }
 
     showPopup(popup: Popup, sourceX: number, sourceY: number) {

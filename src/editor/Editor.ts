@@ -420,7 +420,7 @@ export class Editor extends AbstractVisualEventListener {
 
     openPopup(sourceX: number, sourceY: number, popup: Popup) {
         if (!popup.isRendered) {
-            this.view.renderPopup(popup);
+            this.view.addPopup(popup);
         }
         if (!popup.isShown) {
             this.view.showPopup(popup, sourceX, sourceY);
@@ -456,6 +456,8 @@ export class Editor extends AbstractVisualEventListener {
 
     onMouseUp(editor: Editor, event: MouseEvent) {
         ModifierKeyHolder.getInstance().set(event);
+        ModifierKeyHolder.getInstance().setIsDragging(false);
+        ModifierKeyHolder.getInstance().isMouseDown = false;
     }
 
     onMouseMove(editor: Editor, event: MouseEvent) {
