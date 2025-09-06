@@ -1,5 +1,5 @@
 import {ILexer} from "./ILexer";
-import {TextRange} from "../../Position";
+import {TextRange} from "../../coordinate/TextRange";
 
 export class Token<Type> {
     isError = false;
@@ -242,11 +242,11 @@ export class LazyTokenStream<Type> extends TokenStream<Type> {
     }
 
     exhaust(): Token<Type>[] {
-        let index = this.index;
+        let tokens: Token<any>[] = [];
         while (!this.isEmpty()) {
-            this.compute();
+            tokens.push(this.consume()!);
         }
-        return this.tokens.slice(index);
+        return tokens;
     }
 
     includeComments() {

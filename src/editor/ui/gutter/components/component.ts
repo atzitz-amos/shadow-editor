@@ -1,4 +1,4 @@
-import {Component} from "../../components/Component";
+import {Component} from "../../../core/components/Component";
 
 export interface GutterComponent extends Component {
     line: number;

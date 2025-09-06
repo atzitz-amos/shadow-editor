@@ -72,9 +72,9 @@ export enum Key {
     LeftClick = "LClick",
     LeftDoubleClick = "LDoubleClick",
     LeftTripleClick = "LTripleClick",
-    MIDDLE_CLICK = "MiddleClick",
-    RCLICK = "RClick",
-    RDOUBLE_CLICK = "RDoubleClick",
+    MiddleClick = "MiddleClick",
+    RightClick = "RClick",
+    RightDoubleClick = "RDoubleClick",
 }
 
 export type Keybind = {

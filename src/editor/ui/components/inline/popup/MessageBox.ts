@@ -1,10 +1,12 @@
 import {View} from "../../../View";
 import {Popup} from "./Popup";
 import {MarkdownMessage} from "../../markdown/Message";
-import {InlineComponent} from "../Inline";
+import {InlineComponent} from "../../../../core/components/InlineComponent";
 
 
 export class MessageBox extends Popup {
+    name: string = "message-box";
+
     msg: MarkdownMessage;
 
     constructor(owner: InlineComponent, msg: MarkdownMessage) {

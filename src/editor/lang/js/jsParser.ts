@@ -34,7 +34,7 @@ import {
     JSTernaryExpr,
     JSUnaryExpr
 } from "./jsNodes";
-import {HasRange, TextRange} from "../../core/Position";
+import {HasRange, TextRange} from "../../core/coordinate/TextRange";
 import {JsPrecedenceUtils} from "./jsUtils";
 import {JSBlockScope, JSFunctionScope, JSScope, JSScopeManager} from "./jsScope";
 

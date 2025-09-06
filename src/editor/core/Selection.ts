@@ -1,6 +1,7 @@
-import {Position} from "./Position";
 import {Caret} from "./Caret";
 import {ModifierKeyHolder} from "./events/keybind";
+import {Editor} from "../Editor";
+import {LogicalPosition} from "./coordinate/LogicalPosition";
 
 
 export enum SelectionDirection {
@@ -10,76 +11,93 @@ export enum SelectionDirection {
 }
 
 export class SelectionModel {
-    isSelectionActive: boolean;
+    editor: Editor;
     caret: Caret;
 
-    start: Position | null;
-    end: Position | null = null;
+    isSelectionActive: boolean;
+
+    startOffset: Offset | null;
+    endOffset: Offset | null = null;
 
     constructor(caret: Caret) {
+        this.editor = caret.editor;
         this.caret = caret;
         this.isSelectionActive = false;
     }
 
-    get direction(): SelectionDirection {
-        if (!this.isSelectionActive || !this.start || !this.end) {
+    getDirection(): SelectionDirection {
+        if (!this.isSelectionActive || this.startOffset === null || this.endOffset === null) {
             return SelectionDirection.UNKNOWN;
         }
-        if (this.start.offset < this.end.offset) {
+        if (this.startOffset < this.endOffset) {
             return SelectionDirection.RIGHT;
         } else {
             return SelectionDirection.LEFT;
         }
     }
 
-    setStart(start: Position): void {
-        this.start = start.clone();
+    setStart(start: LogicalPosition): void {
+        this.startOffset = this.editor.logicalToOffset(start);
     }
 
-    setEnd(end: Position): void {
-        this.end = end.clone();
+    setEnd(end: LogicalPosition): void {
+        this.endOffset = this.editor.logicalToOffset(end);
     }
 
     setActive(active: boolean): void {
         this.isSelectionActive = active;
     }
 
-    clear(): void {
-        this.isSelectionActive = false;
-        this.setStart(this.caret.position);
-        this.end = null;
-    }
-
     onCaretMove(): void {
+        // TODO: introduce parameter `shouldEnableSelection` to indicate whether shift is pressed
         if (!ModifierKeyHolder.isShiftPressed && !ModifierKeyHolder.isDragging) {
-            this.setStart(this.caret.position)
+            this.setStart(this.caret.getLogical())
             return this.clear();
         }
-        this.setEnd(this.caret.position);
+        this.setEnd(this.caret.getLogical());
         if (!this.isSelectionActive) {
             this.setActive(true);
         }
     }
 
-    getStart(): Position {
-        let start = this.start || this.caret.position;
-        if (this.end && this.end.offset < start.offset) {
-            return this.end;
-        }
-        return start;
+    getStartOffset() {
+        return this.startOffset;
     }
 
-    getEnd(): Position {
-        let end = this.end || this.caret.position;
-        if (this.start && this.start.offset > end.offset) {
-            return this.start;
+    getStart(): LogicalPosition {
+        let start = this.startOffset;
+        if (start === null) {
+            return this.caret.getLogical();
         }
-        return end;
+        return this.editor.offsetToLogical(start);
     }
 
-    set(start: number, end: number) {
-        this.start = Position.fromOffset(this.caret.editor, start);
-        this.end = Position.fromOffset(this.caret.editor, end);
+    getEndOffset() {
+        return this.endOffset;
+    }
+
+    getEnd(): LogicalPosition {
+        let end = this.endOffset;
+        if (end === null) {
+            return this.caret.getLogical();
+        }
+        return this.editor.offsetToLogical(end);
+    }
+
+    getSelectionLength(): number {
+        if (!this.isSelectionActive) return 0;
+        return Math.abs(this.startOffset! - this.endOffset!);
+    }
+
+    select(from: number, to: number) {
+        this.startOffset = from;
+        this.endOffset = to;
         this.isSelectionActive = true;
+    }
+
+    clear(): void {
+        this.setStart(this.caret.getLogical());
+        this.isSelectionActive = false;
+        this.endOffset = null;
     }
 }

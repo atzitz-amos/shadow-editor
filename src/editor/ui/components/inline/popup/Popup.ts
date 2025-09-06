@@ -1,11 +1,12 @@
-import {Component} from "../../Component";
+import {Component} from "../../../../core/components/Component";
 import {View} from "../../../View";
-import {InlineComponent} from "../Inline"
 import {Registry} from "../../../../core/Registry";
 import {Editor} from "../../../../Editor";
 import {HTMLUtils} from "../../../../utils/HTMLUtils";
+import {InlineComponent} from "../../../../core/components/InlineComponent";
 
 export abstract class Popup implements Component {
+    abstract name: string;
     id: string;
 
     isRendered: boolean = false;
@@ -25,9 +26,9 @@ export abstract class Popup implements Component {
 
     isInBound(x: number, y: number): boolean {
         if (!this.isShown || !this.element) return false;
-        let owner = this.owner.element;
+        let owner = this.owner?.getRenderedView();
         return HTMLUtils.isInBound(this.element, x, y)
-            || (owner && HTMLUtils.isInBound(owner, x, y))!;
+            || (owner && owner.isInBound(x, y))!;
     }
 
     close(): void {

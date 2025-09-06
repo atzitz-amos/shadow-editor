@@ -17,7 +17,7 @@ export class TabAction extends AbstractAction {
     run(editor: Editor, event: KeyboardEvent) {
         event.preventDefault();
         editor.caretModel.forEachCaret(caret => {
-            editor.insertText(caret.position.offset, '    ');
+            editor.insertText(caret.getOffset(), '    ');
             editor.caretModel.shift(4);
         });
         editor.view.resetBlink();

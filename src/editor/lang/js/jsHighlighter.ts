@@ -1,20 +1,20 @@
-import {HighlightedToken, IHighlightedToken} from "../../core/lang/highlighter/HighlightedToken";
 import {VisitorHighlighter, VisitorHighlighterImplementor} from "../../core/lang/highlighter/IHighlighter";
 import {JS} from "./jsLexer";
 import {Token} from "../../core/lang/lexer/TokenStream";
+import {HighlightedToken} from "../../core/lang/highlighter/HighlightedToken";
 
 export class JSHighlighter extends VisitorHighlighter<JS> implements VisitorHighlighterImplementor<JS> {
     _impl = this;
 
-    visitEqualOp(token: Token<JS>): IHighlightedToken | null {
+    visitEqualOp(token: Token<JS>): HighlightedToken | null {
         return new HighlightedToken(token, "js-operator");
     }
 
-    visitCompareOp(token: Token<JS>): IHighlightedToken | null {
+    visitCompareOp(token: Token<JS>): HighlightedToken | null {
         return new HighlightedToken(token, "js-operator");
     }
 
-    visitArrow(token: Token<JS>): IHighlightedToken | null {
+    visitArrow(token: Token<JS>): HighlightedToken | null {
         return new HighlightedToken(token, "js-operator");
     }
 
@@ -30,63 +30,63 @@ export class JSHighlighter extends VisitorHighlighter<JS> implements VisitorHigh
         return new HighlightedToken(token, "js-string");
     }
 
-    visitIdentifier(token: Token<JS>): IHighlightedToken | null {
+    visitIdentifier(token: Token<JS>): HighlightedToken | null {
         return new HighlightedToken(token, "js-identifier");
     }
 
-    visitNumber(token: Token<JS>): IHighlightedToken | null {
+    visitNumber(token: Token<JS>): HighlightedToken | null {
         return new HighlightedToken(token, "js-number");
     }
 
-    visitPunctuation(token: Token<JS>): IHighlightedToken | null {
+    visitPunctuation(token: Token<JS>): HighlightedToken | null {
         return new HighlightedToken(token, "js-default");
     }
 
-    visitLeftParen(token: Token<JS>): IHighlightedToken | null {
+    visitLeftParen(token: Token<JS>): HighlightedToken | null {
         return new HighlightedToken(token, "js-left-paren js-default");
     }
 
-    visitRightParen(token: Token<JS>): IHighlightedToken | null {
+    visitRightParen(token: Token<JS>): HighlightedToken | null {
         return new HighlightedToken(token, "js-right-paren js-default");
     }
 
-    visitLeftBrace(token: Token<JS>): IHighlightedToken | null {
+    visitLeftBrace(token: Token<JS>): HighlightedToken | null {
         return new HighlightedToken(token, "js-left-brace js-default");
     }
 
-    visitRightBrace(token: Token<JS>): IHighlightedToken | null {
+    visitRightBrace(token: Token<JS>): HighlightedToken | null {
         return new HighlightedToken(token, "js-right-brace js-default");
     }
 
-    visitLeftBracket(token: Token<JS>): IHighlightedToken | null {
+    visitLeftBracket(token: Token<JS>): HighlightedToken | null {
         return new HighlightedToken(token, "js-left-bracket js-default");
     }
 
-    visitRightBracket(token: Token<JS>): IHighlightedToken | null {
+    visitRightBracket(token: Token<JS>): HighlightedToken | null {
         return new HighlightedToken(token, "js-right-bracket js-default");
     }
 
-    visitOperator(token: Token<JS>): IHighlightedToken | null {
+    visitOperator(token: Token<JS>): HighlightedToken | null {
         return new HighlightedToken(token, "js-operator");
     }
 
-    visitEquals(token: Token<JS>): IHighlightedToken | null {
+    visitEquals(token: Token<JS>): HighlightedToken | null {
         return new HighlightedToken(token, "js-operator");
     }
 
-    visitEOL(token: Token<JS>): IHighlightedToken | null {
+    visitEOL(token: Token<JS>): HighlightedToken | null {
         return null;  // We skip EOL tokens
     }
 
-    visitEOF(token: Token<JS>): IHighlightedToken | null {
+    visitEOF(token: Token<JS>): HighlightedToken | null {
         return null;  // We skip EOF tokens
     }
 
-    visitSyntaxError(token: Token<JS>): IHighlightedToken | null {
+    visitSyntaxError(token: Token<JS>): HighlightedToken | null {
         return new HighlightedToken(token, "js-syntax-error");
     }
 
-    visitKeyword(token: Token<JS>): IHighlightedToken | null {
+    visitKeyword(token: Token<JS>): HighlightedToken | null {
         return new HighlightedToken(token, "js-keyword");
     }
 }

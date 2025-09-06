@@ -1,4 +1,5 @@
 import {Popup, PopupBuilder} from "../ui/components/inline/popup/Popup";
+import {Component} from "./components/Component";
 
 export type HasId = { id: string };
 
@@ -6,13 +7,20 @@ export class Registry {
     private static componentIdCounter: number = 0;
     private static actionIdCounter: number = 0;
 
+    private static components = new Map<string, Component>();
     private static popups: Map<string, Popup> = new Map();
 
-    static getComponentId(componentName: string): string {
-        return `${componentName}-${this.componentIdCounter++}`;
+    static getComponentIDFor(component: Component): string {
+        const id = `${component.name}-${this.componentIdCounter++}`;
+        this.components.set(id, component);
+        return id;
     }
 
-    static getActionId(name: string): string {
+    static getComponentById(id: string): Component | undefined {
+        return this.components.get(id);
+    }
+
+    static getActionIdFor(name: string): string {
         return `${this.actionIdCounter++}-${name}`;
     }
 
@@ -26,6 +34,6 @@ export class Registry {
 
     static registerPopup(owner: HasId, popup: Popup) {
         this.popups.set(owner.id, popup);
-        return this.getComponentId("popup");
+        return this.getComponentIDFor(popup);
     }
 }

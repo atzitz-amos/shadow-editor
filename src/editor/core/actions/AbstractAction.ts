@@ -11,7 +11,7 @@ export abstract class AbstractAction {
     keybinding?: Keybind;
 
     constructor() {
-        this.id = Registry.getActionId(this.name);
+        this.id = Registry.getActionIdFor(this.name);
     }
 
     abstract run(editor: Editor, event: KeyboardEvent): void;

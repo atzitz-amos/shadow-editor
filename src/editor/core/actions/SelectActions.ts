@@ -13,9 +13,9 @@ export class SelectAllAction extends AbstractAction {
         shift: false
     };
 
-    run(editor: Editor, _: any) {
-        editor.caretModel.removeAll();
-        editor.caretModel.primary.selectionModel.set(0, editor.data.raw.length());
+    run(editor: Editor, _: KeyboardEvent) {
+        editor.getCaretModel().removeAll();
+        editor.getCaretModel().getPrimary().getSelectionModel().select(0, editor.getOpenedDocument().getTotalDocumentLength());
         editor.view.resetBlink();
     }
 }
@@ -31,9 +31,9 @@ export class SelectDoubleClickAction extends AbstractAction {
     }
 
     run(editor: Editor) {
-        const position = editor.caretModel.primary.position;
-        const wordRange = editor.getWordAt(position.offset, SelectDoubleClickAction.DELIMITER);
-        editor.caretModel.primary.selectionModel.set(wordRange.begin, wordRange.end);
+        const caret = editor.getPrimaryCaret();
+        const wordRange = editor.getOpenedDocument().getWordAt(caret.getOffset(), SelectDoubleClickAction.DELIMITER);
+        caret.selectionModel.select(wordRange.begin, wordRange.end);
         editor.view.resetBlink();
     }
 }

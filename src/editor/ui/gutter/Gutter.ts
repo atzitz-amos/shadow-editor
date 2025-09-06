@@ -4,7 +4,7 @@ import {HTMLUtils} from "../../utils/HTMLUtils";
 export class Gutter {
     view: View;
     element: HTMLDivElement;
-    digits: number = 1;
+    nDigits: number = 1;
 
     lines: HTMLDivElement[] = [];
     edgelines: HTMLDivElement[] = [];
@@ -31,7 +31,7 @@ export class Gutter {
     }
 
     update() {
-        this.element.style.setProperty('--editor-gutter-num-size', HTMLUtils.px(this.digits * this.view.getCharSize()));
+        this.element.style.setProperty('--editor-gutter-num-size', HTMLUtils.px(this.nDigits * this.view.getCharSize()));
     }
 
     destroy(): void {

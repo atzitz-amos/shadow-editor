@@ -10,6 +10,7 @@
     </head>
     <body>
         <div class="editor-c"></div>
+        <div class="editor-c2"></div>
         <script type="module">
             import {Editor} from './src/editor/Editor.ts';
             import {JSLangPlugin} from './src/editor/lang/js/jsLang.ts';
@@ -17,11 +18,11 @@
             import {JSParser} from "./src/editor/lang/js/jsParser";
             import {JSParsingUtils} from "./src/editor/lang/js/jsUtils";
             import {EditorInstance} from "./src/editor/EditorInstance";
-            import {TextRange} from "./src/editor/core/Position";
-            import {EditorComponentsData} from "./src/editor/core/data/edac";
+            import {TextRange} from "./src/editor/core/coordinate/TextRange";
             import {HighlightedToken} from "./src/editor/core/lang/highlighter/HighlightedToken";
 
             const editor = new Editor();
+
             editor.registerPlugin(new JSLangPlugin());
             editor.attach(document.querySelector('.editor-c'));
 
@@ -30,10 +31,10 @@
             window.js = new JSLexer();
             window.JSParsingUtils = JSParsingUtils;
             window.TextRange = TextRange;
-            window.EditorComponentsData = EditorComponentsData;
             window.HighlightedToken = HighlightedToken;
             window.p = x => console.log(JSParsingUtils.toHumanReadableString(parser.parse(null, js.asTokenStream(x))))
             window.parser = new JSParser();
+
         </script>
     </body>
 </html>

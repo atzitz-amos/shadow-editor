@@ -2,9 +2,10 @@ import {Editor} from "../../Editor";
 import {PluginManager} from "../../plugins/Plugins";
 import {Key, Keybind} from "./keybind";
 import {Caret} from "../Caret";
-import {Position, TextContext} from "../Position";
+import {TextContext} from "../coordinate/TextRange";
 import {SRNode} from "../lang/parser/ast";
 import {TokenStream} from "../lang/lexer/TokenStream";
+import {LogicalPosition} from "../coordinate/LogicalPosition";
 
 export interface VisualEventListener {
     onAttached(editor: Editor, root: HTMLElement): void;
@@ -31,7 +32,7 @@ export interface VisualEventListener {
 }
 
 export interface EditorEventListener {
-    onCaretMove(editor: Editor, caret: Caret, oldPos: Position, newPos: Position): void;
+    onCaretMove(editor: Editor, caret: Caret, oldPos: LogicalPosition, newPos: LogicalPosition): void;
 
     onCaretRemove(editor: Editor, caret: Caret): void;
 
@@ -88,7 +89,7 @@ export abstract class AbstractEditorEventListener implements EditorEventListener
     onCaretRemove(editor: Editor, caret: Caret): void {
     }
 
-    onCaretMove(editor: Editor, caret: Caret, oldPos: Position, newPos: Position): void {
+    onCaretMove(editor: Editor, caret: Caret, oldPos: LogicalPosition, newPos: LogicalPosition): void {
     }
 }
 
@@ -137,7 +138,7 @@ export abstract class AbstractGeneralEventListener implements GeneralEventListen
     onBlur(editor: Editor, event: FocusEvent): void {
     }
 
-    onCaretMove(editor: Editor, caret: Caret, oldPos: Position, newPos: Position): void {
+    onCaretMove(editor: Editor, caret: Caret, oldPos: LogicalPosition, newPos: LogicalPosition): void {
     }
 
     onCaretRemove(editor: Editor, caret: Caret): void {
@@ -168,6 +169,10 @@ export class EventManager {
     private visualListeners: VisualEventListener[] = [];
     private editorListeners: EditorEventListener[] = [];
     private langListeners: Record<string, LangEventListener[]> = {};
+    private conditionalListeners: Map<Keybind, {
+        listener: (editor: Editor, event: MouseEvent) => void,
+        condition: (editor: Editor, event: MouseEvent) => boolean
+    }> = new Map();
     private keybindingListeners: Map<Keybind, ListenerType> = new Map();
 
     addVisualEventListener(listener: VisualEventListener) {
@@ -204,23 +209,12 @@ export class EventManager {
     fireMouseKeybinding(event: MouseEvent, editor: Editor) {
         for (let [keybind, listener] of this.keybindingListeners.entries()) {
             if (this.matches(keybind, event)) {
-                if (event.button === 0) {
-                    if (keybind.key === Key.LeftClick) {
-                        listener.apply(null, [editor, event]);
-                    } else if (keybind.key === Key.LeftDoubleClick && event.detail === 2) {
-                        listener.apply(null, [editor, event]);
-                    } else if (keybind.key === Key.LeftTripleClick && event.detail === 3) {
-                        listener.apply(null, [editor, event]);
-                    }
-                } else if (event.button === 1 && keybind.key === Key.MIDDLE_CLICK) {
-                    listener.apply(null, [editor, event]);
-                } else {
-                    if (keybind.key === Key.RCLICK) {
-                        listener.apply(null, [editor, event]);
-                    } else if (keybind.key === Key.RDOUBLE_CLICK && event.detail === 2) {
-                        listener.apply(null, [editor, event]);
-                    }
-                }
+                this.fireMouseKeybindingFor(listener, editor, event, keybind);
+            }
+        }
+        for (let [keybind, {listener, condition}] of this.conditionalListeners.entries()) {
+            if (this.matches(keybind, event) && condition(editor, event)) {
+                this.fireMouseKeybindingFor(listener, editor, event, keybind);
             }
         }
     }
@@ -248,6 +242,30 @@ export class EventManager {
                 if (method) {
                     method.apply(listener, args);
                 }
+            }
+        }
+    }
+
+    addConditionalEventListener(keybind: Keybind, listener: (editor: Editor, event: MouseEvent) => void, condition: (editor: Editor, event: MouseEvent) => boolean) {
+        this.conditionalListeners.set(keybind, {listener, condition});
+    }
+
+    private fireMouseKeybindingFor(listener: ListenerType, editor: Editor, event: MouseEvent, keybind: Keybind) {
+        if (event.button === 0) {
+            if (keybind.key === Key.LeftClick) {
+                listener.apply(null, [editor, event]);
+            } else if (keybind.key === Key.LeftDoubleClick && event.detail === 2) {
+                listener.apply(null, [editor, event]);
+            } else if (keybind.key === Key.LeftTripleClick && event.detail === 3) {
+                listener.apply(null, [editor, event]);
+            }
+        } else if (event.button === 1 && keybind.key === Key.MiddleClick) {
+            listener.apply(null, [editor, event]);
+        } else {
+            if (keybind.key === Key.RightClick) {
+                listener.apply(null, [editor, event]);
+            } else if (keybind.key === Key.RightDoubleClick && event.detail === 2) {
+                listener.apply(null, [editor, event]);
             }
         }
     }

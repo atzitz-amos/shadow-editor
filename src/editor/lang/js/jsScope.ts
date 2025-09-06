@@ -1,5 +1,5 @@
 import {ILanguageReference, IScope, ScopeManager} from "../../core/lang/Scoping";
-import {TextRange} from "../../core/Position";
+import {TextRange} from "../../core/coordinate/TextRange";
 import {JSCodeBlock, JSDeclStmt, JSFuncDecl, JSLambda} from "./jsNodes";
 import {EditorInstance} from "../../EditorInstance";
 import {SRCodeBlock} from "../../core/lang/parser/ast";

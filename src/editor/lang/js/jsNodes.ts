@@ -1,5 +1,5 @@
 import {SRCodeBlock, SRNode} from "../../core/lang/parser/ast";
-import {TextRange} from "../../core/Position";
+import {TextRange} from "../../core/coordinate/TextRange";
 import {JS} from "./jsLexer";
 import {Token} from "../../core/lang/lexer/TokenStream";
 import {StringUtils} from "../../utils/StringUtils";

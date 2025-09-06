@@ -3,7 +3,7 @@ import {JS, JSLexer} from "./jsLexer";
 import {JSHighlighter} from "./jsHighlighter";
 import {JSParser} from "./jsParser";
 import {Editor} from "../../Editor";
-import {TextContext} from "../../core/Position";
+import {TextContext} from "../../core/coordinate/TextRange";
 import {SRNode} from "../../core/lang/parser/ast";
 import {ErrorToken, Token, TokenStream} from "../../core/lang/lexer/TokenStream";
 import {SrNodeVisitor, SrNodeVisitorImpl} from "../../utils/VisitorUtils";
@@ -36,7 +36,7 @@ export class JSLangPlugin extends EditorPlugin implements LangEventListener {
         SrNodeVisitor.visitAll<JSNodeType, JS>(nodes, new class implements SrNodeVisitorImpl<JSNodeType, JS> {
             visitNodeIdentifier(node: SRNode) {
                 let identifier = node as JSIdentifier;
-                let scope = editor.data.srTree.scoping.getScopeAt(identifier.range.begin);
+                let scope = editor.getOpenedDocument().getSrTree().getScopingModel().getScopeAt(identifier.range.begin);
                 if (!scope) return;
                 let symbol = scope.resolve(identifier.token.value) as JSReference;
                 if (!symbol) {
@@ -44,16 +44,16 @@ export class JSLangPlugin extends EditorPlugin implements LangEventListener {
                     return;
                 }
                 if (symbol.decl.nodeType === JSNodeType.FuncDeclStmt) {
-                    editor.data.edac.add(new HighlightedToken(identifier.token, "js-function-name"))
+                    editor.getComponentManager().add(new HighlightedToken(identifier.token, "js-function-name"))
 
                     let decl = symbol.decl as JSFuncDecl;
-                    editor.data.edac.add(new InlineLink(identifier.token, decl.name!.range.begin));
+                    editor.getComponentManager().add(new InlineLink(identifier.token, decl.name!.range.begin));
                 }
                 if (symbol.decl.nodeType === JSNodeType.DeclStmt) {
-                    editor.data.edac.add(new HighlightedToken(identifier.token, "js-variable-name"))
+                    editor.getComponentManager().add(new HighlightedToken(identifier.token, "js-variable-name"))
 
                     let decl = symbol.decl as JSDeclStmt;
-                    editor.data.edac.add(new InlineLink(identifier.token, decl.name!.range.begin));
+                    editor.getComponentManager().add(new InlineLink(identifier.token, decl.name!.range.begin));
                 }
             }
 

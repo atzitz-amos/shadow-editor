@@ -4,12 +4,15 @@ import {Key} from "../events/keybind";
 import {SelectionDirection} from "../Selection";
 import {Caret} from "../Caret";
 
+import {LogicalPosition} from "../coordinate/LogicalPosition";
+import {CtrlMoveHelper} from "./utils/CtrlMoveHelper";
+
 
 function handleClearSelection(caret: Caret, shouldMove: boolean) {
-    let start = caret.selectionModel.start;
+    let start = caret.selectionModel.startOffset;
     caret.selectionModel.clear();
     if (shouldMove) {
-        caret.moveToLogical(start!);
+        caret.moveToOffset(start!);
     }
 }
 
@@ -25,7 +28,7 @@ export class MoveCaretLeftAction extends AbstractAction {
 
     run(editor: Editor, event: KeyboardEvent) {
         editor.caretModel.forEachCaret(caret => {
-            let selectionDirection = caret.selectionModel.direction;
+            let selectionDirection = caret.selectionModel.getDirection();
             if (!event.shiftKey && selectionDirection !== SelectionDirection.UNKNOWN) {
                 handleClearSelection(caret, selectionDirection === SelectionDirection.RIGHT);
             } else {
@@ -51,7 +54,7 @@ export class MoveCaretRightAction extends AbstractAction {
 
     run(editor: Editor, event: KeyboardEvent) {
         editor.caretModel.forEachCaret(caret => {
-            let selectionDirection = caret.selectionModel.direction;
+            let selectionDirection = caret.selectionModel.getDirection();
             if (!event.shiftKey && selectionDirection !== SelectionDirection.UNKNOWN) {
                 handleClearSelection(caret, selectionDirection === SelectionDirection.LEFT);
             } else {
@@ -77,16 +80,18 @@ export class MoveCaretUpAction extends AbstractAction {
     run(editor: Editor, event: KeyboardEvent) {
         editor.view.resetBlink();
         editor.caretModel.forEachCaret(caret => {
-            if (!event.shiftKey && caret.selectionModel.direction !== SelectionDirection.UNKNOWN) {
-                handleClearSelection(caret, caret.selectionModel.direction === SelectionDirection.RIGHT);
+            if (!event.shiftKey && caret.selectionModel.getDirection() !== SelectionDirection.UNKNOWN) {
+                handleClearSelection(caret, caret.selectionModel.getDirection() === SelectionDirection.RIGHT);
             }
 
-            if (caret.position.y === 0) return;
+            let caretPos = caret.getLogical();
+
+            if (caretPos.row === 0) return;
 
             caret.setVertMovementPos();
-            let pos = editor.createLogical(
-                Math.min(editor.getLineLength(caret.position.y - 1), caret.vertMovementPos),
-                caret.position.y - 1
+            let pos = new LogicalPosition(
+                Math.min(editor.getOpenedDocument().getLineLength(caretPos.row - 1), caret.vertMovementPos),
+                caretPos.row - 1
             )
             caret.moveToLogical(pos);
         });
@@ -107,16 +112,18 @@ export class MoveCaretDownAction extends AbstractAction {
     run(editor: Editor, event: KeyboardEvent) {
         editor.view.resetBlink();
         editor.caretModel.forEachCaret(caret => {
-            if (!event.shiftKey && caret.selectionModel.direction !== SelectionDirection.UNKNOWN) {
-                handleClearSelection(caret, caret.selectionModel.direction === SelectionDirection.LEFT);
+            if (!event.shiftKey && caret.selectionModel.getDirection() !== SelectionDirection.UNKNOWN) {
+                handleClearSelection(caret, caret.selectionModel.getDirection() === SelectionDirection.LEFT);
             }
 
-            if (caret.position.y >= editor.getLineCount() - 1) return;
+            let caretPos = caret.getLogical();
+
+            if (caretPos.row >= editor.getLineCount() - 1) return;
 
             caret.setVertMovementPos();
-            let pos = editor.createLogical(
-                Math.min(editor.getLineLength(caret.position.y + 1), caret.vertMovementPos),
-                caret.position.y + 1
+            let pos = new LogicalPosition(
+                Math.min(editor.getOpenedDocument().getLineLength(caretPos.row + 1), caret.vertMovementPos),
+                caretPos.row + 1
             )
             caret.moveToLogical(pos);
         });
@@ -137,7 +144,7 @@ export class MoveCaretToStartAction extends AbstractAction {
         editor.view.resetBlink();
         editor.caretModel.forEachCaret(caret => {
             caret.vertMovementPos = 0;
-            caret.moveToLogical(editor.createLogical(0, caret.position.y));
+            caret.moveToLogical(new LogicalPosition(0, caret.getLogical().row));
         });
     }
 }
@@ -155,12 +162,50 @@ export class MoveCaretToEndAction extends AbstractAction {
     run(editor: Editor, event: KeyboardEvent) {
         editor.view.resetBlink();
         editor.caretModel.forEachCaret(caret => {
-            let lineLength = editor.getLineLength(caret.position.y);
+            let lineLength = editor.getOpenedDocument().getLineLength(caret.getLogical().row);
             caret.vertMovementPos = lineLength;
-            caret.moveToLogical(editor.createLogical(
+            caret.moveToLogical(new LogicalPosition(
                 lineLength,
-                caret.position.y
+                caret.getLogical().row
             ));
+        });
+    }
+}
+
+export class CtrlMoveCaretLeftAction extends AbstractAction {
+    name = 'CtrlMoveCaretLeft';
+    description = 'Move the caret to the beginning of the previous word.';
+
+    keybinding = {
+        key: Key.ARROW_LEFT,
+        ctrl: true,
+        alt: false,
+    };
+
+    run(editor: Editor, event: KeyboardEvent) {
+        editor.view.resetBlink();
+        editor.caretModel.forEachCaret(caret => {
+            const offset = CtrlMoveHelper.getOffsetToPreviousWord(caret.editor.getOpenedDocument(), caret.getOffset(), CtrlMoveHelper.DELIMITER);
+            caret.shift(offset);
+        });
+    }
+}
+
+export class CtrlMoveCaretRightAction extends AbstractAction {
+    name = 'CtrlMoveCaretRight';
+    description = 'Move the caret to the beginning of the next word.';
+
+    keybinding = {
+        key: Key.ARROW_RIGHT,
+        ctrl: true,
+        alt: false,
+    };
+
+    run(editor: Editor, event: KeyboardEvent) {
+        editor.view.resetBlink();
+        editor.caretModel.forEachCaret(caret => {
+            const offset = CtrlMoveHelper.getOffsetToNextWord(caret.editor.getOpenedDocument(), caret.getOffset(), CtrlMoveHelper.DELIMITER);
+            caret.shift(offset);
         });
     }
 }

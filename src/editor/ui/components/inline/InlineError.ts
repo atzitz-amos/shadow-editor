@@ -1,17 +1,12 @@
-import {TextRange} from "../../../core/Position";
-import {InlineComponent} from "./Inline";
-import {Registry} from "../../../core/Registry";
+import {TextRange} from "../../../core/coordinate/TextRange";
 import {MessageBox} from "./popup/MessageBox";
 import {Popup, PopupBuilder} from "./popup/Popup";
 import {Markdown} from "../markdown/Parser"
-import {Editor} from "../../../Editor";
-import {HTMLUtils} from "../../../utils/HTMLUtils";
+import {InlineComponent} from "../../../core/components/InlineComponent";
 
 
-export class InlineError implements InlineComponent, PopupBuilder {
-    id: string;
-
-    element: HTMLElement;
+export class InlineError extends InlineComponent implements PopupBuilder {
+    name = "inline-error";
 
     className = "js-error-marker";
     content: string;
@@ -19,9 +14,9 @@ export class InlineError implements InlineComponent, PopupBuilder {
     range: TextRange;
 
     constructor(range: TextRange, errType: string, errValue: string, errMsg: string) {
-        this.id = Registry.getComponentId("inline-error")
+        super();
 
-        this.range = range;
+        this.range = range.cloneNotTracked();
         this.className += " " + errType;
         this.content = errValue;
         this.msg = errMsg;
@@ -31,20 +26,13 @@ export class InlineError implements InlineComponent, PopupBuilder {
             this.content += ' '.repeat(length);
     }
 
-    onDestroy(editor: Editor): void {
-    }
-
-    onRender(editor: Editor, element: HTMLSpanElement) {
-        this.element = element;
-
-        element.addEventListener("mouseover", e => {
+    onceRendered() {
+        this.view!.addEventListener("mouseover", e => {
             setTimeout(() => {
-                if (HTMLUtils.isInBound(this.element, e.x, e.y, 2))
-                    editor.openPopup(e.x, e.y, Registry.getPopup(this));
+                if (this.view?.isInBound(e.x, e.y, 2)) {
+                    //this.view!.getEditor().openPopup(e.x, e.y, Registry.getPopup(this));
+                }
             }, 800);
-        });
-
-        element.addEventListener("click", () => {
         });
     }
 

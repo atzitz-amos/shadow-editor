@@ -1,4 +1,4 @@
-import {HasRange, TextRange} from "../Position";
+import {HasRange, TextRange} from "../coordinate/TextRange";
 import {SRCodeBlock, SRNode} from "./parser/ast";
 
 export interface ScopeManager {

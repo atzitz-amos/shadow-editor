@@ -12,4 +12,8 @@ export class ProjectFile {
     read() {
         return this.path === '' ? '' : '';
     }
+
+    getContentAsString() {
+        return "";
+    }
 }

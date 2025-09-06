@@ -1,4 +1,4 @@
-import {TextRange} from "../../Position";
+import {TextRange} from "../../coordinate/TextRange";
 import {Token} from "../lexer/TokenStream";
 
 /**

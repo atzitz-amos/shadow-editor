@@ -31,4 +31,8 @@ export class SRTree {
     getContainingNodeAt(at: Offset): SRCodeBlock {
         return this.scoping.getContainingNodeAt(at) || this.code;
     }
+
+    getScopingModel(): ScopeManager {
+        return this.scoping;
+    }
 }

@@ -1,6 +1,6 @@
 import {ILexer} from "../../core/lang/lexer/ILexer";
 import {ErrorToken, LazyTokenStream, Source, Token, TokenStream} from "../../core/lang/lexer/TokenStream";
-import {TextRange} from "../../core/Position";
+import {TextRange} from "../../core/coordinate/TextRange";
 
 export enum JS {
     Keyword = "Keyword",
@@ -102,7 +102,7 @@ export class JSLexer implements ILexer<JS> {
         }
 
         while (true) {
-            if (src.isEmpty()) return new Token(JS.EOF, "", new TextRange(src.index, src.index + 1));
+            if (src.isEmpty()) return new Token(JS.EOF, "", TextRange.tracked(src.index, src.index + 1));
             let char = src.consume() as string;
             if (char === "\n") {
                 return new Token(JS.EOL, "\n", TextRange.around(src.index - 1), true)
@@ -112,16 +112,16 @@ export class JSLexer implements ILexer<JS> {
                 while (!src.isEmpty() && src.seek()! >= '0' && src.seek()! <= '9') {
                     num += src.consume();
                 }
-                return new Token(JS.Number, num, new TextRange(src.index - num.length, src.index));
+                return new Token(JS.Number, num, TextRange.tracked(src.index - num.length, src.index));
             } else if (this.isAlphanumeric(char)) {
                 let identifier = char;
                 while (!src.isEmpty() && (this.isAlphanumeric(src.seek()!) || (src.seek()! >= '0' && src.seek()! <= '9'))) {
                     identifier += src.consume();
                 }
                 if (JSLexer.KEYWORDS.includes(identifier)) {
-                    return new Token(JS.Keyword, identifier, new TextRange(src.index - identifier.length, src.index));
+                    return new Token(JS.Keyword, identifier, TextRange.tracked(src.index - identifier.length, src.index));
                 }
-                return new Token(JS.Identifier, identifier, new TextRange(src.index - identifier.length, src.index));
+                return new Token(JS.Identifier, identifier, TextRange.tracked(src.index - identifier.length, src.index));
             } else if (char === "(") {
                 return new Token(JS.LPAREN, "(", TextRange.around(src.index - 1));
             } else if (char === ")") {
@@ -138,7 +138,7 @@ export class JSLexer implements ILexer<JS> {
                 if (src.seek() === "." && src.seekNext() === ".") {
                     src.consume(); // consume the second dot
                     src.consume(); // consume the third dot
-                    return new Token(JS.Punctuation, "...", new TextRange(src.index - 3, src.index));
+                    return new Token(JS.Punctuation, "...", TextRange.tracked(src.index - 3, src.index));
                 }
                 return new Token(JS.Punctuation, ".", TextRange.around(src.index - 1));
             } else if (char === "," || char === ";" || char === ":") {
@@ -148,35 +148,35 @@ export class JSLexer implements ILexer<JS> {
                     src.consume(); // consume the second '='
                     if (src.seek() === "=") {
                         src.consume(); // consume the third '='
-                        return new Token(JS.CompareOp, "===", new TextRange(src.index - 3, src.index));
+                        return new Token(JS.CompareOp, "===", TextRange.tracked(src.index - 3, src.index));
                     }
-                    return new Token(JS.CompareOp, "==", new TextRange(src.index - 2, src.index));
+                    return new Token(JS.CompareOp, "==", TextRange.tracked(src.index - 2, src.index));
                 } else if (src.seek() === ">") {
                     src.consume(); // consume the '>'
-                    return new Token(JS.Arrow, "=>", new TextRange(src.index - 2, src.index));
+                    return new Token(JS.Arrow, "=>", TextRange.tracked(src.index - 2, src.index));
                 }
                 return new Token(JS.Equals, "=", TextRange.around(src.index - 1));
             } else if (char == "+" || char === "-" || char === "*" || char === "/") {
                 if (src.seek() === "=") {
                     src.consume(); // consume the '='
-                    return new Token(JS.EqualOp, char + "=", new TextRange(src.index - 2, src.index));
+                    return new Token(JS.EqualOp, char + "=", TextRange.tracked(src.index - 2, src.index));
                 } else if (char === src.seek()) {
                     src.consume();
-                    return (char === "+" || char === "-") ? new Token(JS.IncrDecrOp, char + char, new TextRange(src.index - 2, src.index))
+                    return (char === "+" || char === "-") ? new Token(JS.IncrDecrOp, char + char, TextRange.tracked(src.index - 2, src.index))
                         : new Token(JS.Operator, char + char, TextRange.around(src.index - 2));
                 }
                 return new Token(JS.Operator, char, TextRange.around(src.index - 1));
             } else if (char === ">" || char === "<") {
                 if (src.seek() === "=") {
                     src.consume(); // consume the '='
-                    return new Token(JS.CompareOp, char + "=", new TextRange(src.index - 2, src.index));
+                    return new Token(JS.CompareOp, char + "=", TextRange.tracked(src.index - 2, src.index));
                 } else if (src.seek() === char) {
                     src.consume();
                     if (char === ">" && src.seek() === ">") {
                         src.consume(); // consume the third '>'
-                        return new Token(JS.Operator, ">>>", new TextRange(src.index - 3, src.index));
+                        return new Token(JS.Operator, ">>>", TextRange.tracked(src.index - 3, src.index));
                     }
-                    return new Token(JS.Operator, char + char, new TextRange(src.index - 2, src.index));
+                    return new Token(JS.Operator, char + char, TextRange.tracked(src.index - 2, src.index));
                 }
                 return new Token(JS.CompareOp, char, TextRange.around(src.index - 1));
             } else if (char === "|" || char === "&" || char === "?" || char === "^") {
@@ -184,7 +184,7 @@ export class JSLexer implements ILexer<JS> {
                     return new Token(JS.EqualOp, char + "=", TextRange.around(src.index - 2));
                 } else if (src.seek() === char && char !== "^") {
                     src.consume();
-                    return new Token(JS.Operator, char + char, new TextRange(src.index - 2, src.index));
+                    return new Token(JS.Operator, char + char, TextRange.tracked(src.index - 2, src.index));
                 } else if (char !== "?") {
                     return new Token(JS.Operator, char, TextRange.around(src.index - 1));
                 }
@@ -198,10 +198,10 @@ export class JSLexer implements ILexer<JS> {
                 }
                 if (src.seek() === char) {
                     str += src.consume(); // consume the closing quote
-                    return new Token(JS.String, str, new TextRange(src.index - str.length, src.index));
+                    return new Token(JS.String, str, TextRange.tracked(src.index - str.length, src.index));
                 } else {
                     src.followupError = new ErrorToken(JS.SyntaxError, str[str.length - 1], "Unterminated string literal", TextRange.around(src.index - 1));
-                    return new Token(JS.String, str, new TextRange(src.index - str.length, src.index));
+                    return new Token(JS.String, str, TextRange.tracked(src.index - str.length, src.index));
                 }
 
             } else {

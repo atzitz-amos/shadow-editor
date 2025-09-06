@@ -1,8 +1,10 @@
 import {Editor} from "../../Editor";
 import {DeleteAction} from "./DeleteAction";
-import {BackspaceAction} from "./BackspaceAction";
+import {BackspaceAction, CtrlBackspaceAction} from "./BackspaceAction";
 import {AbstractAction} from "./AbstractAction";
 import {
+    CtrlMoveCaretLeftAction,
+    CtrlMoveCaretRightAction,
     MoveCaretDownAction,
     MoveCaretLeftAction,
     MoveCaretRightAction,
@@ -28,9 +30,12 @@ export class Actions {
         this.addAction(new MoveCaretDownAction());
         this.addAction(new MoveCaretToStartAction());
         this.addAction(new MoveCaretToEndAction());
+        this.addAction(new CtrlMoveCaretLeftAction());
+        this.addAction(new CtrlMoveCaretRightAction());
         this.addAction(new DeleteAction());
         this.addAction(new TabAction());
         this.addAction(new BackspaceAction());
+        this.addAction(new CtrlBackspaceAction());
         this.addAction(new SelectAllAction());
         this.addAction(new SelectDoubleClickAction());
     }

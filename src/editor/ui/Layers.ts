@@ -130,8 +130,8 @@ export class CaretLayer extends AbstractLayer {
     update(): void {
         this.view.editor.caretModel.forEachCaret(caret => {
             let caretEl = this.getCaretElement(caret);
-            caretEl.style.top = HTMLUtils.px(caret.position.toVisual().y);
-            caretEl.style.left = HTMLUtils.px(caret.position.toVisual().x);
+            caretEl.style.top = HTMLUtils.px(caret.getXY().y);
+            caretEl.style.left = HTMLUtils.px(caret.getXY().x);
         });
     }
 
@@ -166,11 +166,11 @@ class CaretSelectionElement {
         this.selectionBodyEl.style.display = 'none';
         this.selectionEndEl.style.display = 'none';
 
-        let selection = this.caret.selectionModel;
-        if (selection.isSelectionActive && selection.start && selection.end) {
 
-            let start = selection.start.toVisual()
-            let end = selection.end.toVisual();
+        let selection = this.caret.selectionModel;
+        if (selection.isSelectionActive) {
+            let start = this.view.editor.logicalToXY(selection.getStart());
+            let end = this.view.editor.logicalToXY(selection.getEnd());
 
             let sx = start.x, sy = start.y, ex = end.x, ey = end.y;
             if (sy > ey) {
@@ -255,8 +255,8 @@ export class ActiveLineLayer extends AbstractLayer {
     }
 
     update(): void {
-        let pos: number = this.view.editor.caretModel.primary.position.toVisual().y;
-        this._activeLine.style.top = HTMLUtils.px(pos);
+        let pos = this.view.editor.visualToXY(this.view.editor.getPrimaryCaret().getVisual());
+        this._activeLine.style.top = HTMLUtils.px(pos.y);
     }
 }
 

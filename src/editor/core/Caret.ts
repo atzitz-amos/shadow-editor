@@ -1,76 +1,80 @@
 import {Editor} from "../Editor";
-import {Position, PositionTuple} from "./Position";
 import {SelectionModel} from "./Selection";
+import {LogicalPosition} from "./coordinate/LogicalPosition";
+import {VisualPosition} from "./coordinate/VisualPosition";
 
 
 export class Caret {
     id: number = 0;
 
-    isPrimary: boolean;
-
-    position: Position;
+    caretModel: CaretModel;
     editor: Editor;
+    isPrimary: boolean;
     vertMovementPos: Offset = 0;
-
     selectionModel: SelectionModel;
 
-    constructor(editor: Editor, isPrimary: boolean, position: Position) {
-        this.editor = editor;
+    private myLogical: LogicalPosition;
+    private myVisual: VisualPosition;
+
+    constructor(caretModel: CaretModel, isPrimary: boolean) {
+        this.caretModel = caretModel;
+        this.editor = caretModel.editor;
         this.isPrimary = isPrimary;
-        this.position = position;
+
+        this.myLogical = new LogicalPosition(0, 0);
+        this.myVisual = new VisualPosition(0, 0);
 
         this.selectionModel = new SelectionModel(this);
     }
 
 
-    moveToLogical(x: number, y: number): void;
-    moveToLogical(logical: PositionTuple): void;
-    moveToLogical(pos: number | PositionTuple, y?: number) {
-        let position: Position;
-        if (typeof pos === "number") {
-            position = this.position.createLogical(pos, y as int);
-        } else {
-            position = this.position.createLogical(pos.x, pos.y);
-        }
-        let old = this.position;
-        this.position = position;
-
-        this.onCaretMove(old, position);
+    getSelectionModel(): SelectionModel {
+        return this.selectionModel;
     }
 
-    onCaretMove(old: Position, new_: Position) {
-        this.editor.fire("onCaretMove", this, old, new_);
+    getLogical() {
+        return this.myLogical;
+    }
+
+    getVisual() {
+        return this.myVisual;
+    }
+
+    getOffset() {
+        return this.editor.logicalToOffset(this.myLogical);
+    }
+
+    getXY() {
+        return this.editor.logicalToXY(this.getLogical());
+    }
+
+    setVertMovementPos(): void {
+        this.vertMovementPos = Math.max(this.vertMovementPos, this.myLogical.col);
+    }
+
+    onCaretMove(old: LogicalPosition) {
+        this.editor.fire("onCaretMove", this, old, this.myLogical);
 
         this.selectionModel.onCaretMove();
     }
 
-    moveToAbsolute(x: number, y: number): void;
-    moveToAbsolute(absolute: PositionTuple): void;
-    moveToAbsolute(pos: number | PositionTuple, y?: number) {
-        let position: Position;
-        if (typeof pos === "number") {
-            position = this.position.createAbsolute(pos, y as int);
-        } else {
-            position = this.position.createAbsolute(pos.x, pos.y);
-        }
-        this.setPosition(position)
+    moveToOffset(number: number) {
+        this.moveToLogical(this.editor.offsetToLogical(number));
     }
 
-    setPosition(position: Position) {
-        let old = this.position;
-        this.position = position;
-        this.onCaretMove(old, position);
+    moveToLogical(logical: LogicalPosition): void {
+        let old = this.myLogical;
+
+        this.myLogical = logical;
+        this.myVisual = this.editor.logicalToVisual(logical);
+
+        this.onCaretMove(old);
     }
+
 
     shift(offset: Offset = 1): void {
-        let oldOffset = this.position.offset;
-        this.position.offset += offset;
-        this.onCaretMove(Position.fromOffset(this.editor, oldOffset), this.position);
+        this.moveToOffset(this.getOffset() + offset);
         this.vertMovementPos = 0;
-    }
-
-    setVertMovementPos(): void {
-        this.vertMovementPos = Math.max(this.vertMovementPos, this.position.x);
     }
 
     remove() {
@@ -85,15 +89,17 @@ export class CaretModel {
 
     constructor(editor: Editor) {
         this.editor = editor;
-        this.carets.push(new Caret(editor, true, editor.createLogical(0, 0)));
+        this.carets.push(new Caret(this, true));
     }
 
-    get primary(): Caret {
+    getPrimary(): Caret {
         return this.carets.find(caret => caret.isPrimary)!;
     }
 
-    addCaret(position: Position) {
-        const caret = new Caret(this.editor, false, position);
+    addCaret(position: LogicalPosition) {
+        const caret = new Caret(this, false);
+        // TODO set caret position
+
         this.carets.push(caret);
         return caret;
     }

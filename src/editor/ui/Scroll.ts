@@ -36,3 +36,7 @@ export class Scrolling {
     }
 }
 
+export enum ScrollMode {
+    Smooth,
+    Instant
+}

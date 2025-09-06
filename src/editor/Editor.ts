@@ -3,8 +3,6 @@ import {Project} from "./project/Project";
 import {ProjectFile} from "./project/File";
 import {IPlugin, PluginManager} from "./plugins/Plugins"
 import {EditorProperties} from "./Properties";
-import {EditorData} from "./core/data/data";
-import {RawEditorData} from "./core/data/raw";
 import {
     AbstractVisualEventListener,
     EditorEventListener,
@@ -17,14 +15,12 @@ import {
     ListenerType,
     VisualEventListener
 } from "./core/events/events";
-import {Position, PositionTuple, TextRange} from "./core/Position";
-import {OffsetManager} from "./core/OffsetManager";
+import {TextRange} from "./core/coordinate/TextRange";
 import {Caret, CaretModel} from "./core/Caret";
 import {Key, Keybind, ModifierKeyHolder} from "./core/events/keybind";
 
 import {DefaultLexer} from "./lang/default/Lexer";
 import {HTMLUtils} from "./utils/HTMLUtils";
-import {SRTree} from "./core/lang/parser/SRTree";
 import {ILexer} from "./core/lang/lexer/ILexer";
 import {IParser} from "./core/lang/parser/IParser";
 import {IHighlighter} from "./core/lang/highlighter/IHighlighter";
@@ -33,9 +29,15 @@ import {TokenStream} from "./core/lang/lexer/TokenStream";
 import {SRCodeBlock} from "./core/lang/parser/ast";
 import {IScope} from "./core/lang/Scoping";
 import {Actions} from "./core/actions/Actions";
-import {EDAC} from "./core/data/edac";
 import {InlineError} from "./ui/components/inline/InlineError";
 import {Popup} from "./ui/components/inline/popup/Popup";
+import {Document} from "./core/document/Document";
+import {EditorComponentsManager} from "./core/components/EditorComponentsManager";
+import {InlineComponent} from "./core/components/InlineComponent";
+import {LogicalPosition} from "./core/coordinate/LogicalPosition";
+import {VisualPosition} from "./core/coordinate/VisualPosition";
+import {XYPoint} from "./core/coordinate/XYPoint";
+import {EditorCoordinateMapper} from "./core/coordinate/EditorCoordinateMapper";
 
 export class Editor extends AbstractVisualEventListener {
     static ID = 0;
@@ -49,9 +51,12 @@ export class Editor extends AbstractVisualEventListener {
     view: View;
     root: HTMLElement;
 
-    data: EditorData;
+    document: Document;
+    componentManager: EditorComponentsManager;
+
+    coordinateMapper: EditorCoordinateMapper;
+
     caretModel: CaretModel;
-    offsetManager: OffsetManager;
     eventsManager: EventManager;
 
     actions: Actions;
@@ -79,11 +84,12 @@ export class Editor extends AbstractVisualEventListener {
         this.eventsManager = new EventManager();
         this.eventsManager.addVisualEventListener(this);
 
-        this.data = new EditorData(this, this.file.read());
-        this.data.setLanguage(this.file.type);
+        this.document = new Document(this, this.file);
+        this.componentManager = new EditorComponentsManager(this);
 
         this.view = new View(this);
-        this.offsetManager = new OffsetManager(this.data);
+
+        this.coordinateMapper = new EditorCoordinateMapper(this.view);
 
         this.caretModel = new CaretModel(this);
 
@@ -99,17 +105,12 @@ export class Editor extends AbstractVisualEventListener {
     }
 
     get lang(): string {
-        return this.data.language;
+        return this.document.getLanguage();
     }
 
     attach(element: HTMLElement) {
         // We assume plugins have loaded by now, so we can finally parse the file content
         EditorInstance.with(this, () => {
-            this.data.srTree = new SRTree(
-                this.getParserForFileType(this.data.language),
-                this.getLexerForFileType(this.data.language).asTokenStream(this.data.text)
-            );
-
             this.root = HTMLUtils.createElement('div.editor', element) as HTMLDivElement;
             this.view.onAttached(this, this.root);
 
@@ -123,7 +124,7 @@ export class Editor extends AbstractVisualEventListener {
     }
 
     fireLangEvent<event extends LangEvent>(event: event, ...args: LangEventArgs<event>) {
-        EditorInstance.with(this, () => this.eventsManager.fireLangEvent(this.lang, event, this, ...args));
+        this.eventsManager.fireLangEvent(this.lang, event, this, ...args);
     }
 
     fireKeybinding(keyboardEvent: KeyboardEvent) {
@@ -160,12 +161,34 @@ export class Editor extends AbstractVisualEventListener {
         this.eventsManager.addKeybindingListener(keybinding, listener);
     }
 
+    registerComponentKeybind(component: InlineComponent, keybinding: Keybind, listener: ListenerType) {
+        this.eventsManager.addConditionalEventListener(
+            keybinding,
+            listener,
+            (editor, event) => {
+                return component.getRenderedView()?.isInBound(event.clientX, event.clientY)!;
+            });
+    }
+
     /**
      +--------------------------+
      |           Data           |
      +--------------------------+    */
-    getRawData(): RawEditorData {
-        return this.data.raw;
+    getOpenedDocument(): Document {
+        return this.document;
+    }
+
+    getComponentManager(): EditorComponentsManager {
+        return this.componentManager;
+    }
+
+    getCaretModel() {
+        return this.caretModel;
+    }
+
+    getPrimaryCaret() {
+        return this.caretModel.getPrimary();
+
     }
 
     getLexerForFileType(fileType: string): ILexer<any> {
@@ -182,19 +205,19 @@ export class Editor extends AbstractVisualEventListener {
     }
 
     getCurrentLexer(): ILexer<any> {
-        return this.getLexerForFileType(this.data.language);
+        return this.getLexerForFileType(this.document.getLanguage());
     }
 
     getCurrentHighlighter(): IHighlighter<any> {
-        return this.getHighlighterForFileType(this.data.language);
+        return this.getHighlighterForFileType(this.document.getLanguage());
     }
 
     getCurrentParser(): IParser<any> {
-        return this.getParserForFileType(this.data.language);
+        return this.getParserForFileType(this.document.getLanguage());
     }
 
     parse(scope: IScope, tokens: TokenStream<any>): SRCodeBlock {
-        return this.getCurrentParser().parse(scope, tokens.clone());
+        return this.getCurrentParser().parse(scope, tokens);
     }
 
     /**
@@ -202,76 +225,51 @@ export class Editor extends AbstractVisualEventListener {
      |         Position         |
      +--------------------------+    */
 
-    public offsetToLogical(offset: number): PositionTuple {
+    public offsetToLogical(offset: number): LogicalPosition {
         if (offset < 0) offset = 0;
-        else if (offset > this.data.raw.length()) offset = this.data.raw.length() - 1;
+        else if (offset > this.document.getTotalDocumentLength()) offset = this.document.getTotalDocumentLength() - 1;
 
-        return this.offsetManager.offsetToLogical(offset);
+        return this.coordinateMapper.offsetToLogical(offset);
     }
 
-    public absoluteToOffset(x: number, y: number): Offset {
-        return this.offsetManager.calculateOffset(this.offsetManager.absoluteToLogical(new PositionTuple(x, y)));
+    public offsetToVisual(offset: Offset): VisualPosition {
+        return this.coordinateMapper.offsetToVisual(offset);
     }
 
-    public offsetToAbsolute(offset: Offset): PositionTuple {
-        return this.offsetManager.logicalToAbsolute(this.offsetToLogical(offset));
+    public logicalToOffset(logical: LogicalPosition): Offset {
+        return this.coordinateMapper.logicalToOffset(logical);
     }
 
-    public calculateOffset(logical: PositionTuple): number {
-        return this.offsetManager.calculateOffset(logical);
+    public logicalToVisual(logical: LogicalPosition): VisualPosition {
+        return this.coordinateMapper.logicalToVisual(logical);
     }
 
-    /**
-     * Convert page XY to logical coords. The XY coords must be relative to the layers div on the page.
-     * @returns The logical position */
-    public visualToNearestLogical(x: number, y: number): PositionTuple {
-        const charSize = this.view.getCharSize();
-        const lineHeight = this.view.getLineHeight();
-
-        const scrollXChars = this.view.scroll.scrollXOffset === 0 ? this.view.scroll.scrollXChars : this.view.scroll.scrollXChars - 1;
-        const scrollYLines = this.view.scroll.scrollYOffset === 0 ? this.view.scroll.scrollYLines : this.view.scroll.scrollYLines - 1;
-
-        const logicalX = Math.round((x + this.view.scroll.scrollXOffset) / charSize) + scrollXChars;
-        const logicalY = Math.floor((y + this.view.scroll.scrollYOffset) / lineHeight) + scrollYLines;
-
-        return new PositionTuple(logicalX, logicalY);
+    public visualToOffset(visual: VisualPosition): Offset {
+        return this.coordinateMapper.visualToOffset(visual);
     }
 
-    public logicalToVisual(logical: PositionTuple): PositionTuple {
-        const charSize = this.view.getCharSize();
-        const lineHeight = this.view.getLineHeight();
-
-        const scrollYLines = this.view.scroll.scrollYOffset === 0 ? this.view.scroll.scrollYLines : this.view.scroll.scrollYLines - 1;
-
-        const visualX = (logical.x - this.view.scroll.scrollXChars) * charSize - this.view.scroll.scrollXOffset;
-        const visualY = (logical.y - scrollYLines) * lineHeight - this.view.scroll.scrollYOffset;
-
-        return new PositionTuple(visualX, visualY);
+    public visualToLogical(visual: VisualPosition): LogicalPosition {
+        return this.coordinateMapper.visualToLogical(visual);
     }
 
-    createLogical(x: number, y: number) {
-        return Position.fromLogical(this, x, y);
+    public logicalToXY(pos: LogicalPosition): XYPoint {
+        return this.coordinateMapper.logicalToXY(pos);
     }
 
-    createAbsolutePosition(x: number, y: number) {
-        return Position.fromAbsolute(this, x, y);
+    public visualToXY(pos: VisualPosition): XYPoint {
+        return this.coordinateMapper.visualToXY(pos);
     }
 
-    createPositionFromOffset(offset: number) {
-        return Position.fromOffset(this, offset);
+    public xyToNearestVisual(x: number, y: number): VisualPosition {
+        return this.coordinateMapper.xyToNearestVisual(new XYPoint(x, y));
     }
-
-    createVisualPosition(x: number, y: number) {
-        return Position.fromVisual(this, x, y);
-    }
-
 
     getFullRange() {
-        return new TextRange(0, this.data.raw.length());
+        return TextRange.tracked(0, this.document.getTotalDocumentLength());
     }
 
     isValidOffset(offset: Offset): boolean {
-        return offset >= 0 && offset <= this.data.raw.length();
+        return offset >= 0 && offset <= this.document.getTotalDocumentLength();
     }
 
     /**
@@ -281,13 +279,15 @@ export class Editor extends AbstractVisualEventListener {
 
     moveCursorToMouseEvent(event: MouseEvent) {
         let [x, y] = this.view.getRelativePos(event);
-        let logical = this.visualToNearestLogical(x, y);
+        let visual = this.xyToNearestVisual(x, y);
 
-        if (logical.y < 0) logical.y = 0;
-        else if (logical.y >= this.getLineCount()) logical.y = this.getLineCount() - 1;
+        if (visual.row < 0) visual.row = 0;
+        else if (visual.row >= this.document.getLineCount()) visual.row = this.document.getLineCount() - 1;
+        visual.col = Math.max(0, Math.min(visual.col, this.document.getLineLength(visual.row)));
 
-        logical.x = Math.max(0, Math.min(logical.x, this.getLineLength(logical.y)));
-        this.caretModel.primary.moveToLogical(logical);
+        let logical = this.visualToLogical(visual);
+
+        this.getPrimaryCaret().moveToLogical(logical);
 
         this.view.resetBlink();
     }
@@ -295,11 +295,11 @@ export class Editor extends AbstractVisualEventListener {
     type(char: string) {
         EditorInstance.with(this, () => {
             this.caretModel.forEachCaret(caret => {
-                if (caret.selectionModel.isSelectionActive) {
+                if (caret.getSelectionModel().isSelectionActive) {
                     this.deleteSelection(caret);
                 }
 
-                this.insertText(caret.position.toOffset(), char)
+                this.insertText(caret.getOffset(), char)
                 caret.shift();
                 this.view.resetBlink();
             });
@@ -308,31 +308,27 @@ export class Editor extends AbstractVisualEventListener {
 
     insertText(offset: Offset, text: string) {
         // Insert the text at the specified offset
-        this.data.raw.insert(offset, text);
-
-        // Update the offsets of all ranges in the editor and recompute new line breaks
-        this.offsetManager.offset(offset, text.length);
-        this.offsetManager.recomputeNewLines(offset, text);
+        this.document.insertText(offset, text);
 
         // Get the current lexer and highlighter
         let lexer = this.getCurrentLexer();
         let highlighter = this.getCurrentHighlighter()
 
         // Get the context that should be updated
-        let ctx = this.data.withContext(offset);
+        let ctx = this.document.getAssociatedContext(offset);
         ctx.scope.clear();
 
         // Reparse the context with the new text
         let tokens = lexer.asTokenStream(ctx.text);
-        let nodes = this.parse(ctx.scope, tokens).children;
-        this.data.srTree.patch(
+        let nodes = this.parse(ctx.scope, tokens.clone()).children;
+        this.document.getSrTree().patch(
             ctx.containingNode,
             nodes,
         );
 
         // Perform syntax highlighting on the tokens
         let highlightedTokens = highlighter.highlight(tokens);
-        this.data.setComponentsAtRange(ctx.scope.range, highlightedTokens);
+        this.componentManager.setRange(ctx.scope.range, highlightedTokens);
 
         this.fireLangEvent("onSrLoaded", ctx, nodes, tokens);
 
@@ -340,35 +336,32 @@ export class Editor extends AbstractVisualEventListener {
     }
 
     deleteAt(offset: Offset, n: number = 1) {
-        if (offset < 0 || offset >= this.data.raw.length()) {
+        if (offset < 0 || offset >= this.document.getTotalDocumentLength()) {
             return;
         }
 
         // Delete the character at the specified offset
-        let text = this.data.raw.delete(offset, n);
-
-        // Update the offsets of all ranges in the editor and recompute new line breaks
-        this.offsetManager.recomputeNewLines(offset, text, true);
-        this.offsetManager.offset(offset, -n);
+        this.document.deleteAt(offset, n);
 
         // Get the current lexer and highlighter
         let lexer = this.getCurrentLexer();
         let highlighter = this.getCurrentHighlighter();
 
         // Get the context that should be updated
-        let ctx = this.data.withContext(offset);
+        let ctx = this.document.getAssociatedContext(offset);
+
         ctx.scope.clear();
 
         // Reparse the context with the new text
         let tokens = lexer.asTokenStream(ctx.text);
-        let nodes = this.parse(ctx.scope, tokens).children;
-        this.data.srTree.patch(
+        let nodes = this.parse(ctx.scope, tokens.clone()).children;
+        this.document.getSrTree().patch(
             ctx.containingNode,
             nodes,
         );
 
         // Perform syntax highlighting on the tokens
-        this.data.setComponentsAtRange(ctx.scope.range, highlighter.highlight(tokens.clone()));
+        this.componentManager.setRange(ctx.scope.range, highlighter.highlight(tokens.clone()));
 
         this.fireLangEvent("onSrLoaded", ctx, nodes, tokens);
 
@@ -376,37 +369,18 @@ export class Editor extends AbstractVisualEventListener {
     }
 
     deleteSelection(caret: Caret) {
-        let selection = caret.selectionModel;
+        let selection = caret.getSelectionModel();
         if (!selection.isSelectionActive) return;
 
-        let start = selection.getStart().toOffset();
-        let end = selection.getEnd().toOffset();
+        let start = selection.getStart();
 
-        this.deleteAt(start, end - start);
+        this.deleteAt(this.logicalToOffset(start), selection.getSelectionLength());
 
-        caret.moveToLogical(Position.fromOffset(this, start));
-    }
-
-    take(n: number, from: number): EDAC[] {
-        return this.data.take(n, from, this.offsetManager.lineBreaks);
-    }
-
-    getLine(line: number): EDAC {
-        return this.data.getLine(line, this.offsetManager.lineBreaks);
+        caret.moveToLogical(start);
     }
 
     getLineCount() {
-        return this.offsetManager.lineBreaks.length;
-    }
-
-    getLineLength(line: number) {
-        let start = this.offsetManager.lineBreaks[line];
-        let end = (line + 1 < this.offsetManager.lineBreaks.length) ? (this.offsetManager.lineBreaks[line + 1] - 1) : this.data.raw.length();
-        return end - start;
-    }
-
-    getWordAt(at: Offset, sep: RegExp = /\s/): TextRange {
-        return this.data.getWordAt(at, sep, this.offsetManager);
+        return this.document.getLineCount();
     }
 
     /**
@@ -415,7 +389,7 @@ export class Editor extends AbstractVisualEventListener {
      +-----------------------+    */
 
     addErrorAt(range: TextRange, type: string, value: string, msg: string) {
-        this.data.registerError(new InlineError(range, type, value, msg));
+        this.componentManager.addError(new InlineError(range, type, value, msg));
     }
 
     openPopup(sourceX: number, sourceY: number, popup: Popup) {

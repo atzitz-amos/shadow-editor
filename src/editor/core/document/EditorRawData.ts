@@ -1,5 +1,4 @@
-// Rope Node class
-import {TextRange} from "../Position";
+import {TextRange} from "../coordinate/TextRange";
 
 class RopeNode {
     weight: number;
@@ -33,15 +32,14 @@ class RopeNode {
     }
 }
 
-// Rope class
-export class RawEditorData {
+export class EditorRawData {
     root: RopeNode;
 
     constructor(initialString: string = "") {
         this.root = new RopeNode(initialString);
     }
 
-    concat(rope: RawEditorData): void {
+    concat(rope: EditorRawData): void {
         this.root = new RopeNode(null, this.root, rope.root);
         this.root.weight = this.root.left!.getTotalWeight();
     }
@@ -54,18 +52,18 @@ export class RawEditorData {
         return this._toString(this.root);
     }
 
-    split(index: number): [RawEditorData, RawEditorData] {
+    split(index: number): [EditorRawData, EditorRawData] {
         const [left, right] = this._split(this.root, index);
-        const leftRope = new RawEditorData();
+        const leftRope = new EditorRawData();
         leftRope.root = left;
-        const rightRope = new RawEditorData();
+        const rightRope = new EditorRawData();
         rightRope.root = right;
         return [leftRope, rightRope];
     }
 
     insert(index: number, str: string): void {
         const [left, right] = this.split(index);
-        const middle = new RawEditorData(str);
+        const middle = new EditorRawData(str);
         left.concat(middle);
         left.concat(right);
         this.root = left.root;

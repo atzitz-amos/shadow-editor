@@ -5,33 +5,34 @@ import {AbstractEditorEventListener, AbstractVisualEventListener} from "../core/
 
 import {defaults} from "../Properties";
 import {HTMLUtils} from "../utils/HTMLUtils";
-import {Scrolling} from "./Scroll";
-import {Position} from "../core/Position";
+import {Scrolling, ScrollMode} from "./Scroll";
 import {Caret} from "../core/Caret";
-import {EDAC} from "../core/data/edac";
 import {Popup} from "./components/inline/popup/Popup";
+import {EDAC, EditorComponentsRenderer} from "../core/components/EditorComponentsRenderer";
+import {LogicalPosition} from "../core/coordinate/LogicalPosition";
+import {VisualPosition} from "../core/coordinate/VisualPosition";
+import {EditorScrollBar} from "./scrollbar/ScrollBar";
 
 
-function _sizer(view) {
+function _sizer(view: View) {
     let sizer = HTMLUtils.createElement("div.editor-sizer", view.view);
     sizer.innerHTML = "a";
 
     return () => sizer.getBoundingClientRect().width;
 }
 
-export enum ScrollMode {
-    Smooth,
-    Instant
-}
-
 export class View {
     editor: Editor;
+
+    componentRenderer: EditorComponentsRenderer;
 
     view: HTMLDivElement;
 
     scroll: Scrolling;
+
     gutter: Gutter;
     layers: Layers;
+    scrollBar: EditorScrollBar;
 
     // Properties
     getCharSize: () => number;
@@ -50,6 +51,7 @@ export class View {
 
     constructor(editor: Editor) {
         this.editor = editor;
+        this.componentRenderer = editor.getComponentManager().getRenderer();
 
         this.editor.addVisualEventListener(new class extends AbstractVisualEventListener {
             onBlur(editor: Editor, event: FocusEvent): void {
@@ -75,15 +77,12 @@ export class View {
 
             onScroll(editor: Editor, event: WheelEvent) {
                 event.preventDefault();
-                let deltaY = event.deltaY;
-                if (deltaY !== 0) {
-                    editor.view.scrollBy(0, deltaY);
-                }
+                editor.view.scrollBy(event.deltaX, event.deltaY);
                 editor.view.resetBlink();
             }
         });
         this.editor.addEditorEventListener(new class extends AbstractEditorEventListener {
-            onCaretMove(editor: Editor, caret: Caret, oldPos: Position, newPos: Position) {
+            onCaretMove(editor: Editor, caret: Caret, oldPos: LogicalPosition, newPos: LogicalPosition) {
                 editor.view.ensureCaretVisible();
             }
         });
@@ -98,8 +97,10 @@ export class View {
         this.view = HTMLUtils.createElement('div.editor-view', root) as HTMLDivElement;
 
         this.scroll = new Scrolling(this, 0, 0);
+
         this.gutter = new Gutter(this);
         this.layers = new Layers(this);
+        this.scrollBar = new EditorScrollBar(this);
 
         this.initCSS();
 
@@ -107,6 +108,7 @@ export class View {
 
         this.gutter.init();
         this.layers.init();
+        this.scrollBar.render();
     }
 
     public setCSSProperties(element: HTMLElement, properties: Record<string, string>) {
@@ -116,17 +118,21 @@ export class View {
     }
 
     /**
-     +-------------------------+
-     |          Logic          |
-     +-------------------------+    */
-
-    /**
      * Force focus the editor */
     focus(): void {
         this.layers.caret.focus();
     }
 
     scrollBy(deltaX: number, deltaY: number) {
+        let newDeltaX = this.scroll.scrollX + deltaX / 2;
+        if (newDeltaX < 0) {
+            this.scroll.scrollX = 0;
+        } else if (newDeltaX > (this.editor.getOpenedDocument().getMaxLengthLine() - this.visualCharCount + 2) * this.getCharSize()) {
+            this.scroll.scrollX = Math.max(0, (this.editor.getOpenedDocument().getMaxLengthLine() - this.visualCharCount + 2) * this.getCharSize());
+        } else {
+            this.scroll.scrollX = newDeltaX;
+        }
+
         let newDeltaY = this.scroll.scrollY + deltaY;
         if (newDeltaY < 0) {
             this.scroll.scrollY = 0;
@@ -139,9 +145,12 @@ export class View {
         this.triggerRepaint();
     }
 
-    scrollIntoView(position: Position, mode: ScrollMode) {
-        // let scrollX = this.scrollIntoViewAlong(position.x, this.scroll.scrollXChars)
-        let scrollY = this.scrollIntoViewAlong(position.y, this.scroll.scrollYLines, this.scroll.scrollYLines + this.visualLineCount - 1);
+    scrollIntoView(position: LogicalPosition, mode: ScrollMode) {
+        let scrollX = this.scrollIntoViewAlong(position.col, this.scroll.scrollXChars, this.scroll.scrollXChars + this.visualCharCount - 1);
+        let scrollY = this.scrollIntoViewAlong(position.row, this.scroll.scrollYLines, this.scroll.scrollYLines + this.visualLineCount - 1);
+        if (scrollX !== null) {
+            this.scroll.scrollX = scrollX * this.getCharSize();
+        }
         if (scrollY !== null) {
             this.scroll.scrollY = scrollY * this.getLineHeight();
         }
@@ -150,12 +159,23 @@ export class View {
     }
 
     ensureCaretVisible() {
-        if (this.offScreen(this.editor.caretModel.primary.position))
-            this.scrollIntoView(this.editor.caretModel.primary.position, ScrollMode.Smooth);
+        if (this.offScreen(this.editor.getPrimaryCaret().getVisual()))
+            this.scrollIntoView(this.editor.getPrimaryCaret().getLogical(), ScrollMode.Smooth);
     }
 
-    animateScroll(position: Position) {
+    /**
+     +-------------------------+
+     |          Logic          |
+     +-------------------------+    */
 
+    getMaxHeight() {
+        const lineCount = Math.max(this.editor.getLineCount() + 2, this.visualLineCount);
+        return lineCount * this.getLineHeight();
+    }
+
+    getMaxWidth() {
+        const maxLineLength = Math.max(this.editor.getOpenedDocument().getMaxLengthLine(), this.visualCharCount);
+        return maxLineLength * this.getCharSize();
     }
 
     getRelativePos(event: MouseEvent) {
@@ -177,27 +197,27 @@ export class View {
 
     repaint() {
         let scrollLines = this.scroll.scrollYLines;
-
         let scrollOffset = this.scroll.scrollYOffset;
 
-        let data = this.lines = this.editor.take(this.visualLineCount, scrollLines);
+        let data = this.lines = this.componentRenderer.renderNLines(scrollLines, this.visualLineCount);
+
         for (let i = 0; i < this.visualLineCount; i++) {
             this.layers.text.renderLine(i, data[i].content);
             this.gutter.renderLine(i, data[i].gutter);
         }
 
-        this.gutter.digits = Math.floor(Math.log10(this.editor.getLineCount())) + 1
+        this.gutter.nDigits = Math.floor(Math.log10(this.editor.getLineCount())) + 1
 
         if (scrollOffset) {
             if (scrollLines > 0) {
-                let line = this.editor.getLine(scrollLines - 1);
+                let line = this.componentRenderer.renderLine(scrollLines - 1);
                 this.layers.text.renderEdgeLine(0, line.content);
                 this.gutter.renderEdgeLine(0, line.gutter);
 
                 this.lines.unshift(line);
             }
             if (scrollLines + this.visualLineCount < this.editor.getLineCount()) {
-                let line = this.editor.getLine(scrollLines + this.visualLineCount);
+                let line = this.componentRenderer.renderLine(scrollLines + this.visualLineCount);
 
                 this.layers.text.renderEdgeLine(1, line.content);
                 this.gutter.renderEdgeLine(1, line.gutter);
@@ -206,6 +226,7 @@ export class View {
             }
         }
         this.setCSSProperties(this.view, {"--editor-scroll-offsetY": HTMLUtils.px(scrollOffset || this.getLineHeight())});
+        this.setCSSProperties(this.view, {"--editor-scroll-x": HTMLUtils.px(this.scroll.scrollX)});
     }
 
     triggerRepaint() {
@@ -215,6 +236,7 @@ export class View {
     update() {
         this.gutter.update();
         this.layers.update();
+        this.scrollBar.update();
     }
 
     destroy() {
@@ -271,8 +293,8 @@ export class View {
         this.layers.caret.blinkReset();
     }
 
-    offScreen(pos: Position): boolean {
-        let visual = pos.toVisual();
+    offScreen(pos: VisualPosition): boolean {
+        let visual = this.editor.visualToXY(pos);
         return visual.x < 0 || visual.x >= this.getViewWidth() || visual.y < 0 || visual.y >= this.getViewHeight();
     }
 
@@ -334,7 +356,7 @@ export class View {
         this.getViewWidth = () => P.width!;
         this.getViewHeight = () => P.height!;
         this.visualLineCount = Math.floor(P.height! / this.getLineHeight())
-        this.visualCharCount = Math.floor(P.width! / this.getCharSize());
+        setTimeout(() => this.visualCharCount = Math.floor(this.layers.layers_el.getBoundingClientRect().width / this.getCharSize()), 0);
 
         this.setCSSProperties(this.view, {
             '--editor-scroll-offsetY': HTMLUtils.px(this.getLineHeight()),
