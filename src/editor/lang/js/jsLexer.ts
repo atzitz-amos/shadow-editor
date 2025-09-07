@@ -6,7 +6,7 @@ export enum JS {
     Keyword = "Keyword",
     Identifier = "Identifier",
     Number = "Number",
-    String = "String",  // TODO
+    String = "String",
     Punctuation = "Punctuation",
     LPAREN = "LeftParen",
     RPAREN = "RightParen",

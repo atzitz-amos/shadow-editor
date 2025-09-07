@@ -356,7 +356,9 @@ export class View {
         this.getViewWidth = () => P.width!;
         this.getViewHeight = () => P.height!;
         this.visualLineCount = Math.floor(P.height! / this.getLineHeight())
-        setTimeout(() => this.visualCharCount = Math.floor(this.layers.layers_el.getBoundingClientRect().width / this.getCharSize()), 0);
+        setTimeout(() => {
+            this.visualCharCount = Math.floor(this.layers.layers_el.getBoundingClientRect().width / this.getCharSize())
+        }, 100);
 
         this.setCSSProperties(this.view, {
             '--editor-scroll-offsetY': HTMLUtils.px(this.getLineHeight()),

@@ -25,7 +25,7 @@ export class PluginManager {
 
     lexerProviderMap: Map<string, () => ILexer<any>> = new Map();
     highlighterProviderMap: Map<string, () => IHighlighter<any>> = new Map();
-    parserProviderMap: Map<string, () => any> = new Map(); // TODO
+    parserProviderMap: Map<string, () => any> = new Map();
 
     constructor(editorInstance: Editor) {
         this.editor = editorInstance;
