@@ -2,19 +2,24 @@ import {Editor} from "../Editor";
 import {SelectionModel} from "./Selection";
 import {LogicalPosition} from "./coordinate/LogicalPosition";
 import {VisualPosition} from "./coordinate/VisualPosition";
+import {InlayRecord} from "./inlay/InlayManager";
 
 
 export class Caret {
     id: number = 0;
 
-    caretModel: CaretModel;
     editor: Editor;
+    caretModel: CaretModel;
+
     isPrimary: boolean;
-    vertMovementPos: Offset = 0;
+
+    myVertMovementPos: Offset = 0;
+
     selectionModel: SelectionModel;
 
     private myLogical: LogicalPosition;
     private myVisual: VisualPosition;
+    private myCurrentInlaySlot: InlayRecord | null = null;
 
     constructor(caretModel: CaretModel, isPrimary: boolean) {
         this.caretModel = caretModel;
@@ -49,7 +54,7 @@ export class Caret {
     }
 
     setVertMovementPos(): void {
-        this.vertMovementPos = Math.max(this.vertMovementPos, this.myLogical.col);
+        this.myVertMovementPos = Math.max(this.myVertMovementPos, this.myLogical.col);
     }
 
     onCaretMove(old: LogicalPosition) {
@@ -58,8 +63,11 @@ export class Caret {
         this.selectionModel.onCaretMove();
     }
 
-    moveToOffset(number: number) {
-        this.moveToLogical(this.editor.offsetToLogical(number));
+    moveToOffset(offset: Offset): void {
+        this.moveToLogical(this.editor.offsetToLogical(offset));
+    }
+
+    moveToInlayAwareOffset(offset: Offset): void {
     }
 
     moveToLogical(logical: LogicalPosition): void {
@@ -68,13 +76,29 @@ export class Caret {
         this.myLogical = logical;
         this.myVisual = this.editor.logicalToVisual(logical);
 
+        this.myCurrentInlaySlot = null;
+
         this.onCaretMove(old);
     }
 
 
-    shift(offset: Offset = 1): void {
-        this.moveToOffset(this.getOffset() + offset);
-        this.vertMovementPos = 0;
+    shiftRight(withInlays: boolean = false): void {
+        if (withInlays) {
+            const inlay = this.editor.getInlayManager().getInlayAt(this.getOffset());
+            if (inlay && this.myCurrentInlaySlot !== null) {
+                this.moveToOffset(this.getOffset() + 1);
+            } else if (inlay) {
+                this.myVisual.col++;
+                this.myCurrentInlaySlot = inlay;
+            }
+        } else {
+            this.moveToOffset(this.getOffset() + 1);
+        }
+        this.myVertMovementPos = 0;
+    }
+
+    shiftLeft(withInlays: boolean = false): void {
+
     }
 
     remove() {
@@ -111,7 +135,7 @@ export class CaretModel {
     }
 
     shift(offset: Offset) {
-        this.forEachCaret(caret => caret.shift(offset));
+        this.forEachCaret(caret => caret.moveToOffset(offset + caret.getOffset()));
     }
 
     removeAll() {

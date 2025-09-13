@@ -38,6 +38,7 @@ import {LogicalPosition} from "./core/coordinate/LogicalPosition";
 import {VisualPosition} from "./core/coordinate/VisualPosition";
 import {XYPoint} from "./core/coordinate/XYPoint";
 import {EditorCoordinateMapper} from "./core/coordinate/EditorCoordinateMapper";
+import {InlayManager} from "./core/inlay/InlayManager";
 
 export class Editor extends AbstractVisualEventListener {
     static ID = 0;
@@ -54,6 +55,7 @@ export class Editor extends AbstractVisualEventListener {
     document: Document;
     componentManager: EditorComponentsManager;
 
+    inlayManager: InlayManager;
     coordinateMapper: EditorCoordinateMapper;
 
     caretModel: CaretModel;
@@ -89,6 +91,7 @@ export class Editor extends AbstractVisualEventListener {
 
         this.view = new View(this);
 
+        this.inlayManager = new InlayManager(this);
         this.coordinateMapper = new EditorCoordinateMapper(this.view);
 
         this.caretModel = new CaretModel(this);
@@ -188,7 +191,6 @@ export class Editor extends AbstractVisualEventListener {
 
     getPrimaryCaret() {
         return this.caretModel.getPrimary();
-
     }
 
     getLexerForFileType(fileType: string): ILexer<any> {
@@ -214,6 +216,10 @@ export class Editor extends AbstractVisualEventListener {
 
     getCurrentParser(): IParser<any> {
         return this.getParserForFileType(this.document.getLanguage());
+    }
+
+    getInlayManager(): InlayManager {
+        return this.inlayManager;
     }
 
     parse(scope: IScope, tokens: TokenStream<any>): SRCodeBlock {
@@ -300,7 +306,7 @@ export class Editor extends AbstractVisualEventListener {
                 }
 
                 this.insertText(caret.getOffset(), char)
-                caret.shift();
+                caret.shiftRight();
                 this.view.resetBlink();
             });
         });

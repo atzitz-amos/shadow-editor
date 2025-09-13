@@ -3,6 +3,7 @@ import {MessageBox} from "./popup/MessageBox";
 import {Popup, PopupBuilder} from "./popup/Popup";
 import {Markdown} from "../markdown/Parser"
 import {InlineComponent} from "../../../core/components/InlineComponent";
+import {Registry} from "../../../core/Registry";
 
 
 export class InlineError extends InlineComponent implements PopupBuilder {
@@ -30,7 +31,7 @@ export class InlineError extends InlineComponent implements PopupBuilder {
         this.view!.addEventListener("mouseover", e => {
             setTimeout(() => {
                 if (this.view?.isInBound(e.x, e.y, 2)) {
-                    //this.view!.getEditor().openPopup(e.x, e.y, Registry.getPopup(this));
+                    this.view!.getEditor().openPopup(e.x, e.y, Registry.getPopup(this));
                 }
             }, 800);
         });

@@ -44,7 +44,7 @@ export class EditorComponentsRenderer {
             };
         } else {
             return {
-                content: this.render(doc.getLine(line).getAssociatedRange()),
+                content: this.render(doc.getLineData(line).getAssociatedRange()),
                 gutter: this.renderGutterComponents(line),
                 line: line
             };

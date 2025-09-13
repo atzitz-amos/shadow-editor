@@ -83,8 +83,17 @@ export class Document {
         return this.data.length();
     }
 
-    public getLine(line: number) {
+    public getLineData(line: number): LineData {
         return this.lines[line];
+    }
+
+    public getLineStart(at: Offset): Offset {
+        for (let i = 0; i < this.lineBreaks.length; i++) {
+            if (this.lineBreaks[i] > at) {
+                return this.lineBreaks[i - 1];
+            }
+        }
+        return this.lineBreaks[this.lineBreaks.length - 1];
     }
 
     public getLineAt(offset: Offset): LineData {

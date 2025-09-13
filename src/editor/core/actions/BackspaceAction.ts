@@ -19,7 +19,7 @@ export class BackspaceAction extends AbstractAction {
         editor.caretModel.forEachCaret(caret => {
             if (caret.getSelectionModel().isSelectionActive) editor.deleteSelection(caret);
             else {
-                caret.shift(-1);
+                caret.shiftLeft();
                 editor.deleteAt(caret.getOffset());
             }
         });
@@ -49,7 +49,7 @@ export class CtrlBackspaceAction extends AbstractAction {
             if (caret.getSelectionModel().isSelectionActive) editor.deleteSelection(caret);
             else {
                 const offset = CtrlMoveHelper.getOffsetToPreviousWord(editor.getOpenedDocument(), caret.getOffset(), CtrlMoveHelper.DELIMITER);
-                caret.shift(offset);
+                caret.moveToOffset(caret.getOffset() + offset);
                 editor.deleteAt(caret.getOffset(), -offset);
             }
 

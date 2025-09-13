@@ -3,12 +3,27 @@ import {Editor} from "../../Editor";
 import {LogicalPosition} from "./LogicalPosition";
 import {VisualPosition} from "./VisualPosition";
 import {XYPoint} from "./XYPoint";
+import {InlayManager} from "../inlay/InlayManager";
 
 export class EditorCoordinateMapper {
     private readonly editor: Editor;
+    private readonly inlayManager: InlayManager;
 
     constructor(private view: View) {
         this.editor = view.editor;
+        this.inlayManager = this.editor.getInlayManager();
+    }
+
+    inlayAwareOffsetToLogical(offset: Offset): LogicalPosition {
+        const inlays = this.inlayManager.getInlays();
+        for (let inlay of inlays) {
+            if (offset > inlay.offset) {
+                offset -= inlay.deltaOffset;
+            } else {
+                break;
+            }
+        }
+        return this.offsetToLogical(offset);
     }
 
     offsetToLogical(offset: Offset): LogicalPosition {
@@ -27,7 +42,7 @@ export class EditorCoordinateMapper {
 
     logicalToOffset(pos: LogicalPosition): Offset {
         const document = this.editor.getOpenedDocument();
-        const line = document.getLine(pos.row);
+        const line = document.getLineData(pos.row);
         return line.getStart() + pos.col;
     }
 
