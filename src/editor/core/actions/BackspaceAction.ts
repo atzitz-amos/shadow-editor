@@ -20,7 +20,8 @@ export class BackspaceAction extends AbstractAction {
             if (caret.getSelectionModel().isSelectionActive) editor.deleteSelection(caret);
             else {
                 caret.shiftLeft();
-                editor.deleteAt(caret.getOffset());
+                if (!caret.isBeforeInlay())
+                    editor.deleteAt(caret.getOffset());
             }
         });
         editor.view.resetBlink();

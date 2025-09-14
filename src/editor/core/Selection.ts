@@ -72,6 +72,14 @@ export class SelectionModel {
         return this.editor.offsetToLogical(start);
     }
 
+    getActualStart(): LogicalPosition {
+        if (!this.isSelectionActive || this.startOffset === null || this.endOffset === null) {
+            return this.caret.getLogical();
+        }
+        let start = Math.min(this.startOffset, this.endOffset);
+        return this.editor.offsetToLogical(start);
+    }
+
     getEndOffset() {
         return this.endOffset;
     }

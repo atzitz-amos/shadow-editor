@@ -1,6 +1,6 @@
 import {AbstractAction} from "./AbstractAction";
 import {Editor} from "../../Editor";
-import {Key} from "../events/keybind";
+import {Key, ModifierKeyHolder} from "../events/keybind";
 import {SelectionDirection} from "../Selection";
 import {Caret} from "../Caret";
 
@@ -32,7 +32,7 @@ export class MoveCaretLeftAction extends AbstractAction {
             if (!event.shiftKey && selectionDirection !== SelectionDirection.UNKNOWN) {
                 handleClearSelection(caret, selectionDirection === SelectionDirection.RIGHT);
             } else {
-                caret.shiftLeft();
+                caret.shiftLeft(!ModifierKeyHolder.isShiftPressed);
             }
         });
 
@@ -58,7 +58,7 @@ export class MoveCaretRightAction extends AbstractAction {
             if (!event.shiftKey && selectionDirection !== SelectionDirection.UNKNOWN) {
                 handleClearSelection(caret, selectionDirection === SelectionDirection.LEFT);
             } else {
-                caret.shiftRight();
+                caret.shiftRight(!ModifierKeyHolder.isShiftPressed);
             }
         });
         editor.view.resetBlink();

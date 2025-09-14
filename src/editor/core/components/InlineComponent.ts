@@ -9,7 +9,7 @@ export abstract class InlineComponent implements Component {
     public id: string;
 
     public className: string;
-    public content: string;
+    public content: string | null;
 
     public range: TextRange;
 

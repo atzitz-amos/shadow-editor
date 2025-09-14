@@ -19,7 +19,6 @@ export class Caret {
 
     private myLogical: LogicalPosition;
     private myVisual: VisualPosition;
-    private myCurrentInlaySlot: InlayRecord | null = null;
 
     constructor(caretModel: CaretModel, isPrimary: boolean) {
         this.caretModel = caretModel;
@@ -50,7 +49,7 @@ export class Caret {
     }
 
     getXY() {
-        return this.editor.logicalToXY(this.getLogical());
+        return this.editor.visualToXY(this.getVisual());
     }
 
     setVertMovementPos(): void {
@@ -64,6 +63,11 @@ export class Caret {
     }
 
     moveToOffset(offset: Offset): void {
+        const document = this.editor.getOpenedDocument();
+
+        if (offset < 0) offset = 0;
+        else if (offset > document.getTotalDocumentLength()) offset = document.getTotalDocumentLength();
+
         this.moveToLogical(this.editor.offsetToLogical(offset));
     }
 
@@ -76,33 +80,68 @@ export class Caret {
         this.myLogical = logical;
         this.myVisual = this.editor.logicalToVisual(logical);
 
-        this.myCurrentInlaySlot = null;
-
         this.onCaretMove(old);
     }
 
 
-    shiftRight(withInlays: boolean = false): void {
-        if (withInlays) {
-            const inlay = this.editor.getInlayManager().getInlayAt(this.getOffset());
-            if (inlay && this.myCurrentInlaySlot !== null) {
-                this.moveToOffset(this.getOffset() + 1);
-            } else if (inlay) {
-                this.myVisual.col++;
-                this.myCurrentInlaySlot = inlay;
-            }
-        } else {
-            this.moveToOffset(this.getOffset() + 1);
-        }
-        this.myVertMovementPos = 0;
+    moveToVisual(visual: VisualPosition) {
+        this.myVisual = visual;
+        let old = this.myLogical;
+        this.myLogical = this.editor.visualToLogical(visual);
+
+        this.onCaretMove(old);
     }
 
-    shiftLeft(withInlays: boolean = false): void {
+    shiftRight(withInlays: boolean = true): void {
+        this.myVertMovementPos = 0;
 
+        let currentOffset = this.getOffset();
+
+        if (withInlays) {
+            const document = this.editor.getOpenedDocument();
+            const inlay = this.editor.getInlayManager().getInlayAt(currentOffset)
+            if (currentOffset !== document.getLineEnd(currentOffset) || inlay) {
+                console.log(1);
+                this.myVisual.col++;
+                this.moveToVisual(this.myVisual);
+                return;
+            }
+        }
+        this.moveToOffset(currentOffset + 1);
+    }
+
+    shiftLeft(withInlays: boolean = true): void {
+        this.myVertMovementPos = 0;
+
+        let currentOffset = this.getOffset();
+
+        if (withInlays) {
+            const inlay = this.editor.getInlayManager().getInlayAt(currentOffset - 1)
+            if (currentOffset !== this.editor.getOpenedDocument().getLineStart(currentOffset) || inlay) {
+                this.myVisual.col--;
+                this.moveToVisual(this.myVisual);
+                return;
+            }
+        }
+
+        this.moveToOffset(currentOffset - 1);
     }
 
     remove() {
         this.editor.fire("onCaretRemove", this);
+    }
+
+    refresh() {
+        this.myLogical = this.editor.visualToLogical(this.myVisual);
+    }
+
+    isBeforeInlay() {
+        const inlay = this.editor.getInlayManager().getInlayAt(this.getOffset());
+        if (inlay) {  // We now need to check if we are before or after the inlay
+            if (this.getVisual().col === this.editor.logicalToVisual(this.getLogical()).col) {
+                return true;
+            }
+        }
     }
 }
 

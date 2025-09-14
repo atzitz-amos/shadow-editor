@@ -14,6 +14,10 @@ export class InlayManager {
     }
 
     public addInlay(inlay: InlayRecord) {
+        if (this.inlays.length === 0) {
+            this.inlays.push(inlay);
+            return;
+        }
         for (let i = 0; i < this.inlays.length; i++) {
             if (this.inlays[i].offset === inlay.offset) {
                 this.inlays[i] = inlay;

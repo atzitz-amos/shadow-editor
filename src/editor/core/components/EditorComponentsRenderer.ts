@@ -2,6 +2,7 @@ import {EditorComponentsManager} from "./EditorComponentsManager";
 import {TextRange} from "../coordinate/TextRange";
 import {InlineComponent} from "./InlineComponent";
 import {HTMLViewUtils} from "./view/HTMLViewUtils";
+import {InlayComponent} from "../../ui/components/inline/inlays/InlayComponent";
 
 
 export type EDAC = {
@@ -87,13 +88,26 @@ export class EditorComponentsRenderer {
                     spans.push(span);
                 } else {
                     // Merge classNames from all active components
-                    const mergedClass = active.map(c => c.component.className).join(' ').trim();
+                    let mergedClass = "";
 
                     // Assume we take content from bottommost component (first pushed)
-                    const top = active[0].component;
-                    const relativeStart = Math.max(prevPos, top.range.begin);
-                    const relativeEnd = Math.min(currPos, top.range.end);
-                    const content = top.content.slice(relativeStart - top.range.begin, relativeEnd - top.range.begin);
+                    let content: string = "";
+                    let relativeStart: number, relativeEnd: number;
+                    for (let component of active) {
+                        let top = component.component;
+                        if (top.content != null) {
+                            relativeStart = Math.max(prevPos, top.range.begin);
+                            relativeEnd = Math.min(currPos, top.range.end);
+                            content = top.content.slice(relativeStart - top.range.begin, relativeEnd - top.range.begin);
+                            mergedClass += top.className;
+                        }
+                        if (top instanceof InlayComponent) {
+                            let span = top.getInsertedElement();
+                            spans.push(span);
+                            component.spans?.push(span);
+                        }
+                    }
+
 
                     const span = document.createElement('span');
                     span.className = mergedClass;

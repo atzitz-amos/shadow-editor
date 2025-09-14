@@ -3,6 +3,11 @@
     src: url("res/JetBrainsMono-Light.ttf");
 }
 
+@font-face {
+    font-family: JetBrains_Thin;
+    src: url("res/JetBrainsMonoNL-Thin.ttf");
+}
+
 .editor * {
     font-family: 'JetBrains', 'monospace';
     font-size: var(--editor-font-size);
@@ -140,7 +145,7 @@
 }
 
 .editor .layer-inner {
-    z-index: 10;
+    z-index: 3;
     flex-direction: column;
     color: white;
     background: transparent;
@@ -148,6 +153,7 @@
 
 .editor .layer-caret {
     z-index: 4;
+    pointer-events: none;
 }
 
 .editor .layer-error {
@@ -250,6 +256,22 @@
 
 .editor-ht {
     box-sizing: content-box;
+}
+
+.inlay-hint {
+    display: inline-flex;
+
+    height: 85%;
+    align-items: center;
+    padding: 0 5px 0 4px;
+
+    letter-spacing: 1.2px;
+    font-size: 0.8em;
+
+    background: #353535;
+    color: #8c8c8c;
+    border-radius: 4px;
+
 }
 
 .editor-popup {

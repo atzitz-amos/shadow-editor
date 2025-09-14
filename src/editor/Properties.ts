@@ -35,6 +35,6 @@ export const defaults = {
         gutterColor: '#93969f',
         caretColor: '#ffffff',
         selectionColor: '#214283',
-        activeLineColor: '#2b2e38',
+        activeLineColor: '#26282e',
     }
 }

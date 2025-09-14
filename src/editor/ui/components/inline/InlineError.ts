@@ -10,7 +10,7 @@ export class InlineError extends InlineComponent implements PopupBuilder {
     name = "inline-error";
 
     className = "js-error-marker";
-    content: string;
+    content: string | null = null;
     msg: string;
     range: TextRange;
 
@@ -19,12 +19,7 @@ export class InlineError extends InlineComponent implements PopupBuilder {
 
         this.range = range.cloneNotTracked();
         this.className += " " + errType;
-        this.content = errValue;
         this.msg = errMsg;
-
-        let length = range.end - range.begin - this.content.length;
-        if (length > 0)
-            this.content += ' '.repeat(length);
     }
 
     onceRendered() {

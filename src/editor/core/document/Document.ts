@@ -96,6 +96,15 @@ export class Document {
         return this.lineBreaks[this.lineBreaks.length - 1];
     }
 
+    public getLineEnd(at: Offset) {
+        for (let i = 0; i < this.lineBreaks.length; i++) {
+            if (this.lineBreaks[i] > at) {
+                return this.lineBreaks[i] - 1;
+            }
+        }
+        return this.getTotalDocumentLength();
+    }
+
     public getLineAt(offset: Offset): LineData {
         for (let i = 0; i < this.lineBreaks.length; i++) {
             if (this.lineBreaks[i] > offset) {
