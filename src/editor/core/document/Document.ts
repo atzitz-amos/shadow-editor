@@ -143,6 +143,8 @@ export class Document {
 
         this.recomputeLines(offset, text, false);
         TextRangeManager.getInstance().updateRanges(offset, text.length);
+
+        this.editor.fire('onDocumentModified', this);
     }
 
     public deleteAt(at: Offset, n: number): string {
@@ -150,6 +152,8 @@ export class Document {
 
         this.recomputeLines(at, deleted, true);
         TextRangeManager.getInstance().updateRanges(at, -n);
+
+        this.editor.fire('onDocumentModified', this);
 
         return deleted;
     }

@@ -31,7 +31,7 @@ export class JSLangPlugin extends EditorPlugin implements LangEventListener {
         );
 
         editor.addLangEventListener("js", this);
-    }
+    };
 
     onSrLoaded(editor: Editor, ctx: TextContext, nodes: SRNode[], tokens: TokenStream<JS>) {
         SrNodeVisitor.visitAll<JSNodeType, JS>(nodes, new class implements SrNodeVisitorImpl<JSNodeType, JS> {
@@ -65,7 +65,7 @@ export class JSLangPlugin extends EditorPlugin implements LangEventListener {
 
             visitNodeFuncDeclStmt(node: SRNode) {
                 let decl = node as JSFuncDecl;
-                if (decl.name) {
+                if (decl.name && !decl.name.isError) {
                     editor.addInlay(new InlayHint(decl.name.range.begin, "fn:"))
                 }
             }

@@ -99,6 +99,8 @@ export class EditorComponentsRenderer {
                             relativeStart = Math.max(prevPos, top.range.begin);
                             relativeEnd = Math.min(currPos, top.range.end);
                             content = top.content.slice(relativeStart - top.range.begin, relativeEnd - top.range.begin);
+                        }
+                        if (top.className != null) {
                             mergedClass += top.className;
                         }
                         if (top instanceof InlayComponent) {

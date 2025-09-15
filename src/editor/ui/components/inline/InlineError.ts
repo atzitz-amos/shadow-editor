@@ -10,9 +10,11 @@ export class InlineError extends InlineComponent implements PopupBuilder {
     name = "inline-error";
 
     className = "js-error-marker";
-    content: string | null = null;
+    content = null;
     msg: string;
     range: TextRange;
+
+    private timeoutId: any;
 
     constructor(range: TextRange, errType: string, errValue: string, errMsg: string) {
         super();
@@ -23,12 +25,17 @@ export class InlineError extends InlineComponent implements PopupBuilder {
     }
 
     onceRendered() {
-        this.view!.addEventListener("mouseover", e => {
-            setTimeout(() => {
+        this.view!.addEventListener("mouseenter", e => {
+            this.timeoutId = setTimeout(() => {
                 if (this.view?.isInBound(e.x, e.y, 2)) {
                     this.view!.getEditor().openPopup(e.x, e.y, Registry.getPopup(this));
                 }
-            }, 800);
+            }, 600);
+        });
+
+        this.view!.addEventListener("mouseleave", e => {
+            if (this.timeoutId)
+                clearTimeout(this.timeoutId);
         });
     }
 

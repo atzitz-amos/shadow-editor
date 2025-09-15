@@ -334,6 +334,7 @@ export class Editor extends AbstractVisualEventListener {
         let highlightedTokens = highlighter.highlight(tokens);
         this.componentManager.setRange(ctx.scope.range, highlightedTokens);
 
+        this.fire('onInsertedText', offset, text);
         this.fireLangEvent("onSrLoaded", ctx, nodes, tokens);
 
         this.view.triggerRepaint();
@@ -345,7 +346,7 @@ export class Editor extends AbstractVisualEventListener {
         }
 
         // Delete the character at the specified offset
-        this.document.deleteAt(offset, n);
+        const deleted = this.document.deleteAt(offset, n);
 
         // Get the current lexer and highlighter
         let lexer = this.getCurrentLexer();
@@ -366,6 +367,7 @@ export class Editor extends AbstractVisualEventListener {
         // Perform syntax highlighting on the tokens
         this.componentManager.setRange(ctx.scope.range, highlighter.highlight(tokens.clone()));
 
+        this.fire('onDeletedText', offset, deleted);
         this.fireLangEvent("onSrLoaded", ctx, nodes, tokens);
 
         this.view.triggerRepaint();
