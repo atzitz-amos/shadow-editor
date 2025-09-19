@@ -101,7 +101,7 @@ export class EditorComponentsRenderer {
                             content = top.content.slice(relativeStart - top.range.begin, relativeEnd - top.range.begin);
                         }
                         if (top.className != null) {
-                            mergedClass += top.className;
+                            mergedClass += " " + top.className;
                         }
                         if (top instanceof InlayComponent) {
                             let span = top.getInsertedElement();
