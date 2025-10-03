@@ -83,8 +83,26 @@ export class Document {
         return this.data.length();
     }
 
-    public getLine(line: number) {
+    public getLineData(line: number): LineData {
         return this.lines[line];
+    }
+
+    public getLineStart(at: Offset): Offset {
+        for (let i = 0; i < this.lineBreaks.length; i++) {
+            if (this.lineBreaks[i] > at) {
+                return this.lineBreaks[i - 1];
+            }
+        }
+        return this.lineBreaks[this.lineBreaks.length - 1];
+    }
+
+    public getLineEnd(at: Offset) {
+        for (let i = 0; i < this.lineBreaks.length; i++) {
+            if (this.lineBreaks[i] > at) {
+                return this.lineBreaks[i] - 1;
+            }
+        }
+        return this.getTotalDocumentLength();
     }
 
     public getLineAt(offset: Offset): LineData {
@@ -125,6 +143,8 @@ export class Document {
 
         this.recomputeLines(offset, text, false);
         TextRangeManager.getInstance().updateRanges(offset, text.length);
+
+        this.editor.fire('onDocumentModified', this);
     }
 
     public deleteAt(at: Offset, n: number): string {
@@ -132,6 +152,8 @@ export class Document {
 
         this.recomputeLines(at, deleted, true);
         TextRangeManager.getInstance().updateRanges(at, -n);
+
+        this.editor.fire('onDocumentModified', this);
 
         return deleted;
     }

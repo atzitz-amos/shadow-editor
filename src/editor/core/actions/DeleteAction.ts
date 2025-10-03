@@ -16,7 +16,8 @@ export class DeleteAction extends AbstractAction {
     run(editor: Editor, event: KeyboardEvent): void {
         editor.caretModel.forEachCaret(caret => {
             if (caret.selectionModel.isSelectionActive) editor.deleteSelection(caret);
-            else editor.deleteAt(caret.getOffset());
+            else if (!caret.isBeforeInlay()) editor.deleteAt(caret.getOffset());
+            else caret.shiftRight();
         });
         editor.view.resetBlink();
     }

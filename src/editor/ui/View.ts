@@ -12,6 +12,7 @@ import {EDAC, EditorComponentsRenderer} from "../core/components/EditorComponent
 import {LogicalPosition} from "../core/coordinate/LogicalPosition";
 import {VisualPosition} from "../core/coordinate/VisualPosition";
 import {EditorScrollBar} from "./scrollbar/ScrollBar";
+import {Document} from "../core/document/Document";
 
 
 function _sizer(view: View) {
@@ -84,6 +85,12 @@ export class View {
         this.editor.addEditorEventListener(new class extends AbstractEditorEventListener {
             onCaretMove(editor: Editor, caret: Caret, oldPos: LogicalPosition, newPos: LogicalPosition) {
                 editor.view.ensureCaretVisible();
+            }
+
+            onDocumentModified(editor: Editor, document: Document) {
+                for (let popup of editor.view.popups) {
+                    popup.close();
+                }
             }
         });
     }

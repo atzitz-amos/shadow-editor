@@ -129,9 +129,11 @@ export class CaretLayer extends AbstractLayer {
 
     update(): void {
         this.view.editor.caretModel.forEachCaret(caret => {
-            let caretEl = this.getCaretElement(caret);
-            caretEl.style.top = HTMLUtils.px(caret.getXY().y);
-            caretEl.style.left = HTMLUtils.px(caret.getXY().x);
+            const caretEl = this.getCaretElement(caret);
+            const xy = caret.getXY();
+
+            caretEl.style.top = HTMLUtils.px(xy.y);
+            caretEl.style.left = HTMLUtils.px(xy.x);
         });
     }
 

@@ -12,6 +12,7 @@ import {JSDeclStmt, JSFuncDecl, JSIdentifier, JSNodeType} from "./jsNodes";
 import {JSReference} from "./jsScope";
 import {HighlightedToken} from "../../core/lang/highlighter/HighlightedToken";
 import {InlineLink} from "../../ui/components/inline/InlineLink";
+import {InlayHint} from "../../ui/components/inline/inlays/InlayHint";
 
 export class JSLangPlugin extends EditorPlugin implements LangEventListener {
     name = 'js-lang-plugin';
@@ -30,7 +31,7 @@ export class JSLangPlugin extends EditorPlugin implements LangEventListener {
         );
 
         editor.addLangEventListener("js", this);
-    }
+    };
 
     onSrLoaded(editor: Editor, ctx: TextContext, nodes: SRNode[], tokens: TokenStream<JS>) {
         SrNodeVisitor.visitAll<JSNodeType, JS>(nodes, new class implements SrNodeVisitorImpl<JSNodeType, JS> {
@@ -60,6 +61,13 @@ export class JSLangPlugin extends EditorPlugin implements LangEventListener {
             visitTokenSyntaxError(token: Token<JS>): void {
                 let error = token as ErrorToken<JS>;
                 editor.addErrorAt(error.range, "js-syntax-error", error.value, error.msg);
+            }
+
+            visitNodeFuncDeclStmt(node: SRNode) {
+                let decl = node as JSFuncDecl;
+                if (decl.name && !decl.name.isError) {
+                    editor.addInlay(new InlayHint(decl.name.range.begin, "fn:"))
+                }
             }
         });
 

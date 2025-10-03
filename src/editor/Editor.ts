@@ -15,7 +15,7 @@ import {
     ListenerType,
     VisualEventListener
 } from "./core/events/events";
-import {TextRange} from "./core/coordinate/TextRange";
+import {TextContext, TextRange} from "./core/coordinate/TextRange";
 import {Caret, CaretModel} from "./core/Caret";
 import {Key, Keybind, ModifierKeyHolder} from "./core/events/keybind";
 
@@ -38,6 +38,8 @@ import {LogicalPosition} from "./core/coordinate/LogicalPosition";
 import {VisualPosition} from "./core/coordinate/VisualPosition";
 import {XYPoint} from "./core/coordinate/XYPoint";
 import {EditorCoordinateMapper} from "./core/coordinate/EditorCoordinateMapper";
+import {InlayManager} from "./core/inlay/InlayManager";
+import {InlayComponent} from "./ui/components/inline/inlays/InlayComponent";
 
 export class Editor extends AbstractVisualEventListener {
     static ID = 0;
@@ -54,6 +56,7 @@ export class Editor extends AbstractVisualEventListener {
     document: Document;
     componentManager: EditorComponentsManager;
 
+    inlayManager: InlayManager;
     coordinateMapper: EditorCoordinateMapper;
 
     caretModel: CaretModel;
@@ -89,6 +92,7 @@ export class Editor extends AbstractVisualEventListener {
 
         this.view = new View(this);
 
+        this.inlayManager = new InlayManager(this);
         this.coordinateMapper = new EditorCoordinateMapper(this.view);
 
         this.caretModel = new CaretModel(this);
@@ -188,7 +192,6 @@ export class Editor extends AbstractVisualEventListener {
 
     getPrimaryCaret() {
         return this.caretModel.getPrimary();
-
     }
 
     getLexerForFileType(fileType: string): ILexer<any> {
@@ -216,6 +219,10 @@ export class Editor extends AbstractVisualEventListener {
         return this.getParserForFileType(this.document.getLanguage());
     }
 
+    getInlayManager(): InlayManager {
+        return this.inlayManager;
+    }
+
     parse(scope: IScope, tokens: TokenStream<any>): SRCodeBlock {
         return this.getCurrentParser().parse(scope, tokens);
     }
@@ -226,9 +233,6 @@ export class Editor extends AbstractVisualEventListener {
      +--------------------------+    */
 
     public offsetToLogical(offset: number): LogicalPosition {
-        if (offset < 0) offset = 0;
-        else if (offset > this.document.getTotalDocumentLength()) offset = this.document.getTotalDocumentLength() - 1;
-
         return this.coordinateMapper.offsetToLogical(offset);
     }
 
@@ -281,13 +285,7 @@ export class Editor extends AbstractVisualEventListener {
         let [x, y] = this.view.getRelativePos(event);
         let visual = this.xyToNearestVisual(x, y);
 
-        if (visual.row < 0) visual.row = 0;
-        else if (visual.row >= this.document.getLineCount()) visual.row = this.document.getLineCount() - 1;
-        visual.col = Math.max(0, Math.min(visual.col, this.document.getLineLength(visual.row)));
-
-        let logical = this.visualToLogical(visual);
-
-        this.getPrimaryCaret().moveToLogical(logical);
+        this.getPrimaryCaret().moveToVisual(visual);
 
         this.view.resetBlink();
     }
@@ -300,10 +298,16 @@ export class Editor extends AbstractVisualEventListener {
                 }
 
                 this.insertText(caret.getOffset(), char)
-                caret.shift();
+                caret.shiftRight(false);
+                caret.refresh();
                 this.view.resetBlink();
             });
         });
+    }
+
+    invalidate(ctx: TextContext) {
+        ctx.scope.clear();
+        this.inlayManager.clear();
     }
 
     insertText(offset: Offset, text: string) {
@@ -316,7 +320,7 @@ export class Editor extends AbstractVisualEventListener {
 
         // Get the context that should be updated
         let ctx = this.document.getAssociatedContext(offset);
-        ctx.scope.clear();
+        this.invalidate(ctx);
 
         // Reparse the context with the new text
         let tokens = lexer.asTokenStream(ctx.text);
@@ -330,6 +334,7 @@ export class Editor extends AbstractVisualEventListener {
         let highlightedTokens = highlighter.highlight(tokens);
         this.componentManager.setRange(ctx.scope.range, highlightedTokens);
 
+        this.fire('onInsertedText', offset, text);
         this.fireLangEvent("onSrLoaded", ctx, nodes, tokens);
 
         this.view.triggerRepaint();
@@ -341,7 +346,7 @@ export class Editor extends AbstractVisualEventListener {
         }
 
         // Delete the character at the specified offset
-        this.document.deleteAt(offset, n);
+        const deleted = this.document.deleteAt(offset, n);
 
         // Get the current lexer and highlighter
         let lexer = this.getCurrentLexer();
@@ -349,8 +354,7 @@ export class Editor extends AbstractVisualEventListener {
 
         // Get the context that should be updated
         let ctx = this.document.getAssociatedContext(offset);
-
-        ctx.scope.clear();
+        this.invalidate(ctx);
 
         // Reparse the context with the new text
         let tokens = lexer.asTokenStream(ctx.text);
@@ -363,6 +367,7 @@ export class Editor extends AbstractVisualEventListener {
         // Perform syntax highlighting on the tokens
         this.componentManager.setRange(ctx.scope.range, highlighter.highlight(tokens.clone()));
 
+        this.fire('onDeletedText', offset, deleted);
         this.fireLangEvent("onSrLoaded", ctx, nodes, tokens);
 
         this.view.triggerRepaint();
@@ -372,7 +377,7 @@ export class Editor extends AbstractVisualEventListener {
         let selection = caret.getSelectionModel();
         if (!selection.isSelectionActive) return;
 
-        let start = selection.getStart();
+        let start = selection.getActualStart();
 
         this.deleteAt(this.logicalToOffset(start), selection.getSelectionLength());
 
@@ -390,6 +395,12 @@ export class Editor extends AbstractVisualEventListener {
 
     addErrorAt(range: TextRange, type: string, value: string, msg: string) {
         this.componentManager.addError(new InlineError(range, type, value, msg));
+    }
+
+    addInlay(element: InlayComponent) {
+        this.inlayManager.addInlay(element.toInlayRecord(this.view));
+        this.componentManager.add(element);
+        this.view.triggerRepaint();
     }
 
     openPopup(sourceX: number, sourceY: number, popup: Popup) {

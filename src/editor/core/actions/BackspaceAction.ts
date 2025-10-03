@@ -19,8 +19,9 @@ export class BackspaceAction extends AbstractAction {
         editor.caretModel.forEachCaret(caret => {
             if (caret.getSelectionModel().isSelectionActive) editor.deleteSelection(caret);
             else {
-                caret.shift(-1);
-                editor.deleteAt(caret.getOffset());
+                caret.shiftLeft();
+                if (!caret.isBeforeInlay())
+                    editor.deleteAt(caret.getOffset());
             }
         });
         editor.view.resetBlink();
@@ -49,7 +50,7 @@ export class CtrlBackspaceAction extends AbstractAction {
             if (caret.getSelectionModel().isSelectionActive) editor.deleteSelection(caret);
             else {
                 const offset = CtrlMoveHelper.getOffsetToPreviousWord(editor.getOpenedDocument(), caret.getOffset(), CtrlMoveHelper.DELIMITER);
-                caret.shift(offset);
+                caret.moveToOffset(caret.getOffset() + offset);
                 editor.deleteAt(caret.getOffset(), -offset);
             }
 

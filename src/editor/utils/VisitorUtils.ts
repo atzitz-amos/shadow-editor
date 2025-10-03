@@ -6,11 +6,11 @@ export type VisitorImpl<T extends string, R = void> = {
 };
 
 export type SrNodeVisitorImpl_1<NT extends string, R = void> = {
-    [key in NT as `visitNode${key}`]?: (node: SRNode) => R;
+    [key in NT as `visitNode${key}`]?: <J extends SRNode> (node: J) => R;
 };
 
 export type SrNodeVisitorImpl_2<TT extends string, R = void> = {
-    [key in TT as `visitToken${key}`]?: (token: Token<TT>) => R;
+    [key in TT as `visitToken${key}`]?: <J extends Token<TT>>(token: J) => R;
 };
 
 export type SrNodeVisitorImpl<NT extends string, TT extends string, R = void> =

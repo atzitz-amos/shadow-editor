@@ -6,6 +6,7 @@ import {TextContext} from "../coordinate/TextRange";
 import {SRNode} from "../lang/parser/ast";
 import {TokenStream} from "../lang/lexer/TokenStream";
 import {LogicalPosition} from "../coordinate/LogicalPosition";
+import {Document} from "../document/Document";
 
 export interface VisualEventListener {
     onAttached(editor: Editor, root: HTMLElement): void;
@@ -32,6 +33,12 @@ export interface VisualEventListener {
 }
 
 export interface EditorEventListener {
+    onInsertedText(editor: Editor, offset: Offset, text: string): void;
+
+    onDeletedText(editor: Editor, offset: Offset, text: string): void;
+
+    onDocumentModified(editor: Editor, document: Document): void;
+
     onCaretMove(editor: Editor, caret: Caret, oldPos: LogicalPosition, newPos: LogicalPosition): void;
 
     onCaretRemove(editor: Editor, caret: Caret): void;
@@ -83,6 +90,15 @@ export abstract class AbstractVisualEventListener implements VisualEventListener
 }
 
 export abstract class AbstractEditorEventListener implements EditorEventListener {
+    onDeletedText(editor: Editor, offset: Offset, text: string): void {
+    }
+
+    onDocumentModified(editor: Editor, document: Document): void {
+    }
+
+    onInsertedText(editor: Editor, offset: Offset, text: string): void {
+    }
+
     onSrLoaded(editor: Editor, ctx: TextContext, nodes: SRNode[], tokens: TokenStream<any>): void {
     }
 
@@ -101,54 +117,6 @@ export abstract class AbstractPluginEventListener implements PluginEventListener
 export interface GeneralEventListener extends VisualEventListener, EditorEventListener, PluginEventListener {
 }
 
-export abstract class AbstractGeneralEventListener implements GeneralEventListener {
-    onSrLoaded(editor: Editor, ctx: TextContext, nodes: SRNode[], tokens: TokenStream<any>): void {
-    }
-
-    onAttached(editor: Editor, root: HTMLElement): void {
-    }
-
-    onRender(editor: Editor): void {
-    }
-
-    onInput(editor: Editor, event: InputEvent): void {
-    }
-
-    onKeyDown(editor: Editor, event: KeyboardEvent): void {
-    }
-
-    onKeyUp(editor: Editor, event: KeyboardEvent): void {
-    }
-
-    onMouseDown(editor: Editor, event: MouseEvent): void {
-    }
-
-    onMouseMove(editor: Editor, event: MouseEvent): void {
-    }
-
-    onMouseUp(editor: Editor, event: MouseEvent): void {
-    }
-
-    onScroll(editor: Editor, event: WheelEvent): void {
-    }
-
-    onFocus(editor: Editor, event: FocusEvent): void {
-    }
-
-    onBlur(editor: Editor, event: FocusEvent): void {
-    }
-
-    onCaretMove(editor: Editor, caret: Caret, oldPos: LogicalPosition, newPos: LogicalPosition): void {
-    }
-
-    onCaretRemove(editor: Editor, caret: Caret): void {
-    }
-
-    onRegistered(editor: Editor, pluginManager: PluginManager): void {
-    }
-}
-
-
 export type VisualEvent = keyof VisualEventListener;
 
 export type EditorEvent = keyof EditorEventListener;
@@ -161,7 +129,6 @@ export type GeneralEvent = keyof GeneralEventListener;
 
 export type ListenerType = (...args: any[]) => void;
 
-type Tail<T extends any[]> = T extends [any, ...infer R] ? R : never;
 export type EventArgs<T extends GeneralEvent> = Tail<Parameters<GeneralEventListener[T]>>;
 export type LangEventArgs<T extends LangEvent> = Tail<Parameters<LangEventListener[T]>>;
 

@@ -20,6 +20,8 @@
             import {EditorInstance} from "./src/editor/EditorInstance";
             import {TextRange} from "./src/editor/core/coordinate/TextRange";
             import {HighlightedToken} from "./src/editor/core/lang/highlighter/HighlightedToken";
+            import {InlayHint} from "./src/editor/ui/components/inline/inlays/InlayHint";
+            import {InlayUtils} from "./src/editor/utils/InlayUtils";
 
             const editor = new Editor();
 
@@ -34,7 +36,8 @@
             window.HighlightedToken = HighlightedToken;
             window.p = x => console.log(JSParsingUtils.toHumanReadableString(parser.parse(null, js.asTokenStream(x))))
             window.parser = new JSParser();
-
+            window.InlayHint = InlayHint;
+            window.InlayUtils = InlayUtils;
         </script>
     </body>
 </html>

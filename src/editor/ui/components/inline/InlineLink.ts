@@ -62,14 +62,15 @@ export class InlineLink extends InlineComponent {
     }
 
     onEnter() {
+        console.log();
         if (ModifierKeyHolder.isCtrlPressed) {
-            this.element?.classList.add("js-link-hover")
+            this.view?.addClass("js-link-hover")
         } else {
-            this.element?.classList.remove("js-link-hover");
+            this.view?.removeClass("js-link-hover");
         }
     }
 
     onLeave() {
-        this.element?.classList.remove("js-link-hover");
+        this.view?.removeClass("js-link-hover");
     }
 }
