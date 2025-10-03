@@ -13,31 +13,46 @@
         <div class="editor-c2"></div>
         <script type="module">
             import {Editor} from './src/editor/Editor.ts';
-            import {JSLangPlugin} from './src/editor/lang/js/jsLang.ts';
-            import {JSLexer} from "./src/editor/lang/js/jsLexer";
-            import {JSParser} from "./src/editor/lang/js/jsParser";
-            import {JSParsingUtils} from "./src/editor/lang/js/jsUtils";
             import {EditorInstance} from "./src/editor/EditorInstance";
             import {TextRange} from "./src/editor/core/coordinate/TextRange";
-            import {HighlightedToken} from "./src/editor/core/lang/highlighter/HighlightedToken";
             import {InlayHint} from "./src/editor/ui/components/inline/inlays/InlayHint";
             import {InlayUtils} from "./src/editor/utils/InlayUtils";
+            import {SerializationUtils} from "./src/editor/core/serializable/SerializationUtils";
+            import {JsLexicalGrammar} from "./src/plugins/jsLang/lang/lexer/JsLexicalGrammar";
+            import {RegExpLexer} from "./src/editor/lang/lexer/RegExprLexer";
+            import {ASTBuilder} from "./src/editor/lang/ast/builder/ASTBuilder";
+            import {JsGrammar} from "./src/plugins/jsLang/lang/parser/JsGrammar";
+            import {JsParser} from "./src/plugins/jsLang/lang/parser/JsParser";
+            import {PluginLoader} from "./src/editor/plugins/loader/PluginLoader";
 
             const editor = new Editor();
 
-            editor.registerPlugin(new JSLangPlugin());
             editor.attach(document.querySelector('.editor-c'));
 
             window.editor = editor;
             window.EditorInstance = EditorInstance;
-            window.js = new JSLexer();
-            window.JSParsingUtils = JSParsingUtils;
             window.TextRange = TextRange;
-            window.HighlightedToken = HighlightedToken;
-            window.p = x => console.log(JSParsingUtils.toHumanReadableString(parser.parse(null, js.asTokenStream(x))))
-            window.parser = new JSParser();
             window.InlayHint = InlayHint;
             window.InlayUtils = InlayUtils;
+            window.SerializationUtils = SerializationUtils;
+
+            window.JsGr = JsLexicalGrammar;
+            window.RegLex = RegExpLexer;
+            window.JsLex = new RegLex(JsGr);
+
+            window.builder = ASTBuilder;
+
+            window.JsAst = JsGrammar;
+
+            window.Parser = JsParser;
+            window.p = s => {
+                const b = new builder(JsLex.asTokenStream(s));
+                new Parser(b).parse();
+                return b.production;
+            }
+
+            new PluginLoader(null).loadAll();
+
         </script>
     </body>
 </html>

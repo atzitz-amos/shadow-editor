@@ -1,4 +1,4 @@
-import {TokenStream} from "../lexer/TokenStream";
+import {TokenStream} from "../../../lang/tokens/TokenStream";
 import {SRCodeBlock} from "./ast";
 import {IScope, ScopeManager} from "../Scoping";
 
@@ -10,7 +10,7 @@ export interface IParser<T> {
      * @param input The input string to parse.
      * @returns The root node of the AST.
      */
-    parse(scope: IScope, input: TokenStream<T>): SRCodeBlock;
+    parse(scope: IScope, input: TokenStream): SRCodeBlock;
 
     createScopeManager(): ScopeManager;
 }

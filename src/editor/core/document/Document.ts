@@ -1,4 +1,4 @@
-import {ProjectFile} from "../../project/File";
+import {ProjectFile} from "../project/File";
 import {Editor} from "../../Editor";
 import {EditorRawData} from "./EditorRawData";
 import {LineData} from "./LineData";
@@ -161,7 +161,7 @@ export class Document {
     public getAssociatedContext(at: Offset): TextContext {
         let scope = this.srTree.scoping.toplevel(); // TODO: this.srTree.scoping.getScopeAt(at);
         return {
-            begin: scope.range.begin,
+            begin: scope.range.start,
             end: scope.range.end,
             text: this.data.getTextInRange(scope.range),
             scope: scope,

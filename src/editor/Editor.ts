@@ -1,7 +1,6 @@
 import {View} from "./ui/View";
-import {Project} from "./project/Project";
-import {ProjectFile} from "./project/File";
-import {IPlugin, PluginManager} from "./plugins/Plugins"
+import {Project} from "./core/project/Project";
+import {ProjectFile} from "./core/project/File";
 import {EditorProperties} from "./Properties";
 import {
     AbstractVisualEventListener,
@@ -19,16 +18,14 @@ import {TextContext, TextRange} from "./core/coordinate/TextRange";
 import {Caret, CaretModel} from "./core/Caret";
 import {Key, Keybind, ModifierKeyHolder} from "./core/events/keybind";
 
-import {DefaultLexer} from "./lang/default/Lexer";
 import {HTMLUtils} from "./utils/HTMLUtils";
-import {ILexer} from "./core/lang/lexer/ILexer";
 import {IParser} from "./core/lang/parser/IParser";
 import {IHighlighter} from "./core/lang/highlighter/IHighlighter";
 import {EditorInstance} from "./EditorInstance";
-import {TokenStream} from "./core/lang/lexer/TokenStream";
+import {TokenStream} from "./lang/tokens/TokenStream";
 import {SRCodeBlock} from "./core/lang/parser/ast";
 import {IScope} from "./core/lang/Scoping";
-import {Actions} from "./core/actions/Actions";
+import {ActionManager} from "./actions/ActionManager";
 import {InlineError} from "./ui/components/inline/InlineError";
 import {Popup} from "./ui/components/inline/popup/Popup";
 import {Document} from "./core/document/Document";
@@ -40,6 +37,11 @@ import {XYPoint} from "./core/coordinate/XYPoint";
 import {EditorCoordinateMapper} from "./core/coordinate/EditorCoordinateMapper";
 import {InlayManager} from "./core/inlay/InlayManager";
 import {InlayComponent} from "./ui/components/inline/inlays/InlayComponent";
+import {ProcessManager} from "./core/processors/ProcessManager";
+import {ILexer} from "./lang/lexer/ILexer";
+import {RegExpLexer} from "./lang/lexer/RegExprLexer";
+import {JsLexicalGrammar} from "../plugins/jsLang/lang/lexer/JsLexicalGrammar";
+import {PluginManager} from "./plugins/PluginManager";
 
 export class Editor extends AbstractVisualEventListener {
     static ID = 0;
@@ -60,15 +62,14 @@ export class Editor extends AbstractVisualEventListener {
     coordinateMapper: EditorCoordinateMapper;
 
     caretModel: CaretModel;
+
+    processManager: ProcessManager;
     eventsManager: EventManager;
 
-    actions: Actions;
+    actionManager: ActionManager;
     plugins: PluginManager;
 
     perfCheckRunning: boolean = false;
-
-    private readonly defaultLexer = new DefaultLexer();
-    private readonly defaultHighlighter;  // TODO
 
     private renderingProcess: any;
 
@@ -97,7 +98,9 @@ export class Editor extends AbstractVisualEventListener {
 
         this.caretModel = new CaretModel(this);
 
-        this.actions = new Actions(this);
+        this.processManager = new ProcessManager();
+
+        this.actionManager = new ActionManager(this);
         this.plugins = new PluginManager(this);
 
         this.renderingProcess = setInterval(() => {
@@ -186,36 +189,45 @@ export class Editor extends AbstractVisualEventListener {
         return this.componentManager;
     }
 
-    getCaretModel() {
+    getActionManager(): ActionManager {
+        return this.actionManager;
+    }
+
+    getCaretModel(): CaretModel {
         return this.caretModel;
     }
 
-    getPrimaryCaret() {
+    getPrimaryCaret(): Caret {
         return this.caretModel.getPrimary();
     }
 
-    getLexerForFileType(fileType: string): ILexer<any> {
-        return this.plugins.getLexerForFileType(fileType) || this.defaultLexer;
+    getProcessManager(): ProcessManager {
+        return this.processManager;
     }
 
-    getHighlighterForFileType(fileType: string): IHighlighter<any> {
-        return this.plugins.getHighlighterForFileType(fileType) || this.defaultHighlighter;
+    getLexerForFileType(fileType: string): ILexer {
+        // return this.plugins.getLexerForFileType(fileType);
+        return new RegExpLexer(JsLexicalGrammar);
     }
 
-    getParserForFileType(fileType: string): IParser<any> {
+    getHighlighterForFileType(fileType: string): IHighlighter {
+        return this.plugins.getHighlighterForFileType(fileType);
+    }
+
+    getParserForFileType(fileType: string): IParser {
         // TODO: Default parser
         return this.plugins.getParserForFileType(fileType)!;
     }
 
-    getCurrentLexer(): ILexer<any> {
+    getCurrentLexer(): ILexer {
         return this.getLexerForFileType(this.document.getLanguage());
     }
 
-    getCurrentHighlighter(): IHighlighter<any> {
+    getCurrentHighlighter(): IHighlighter {
         return this.getHighlighterForFileType(this.document.getLanguage());
     }
 
-    getCurrentParser(): IParser<any> {
+    getCurrentParser(): IParser {
         return this.getParserForFileType(this.document.getLanguage());
     }
 
@@ -223,7 +235,7 @@ export class Editor extends AbstractVisualEventListener {
         return this.inlayManager;
     }
 
-    parse(scope: IScope, tokens: TokenStream<any>): SRCodeBlock {
+    parse(scope: IScope, tokens: TokenStream): SRCodeBlock {
         return this.getCurrentParser().parse(scope, tokens);
     }
 

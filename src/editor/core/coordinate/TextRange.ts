@@ -39,8 +39,8 @@ export class TextRangeManager {
                 this.ranges.delete(range);
                 continue;
             }
-            if (obj.begin > at) {
-                obj.begin += offset;
+            if (obj.start > at) {
+                obj.start += offset;
             }
             if (obj.end >= at) {
                 obj.end += offset;
@@ -55,7 +55,7 @@ export class TextRangeManager {
 export class TextRange {
     isTracked: boolean;
 
-    begin: Offset;
+    start: Offset;
     end: Offset;
 
     constructor(begin: Offset, end: Offset, isTracked: boolean = false) {
@@ -63,7 +63,7 @@ export class TextRange {
             TextRangeManager.getInstance().add(this);
 
         this.isTracked = isTracked;
-        this.begin = begin;
+        this.start = begin;
         this.end = end;
     }
 
@@ -84,7 +84,7 @@ export class TextRange {
             return new TextRange(values[0].range.begin, values[values.length - 1].range.end, true);
         }
         if (end) {
-            return new TextRange(start.range.begin, end.range.end, true);
+            return new TextRange(start.range.start, end.range.end, true);
         }
         return start.range.clone();
     }
@@ -104,12 +104,12 @@ export class TextRange {
     }
 
     moveBy(offset: Offset) {
-        this.begin += offset;
+        this.start += offset;
         this.end += offset;
     }
 
     overlaps(range: TextRange) {
-        return this.begin <= range.end && this.end >= range.begin;
+        return this.start <= range.end && this.end >= range.start;
     }
 
     contains(offset: Offset): boolean ;
@@ -118,17 +118,17 @@ export class TextRange {
 
     contains(value: Offset | TextRange): boolean {
         if (value instanceof TextRange) {
-            return this.begin <= value.begin && this.end >= value.end;
+            return this.start <= value.start && this.end >= value.end;
         }
-        return this.begin <= value && this.end >= value;
+        return this.start <= value && this.end >= value;
     }
 
     clone() {
-        return new TextRange(this.begin, this.end, this.isTracked);
+        return new TextRange(this.start, this.end, this.isTracked);
     }
 
     cloneNotTracked() {
-        return new TextRange(this.begin, this.end, false);
+        return new TextRange(this.start, this.end, false);
     }
 }
 

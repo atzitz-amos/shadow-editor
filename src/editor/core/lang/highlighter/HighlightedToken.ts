@@ -1,6 +1,6 @@
 import {TextRange} from "../../coordinate/TextRange";
-import {Token} from "../lexer/TokenStream";
 import {InlineComponent} from "../../components/InlineComponent";
+import {Token} from "../../../lang/tokens/Token";
 
 export interface IHighlightedToken {
 
@@ -15,11 +15,11 @@ export class HighlightedToken extends InlineComponent implements IHighlightedTok
     className: string;
     content: string;
 
-    constructor(token: Token<any>, className: string) {
+    constructor(token: Token, className: string) {
         super();
 
-        this.content = token.value;
-        this.range = token.range.cloneNotTracked();
+        this.content = token.getRaw();
+        this.range = token.getRange().cloneNotTracked();
         this.className = "editor-ht " + className;
     }
 }

@@ -1,12 +1,12 @@
 import {Editor} from "../../Editor";
-import {PluginManager} from "../../plugins/Plugins";
 import {Key, Keybind} from "./keybind";
 import {Caret} from "../Caret";
 import {TextContext} from "../coordinate/TextRange";
 import {SRNode} from "../lang/parser/ast";
-import {TokenStream} from "../lang/lexer/TokenStream";
+import {TokenStream} from "../../lang/tokens/TokenStream";
 import {LogicalPosition} from "../coordinate/LogicalPosition";
 import {Document} from "../document/Document";
+import {PluginManager} from "../../plugins/PluginManager";
 
 export interface VisualEventListener {
     onAttached(editor: Editor, root: HTMLElement): void;
@@ -43,7 +43,7 @@ export interface EditorEventListener {
 
     onCaretRemove(editor: Editor, caret: Caret): void;
 
-    onSrLoaded(editor: Editor, ctx: TextContext, nodes: SRNode[], tokens: TokenStream<any>): void;
+    onSrLoaded(editor: Editor, ctx: TextContext, nodes: SRNode[], tokens: TokenStream): void;
 }
 
 export interface PluginEventListener {
@@ -51,7 +51,7 @@ export interface PluginEventListener {
 }
 
 export interface LangEventListener {
-    onSrLoaded(editor: Editor, ctx: TextContext, nodes: SRNode[], tokens: TokenStream<any>): void;
+    onSrLoaded(editor: Editor, ctx: TextContext, nodes: SRNode[], tokens: TokenStream): void;
 }
 
 export abstract class AbstractVisualEventListener implements VisualEventListener {
@@ -99,7 +99,7 @@ export abstract class AbstractEditorEventListener implements EditorEventListener
     onInsertedText(editor: Editor, offset: Offset, text: string): void {
     }
 
-    onSrLoaded(editor: Editor, ctx: TextContext, nodes: SRNode[], tokens: TokenStream<any>): void {
+    onSrLoaded(editor: Editor, ctx: TextContext, nodes: SRNode[], tokens: TokenStream): void {
     }
 
     onCaretRemove(editor: Editor, caret: Caret): void {

@@ -1,7 +1,7 @@
 import {ScopeManager} from "../Scoping";
 import {SRCodeBlock, SRNode} from "./ast";
 import {IParser} from "./IParser";
-import {TokenStream} from "../lexer/TokenStream";
+import {TokenStream} from "../../../lang/tokens/TokenStream";
 
 export class SRTree {
     scoping: ScopeManager;

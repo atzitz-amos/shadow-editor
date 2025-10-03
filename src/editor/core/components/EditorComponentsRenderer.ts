@@ -26,7 +26,7 @@ export class EditorComponentsRenderer {
     }
 
     render(range: TextRange) {
-        return this.renderComponents(this.manager.getComponentsForRange(range), range.begin);
+        return this.renderComponents(this.manager.getComponentsForRange(range), range.start);
     }
 
     renderGutterComponents(line: number): HTMLSpanElement[] {
@@ -67,7 +67,7 @@ export class EditorComponentsRenderer {
 
         let events: Event[] = components.flatMap(component => {
             return [
-                {pos: component.range.begin, type: 'start', component, spans: []},
+                {pos: component.range.start, type: 'start', component, spans: []},
                 {pos: component.range.end, type: 'end', component}
             ];
         });
@@ -96,9 +96,9 @@ export class EditorComponentsRenderer {
                     for (let component of active) {
                         let top = component.component;
                         if (top.content != null) {
-                            relativeStart = Math.max(prevPos, top.range.begin);
+                            relativeStart = Math.max(prevPos, top.range.start);
                             relativeEnd = Math.min(currPos, top.range.end);
-                            content = top.content.slice(relativeStart - top.range.begin, relativeEnd - top.range.begin);
+                            content = top.content.slice(relativeStart - top.range.start, relativeEnd - top.range.start);
                         }
                         if (top.className != null) {
                             mergedClass += top.className;

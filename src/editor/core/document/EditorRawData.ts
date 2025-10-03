@@ -92,7 +92,7 @@ export class EditorRawData {
     }
 
     getTextInRange(range: TextRange): string {
-        return this.substring(range.begin, range.end);
+        return this.substring(range.start, range.end);
     }
 
     private _index(node: RopeNode, i: number): string {

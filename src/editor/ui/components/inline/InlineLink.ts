@@ -1,10 +1,10 @@
 import {TextRange} from "../../../core/coordinate/TextRange";
-import {Token} from "../../../core/lang/lexer/TokenStream";
 import {ModifierKeyHolder} from "../../../core/events/keybind";
 import {Editor} from "../../../Editor";
 import {EditorInstance} from "../../../EditorInstance";
 import {AbstractVisualEventListener} from "../../../core/events/events";
 import {InlineComponent} from "../../../core/components/InlineComponent";
+import {Token} from "../../../lang/tokens/Token";
 
 export class InlineLink extends InlineComponent {
     name = "inline-link";
@@ -17,11 +17,11 @@ export class InlineLink extends InlineComponent {
 
     listeners: AbstractVisualEventListener[] = [];
 
-    constructor(token: Token<any>, target: Offset) {
+    constructor(token: Token, target: Offset) {
         super();
 
-        this.content = token.value;
-        this.range = token.range.cloneNotTracked();
+        this.content = token.getRaw();
+        this.range = token.getRange().cloneNotTracked();
 
         this.target = target;
     }

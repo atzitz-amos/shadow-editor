@@ -1,5 +1,5 @@
-import {Process} from "../editor/core/process/Process";
-import {ProcessGateway} from "../editor/core/process/ProcessGateway";
+import {Process} from "../editor/core/processors/Process";
+import {ProcessGateway} from "../editor/core/processors/ProcessGateway";
 
 export class SumProcessor extends Process {
     getLaunchURL(): string {

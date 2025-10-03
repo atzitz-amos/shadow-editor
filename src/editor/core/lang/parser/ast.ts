@@ -1,5 +1,5 @@
 import {TextRange} from "../../coordinate/TextRange";
-import {Token} from "../lexer/TokenStream";
+import {Token} from "../../../lang/tokens/Token";
 
 /**
  * Represents a node in the Abstract Syntax Tree (AST).
@@ -15,7 +15,7 @@ export interface SRNode {
 
     getAllNodeChildren(): SRNode[];
 
-    getNodeContent(): (Token<any> | SRNode)[];
+    getNodeContent(): (Token | SRNode)[];
 }
 
 /**

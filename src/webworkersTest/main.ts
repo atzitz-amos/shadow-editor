@@ -1,6 +1,6 @@
-import {ProcessManager} from "../editor/core/process/ProcessManager";
 import {FloatSumProcessor, SumProcessor} from "./sumProcessor";
-import {ProcessMonitor} from "../editor/core/process/ProcessMonitor";
+import {ProcessMonitor} from "../editor/core/processors/ProcessMonitor";
+import {ProcessManager} from "../editor/core/processors/ProcessManager";
 
 export async function main() {
     const manager = new ProcessManager();

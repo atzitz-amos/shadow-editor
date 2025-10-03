@@ -9,7 +9,7 @@ export abstract class InlayComponent extends InlineComponent {
 
     toInlayRecord(view: View): InlayRecord {
         return {
-            offset: this.range.begin,
+            offset: this.range.start,
             deltaOffset: 1,
             width: InlayUtils.getInlayWidth(view, this)
         }

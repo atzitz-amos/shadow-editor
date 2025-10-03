@@ -75,7 +75,7 @@ export class EditorComponentsManager {
         }
 
         for (let component of this.gutterComponents) {
-            let begin = this.editor.offsetToLogical(range.begin);
+            let begin = this.editor.offsetToLogical(range.start);
             let end = this.editor.offsetToLogical(range.end);
             if (component.line >= begin.row && component.line <= end.row) {
                 component.onDestroy(this.editor);

@@ -1,4 +1,4 @@
-import {Token, TokenStream} from "../core/lang/lexer/TokenStream";
+import {TokenStream} from "../lang/tokens/TokenStream";
 import {SRNode} from "../core/lang/parser/ast";
 
 export type VisitorImpl<T extends string, R = void> = {
