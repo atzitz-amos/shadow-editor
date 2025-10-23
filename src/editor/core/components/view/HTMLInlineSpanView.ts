@@ -44,7 +44,7 @@ export class HTMLInlineSpanView implements HTMLComponentView {
     }
 
     getClientLeft(): number {
-        return this.elements[0].clientLeft;
+        return Math.min(...this.elements.map(x => x.clientLeft))
     }
 
     getInnerHTML(): string {

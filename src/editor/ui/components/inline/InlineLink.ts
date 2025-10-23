@@ -1,10 +1,10 @@
 import {TextRange} from "../../../core/coordinate/TextRange";
-import {Token} from "../../../core/lang/lexer/TokenStream";
-import {ModifierKeyHolder} from "../../../core/events/keybind";
+import {ModifierKeyHolder} from "../../../core/events/Keybind";
 import {Editor} from "../../../Editor";
 import {EditorInstance} from "../../../EditorInstance";
-import {AbstractVisualEventListener} from "../../../core/events/events";
 import {InlineComponent} from "../../../core/components/InlineComponent";
+import {Token} from "../../../lang/tokens/Token";
+import {KeyPressedEvent} from "../../../events/PhysicalEvents";
 
 export class InlineLink extends InlineComponent {
     name = "inline-link";
@@ -15,19 +15,16 @@ export class InlineLink extends InlineComponent {
 
     target: Offset;
 
-    listeners: AbstractVisualEventListener[] = [];
-
-    constructor(token: Token<any>, target: Offset) {
+    constructor(token: Token, target: Offset) {
         super();
 
-        this.content = token.value;
-        this.range = token.range.cloneNotTracked();
+        this.range = token.getRange().cloneNotTracked();
 
         this.target = target;
     }
 
     onDestroy(editor: Editor): void {
-        this.listeners.forEach(listener => editor.removeVisualEventListener(listener));
+        editor.getEventBus().unsubscribe(this, KeyPressedEvent.SUBSCRIBER);
     }
 
     onceRendered(): void {
@@ -49,16 +46,12 @@ export class InlineLink extends InlineComponent {
         view.addEventListener("mouseleave", () => this.onLeave());
 
 
-        let listener = new class extends AbstractVisualEventListener {
-            onKeyUp(editor: Editor, event: KeyboardEvent) {
-                if (event.key === "Control") {
+        view.getEditor().getEventBus().subscribe(this, KeyPressedEvent.SUBSCRIBER, (event: KeyPressedEvent) => {
+                if (event.getEvent().key === "Control") {
                     view.removeClass("js-link-hover");
                 }
             }
-
-        };
-        view.getEditor().addVisualEventListener(listener)
-        this.listeners.push(listener);
+        );
     }
 
     onEnter() {

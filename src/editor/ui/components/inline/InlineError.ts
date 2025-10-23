@@ -10,7 +10,6 @@ export class InlineError extends InlineComponent implements PopupBuilder {
     name = "inline-error";
 
     className = "js-error-marker";
-    content = null;
     msg: string;
     range: TextRange;
 

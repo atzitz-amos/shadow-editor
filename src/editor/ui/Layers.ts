@@ -1,5 +1,5 @@
 import {View} from "./View";
-import {Caret} from "../core/Caret";
+import {Caret} from "../core/caret/Caret";
 import {HTMLUtils} from "../utils/HTMLUtils";
 
 
@@ -97,25 +97,25 @@ export class CaretLayer extends AbstractLayer {
 
     setupEventListeners() {
         this._input.addEventListener('input', (e: any) => {
-            this.view.editor.fire('onInput', e);
+            this.view.onInput(e);
             this.blinkReset();
         });
 
         this._input.addEventListener('keydown', (e: KeyboardEvent) => {
-            this.view.editor.fire('onKeyDown', e);
+            this.view.onKeyDown(e);
         });
 
         this._input.addEventListener('keyup', (e: KeyboardEvent) => {
-            this.view.editor.fire('onKeyUp', e);
+            this.view.onKeyUp(e);
         });
 
         this._input.addEventListener('focus', e => {
-            this.view.editor.fire('onFocus', e);
+            this.view.onFocus(e);
             this.blinkReset();
         });
 
         this._input.addEventListener('blur', e => {
-            this.view.editor.fire('onBlur', e);
+            this.view.onBlur(e);
             this.blinkReset();
         });
     }

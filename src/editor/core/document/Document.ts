@@ -1,17 +1,17 @@
-import {ProjectFile} from "../../project/File";
+import {ProjectFile} from "../project/File";
 import {Editor} from "../../Editor";
-import {EditorRawData} from "./EditorRawData";
+import {EditorRawData} from "./RawData";
 import {LineData} from "./LineData";
-import {SRTree} from "../lang/parser/SRTree";
-import {AbstractVisualEventListener} from "../events/events";
 import {TextContext, TextRange, TextRangeManager} from "../coordinate/TextRange";
+import {LanguageBase} from "../../lang/LanguageBase";
+import {DocumentInsertEvent} from "./events/DocumentInsertEvent";
+import {DocumentModificationEvent} from "./events/DocumentModificationEvent";
+import {DocumentDeleteEvent} from "./events/DocumentDeleteEvent";
 
 /**
  * Represents an opened file in the editor
  * Store the language, the line-breaks, the components and the AST of a file */
 export class Document {
-    private readonly language: string;
-
     private data: EditorRawData;
     private srTree: SRTree;
 
@@ -19,16 +19,12 @@ export class Document {
     private lineBreaks: Offset[] = [];
 
     constructor(private editor: Editor, private file: ProjectFile) {
-        this.language = file.type;
-
         this.data = new EditorRawData(file.getContentAsString());
         this.parseLines();
+    }
 
-        this.editor.addVisualEventListener(new class extends AbstractVisualEventListener {
-            onAttached(editor: Editor, root: HTMLElement) {
-                editor.getOpenedDocument().loadSRTree(editor);
-            }
-        });
+    public getEditor(): Editor {
+        return this.editor;
     }
 
     public getTextContent(): string {
@@ -130,8 +126,8 @@ export class Document {
         return this.lines.length;
     }
 
-    public getLanguage(): string {
-        return this.language;
+    public getLanguage(): LanguageBase | null {
+        return this.file.getLanguage();
     }
 
     public getSrTree(): SRTree {
@@ -144,7 +140,8 @@ export class Document {
         this.recomputeLines(offset, text, false);
         TextRangeManager.getInstance().updateRanges(offset, text.length);
 
-        this.editor.fire('onDocumentModified', this);
+        this.editor.getEventBus().syncPublish(new DocumentModificationEvent(this, new TextRange(offset, offset), text));
+        this.editor.getEventBus().asyncPublish(new DocumentInsertEvent(this, offset, text));
     }
 
     public deleteAt(at: Offset, n: number): string {
@@ -153,27 +150,33 @@ export class Document {
         this.recomputeLines(at, deleted, true);
         TextRangeManager.getInstance().updateRanges(at, -n);
 
-        this.editor.fire('onDocumentModified', this);
+        let affectedRange = new TextRange(at, at + n);
+        this.editor.getEventBus().syncPublish(new DocumentModificationEvent(this, affectedRange, null));
+        this.editor.getEventBus().asyncPublish(new DocumentDeleteEvent(this, affectedRange));
 
         return deleted;
     }
 
     public getAssociatedContext(at: Offset): TextContext {
-        let scope = this.srTree.scoping.toplevel(); // TODO: this.srTree.scoping.getScopeAt(at);
+        // TODO
+        /*let scope = this.srTree.scoping.toplevel(); // TODO: this.srTree.scoping.getScopeAt(at);
         return {
-            begin: scope.range.begin,
+            begin: scope.range.start,
             end: scope.range.end,
             text: this.data.getTextInRange(scope.range),
             scope: scope,
             containingNode: this.srTree.getContainingNodeAt(at)
+        }*/
+        return {
+            begin: 0,
+            end: this.getTotalDocumentLength(),
+            text: this.getTextContent(),
+            scope: null,
+            containingNode: null
         }
     }
 
     private loadSRTree(editor: Editor) {
-        this.srTree = new SRTree(
-            editor.getParserForFileType(this.language),
-            editor.getLexerForFileType(this.language).asTokenStream(this.getTextContent())
-        );
     }
 
     private parseLines(): void {

@@ -1,4 +1,4 @@
-import {Keybind} from "../events/keybind";
+import {Keybind} from "../events/Keybind";
 import {Registry} from "../Registry";
 import {Editor} from "../../Editor";
 
@@ -8,12 +8,12 @@ export abstract class AbstractAction {
     name: string;
     description: string;
 
-    keybinding?: Keybind;
+    defaultKeybinding?: Keybind;
 
     constructor() {
         this.id = Registry.getActionIdFor(this.name);
     }
 
-    abstract run(editor: Editor, event: KeyboardEvent): void;
+    abstract run(editor: Editor, event: KeyboardEvent | MouseEvent): void;
 }
 

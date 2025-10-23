@@ -290,6 +290,15 @@
     user-select: auto;
 }
 
+.highlighted-token {
+    text-underline-offset: 2px;
+    text-decoration-thickness: 1px !important;
+}
+
+.punctuation {
+    transform: translateY(1px);
+}
+
 .md * {
     margin: 0;
     letter-spacing: normal;

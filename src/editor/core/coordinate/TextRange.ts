@@ -1,6 +1,4 @@
 import {EditorInstance} from "../../EditorInstance";
-import {SRNode} from "../lang/parser/ast";
-import {IScope} from "../lang/Scoping";
 
 
 export type HasRange = { range: TextRange };
@@ -39,8 +37,8 @@ export class TextRangeManager {
                 this.ranges.delete(range);
                 continue;
             }
-            if (obj.begin > at) {
-                obj.begin += offset;
+            if (obj.start > at) {
+                obj.start += offset;
             }
             if (obj.end >= at) {
                 obj.end += offset;
@@ -55,15 +53,15 @@ export class TextRangeManager {
 export class TextRange {
     isTracked: boolean;
 
-    begin: Offset;
+    start: Offset;
     end: Offset;
 
     constructor(begin: Offset, end: Offset, isTracked: boolean = false) {
-        if (isTracked)
+        if (false) // TODO: (isTracked)
             TextRangeManager.getInstance().add(this);
 
         this.isTracked = isTracked;
-        this.begin = begin;
+        this.start = begin;
         this.end = end;
     }
 
@@ -81,10 +79,10 @@ export class TextRange {
             } else if (values.length == 0) {
                 return new TextRange(0, 0);
             }
-            return new TextRange(values[0].range.begin, values[values.length - 1].range.end, true);
+            return new TextRange(values[0].range.start, values[values.length - 1].range.end, true);
         }
         if (end) {
-            return new TextRange(start.range.begin, end.range.end, true);
+            return new TextRange(start.range.start, end.range.end, true);
         }
         return start.range.clone();
     }
@@ -104,12 +102,12 @@ export class TextRange {
     }
 
     moveBy(offset: Offset) {
-        this.begin += offset;
+        this.start += offset;
         this.end += offset;
     }
 
-    overlaps(range: TextRange) {
-        return this.begin <= range.end && this.end >= range.begin;
+    intersects(range: TextRange) {
+        return this.start <= range.end && this.end >= range.start;
     }
 
     contains(offset: Offset): boolean ;
@@ -118,17 +116,30 @@ export class TextRange {
 
     contains(value: Offset | TextRange): boolean {
         if (value instanceof TextRange) {
-            return this.begin <= value.begin && this.end >= value.end;
+            return this.start <= value.start && this.end >= value.end;
         }
-        return this.begin <= value && this.end >= value;
+        return this.start <= value && this.end >= value;
     }
 
     clone() {
-        return new TextRange(this.begin, this.end, this.isTracked);
+        return new TextRange(this.start, this.end, this.isTracked);
     }
 
     cloneNotTracked() {
-        return new TextRange(this.begin, this.end, false);
+        return new TextRange(this.start, this.end, false);
+    }
+
+    is(range: TextRange) {
+        return this.start === range.start && this.end === range.end;
+    }
+
+    getLength() {
+        return this.end - this.start;
+    }
+
+    delta(offset: Offset) {
+        this.start += offset;
+        this.end += offset;
     }
 }
 
@@ -137,6 +148,4 @@ export type TextContext = {
     begin: Offset;
     end: Offset;
     text: string;
-    scope: IScope;
-    containingNode: SRNode;
 };

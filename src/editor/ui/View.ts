@@ -1,18 +1,15 @@
 import {Editor} from "../Editor";
 import {Layers} from "./Layers";
 import {Gutter} from "./gutter/Gutter";
-import {AbstractEditorEventListener, AbstractVisualEventListener} from "../core/events/events";
-
 import {defaults} from "../Properties";
 import {HTMLUtils} from "../utils/HTMLUtils";
 import {Scrolling, ScrollMode} from "./Scroll";
-import {Caret} from "../core/Caret";
 import {Popup} from "./components/inline/popup/Popup";
-import {EDAC, EditorComponentsRenderer} from "../core/components/EditorComponentsRenderer";
+import {RenderedLineData, ComponentsRenderer} from "../core/components/ComponentsRenderer";
 import {LogicalPosition} from "../core/coordinate/LogicalPosition";
 import {VisualPosition} from "../core/coordinate/VisualPosition";
 import {EditorScrollBar} from "./scrollbar/ScrollBar";
-import {Document} from "../core/document/Document";
+import {CaretMovedEvent} from "../core/caret/events/CaretMovedEvent";
 
 
 function _sizer(view: View) {
@@ -25,7 +22,7 @@ function _sizer(view: View) {
 export class View {
     editor: Editor;
 
-    componentRenderer: EditorComponentsRenderer;
+    componentRenderer: ComponentsRenderer;
 
     view: HTMLDivElement;
 
@@ -46,53 +43,17 @@ export class View {
 
     // Data
     popups: Popup[] = [];
-    lines: EDAC[];
+    lines: RenderedLineData[];
 
     isDirty: boolean = true;
 
     constructor(editor: Editor) {
         this.editor = editor;
-        this.componentRenderer = editor.getComponentManager().getRenderer();
+        this.componentRenderer = editor.getComponentsManager().getRenderer();
 
-        this.editor.addVisualEventListener(new class extends AbstractVisualEventListener {
-            onBlur(editor: Editor, event: FocusEvent): void {
-                editor.root.classList.remove('focused');
-            }
-
-            onFocus(editor: Editor, event: FocusEvent): void {
-                editor.root.classList.add('focused');
-            }
-
-            onMouseDown(editor: Editor, event: MouseEvent) {
-                event.preventDefault();
-                editor.view.focus();
-            }
-
-            onMouseMove(editor: Editor, event: MouseEvent) {
-                for (let popup of editor.view.popups) {
-                    if (!popup.isInBound(event.x, event.y)) {
-                        popup.close();
-                    }
-                }
-            }
-
-            onScroll(editor: Editor, event: WheelEvent) {
-                event.preventDefault();
-                editor.view.scrollBy(event.deltaX, event.deltaY);
-                editor.view.resetBlink();
-            }
-        });
-        this.editor.addEditorEventListener(new class extends AbstractEditorEventListener {
-            onCaretMove(editor: Editor, caret: Caret, oldPos: LogicalPosition, newPos: LogicalPosition) {
-                editor.view.ensureCaretVisible();
-            }
-
-            onDocumentModified(editor: Editor, document: Document) {
-                for (let popup of editor.view.popups) {
-                    popup.close();
-                }
-            }
-        });
+        this.editor.getEventBus().subscribe(this, CaretMovedEvent.SUBSCRIBER, () => {
+            this.ensureCaretVisible();
+        })
     }
 
     /**
@@ -305,6 +266,57 @@ export class View {
         return visual.x < 0 || visual.x >= this.getViewWidth() || visual.y < 0 || visual.y >= this.getViewHeight();
     }
 
+    onBlur(event: FocusEvent): void {
+        this.editor.root.classList.remove('focused');
+    }
+
+    onFocus(event: FocusEvent): void {
+        this.editor.root.classList.add('focused');
+    }
+
+    onMouseDown(event: MouseEvent) {
+        event.preventDefault();
+        this.focus();
+
+        this.editor.onMouseDown(event);
+    }
+
+    onMouseUp(event: MouseEvent) {
+        this.editor.onMouseUp(event);
+    }
+
+    onMouseMove(event: MouseEvent) {
+        for (let popup of this.popups) {
+            if (!popup.isInBound(event.x, event.y)) {
+                popup.close();
+            }
+        }
+
+        this.editor.onMouseMove(event);
+    }
+
+    onScroll(event: WheelEvent) {
+        event.preventDefault();
+        this.editor.view.scrollBy(event.deltaX, event.deltaY);
+        this.editor.view.resetBlink();
+    }
+
+    onInput(e: InputEvent) {
+        for (let popup of this.popups) {
+            popup.close();
+        }
+
+        this.editor.onInput(e);
+    }
+
+    onKeyDown(e: KeyboardEvent) {
+        this.editor.onKeyDown(e);
+    }
+
+    onKeyUp(e: KeyboardEvent) {
+        this.editor.onKeyUp(e);
+    }
+
     private scrollIntoViewAlong(position: number, scrollStart: number, scrollEnd: number): number | null {
         if (position > scrollStart && position < scrollEnd) {
             return null;  // Already in view
@@ -322,10 +334,10 @@ export class View {
     /**
      * Setups the event listeners */
     private setupEventListeners() {
-        this.view.addEventListener('mousedown', (e) => this.editor.fire('onMouseDown', e));
-        this.view.addEventListener('mouseup', (e) => this.editor.fire('onMouseUp', e));
-        this.view.addEventListener('mousemove', (e) => this.editor.fire('onMouseMove', e));
-        this.view.addEventListener('wheel', (e) => this.editor.fire('onScroll', e));
+        this.view.addEventListener('mousedown', this.onMouseDown.bind(this));
+        this.view.addEventListener('mouseup', this.onMouseUp.bind(this));
+        this.view.addEventListener('mousemove', this.onMouseMove.bind(this));
+        this.view.addEventListener('wheel', this.onScroll.bind(this));
 
         // Prevent default context menu on right click
         this.view.addEventListener('contextmenu', e => e.preventDefault());

@@ -8,10 +8,9 @@ export abstract class InlineComponent implements Component {
     public abstract name: string;
     public id: string;
 
-    public className: string | null;
-    public content: string | null;
+    public className: string | null = null;
 
-    public range: TextRange;
+    public abstract range: TextRange;
 
     protected view: HTMLComponentView | undefined = undefined;
 
@@ -19,17 +18,22 @@ export abstract class InlineComponent implements Component {
         this.id = Registry.getComponentIDFor(this);
     }
 
-    getRenderedView(): HTMLComponentView | undefined {
-        return this.view;
+    applyStyle(element: HTMLSpanElement) {
+        if (this.className)
+            element.classList.add(this.className);
     }
 
-    onDestroy(editor: Editor): void {
-        this.view = undefined;
+    getRenderedView(): HTMLComponentView | undefined {
+        return this.view;
     }
 
     onRender(view: HTMLComponentView): void {
         this.view = view;
         this.onceRendered();
+    }
+
+    onDestroy(editor: Editor): void {
+        this.view = undefined;
     }
 
     onceRendered(): void {

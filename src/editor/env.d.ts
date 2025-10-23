@@ -5,3 +5,7 @@ type int = number;
 type Offset = number;
 
 type Tail<T extends any[]> = T extends [any, ...infer R] ? R : never;
+
+type Class<T> = { new(...args: any[]): T } & T;
+
+type Constructor<T = any, A extends any[] = any[]> = new (...args: A) => T;

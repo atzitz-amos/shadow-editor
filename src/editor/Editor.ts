@@ -1,47 +1,39 @@
 import {View} from "./ui/View";
-import {Project} from "./project/Project";
-import {ProjectFile} from "./project/File";
-import {IPlugin, PluginManager} from "./plugins/Plugins"
+import {Project} from "./core/project/Project";
+import {ProjectFile} from "./core/project/File";
 import {EditorProperties} from "./Properties";
-import {
-    AbstractVisualEventListener,
-    EditorEventListener,
-    EventArgs,
-    EventManager,
-    GeneralEvent,
-    LangEvent,
-    LangEventArgs,
-    LangEventListener,
-    ListenerType,
-    VisualEventListener
-} from "./core/events/events";
 import {TextContext, TextRange} from "./core/coordinate/TextRange";
-import {Caret, CaretModel} from "./core/Caret";
-import {Key, Keybind, ModifierKeyHolder} from "./core/events/keybind";
+import {Caret, CaretModel} from "./core/caret/Caret";
+import {Key, ModifierKeyHolder} from "./core/events/Keybind";
 
-import {DefaultLexer} from "./lang/default/Lexer";
 import {HTMLUtils} from "./utils/HTMLUtils";
-import {ILexer} from "./core/lang/lexer/ILexer";
-import {IParser} from "./core/lang/parser/IParser";
-import {IHighlighter} from "./core/lang/highlighter/IHighlighter";
 import {EditorInstance} from "./EditorInstance";
-import {TokenStream} from "./core/lang/lexer/TokenStream";
-import {SRCodeBlock} from "./core/lang/parser/ast";
-import {IScope} from "./core/lang/Scoping";
-import {Actions} from "./core/actions/Actions";
+import {TokenStream} from "./lang/tokens/TokenStream";
 import {InlineError} from "./ui/components/inline/InlineError";
 import {Popup} from "./ui/components/inline/popup/Popup";
 import {Document} from "./core/document/Document";
-import {EditorComponentsManager} from "./core/components/EditorComponentsManager";
-import {InlineComponent} from "./core/components/InlineComponent";
+import {ComponentsManager} from "./core/components/ComponentsManager";
 import {LogicalPosition} from "./core/coordinate/LogicalPosition";
 import {VisualPosition} from "./core/coordinate/VisualPosition";
 import {XYPoint} from "./core/coordinate/XYPoint";
 import {EditorCoordinateMapper} from "./core/coordinate/EditorCoordinateMapper";
 import {InlayManager} from "./core/inlay/InlayManager";
 import {InlayComponent} from "./ui/components/inline/inlays/InlayComponent";
+import {ProcessManager} from "./core/processManager/ProcessManager";
+import {PluginManager} from "./plugins/PluginManager";
+import {EditorPlugin} from "./plugins/loader/Plugin";
+import {LanguageBase} from "./lang/LanguageBase";
+import {ASTBuilder} from "./lang/ast/builder/ASTBuilder";
+import JsLang from "../plugins/jsLang/lang/JsLang";
+import {ASTNode} from "./lang/ast/nodes/ASTNode";
+import {LangSupport} from "./core/lang/LangSupport";
+import {LangService} from "./core/lang/LangService";
+import {EventBus} from "./core/events/EventBus";
+import {KeybindManager} from "./core/events/KeybindManager";
+import {EditorAttachedEvent} from "./events/EditorAttachedEvent";
+import {KeyPressedEvent, KeyReleasedEvent, MousePressedEvent, MouseReleasedEvent} from "./events/PhysicalEvents";
 
-export class Editor extends AbstractVisualEventListener {
+export class Editor {
     static ID = 0;
 
     id: number;
@@ -54,41 +46,46 @@ export class Editor extends AbstractVisualEventListener {
     root: HTMLElement;
 
     document: Document;
-    componentManager: EditorComponentsManager;
+    langService: LangService;
+    componentManager: ComponentsManager;
 
     inlayManager: InlayManager;
     coordinateMapper: EditorCoordinateMapper;
 
     caretModel: CaretModel;
-    eventsManager: EventManager;
 
-    actions: Actions;
-    plugins: PluginManager;
+    processManager: ProcessManager;
+    keybindManager: KeybindManager;
+    eventBus: EventBus;
+
+    langSupport: LangSupport;
+    pluginManager: PluginManager;
 
     perfCheckRunning: boolean = false;
-
-    private readonly defaultLexer = new DefaultLexer();
-    private readonly defaultHighlighter;  // TODO
 
     private renderingProcess: any;
 
     constructor(project?: Project | null, options?: EditorProperties) {
-        super();
-
         this.id = Editor.ID++;
 
         this.properties = options || {};
 
-        this.file = this.properties.file || new ProjectFile('temp', '', 'js');
+        this.file = this.properties.file || new ProjectFile('temp.js', '');
         if (project) project.addFile(this.file);
+
+        // TODO
+        this.file.setLanguage(JsLang.class);
 
         this.project = project || Project.singleFileProject(this.file);
 
-        this.eventsManager = new EventManager();
-        this.eventsManager.addVisualEventListener(this);
+        this.eventBus = new EventBus('editor.bus');
+        this.keybindManager = new KeybindManager(this);
 
         this.document = new Document(this, this.file);
-        this.componentManager = new EditorComponentsManager(this);
+        this.langService = new LangService(this);
+        this.componentManager = new ComponentsManager(this);
+
+        this.langService.setCurrentLanguage(JsLang.class);
 
         this.view = new View(this);
 
@@ -97,19 +94,17 @@ export class Editor extends AbstractVisualEventListener {
 
         this.caretModel = new CaretModel(this);
 
-        this.actions = new Actions(this);
-        this.plugins = new PluginManager(this);
+        this.processManager = new ProcessManager();
+
+        this.langSupport = new LangSupport();
+        this.pluginManager = new PluginManager(this);
+        this.pluginManager.loadAll();
 
         this.renderingProcess = setInterval(() => {
             EditorInstance.with(this, () => {
                 this.view.render();
             });
         }, 20);
-
-    }
-
-    get lang(): string {
-        return this.document.getLanguage();
     }
 
     attach(element: HTMLElement) {
@@ -118,113 +113,84 @@ export class Editor extends AbstractVisualEventListener {
             this.root = HTMLUtils.createElement('div.editor', element) as HTMLDivElement;
             this.view.onAttached(this, this.root);
 
-            this.fire('onAttached', this.root);
+            this.eventBus.syncPublish(new EditorAttachedEvent(this, this.root));
         });
 
     }
 
-    fire<event extends GeneralEvent>(event: event, ...args: EventArgs<event>): void {
-        EditorInstance.with(this, () => this.eventsManager.fire(event, this, ...args));
+    enable(plugin: Class<EditorPlugin>) {
+        this.pluginManager.enable(plugin);
     }
 
-    fireLangEvent<event extends LangEvent>(event: event, ...args: LangEventArgs<event>) {
-        this.eventsManager.fireLangEvent(this.lang, event, this, ...args);
-    }
-
-    fireKeybinding(keyboardEvent: KeyboardEvent) {
-        EditorInstance.with(this, () => this.eventsManager.fireKeybinding(keyboardEvent, this));
-    }
-
-    fireMouseKeybinding(mouseEvent: MouseEvent) {
-        EditorInstance.with(this, () => this.eventsManager.fireMouseKeybinding(mouseEvent, this));
-    }
-
-    registerPlugin(plugin: IPlugin) {
-        EditorInstance.with(this, () => {
-            this.plugins.register(plugin);
-        });
-    }
-
-    addVisualEventListener(listener: VisualEventListener) {
-        this.eventsManager.addVisualEventListener(listener);
-    }
-
-    addEditorEventListener(listener: EditorEventListener) {
-        this.eventsManager.addEditorEventListener(listener);
-    }
-
-    addLangEventListener(lang: string, listener: LangEventListener) {
-        this.eventsManager.addLangEventListener(lang, listener);
-    }
-
-    removeVisualEventListener(listener: VisualEventListener) {
-        this.eventsManager.removeVisualEventListener(listener);
-    }
-
-    registerKeybinding(keybinding: Keybind, listener: ListenerType) {
-        this.eventsManager.addKeybindingListener(keybinding, listener);
-    }
-
-    registerComponentKeybind(component: InlineComponent, keybinding: Keybind, listener: ListenerType) {
-        this.eventsManager.addConditionalEventListener(
-            keybinding,
-            listener,
-            (editor, event) => {
-                return component.getRenderedView()?.isInBound(event.clientX, event.clientY)!;
-            });
+    disable(plugin: Class<EditorPlugin>) {
+        this.pluginManager.enable(plugin);
     }
 
     /**
      +--------------------------+
      |           Data           |
      +--------------------------+    */
+    getEventBus(): EventBus {
+        return this.eventBus;
+    }
+
+    getKeybindManager(): KeybindManager {
+        return this.keybindManager;
+    }
+
+    getProject(): Project {
+        return this.project;
+    }
+
+    getOpenedFile(): ProjectFile {
+        return this.file;
+    }
+
     getOpenedDocument(): Document {
         return this.document;
     }
 
-    getComponentManager(): EditorComponentsManager {
+    getCurrentLanguage(): LanguageBase | null {
+        return this.file.getLanguage();
+    }
+
+    getLangSupport() {
+        return this.langSupport;
+    }
+
+    getLangService(): LangService {
+        return this.langService;
+    }
+
+    getComponentsManager(): ComponentsManager {
         return this.componentManager;
     }
 
-    getCaretModel() {
+    getCaretModel(): CaretModel {
         return this.caretModel;
     }
 
-    getPrimaryCaret() {
+    getPrimaryCaret(): Caret {
         return this.caretModel.getPrimary();
     }
 
-    getLexerForFileType(fileType: string): ILexer<any> {
-        return this.plugins.getLexerForFileType(fileType) || this.defaultLexer;
+    getProcessManager(): ProcessManager {
+        return this.processManager;
     }
 
-    getHighlighterForFileType(fileType: string): IHighlighter<any> {
-        return this.plugins.getHighlighterForFileType(fileType) || this.defaultHighlighter;
-    }
-
-    getParserForFileType(fileType: string): IParser<any> {
-        // TODO: Default parser
-        return this.plugins.getParserForFileType(fileType)!;
-    }
-
-    getCurrentLexer(): ILexer<any> {
-        return this.getLexerForFileType(this.document.getLanguage());
-    }
-
-    getCurrentHighlighter(): IHighlighter<any> {
-        return this.getHighlighterForFileType(this.document.getLanguage());
-    }
-
-    getCurrentParser(): IParser<any> {
-        return this.getParserForFileType(this.document.getLanguage());
+    getPluginManager(): PluginManager {
+        return this.pluginManager;
     }
 
     getInlayManager(): InlayManager {
         return this.inlayManager;
     }
 
-    parse(scope: IScope, tokens: TokenStream<any>): SRCodeBlock {
-        return this.getCurrentParser().parse(scope, tokens);
+    parse(stream: TokenStream): ASTNode[] {
+        const builder = new ASTBuilder(stream);
+        const parser = this.langService.makeParser(builder)!;  // TODO: handle no parser
+        parser.parse();
+        return builder.getProduction();
     }
 
     /**
@@ -306,8 +272,9 @@ export class Editor extends AbstractVisualEventListener {
     }
 
     invalidate(ctx: TextContext) {
-        ctx.scope.clear();
-        this.inlayManager.clear();
+        // TODO
+        // ctx.scope.clear();
+        // this.inlayManager.clear();
     }
 
     insertText(offset: Offset, text: string) {
@@ -315,27 +282,31 @@ export class Editor extends AbstractVisualEventListener {
         this.document.insertText(offset, text);
 
         // Get the current lexer and highlighter
-        let lexer = this.getCurrentLexer();
-        let highlighter = this.getCurrentHighlighter()
+        // const lexer = this.langService.getLexer();
+        // const highlighter = this.langService.createHighlighter()
 
         // Get the context that should be updated
         let ctx = this.document.getAssociatedContext(offset);
         this.invalidate(ctx);
 
         // Reparse the context with the new text
-        let tokens = lexer.asTokenStream(ctx.text);
-        let nodes = this.parse(ctx.scope, tokens.clone()).children;
-        this.document.getSrTree().patch(
-            ctx.containingNode,
-            nodes,
-        );
+        // let tokens = lexer.asTokenStream(ctx.text);
+        // let nodes = this.parse(ctx.scope, tokens.clone()).children;
+        // this.document.getSrTree().patch(
+        //     ctx.containingNode,
+        //     nodes,
+        // );
 
         // Perform syntax highlighting on the tokens
-        let highlightedTokens = highlighter.highlight(tokens);
-        this.componentManager.setRange(ctx.scope.range, highlightedTokens);
+        // let highlightedTokens = highlighter.highlightAll(tokens.clone());
+        // this.componentManager.setRange(this.getFullRange(), highlightedTokens);
 
-        this.fire('onInsertedText', offset, text);
-        this.fireLangEvent("onSrLoaded", ctx, nodes, tokens);
+        // this.fire('onHighlightingPerformed', this.getFullRange(), highlightedTokens);
+        //this.fireLangEvent("onSrLoaded", ctx, nodes, tokens);
+
+        // const builder = new ASTBuilder(tokens.clone());
+        // this.createParser(builder).parse();
+        // console.log(builder);
 
         this.view.triggerRepaint();
     }
@@ -349,26 +320,27 @@ export class Editor extends AbstractVisualEventListener {
         const deleted = this.document.deleteAt(offset, n);
 
         // Get the current lexer and highlighter
-        let lexer = this.getCurrentLexer();
-        let highlighter = this.getCurrentHighlighter();
+        // let lexer = this.getCurrentLexer();
+        // let highlighter = this.getIncrementalHighlighter();
 
         // Get the context that should be updated
         let ctx = this.document.getAssociatedContext(offset);
         this.invalidate(ctx);
 
         // Reparse the context with the new text
-        let tokens = lexer.asTokenStream(ctx.text);
-        let nodes = this.parse(ctx.scope, tokens.clone()).children;
-        this.document.getSrTree().patch(
-            ctx.containingNode,
-            nodes,
-        );
+        // let stream = lexer.asTokenStream(ctx.text);
+        // let nodes = this.parse(ctx.scope, tokens.clone()).children;
+        // this.document.getSrTree().patch(
+        //     ctx.containingNode,
+        //     nodes,
+        // );
 
         // Perform syntax highlighting on the tokens
-        this.componentManager.setRange(ctx.scope.range, highlighter.highlight(tokens.clone()));
+        // let highlightedTokens = highlighter.highlightAll(stream.clone());
+        // this.componentManager.setRange(this.getFullRange(), highlightedTokens);
 
-        this.fire('onDeletedText', offset, deleted);
-        this.fireLangEvent("onSrLoaded", ctx, nodes, tokens);
+        // this.fire('onHighlightingPerformed', this.getFullRange(), highlightedTokens);
+        //this.fireLangEvent("onSrLoaded", ctx, nodes, tokens);
 
         this.view.triggerRepaint();
     }
@@ -417,42 +389,49 @@ export class Editor extends AbstractVisualEventListener {
      |      Event Listeners      |
      +---------------------------+    */
 
-    onKeyUp(editor: Editor, event: KeyboardEvent) {
+    onKeyUp(event: KeyboardEvent) {
         ModifierKeyHolder.getInstance().set(event);
+
+        this.eventBus.syncPublish(new KeyReleasedEvent(this, event));
     }
 
-    onKeyDown(editor: Editor, event: KeyboardEvent) {
+    onKeyDown(event: KeyboardEvent) {
         if (event.key === Key.ENTER) {
             ModifierKeyHolder.getInstance().clear();
             return this.type('\n');
         }
         ModifierKeyHolder.getInstance().set(event);
-        this.fireKeybinding(event);
+
+        this.keybindManager.onKeydown(event);
+        this.eventBus.syncPublish(new KeyPressedEvent(this, event));
     }
 
-    onMouseDown(editor: Editor, event: MouseEvent) {
+    onMouseDown(event: MouseEvent) {
         ModifierKeyHolder.getInstance().set(event);
 
         this.caretModel.removeAll();
         this.moveCursorToMouseEvent(event);
 
-        this.fireMouseKeybinding(event);
+        this.keybindManager.onMousedown(event);
+        this.eventBus.syncPublish(new MousePressedEvent(this, event));
     }
 
-    onMouseUp(editor: Editor, event: MouseEvent) {
+    onMouseUp(event: MouseEvent) {
         ModifierKeyHolder.getInstance().set(event);
         ModifierKeyHolder.getInstance().setIsDragging(false);
         ModifierKeyHolder.getInstance().isMouseDown = false;
+
+        this.eventBus.syncPublish(new MouseReleasedEvent(this, event));
     }
 
-    onMouseMove(editor: Editor, event: MouseEvent) {
+    onMouseMove(event: MouseEvent) {
         if (ModifierKeyHolder.isMouseDown) {
             ModifierKeyHolder.getInstance().setIsDragging(true);
             this.moveCursorToMouseEvent(event);
         }
     }
 
-    onInput(editor: Editor, event: InputEvent) {
+    onInput(event: InputEvent) {
         ModifierKeyHolder.getInstance().clear();
         if (event.data) this.type(event.data);
     }

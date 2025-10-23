@@ -1,5 +1,5 @@
-import {ProcessExecutable} from "./ProcessExecutable";
-import {ProcessGatewayMessage} from "./ProcessGatewayMessage";
+import {ProcessExecutable} from "./processors/ProcessExecutable";
+import {ProcessGatewayMessage} from "./processors/ProcessGatewayMessage";
 
 export enum ProcessState {
     RUNNING,
@@ -74,6 +74,5 @@ export class ProcessMonitor {
         } else if (data.cmd === ProcessGatewayMessage.NOTIFY_PROGRESS) {
             this.progressListeners.forEach(listener => listener(data.progress));
         }
-
     }
 }
