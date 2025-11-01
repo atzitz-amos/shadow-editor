@@ -1,5 +1,5 @@
-import {View} from "../../View";
-import {GutterComponent} from "./component";
+import {View} from "../../view/View";
+import {GutterComponent} from "./GutterComponent";
 import {Registry} from "../../../core/Registry";
 import {Editor} from "../../../Editor";
 

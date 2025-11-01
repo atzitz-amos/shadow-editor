@@ -13,9 +13,7 @@
         <script type="module">
             import {Editor} from './src/editor/Editor.ts';
             import {EditorInstance} from "./src/editor/EditorInstance";
-            import {TextRange, TextRangeManager} from "./src/editor/core/coordinate/TextRange";
-            import {InlayHint} from "./src/editor/ui/components/inline/inlays/InlayHint";
-            import {InlayUtils} from "./src/editor/core/inlay/InlayUtils";
+            import {TextRange} from "./src/editor/core/coordinate/TextRange";
             import {SerializationUtils} from "./src/editor/core/serializable/SerializationUtils";
             import {JsLexicalGrammar} from "./src/plugins/jsLang/lang/lexer/JsLexicalGrammar";
             import {RegExpLexer} from "./src/editor/lang/lexer/RegExprLexer";
@@ -31,6 +29,7 @@
             import JsIncrLexer from "./src/plugins/jsLang/lang/lexer/JsIncrLexer";
             import {Source} from "./src/editor/lang/tokens/TokenStream";
             import {DocumentModificationEvent} from "./src/editor/core/document/events/DocumentModificationEvent";
+            import {InlineError} from "./src/editor/ui/inline/error/InlineError";
 
             const editor = new Editor();
             editor.enable(JSLangPlugin.class);
@@ -41,8 +40,6 @@
             window.editor = editor;
             window.EditorInstance = EditorInstance;
             window.TextRange = TextRange;
-            window.InlayHint = InlayHint;
-            window.InlayUtils = InlayUtils;
             window.SerializationUtils = SerializationUtils;
 
             window.JsGr = JsLexicalGrammar;
@@ -51,15 +48,9 @@
             window.JsIncrLex = JsIncrLexer;
             window.DocumentModificationEvent = DocumentModificationEvent;
 
-            window.onload = () => {
-                editor.getEventBus().subscribe(0, DocumentModificationEvent.SUBSCRIBER, event => {
-                    window.tevent = event;
-                });
-
-                EditorInstance.acquire(editor);
-            }
-
             window.lex = new JsIncrLex()
+
+            window.InError = InlineError;
 
             window.v = () => {
                 const e = performance.now();
@@ -72,12 +63,10 @@
 
             window.builder = ASTBuilder;
 
-            window.TextRangeManager = TextRangeManager;
-
             window.JsAst = JsGrammar;
 
             window.Parser = JsParser;
-            window.p = (w=lex) => {
+            window.p = (w = lex) => {
                 let e = performance.now();
                 const b = new builder(w.createTokenStream());
                 new Parser(b).parse();

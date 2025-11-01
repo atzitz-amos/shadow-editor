@@ -1,9 +1,16 @@
 import {Editor} from "../../../Editor";
-import {HTMLComponentView} from "./HTMLComponentView";
+import {HTMLView} from "./HTMLView";
 import {HTMLViewUtils} from "./HTMLViewUtils";
 import {HTMLUtils} from "../../../utils/HTMLUtils";
 
-export class HTMLInlineSpanView implements HTMLComponentView {
+/**
+ * Represents multiple inline span HTML elements in the editor UI linked together as a single view.
+ *
+ * @author Atzitz Amos
+ * @date 09/06/2025
+ * @since 1.0.0
+ */
+export class HTMLSpanView implements HTMLView {
     private readonly stylesheet: CSSStyleDeclaration;
 
     constructor(private editor: Editor, private elements: HTMLElement[]) {

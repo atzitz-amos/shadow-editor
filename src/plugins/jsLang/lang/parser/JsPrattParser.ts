@@ -270,7 +270,7 @@ export class JsPrattParser {
             this.parseExpression(OperatorPrecedence.COMMA);
             marker.done(JsGrammar.CommaExpr);
             return;
-        } else if (type === JsLexicalGrammar.KEYWORD && token.getValue() === "instanceof" || token.getValue() === "in") {
+                } else if ((type === JsLexicalGrammar.KEYWORD && token.getValue() === "instanceof") || token.getValue() === "in") {
             this.parseExpression(OperatorPrecedence.INSTANCEOF_IN);
             marker.done(JsGrammar.BinaryExpr);
             return;

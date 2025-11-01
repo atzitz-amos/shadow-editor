@@ -188,7 +188,7 @@ export default class ASTViewerPlugin extends EditorPlugin {
 
             node.style.backgroundColor = "#ffffff0d";
 
-            this.editor.getComponentsManager().add(new class extends InlineComponent {
+            this.editor.getWidgetManager().add(new class extends InlineComponent {
                 public name: string = "ASTViewerHighlighter";
                 public range: TextRange = range;
 
@@ -224,7 +224,7 @@ export default class ASTViewerPlugin extends EditorPlugin {
         };
 
         node.onmouseleave = () => {
-            this.editor.getComponentsManager().removeByName("ASTViewerHighlighter");
+            this.editor.getWidgetManager().removeByName("ASTViewerHighlighter");
             this.editor.view.triggerRepaint();
             node.style.backgroundColor = "transparent";
         };

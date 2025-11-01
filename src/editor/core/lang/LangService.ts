@@ -70,12 +70,18 @@ export class LangService {
     private onDocumentChange(event: DocumentModificationEvent) {
         this.myLexer!.relex(event);  // TODO: Support default language
 
-        const highlightsHolder = this.editor.getComponentsManager().getHighlightsHolder();
+        const highlightsHolder = this.editor.getWidgetManager().getHighlightsHolder();
         highlightsHolder.clear();
         this.myIncrementalHighlighter?.highlight(this.myLexer!.createTokenStream(), highlightsHolder);
 
+        const start = performance.now();
         const builder = new ASTBuilder(this.myLexer!.createTokenStream());
-        this.makeParser(builder)?.parse();
-        this.myProd = builder.getProduction();
+        this.makeParser(builder)?.parse().then(() => {
+            console.log("Successfully parsed "
+                + this.editor.getOpenedDocument().getLineCount()
+                + " lines (" + this.editor.getOpenedDocument().getTotalDocumentLength()
+                + " chars) in "
+                + (performance.now() - start) + "ms");
+        });
     }
 }

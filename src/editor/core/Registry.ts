@@ -1,5 +1,5 @@
-import {Popup, PopupBuilder} from "../ui/components/inline/popup/Popup";
 import {Component} from "./components/Component";
+import {Popup, PopupBuilder} from "../ui/popups/Popup";
 
 export type HasId = { id: string };
 

@@ -2,7 +2,7 @@ import {ProjectFile} from "../project/File";
 import {Editor} from "../../Editor";
 import {EditorRawData} from "./RawData";
 import {LineData} from "./LineData";
-import {TextContext, TextRange, TextRangeManager} from "../coordinate/TextRange";
+import {TextContext, TextRange} from "../coordinate/TextRange";
 import {LanguageBase} from "../../lang/LanguageBase";
 import {DocumentInsertEvent} from "./events/DocumentInsertEvent";
 import {DocumentModificationEvent} from "./events/DocumentModificationEvent";
@@ -138,7 +138,6 @@ export class Document {
         this.data.insert(offset, text);
 
         this.recomputeLines(offset, text, false);
-        TextRangeManager.getInstance().updateRanges(offset, text.length);
 
         this.editor.getEventBus().syncPublish(new DocumentModificationEvent(this, new TextRange(offset, offset), text));
         this.editor.getEventBus().asyncPublish(new DocumentInsertEvent(this, offset, text));
@@ -148,7 +147,6 @@ export class Document {
         let deleted = this.data.delete(at, n);
 
         this.recomputeLines(at, deleted, true);
-        TextRangeManager.getInstance().updateRanges(at, -n);
 
         let affectedRange = new TextRange(at, at + n);
         this.editor.getEventBus().syncPublish(new DocumentModificationEvent(this, affectedRange, null));

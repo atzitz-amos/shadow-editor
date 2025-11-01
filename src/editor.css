@@ -1,11 +1,11 @@
 @font-face {
     font-family: JetBrains;
-    src: url("res/JetBrainsMono-Light.ttf");
+    src: url("../res/JetBrainsMono-Light.ttf");
 }
 
 @font-face {
     font-family: JetBrains_Thin;
-    src: url("res/JetBrainsMonoNL-Thin.ttf");
+    src: url("../res/JetBrainsMonoNL-Thin.ttf");
 }
 
 .editor * {
@@ -152,12 +152,12 @@
 }
 
 .editor .layer-caret {
-    z-index: 4;
+    z-index: 5;
     pointer-events: none;
 }
 
-.editor .layer-error {
-    z-index: 5;
+.editor .layer-overlays {
+    z-index: 4;
 }
 
 .editor .editor-caret {
@@ -271,7 +271,11 @@
     background: #353535;
     color: #8c8c8c;
     border-radius: 4px;
+}
 
+.overlay-widget {
+    position: relative;
+    height: 100%;
 }
 
 .editor-popup {
@@ -293,6 +297,24 @@
 .highlighted-token {
     text-underline-offset: 2px;
     text-decoration-thickness: 1px !important;
+}
+
+.error-marker::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0; /* stick to bottom of text */
+    width: 100%;
+    height: 18px; /* matches SVG’s wave height in ems */
+
+    background-image: url("../res/error_waves.svg");
+    background-repeat: repeat-x;
+    background-size: auto 100%; /* scale to text width, keep aspect ratio */
+    background-position: center bottom; /* align wave to bottom edge */
+
+    translate: 0 14px;
+
+    z-index: -1;
 }
 
 .punctuation {

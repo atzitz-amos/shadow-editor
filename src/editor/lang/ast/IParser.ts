@@ -1,3 +1,3 @@
 export interface IParser {
-    parse(): void;
+    parse(): Promise<void>;
 }

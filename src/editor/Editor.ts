@@ -1,4 +1,4 @@
-import {View} from "./ui/View";
+import {View} from "./ui/view/View";
 import {Project} from "./core/project/Project";
 import {ProjectFile} from "./core/project/File";
 import {EditorProperties} from "./Properties";
@@ -9,16 +9,13 @@ import {Key, ModifierKeyHolder} from "./core/events/Keybind";
 import {HTMLUtils} from "./utils/HTMLUtils";
 import {EditorInstance} from "./EditorInstance";
 import {TokenStream} from "./lang/tokens/TokenStream";
-import {InlineError} from "./ui/components/inline/InlineError";
-import {Popup} from "./ui/components/inline/popup/Popup";
 import {Document} from "./core/document/Document";
-import {ComponentsManager} from "./core/components/ComponentsManager";
+import {WidgetManager} from "./core/components/WidgetManager";
 import {LogicalPosition} from "./core/coordinate/LogicalPosition";
 import {VisualPosition} from "./core/coordinate/VisualPosition";
 import {XYPoint} from "./core/coordinate/XYPoint";
 import {EditorCoordinateMapper} from "./core/coordinate/EditorCoordinateMapper";
 import {InlayManager} from "./core/inlay/InlayManager";
-import {InlayComponent} from "./ui/components/inline/inlays/InlayComponent";
 import {ProcessManager} from "./core/processManager/ProcessManager";
 import {PluginManager} from "./plugins/PluginManager";
 import {EditorPlugin} from "./plugins/loader/Plugin";
@@ -32,6 +29,7 @@ import {EventBus} from "./core/events/EventBus";
 import {KeybindManager} from "./core/events/KeybindManager";
 import {EditorAttachedEvent} from "./events/EditorAttachedEvent";
 import {KeyPressedEvent, KeyReleasedEvent, MousePressedEvent, MouseReleasedEvent} from "./events/PhysicalEvents";
+import {InlayWidget} from "./ui/inline/inlay/InlayWidget";
 
 export class Editor {
     static ID = 0;
@@ -47,7 +45,7 @@ export class Editor {
 
     document: Document;
     langService: LangService;
-    componentManager: ComponentsManager;
+    widgetManager: WidgetManager;
 
     inlayManager: InlayManager;
     coordinateMapper: EditorCoordinateMapper;
@@ -83,7 +81,7 @@ export class Editor {
 
         this.document = new Document(this, this.file);
         this.langService = new LangService(this);
-        this.componentManager = new ComponentsManager(this);
+        this.widgetManager = new WidgetManager(this);
 
         this.langService.setCurrentLanguage(JsLang.class);
 
@@ -162,8 +160,8 @@ export class Editor {
         return this.langService;
     }
 
-    getComponentsManager(): ComponentsManager {
-        return this.componentManager;
+    getWidgetManager(): WidgetManager {
+        return this.widgetManager;
     }
 
     getCaretModel(): CaretModel {
@@ -235,7 +233,7 @@ export class Editor {
     }
 
     getFullRange() {
-        return TextRange.tracked(0, this.document.getTotalDocumentLength());
+        return new TextRange(0, this.document.getTotalDocumentLength());
     }
 
     isValidOffset(offset: Offset): boolean {
@@ -365,23 +363,9 @@ export class Editor {
      |       Components      |
      +-----------------------+    */
 
-    addErrorAt(range: TextRange, type: string, value: string, msg: string) {
-        this.componentManager.addError(new InlineError(range, type, value, msg));
-    }
-
-    addInlay(element: InlayComponent) {
-        this.inlayManager.addInlay(element.toInlayRecord(this.view));
-        this.componentManager.add(element);
-        this.view.triggerRepaint();
-    }
-
-    openPopup(sourceX: number, sourceY: number, popup: Popup) {
-        if (!popup.isRendered) {
-            this.view.addPopup(popup);
-        }
-        if (!popup.isShown) {
-            this.view.showPopup(popup, sourceX, sourceY);
-        }
+    addInlay(element: InlayWidget) {
+        this.widgetManager.addInlayWidget(element);
+        this.view.triggerRepaint()
     }
 
     /**

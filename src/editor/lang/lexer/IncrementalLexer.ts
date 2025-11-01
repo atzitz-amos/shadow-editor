@@ -55,10 +55,10 @@ export abstract class IncrementalLexer implements ILexer {
 
     public invalidate(): void {
         for (const stream of this.tokenStreams) {
+            console.log(1);
             stream.invalidate();
         }
 
         this.tokenStreams = [];
     }
-
 }

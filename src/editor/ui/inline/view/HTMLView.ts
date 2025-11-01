@@ -1,11 +1,11 @@
 import {Editor} from "../../../Editor";
-import {Component} from "../Component";
+import {Component} from "../../../core/components/Component";
 
 /**
  * A proxy between an {@link Component} and it's associated {@link HTMLElement}
  *
  * Enables to query and modify simultaneously all associated {@link HTMLElement}*/
-export interface HTMLComponentView {
+export interface HTMLView {
     getEditor(): Editor;
 
     getAssociatedElements(): HTMLElement[];

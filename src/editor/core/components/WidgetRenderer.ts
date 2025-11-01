@@ -1,7 +1,8 @@
-import {ComponentsManager} from "./ComponentsManager";
+import {WidgetManager} from "./WidgetManager";
 import {TextRange} from "../coordinate/TextRange";
 import {FragmentEvent, FragmentType} from "./fragments/FragmentEvent";
-import {FragmentBuilder} from "./fragments/FragmentBuilder";
+import {FragmentsBuilder} from "./fragments/FragmentsBuilder";
+import {HTMLUtils} from "../../utils/HTMLUtils";
 
 
 export type RenderedLineData = {
@@ -10,10 +11,10 @@ export type RenderedLineData = {
     line: number;
 }
 
-export class ComponentsRenderer {
-    private manager: ComponentsManager;
+export class WidgetRenderer {
+    private manager: WidgetManager;
 
-    constructor(manager: ComponentsManager) {
+    constructor(manager: WidgetManager) {
         this.manager = manager;
     }
 
@@ -33,7 +34,7 @@ export class ComponentsRenderer {
             };
         } else {
             return {
-                content: this.renderComponents(doc.getLineData(line).getAssociatedRange()),
+                content: this.renderWidgets(doc.getLineData(line).getAssociatedRange()),
                 gutter: this.renderGutterComponents(line),
                 line: line
             };
@@ -49,12 +50,10 @@ export class ComponentsRenderer {
         return result;
     }
 
-    private renderComponents(range: TextRange): HTMLSpanElement[] {
+    private renderWidgets(range: TextRange): HTMLSpanElement[] {
         const textContent = this.manager.getDocument().getTextContent()
-        const highlights = this.manager.getHighlightsHolder();
-        const components = this.manager.getAllComponents();
 
-        const events: FragmentEvent[] = FragmentBuilder.ofRange(range, highlights.toFragments(), components);
+        const events: FragmentEvent[] = FragmentsBuilder.build(range, this.manager);
         const active: FragmentEvent[] = [];
 
         let prevPos = range.start;
@@ -68,22 +67,31 @@ export class ComponentsRenderer {
                 const span = document.createElement('span');
                 span.textContent = textContent.substring(prevPos, currPos);
 
-                for (let {fragment} of active) {
-                    fragment.getComponentStyle().applyStyle(span);
-                    for (let className of fragment.getClassList()) {
-                        span.classList.add(className);
+                for (let activeFragment of active) {
+                    if (activeFragment.type != FragmentType.INLAY) {
+                        activeFragment.getFragment().getFragmentStyle().applyStyle(span);
+                        for (let className of activeFragment.getFragment().getClassList()) {
+                            span.classList.add(className);
+                        }
+                        activeFragment.getFragment().addElement(span);
                     }
-                    fragment.addElement(span);
                 }
 
                 result.push(span);
             }
 
-            if (event.type == FragmentType.START) {
+            if (event.type == FragmentType.START_RANGE) {
                 active.push(event);
-            } else {
-                const index = active.findIndex(x => x.fragment === event.fragment);
+            } else if (event.type == FragmentType.END_RANGE) {
+                const index = active.findIndex(x => x.getFragment() === event.getFragment());
                 if (index !== -1) active.splice(index, 1);
+            } else {
+                // Inlay
+                const inlayRecord = this.manager.getInlayManager().getInlayAt(event.pos)!;
+                const span = document.createElement('span');
+                span.className = "inline-flow inlay-flow";
+                span.style.width = HTMLUtils.px(inlayRecord.width);
+                result.push(span);
             }
 
             prevPos = currPos;

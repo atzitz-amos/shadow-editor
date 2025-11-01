@@ -17,5 +17,4 @@ export default class JsFileTypeHandler extends FileTypeHandler {
     public getLanguageForFile(file: ProjectFile): LanguageBase | null {
         return JsLang.class;
     }
-
 }

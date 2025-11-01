@@ -1,6 +1,6 @@
 import {Editor} from "../../Editor";
 import {Component} from "./Component";
-import {HTMLComponentView} from "./view/HTMLComponentView";
+import {HTMLView} from "../../ui/inline/view/HTMLView";
 import {Registry} from "../Registry";
 import {TextRange} from "../coordinate/TextRange";
 
@@ -12,7 +12,7 @@ export abstract class InlineComponent implements Component {
 
     public abstract range: TextRange;
 
-    protected view: HTMLComponentView | undefined = undefined;
+    protected view: HTMLView | undefined = undefined;
 
     protected constructor() {
         this.id = Registry.getComponentIDFor(this);
@@ -23,11 +23,11 @@ export abstract class InlineComponent implements Component {
             element.classList.add(this.className);
     }
 
-    getRenderedView(): HTMLComponentView | undefined {
+    getRenderedView(): HTMLView | undefined {
         return this.view;
     }
 
-    onRender(view: HTMLComponentView): void {
+    onRender(view: HTMLView): void {
         this.view = view;
         this.onceRendered();
     }

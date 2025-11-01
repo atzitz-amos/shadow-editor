@@ -71,7 +71,7 @@ export class JsParser implements IParser {
 
     }
 
-    parse(): void {
+    async parse(): Promise<void> {
         this.parseBlock(false);
     }
 

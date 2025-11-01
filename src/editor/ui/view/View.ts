@@ -1,15 +1,12 @@
-import {Editor} from "../Editor";
-import {Layers} from "./Layers";
-import {Gutter} from "./gutter/Gutter";
-import {defaults} from "../Properties";
-import {HTMLUtils} from "../utils/HTMLUtils";
-import {Scrolling, ScrollMode} from "./Scroll";
-import {Popup} from "./components/inline/popup/Popup";
-import {RenderedLineData, ComponentsRenderer} from "../core/components/ComponentsRenderer";
-import {LogicalPosition} from "../core/coordinate/LogicalPosition";
-import {VisualPosition} from "../core/coordinate/VisualPosition";
-import {EditorScrollBar} from "./scrollbar/ScrollBar";
-import {CaretMovedEvent} from "../core/caret/events/CaretMovedEvent";
+import {Editor} from "../../Editor";
+import {defaults} from "../../Properties";
+import {HTMLUtils} from "../../utils/HTMLUtils";
+import {Scrolling, ScrollMode} from "../scrollbar/Scroll";
+import {RenderedLineData} from "../../core/components/WidgetRenderer";
+import {LogicalPosition} from "../../core/coordinate/LogicalPosition";
+import {VisualPosition} from "../../core/coordinate/VisualPosition";
+import {CaretMovedEvent} from "../../core/caret/events/CaretMovedEvent";
+import {ViewPainter} from "./ViewPainter";
 
 
 function _sizer(view: View) {
@@ -22,15 +19,11 @@ function _sizer(view: View) {
 export class View {
     editor: Editor;
 
-    componentRenderer: ComponentsRenderer;
+    myPainter: ViewPainter;
 
     view: HTMLDivElement;
 
     scroll: Scrolling;
-
-    gutter: Gutter;
-    layers: Layers;
-    scrollBar: EditorScrollBar;
 
     // Properties
     getCharSize: () => number;
@@ -42,14 +35,14 @@ export class View {
     visualCharCount: number;
 
     // Data
-    popups: Popup[] = [];
     lines: RenderedLineData[];
 
     isDirty: boolean = true;
+    areOverlaysDirty: boolean = true;
 
     constructor(editor: Editor) {
         this.editor = editor;
-        this.componentRenderer = editor.getComponentsManager().getRenderer();
+        this.myPainter = new ViewPainter(this);
 
         this.editor.getEventBus().subscribe(this, CaretMovedEvent.SUBSCRIBER, () => {
             this.ensureCaretVisible();
@@ -66,17 +59,13 @@ export class View {
 
         this.scroll = new Scrolling(this, 0, 0);
 
-        this.gutter = new Gutter(this);
-        this.layers = new Layers(this);
-        this.scrollBar = new EditorScrollBar(this);
+        this.myPainter = new ViewPainter(this);
 
         this.initCSS();
 
         this.setupEventListeners();
 
-        this.gutter.init();
-        this.layers.init();
-        this.scrollBar.render();
+        this.myPainter.init();
     }
 
     public setCSSProperties(element: HTMLElement, properties: Record<string, string>) {
@@ -88,7 +77,7 @@ export class View {
     /**
      * Force focus the editor */
     focus(): void {
-        this.layers.caret.focus();
+        this.myPainter.getLayers().getCaretLayer().focus();
     }
 
     scrollBy(deltaX: number, deltaY: number) {
@@ -147,118 +136,45 @@ export class View {
     }
 
     getRelativePos(event: MouseEvent) {
-        let x = event.clientX - this.layers.layers_el.getBoundingClientRect().left;
-        let y = event.clientY - this.layers.layers_el.getBoundingClientRect().top;
+        let x = event.clientX - this.myPainter.getLayers().layers_el.getBoundingClientRect().left;
+        let y = event.clientY - this.myPainter.getLayers().layers_el.getBoundingClientRect().top;
         return [x, y];
     }
 
-    /**
-     * (Re-)render the view. Expensive operation, as it triggers a repaint. Consider using `update` whenever possible*/
     render() {
         if (this.isDirty) {
             this.isDirty = false;
-            this.repaint();
+            this.myPainter.repaint();
+        }
+
+        if (this.areOverlaysDirty) {
+            this.areOverlaysDirty = false;
+            this.myPainter.repaintOverlays();
         }
 
         this.update();
     }
 
-    repaint() {
-        let scrollLines = this.scroll.scrollYLines;
-        let scrollOffset = this.scroll.scrollYOffset;
-
-        let data = this.lines = this.componentRenderer.renderNLines(scrollLines, this.visualLineCount);
-
-        for (let i = 0; i < this.visualLineCount; i++) {
-            this.layers.text.renderLine(i, data[i].content);
-            this.gutter.renderLine(i, data[i].gutter);
-        }
-
-        this.gutter.nDigits = Math.floor(Math.log10(this.editor.getLineCount())) + 1
-
-        if (scrollOffset) {
-            if (scrollLines > 0) {
-                let line = this.componentRenderer.renderLine(scrollLines - 1);
-                this.layers.text.renderEdgeLine(0, line.content);
-                this.gutter.renderEdgeLine(0, line.gutter);
-
-                this.lines.unshift(line);
-            }
-            if (scrollLines + this.visualLineCount < this.editor.getLineCount()) {
-                let line = this.componentRenderer.renderLine(scrollLines + this.visualLineCount);
-
-                this.layers.text.renderEdgeLine(1, line.content);
-                this.gutter.renderEdgeLine(1, line.gutter);
-
-                this.lines.push(line);
-            }
-        }
-        this.setCSSProperties(this.view, {"--editor-scroll-offsetY": HTMLUtils.px(scrollOffset || this.getLineHeight())});
-        this.setCSSProperties(this.view, {"--editor-scroll-x": HTMLUtils.px(this.scroll.scrollX)});
-    }
-
     triggerRepaint() {
         this.isDirty = true;
+        this.areOverlaysDirty = true;
     }
 
     update() {
-        this.gutter.update();
-        this.layers.update();
-        this.scrollBar.update();
+        this.myPainter.getGutter().update();
+        this.myPainter.getLayers().update();
+        this.myPainter.getScrollBar().update();
     }
 
     destroy() {
-        this.gutter.destroy();
-        this.layers.destroy();
+        this.myPainter.getGutter().destroy();
+        this.myPainter.getLayers().destroy();
 
         this.view.remove();
     }
 
-    addPopup(popup: Popup) {
-        let element = popup.render(this);
-        this.layers.layers_el.appendChild(element);
-
-        this.popups.push(popup);
-    }
-
-    showPopup(popup: Popup, sourceX: number, sourceY: number) {
-        let element = popup.element;
-
-        popup.show();
-
-        let topX = this.layers.layers_el.getBoundingClientRect().left;
-        let topY = this.layers.layers_el.getBoundingClientRect().top;
-
-        let x = sourceX - topX;
-        let y = Math.ceil((sourceY - topY) / this.getLineHeight()) * this.getLineHeight();
-
-        element.style.left = HTMLUtils.px(x);
-        element.style.top = HTMLUtils.px(y);
-    }
-
-    updateTextLayer() {
-        this.layers.text.update();
-        this.layers.activeLine.update();
-    }
-
-    updateCaret() {
-        this.layers.caret.update();
-    }
-
-    updateSelection() {
-        this.layers.selection.update();
-    }
-
-    updateActiveLine() {
-        this.layers.activeLine.update();
-    }
-
-    updateGutter() {
-        this.gutter.update();
-    }
-
     resetBlink() {
-        this.layers.caret.blinkReset();
+        this.myPainter.getLayers().getCaretLayer().blinkReset();
     }
 
     offScreen(pos: VisualPosition): boolean {
@@ -286,12 +202,6 @@ export class View {
     }
 
     onMouseMove(event: MouseEvent) {
-        for (let popup of this.popups) {
-            if (!popup.isInBound(event.x, event.y)) {
-                popup.close();
-            }
-        }
-
         this.editor.onMouseMove(event);
     }
 
@@ -302,10 +212,6 @@ export class View {
     }
 
     onInput(e: InputEvent) {
-        for (let popup of this.popups) {
-            popup.close();
-        }
-
         this.editor.onInput(e);
     }
 
@@ -315,6 +221,18 @@ export class View {
 
     onKeyUp(e: KeyboardEvent) {
         this.editor.onKeyUp(e);
+    }
+
+    getEditor(): Editor {
+        return this.editor;
+    }
+
+    getScroll(): Scrolling {
+        return this.scroll;
+    }
+
+    getLayers() {
+        return this.myPainter.getLayers();
     }
 
     private scrollIntoViewAlong(position: number, scrollStart: number, scrollEnd: number): number | null {
@@ -342,7 +260,7 @@ export class View {
         // Prevent default context menu on right click
         this.view.addEventListener('contextmenu', e => e.preventDefault());
 
-        this.layers.setupEventListeners();
+        this.myPainter.getLayers().setupEventListeners();
     }
 
     /**
@@ -376,13 +294,13 @@ export class View {
         this.getViewHeight = () => P.height!;
         this.visualLineCount = Math.floor(P.height! / this.getLineHeight())
         setTimeout(() => {
-            this.visualCharCount = Math.floor(this.layers.layers_el.getBoundingClientRect().width / this.getCharSize())
+            this.visualCharCount = Math.floor(this.myPainter.getLayers().layers_el.getBoundingClientRect().width / this.getCharSize())
         }, 100);
 
         this.setCSSProperties(this.view, {
             '--editor-scroll-offsetY': HTMLUtils.px(this.getLineHeight()),
         });
 
-        this.gutter.initCSS();
+        this.myPainter.getGutter().initCSS();
     }
 }

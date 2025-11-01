@@ -7,7 +7,6 @@ import {TextAttributes} from "./style/TextAttributes";
 import {TextRange} from "../../core/coordinate/TextRange";
 import {Editor} from "../../Editor";
 import {Fragment} from "../../core/components/fragments/Fragment";
-import {FragmentEvent} from "../../core/components/fragments/FragmentEvent";
 
 export class HighlightHolder {
     private fragments: Fragment[] = [];

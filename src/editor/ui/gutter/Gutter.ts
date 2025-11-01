@@ -1,4 +1,4 @@
-import {View} from "../View";
+import {View} from "../view/View";
 import {HTMLUtils} from "../../utils/HTMLUtils";
 
 export class Gutter {

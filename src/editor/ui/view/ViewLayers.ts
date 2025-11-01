@@ -1,31 +1,20 @@
 import {View} from "./View";
-import {Caret} from "../core/caret/Caret";
-import {HTMLUtils} from "../utils/HTMLUtils";
+import {Caret} from "../../core/caret/Caret";
+import {HTMLUtils} from "../../utils/HTMLUtils";
 
 
-abstract class AbstractLayer {
-    view: View;
-    element: HTMLDivElement;
-
-    abstract init(): void;
-
-    abstract destroy(): void;
-
-    abstract render(): void;
-
-    abstract update(): void;
-}
-
-export class TextLayer extends AbstractLayer {
+export class TextLayer {
     visualLineCount: number;
 
     lines: HTMLDivElement[];
     edgelines: HTMLDivElement[];
 
-    constructor(view: View, root: HTMLElement) {
-        super();
+    element: HTMLDivElement;
+    view: View;
+
+    constructor(view: View, root: HTMLElement, className: string = 'div.editor-layer.layer-inner') {
         this.view = view;
-        this.element = HTMLUtils.createElement('div.editor-layer.layer-inner', root) as HTMLDivElement;
+        this.element = HTMLUtils.createElement(className, root) as HTMLDivElement;
     }
 
     init() {
@@ -41,15 +30,6 @@ export class TextLayer extends AbstractLayer {
         this.edgelines = [firstEdgeline, secondEdgeline];
     }
 
-    destroy(): void {
-    }
-
-    render(): void {
-    }
-
-    update(): void {
-    }
-
     renderLine(n: number, content: HTMLSpanElement[]) {
         this.lines[n].innerHTML = '';
         this.lines[n].append(...content);
@@ -61,13 +41,14 @@ export class TextLayer extends AbstractLayer {
     }
 }
 
-export class CaretLayer extends AbstractLayer {
+export class CaretLayer {
     private _caret: HTMLDivElement;
     private _input: HTMLInputElement;
     private _blink: NodeJS.Timeout;
+    private readonly view: View;
+    private readonly element: HTMLDivElement;
 
     constructor(view: View, root: HTMLElement) {
-        super();
         this.view = view;
         this.element = HTMLUtils.createElement('div.editor-layer.layer-caret', root) as HTMLDivElement;
 
@@ -118,9 +99,6 @@ export class CaretLayer extends AbstractLayer {
             this.view.onBlur(e);
             this.blinkReset();
         });
-    }
-
-    destroy(): void {
     }
 
     render(): void {
@@ -207,11 +185,12 @@ class CaretSelectionElement {
     }
 }
 
-class SelectionLayer extends AbstractLayer {
+class SelectionLayer {
     selectionElements: Map<number, CaretSelectionElement> = new Map();
+    view: View;
+    element: HTMLDivElement;
 
     constructor(view: View, root: HTMLElement) {
-        super();
         this.view = view;
         this.element = HTMLUtils.createElement('div.editor-layer.layer-selection', root) as HTMLDivElement;
     }
@@ -220,9 +199,6 @@ class SelectionLayer extends AbstractLayer {
         this.view.editor.caretModel.forEachCaret(caret => {
             this.selectionElements.set(caret.id, new CaretSelectionElement(this, caret));
         });
-    }
-
-    destroy(): void {
     }
 
     render(): void {
@@ -234,22 +210,19 @@ class SelectionLayer extends AbstractLayer {
     }
 }
 
-export class ActiveLineLayer extends AbstractLayer {
+export class ActiveLineLayer {
     private readonly _activeLine: HTMLDivElement;
+    private readonly view: View;
+    private readonly element: HTMLDivElement;
 
     constructor(view: View, root: HTMLElement) {
-        super();
         this.view = view;
-        this.element = HTMLUtils.createElement('div.editor-layer.layer-active-line', root) as HTMLDivElement;
+        this.element = HTMLUtils.createElement('div.editor-layer.layer-active-line', root);
 
-        this._activeLine = HTMLUtils.createElement('div.editor-active-line', this.element) as HTMLDivElement;
+        this._activeLine = HTMLUtils.createElement('div.editor-active-line', this.element);
     }
 
     init() {
-        const P = this.view.editor.properties;
-    }
-
-    destroy(): void {
     }
 
     render(): void {
@@ -262,33 +235,46 @@ export class ActiveLineLayer extends AbstractLayer {
     }
 }
 
-export class ErrorLayer extends AbstractLayer {
+export class OverlayLayer extends TextLayer {
+    overlayPerLine: HTMLSpanElement[][] = [];
+
     constructor(view: View, root: HTMLElement) {
-        super();
-        this.view = view;
-        this.element = HTMLUtils.createElement('div.editor-layer.layer-error', root) as HTMLDivElement;
+        super(view, root, "div.editor-layer.layer-overlay.layer-inner");
     }
 
-    init(): void {
+    init() {
+        super.init();
+
+        for (let i = 0; i < this.lines.length + 2; i++) {
+            this.overlayPerLine.push([]);
+        }
     }
 
-    destroy(): void {
+    addOverlayOnLine(n: number, element: HTMLSpanElement) {
+        this.overlayPerLine[n].push(element);
     }
 
-    render(): void {
-    }
+    renderAndClear() {
+        for (let i = 1; i < this.overlayPerLine.length - 1; i++) {
+            this.renderLine(i - 1, this.overlayPerLine[i]);
+            this.overlayPerLine[i] = [];
+        }
 
-    update(): void {
+        this.renderEdgeLine(0, this.overlayPerLine[0]);
+        this.renderEdgeLine(1, this.overlayPerLine[this.overlayPerLine.length - 1]);
+        this.overlayPerLine[0] = [];
+        this.overlayPerLine[this.overlayPerLine.length - 1] = [];
     }
 }
 
-export class Layers {
+export class ViewLayers {
     public layers_el: HTMLDivElement;
 
-    public text: TextLayer;
-    public caret: CaretLayer;
-    public selection: SelectionLayer;
-    public activeLine: ActiveLineLayer;
+    private readonly text: TextLayer;
+    private readonly caret: CaretLayer;
+    private readonly selection: SelectionLayer;
+    private readonly activeLine: ActiveLineLayer;
+    private readonly overlayLayer: OverlayLayer;
 
     constructor(view: View) {
         this.layers_el = HTMLUtils.createElement('div.editor-layers', view.view) as HTMLDivElement;
@@ -297,6 +283,7 @@ export class Layers {
         this.caret = new CaretLayer(view, this.layers_el);
         this.selection = new SelectionLayer(view, this.layers_el);
         this.activeLine = new ActiveLineLayer(view, this.layers_el);
+        this.overlayLayer = new OverlayLayer(view, this.layers_el);
     }
 
     init() {
@@ -304,6 +291,7 @@ export class Layers {
         this.caret.init();
         this.selection.init();
         this.activeLine.init();
+        this.overlayLayer.init();
     }
 
     setupEventListeners() {
@@ -311,26 +299,39 @@ export class Layers {
     }
 
     destroy(): void {
-        this.text.destroy();
-        this.caret.destroy();
-        this.selection.destroy();
-        this.activeLine.destroy();
-
         this.layers_el.remove();
     }
 
     render(): void {
-        this.text.render();
         this.caret.render();
         this.selection.render();
         this.activeLine.render();
     }
 
     update(): void {
-        this.text.update();
         this.caret.update();
         this.selection.update();
         this.activeLine.update();
+    }
+
+    getTextLayer(): TextLayer {
+        return this.text;
+    }
+
+    getCaretLayer(): CaretLayer {
+        return this.caret;
+    }
+
+    getSelectionLayer(): SelectionLayer {
+        return this.selection;
+    }
+
+    getActiveLineLayer(): ActiveLineLayer {
+        return this.activeLine;
+    }
+
+    getOverlayLayer(): OverlayLayer {
+        return this.overlayLayer;
     }
 }
 

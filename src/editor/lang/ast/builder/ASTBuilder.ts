@@ -123,12 +123,12 @@ export class ASTBuilder {
 
     error(msg: string) {
         this.isErrorState = true;
-        this.production.push(new ASTErrorNode(TextRange.tracked(this.currentOffset, this.currentOffset), msg));
+        this.production.push(new ASTErrorNode(new TextRange(this.currentOffset, this.currentOffset), msg));
     }
 
     errorBefore(token: Token, msg: string) {
         this.isErrorState = true;
-        this.production.push(new ASTErrorNode(TextRange.tracked(token.getRange().start, token.getRange().start), msg));
+        this.production.push(new ASTErrorNode(new TextRange(token.getRange().start, token.getRange().start), msg));
     }
 
     errorOn(token: Token, msg: string) {
@@ -140,7 +140,7 @@ export class ASTBuilder {
         for (let i = this.production.length - 1; i >= 0; i--) {
             const ast = this.production[i];
             if (ast.getTextRange().is(token.getRange())) {
-                this.production.splice(i, 1,);
+                this.production.splice(i, 1);
                 this.isErrorState = true;
                 this.production.push(new ASTErrorNode(token.getRange(), msg));
                 return;
@@ -159,7 +159,7 @@ export class ASTBuilder {
     }
 
     build(marker: Marker, type: ASTType) {
-        const range = TextRange.tracked(marker.getOffset(), this.currentOffset);
+        const range = new TextRange(marker.getOffset(), this.currentOffset);
         const children = this.production.splice(marker.getBuilderOffset(), this.production.length - marker.getBuilderOffset());
         if (children.length === 1 && type === ASTGrammar.Expression)
             this.production.push(children[0]);
@@ -170,7 +170,7 @@ export class ASTBuilder {
     }
 
     add(type: ASTType) {
-        this.production.push(new ASTElementNode(type, [], TextRange.tracked(this.currentOffset, this.currentOffset)));
+        this.production.push(new ASTElementNode(type, [], new TextRange(this.currentOffset, this.currentOffset)));
     }
 
     clearWhitespace() {

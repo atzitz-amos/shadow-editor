@@ -97,6 +97,14 @@ export class EventBus {
         queueMicrotask(() => this.syncPublish(event));
     }
 
+    unsubscribeAll(obj: Object) {
+        for (const [eventCls, subs] of this.subscriptions) {
+            if (subs.has(obj)) {
+                subs.delete(obj);
+            }
+        }
+    }
+
     private dispatchLocal<T extends EventBase>(event: T) {
         const subs = this.subscriptions.get(event.constructor);
         if (subs) {
