@@ -5,6 +5,7 @@ import {VisualPosition} from "./coordinate/VisualPosition";
 import {InlayRecord} from "./inlay/InlayManager";
 
 
+
 export class Caret {
     id: number = 0;
 
