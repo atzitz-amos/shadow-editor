@@ -1,6 +1,7 @@
-import {Key} from "../core/events/Keybind";
+import {Key} from "../../core/keybinds/Keybind";
 import {Editor} from "../Editor";
-import {AbstractAction} from "../core/actions/AbstractAction";
+import {AbstractAction} from "../../core/actions/AbstractAction";
+import {KeybindContext} from "../../core/keybinds/context/KeybindContext";
 
 
 export class DeleteAction extends AbstractAction {
@@ -13,7 +14,9 @@ export class DeleteAction extends AbstractAction {
         shift: null
     };
 
-    run(editor: Editor, event: KeyboardEvent): void {
+    run(ctx: KeybindContext): void {
+        const editor: Editor = ctx.requireEditor();
+
         editor.caretModel.forEachCaret(caret => {
             if (caret.selectionModel.isSelectionActive) editor.deleteSelection(caret);
             else if (!caret.isBeforeInlay()) editor.deleteAt(caret.getOffset());

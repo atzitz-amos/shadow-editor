@@ -1,8 +1,8 @@
-import {ASTBuilder} from "../../../../editor/lang/ast/builder/ASTBuilder";
-import {IParser} from "../../../../editor/lang/ast/IParser";
+import {ASTBuilder} from "../../../../core/lang/ast/builder/ASTBuilder";
+import {IParser} from "../../../../core/lang/ast/IParser";
 import {JsGrammar} from "./JsGrammar";
 import {JsLexicalGrammar} from "../lexer/JsLexicalGrammar";
-import {Marker} from "../../../../editor/lang/ast/builder/Marker";
+import {Marker} from "../../../../core/lang/ast/builder/Marker";
 import {JsExprParser} from "./JsExprParser";
 
 

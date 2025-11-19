@@ -3,11 +3,11 @@
  * Date: 10/18/2025
  */
 
-import {IncrementalLexer} from "../../../../editor/lang/lexer/IncrementalLexer";
-import {Token} from "../../../../editor/lang/tokens/Token";
-import {Source} from "../../../../editor/lang/tokens/TokenStream";
+import {IncrementalLexer} from "../../../../core/lang/lexer/IncrementalLexer";
+import {Token} from "../../../../core/lang/tokens/Token";
+import {Source} from "../../../../core/lang/tokens/TokenStream";
 import {JsLexicalGrammar} from "./JsLexicalGrammar";
-import {TokenType} from "../../../../editor/lang/tokens/TokenType";
+import {TokenType} from "../../../../core/lang/tokens/TokenType";
 import {TextRange} from "../../../../editor/core/coordinate/TextRange";
 
 export default class JsIncrLexer extends IncrementalLexer {

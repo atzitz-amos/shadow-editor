@@ -1,16 +1,16 @@
-import {View} from "../../ui/View";
 import {Editor} from "../../Editor";
 import {LogicalPosition} from "./LogicalPosition";
 import {VisualPosition} from "./VisualPosition";
 import {XYPoint} from "./XYPoint";
 import {InlayManager} from "../inlay/InlayManager";
+import {View} from "../../ui/view/View";
 
 export class EditorCoordinateMapper {
     private readonly editor: Editor;
     private readonly inlayManager: InlayManager;
 
     constructor(private view: View) {
-        this.editor = view.editor;
+        this.editor = view.getEditor();
         this.inlayManager = this.editor.getInlayManager();
     }
 

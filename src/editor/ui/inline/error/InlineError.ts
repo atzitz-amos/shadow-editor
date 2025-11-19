@@ -2,6 +2,7 @@ import {TextRange} from "../../../core/coordinate/TextRange";
 import {OverlayWidget} from "../overlay/OverlayWidget";
 import {Overlay} from "../overlay/Overlay";
 import {Editor} from "../../../Editor";
+import {PopupFactory} from "../../popups/PopupFactory";
 
 /**
  *
@@ -38,7 +39,7 @@ export class InlineError extends OverlayWidget {
         this.overlay = overlay;
 
         overlay.whenHoveredWithDelay(600, (event) => {
-            // PopupFactory.createTooltipPopup(event.getEditor(), this.message, event.getXY(), event.getBounds());
+            PopupFactory.createTooltipPopup(event.getEditor(), this.message, event.getXY(), event.getBounds());
             console.log(1);
         }, true);
     }

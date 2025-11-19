@@ -1,4 +1,4 @@
-import {ASTGrammar} from "../../../../editor/lang/ast/ASTGrammar";
+import {ASTGrammar} from "../../../../core/lang/ast/ASTGrammar";
 
 export class JsGrammar {
     public static readonly CodeBlock = ASTGrammar.createCodeBlock("CodeBlock");

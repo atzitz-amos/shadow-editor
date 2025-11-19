@@ -3,8 +3,8 @@
  * Date: 10/6/2025
  */
 
-import {HighlighterBase} from "../../../../editor/lang/highlighter/HighlighterBase";
-import {Token} from "../../../../editor/lang/tokens/Token";
+import {HighlighterBase} from "../../../../core/lang/highlighter/HighlighterBase";
+import {Token} from "../../../../core/lang/tokens/Token";
 import {HighlightHolder} from "../../../../editor/ui/highlighter/HighlightHolder";
 import {TextAttributes} from "../../../../editor/ui/highlighter/style/TextAttributes";
 import {JsColorScheme} from "./JsColorScheme";

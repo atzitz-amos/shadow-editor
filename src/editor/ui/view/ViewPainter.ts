@@ -36,9 +36,9 @@ export class ViewPainter {
         let scrollLines = this.view.getScroll().scrollYLines;
         let scrollOffset = this.view.getScroll().scrollYOffset;
 
-        let data = this.componentsRenderer.renderNLines(scrollLines, this.view.visualLineCount);
+        let data = this.componentsRenderer.renderNLines(scrollLines, this.view.getVisualLineCount());
 
-        for (let i = 0; i < this.view.visualLineCount; i++) {
+        for (let i = 0; i < this.view.getVisualLineCount(); i++) {
             this.layers.getTextLayer().renderLine(i, data[i].content);
             this.gutter.renderLine(i, data[i].gutter);
         }
@@ -53,8 +53,8 @@ export class ViewPainter {
 
                 data.unshift(line);
             }
-            if (scrollLines + this.view.visualLineCount < this.view.getEditor().getLineCount()) {
-                let line = this.componentsRenderer.renderLine(scrollLines + this.view.visualLineCount);
+            if (scrollLines + this.view.getVisualLineCount() < this.view.getEditor().getLineCount()) {
+                let line = this.componentsRenderer.renderLine(scrollLines + this.view.getVisualLineCount());
 
                 this.layers.getTextLayer().renderEdgeLine(1, line.content);
                 this.gutter.renderEdgeLine(1, line.gutter);
@@ -89,7 +89,7 @@ export class ViewPainter {
                 let end = document.getLineEnd(start);
 
                 const line = document.getLineAt(start).getLineNumber();
-                if (line >= this.view.getScroll().scrollYLines - 1 && line < this.view.getScroll().scrollYLines + 1 + this.view.visualLineCount) {
+                if (line >= this.view.getScroll().scrollYLines - 1 && line < this.view.getScroll().scrollYLines + 1 + this.view.getVisualLineCount()) {
                     let element = this.paintOverlay(overlay, elementStart, Math.min(range.end, end) - start);
                     spans.push(element);
 

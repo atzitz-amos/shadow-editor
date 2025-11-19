@@ -3,7 +3,6 @@ import {View} from "../view/View";
 import {Registry} from "../../core/Registry";
 import {Editor} from "../../Editor";
 import {HTMLUtils} from "../../utils/HTMLUtils";
-import {InlineComponent} from "../../core/components/InlineComponent";
 
 export abstract class Popup implements Component {
     abstract name: string;

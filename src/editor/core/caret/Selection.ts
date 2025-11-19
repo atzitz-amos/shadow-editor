@@ -1,5 +1,5 @@
 import {Caret} from "./Caret";
-import {ModifierKeyHolder} from "../events/Keybind";
+import {ModifierKeyHolder} from "../../../core/keybinds/Keybind";
 import {Editor} from "../../Editor";
 import {LogicalPosition} from "../coordinate/LogicalPosition";
 

@@ -1,7 +1,6 @@
 import {View} from "../view/View";
 import {Popup} from "./Popup";
 import {MarkdownMessage} from "./markdown/Message";
-import {InlineComponent} from "../../core/components/InlineComponent";
 
 
 export class MessageBox extends Popup {

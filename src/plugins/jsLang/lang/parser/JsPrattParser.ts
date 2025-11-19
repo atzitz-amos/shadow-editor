@@ -1,11 +1,11 @@
 import {JsParser} from "./JsParser";
-import {ASTBuilder} from "../../../../editor/lang/ast/builder/ASTBuilder";
+import {ASTBuilder} from "../../../../core/lang/ast/builder/ASTBuilder";
 import {JsGrammar} from "./JsGrammar";
-import {TokenType} from "../../../../editor/lang/tokens/TokenType";
-import {ASTGrammar, ASTType} from "../../../../editor/lang/ast/ASTGrammar";
+import {TokenType} from "../../../../core/lang/tokens/TokenType";
+import {ASTGrammar, ASTType} from "../../../../core/lang/ast/ASTGrammar";
 import {JsLexicalGrammar} from "../lexer/JsLexicalGrammar";
-import {Token} from "../../../../editor/lang/tokens/Token";
-import {Marker} from "../../../../editor/lang/ast/builder/Marker";
+import {Token} from "../../../../core/lang/tokens/Token";
+import {Marker} from "../../../../core/lang/ast/builder/Marker";
 import {JsExprParser} from "./JsExprParser";
 
 export enum OperatorPrecedence {

@@ -102,7 +102,6 @@ export class Caret {
             const document = this.editor.getOpenedDocument();
             const inlay = this.editor.getInlayManager().getInlayAt(currentOffset)
             if (currentOffset !== document.getLineEnd(currentOffset) || inlay) {
-                console.log(1);
                 this.myVisual.col++;
                 this.moveToVisual(this.myVisual);
                 return;

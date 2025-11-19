@@ -1,9 +1,8 @@
-import {ProjectFile} from "../project/File";
 import {Editor} from "../../Editor";
 import {EditorRawData} from "./RawData";
 import {LineData} from "./LineData";
 import {TextContext, TextRange} from "../coordinate/TextRange";
-import {LanguageBase} from "../../lang/LanguageBase";
+import {LanguageBase} from "../../../core/lang/LanguageBase";
 import {DocumentInsertEvent} from "./events/DocumentInsertEvent";
 import {DocumentModificationEvent} from "./events/DocumentModificationEvent";
 import {DocumentDeleteEvent} from "./events/DocumentDeleteEvent";
@@ -18,8 +17,8 @@ export class Document {
     private lines: LineData[];
     private lineBreaks: Offset[] = [];
 
-    constructor(private editor: Editor, private file: ProjectFile) {
-        this.data = new EditorRawData(file.getContentAsString());
+    constructor(private editor: Editor, content: string) {
+        this.data = new EditorRawData(content);
         this.parseLines();
     }
 
@@ -127,7 +126,7 @@ export class Document {
     }
 
     public getLanguage(): LanguageBase | null {
-        return this.file.getLanguage();
+        return this.editor.getCurrentLanguage();
     }
 
     public getSrTree(): SRTree {

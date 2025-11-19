@@ -3,10 +3,10 @@
  * Date: 10/5/2025
  */
 
-import {ProjectFile} from "../../../editor/core/project/File";
-import {FileTypeHandler, SupportLevel} from "../../../editor/lang/FileTypeHandler";
+import {ProjectFile} from "../../../core/project/filetree/ProjectFile";
+import {FileTypeHandler, SupportLevel} from "../../../core/lang/FileTypeHandler";
 import JsLang from "./JsLang";
-import {LanguageBase} from "../../../editor/lang/LanguageBase";
+import {LanguageBase} from "../../../core/lang/LanguageBase";
 
 export default class JsFileTypeHandler extends FileTypeHandler {
     public getSupportLevel(file: ProjectFile): SupportLevel {

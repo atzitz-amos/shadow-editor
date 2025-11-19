@@ -18,7 +18,7 @@ export class TextLayer {
     }
 
     init() {
-        this.visualLineCount = this.view.visualLineCount;
+        this.visualLineCount = this.view.getVisualLineCount();
         this.lines = [];
 
         let firstEdgeline = HTMLUtils.createElement('div.editor-line.editor-line-edge', this.element) as HTMLDivElement;
@@ -44,7 +44,7 @@ export class TextLayer {
 export class CaretLayer {
     private _caret: HTMLDivElement;
     private _input: HTMLInputElement;
-    private _blink: NodeJS.Timeout;
+    private _blink: number;
     private readonly view: View;
     private readonly element: HTMLDivElement;
 
@@ -276,8 +276,8 @@ export class ViewLayers {
     private readonly activeLine: ActiveLineLayer;
     private readonly overlayLayer: OverlayLayer;
 
-    constructor(view: View) {
-        this.layers_el = HTMLUtils.createElement('div.editor-layers', view.view) as HTMLDivElement;
+    constructor(private view: View) {
+        this.layers_el = HTMLUtils.createElement('div.editor-layers') as HTMLDivElement;
 
         this.text = new TextLayer(view, this.layers_el);
         this.caret = new CaretLayer(view, this.layers_el);
@@ -292,6 +292,8 @@ export class ViewLayers {
         this.selection.init();
         this.activeLine.init();
         this.overlayLayer.init();
+
+        this.view.getViewElement().appendChild(this.layers_el);
     }
 
     setupEventListeners() {

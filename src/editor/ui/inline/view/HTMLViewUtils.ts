@@ -55,7 +55,7 @@ export class HTMLViewUtils {
             }
         } as CSSStyleDeclaration, {
             get(target: CSSStyleDeclaration, p: string | symbol, receiver: any): any {
-                if (typeof p === "string" && p != "getPropertyValue" && p != "setProperty") {
+                if (typeof p === "string" && p !== "getPropertyValue" && p !== "setProperty") {
                     return target.getPropertyValue(p);
                 }
                 return Reflect.get(target, p, receiver);

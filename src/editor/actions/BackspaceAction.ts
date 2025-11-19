@@ -1,7 +1,7 @@
-import {Key} from "../core/events/Keybind";
-import {Editor} from "../Editor";
-import {AbstractAction} from "../core/actions/AbstractAction";
+import {Key} from "../../core/keybinds/Keybind";
+import {AbstractAction} from "../../core/actions/AbstractAction";
 import {CtrlMoveHelper} from "./utils/CtrlMoveHelper";
+import {KeybindContext} from "../../core/keybinds/context/KeybindContext";
 
 
 export class BackspaceAction extends AbstractAction {
@@ -15,7 +15,9 @@ export class BackspaceAction extends AbstractAction {
         shift: false
     }
 
-    run(editor: Editor, event: KeyboardEvent) {
+    run(ctx: KeybindContext) {
+        const editor = ctx.requireEditor();
+
         editor.caretModel.forEachCaret(caret => {
             if (caret.getSelectionModel().isSelectionActive) editor.deleteSelection(caret);
             else {
@@ -45,7 +47,9 @@ export class CtrlBackspaceAction extends AbstractAction {
         shift: false
     }
 
-    run(editor: Editor, event: KeyboardEvent) {
+    run(ctx: KeybindContext) {
+        const editor = ctx.requireEditor();
+
         editor.caretModel.forEachCaret(caret => {
             if (caret.getSelectionModel().isSelectionActive) editor.deleteSelection(caret);
             else {

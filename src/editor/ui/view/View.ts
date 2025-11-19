@@ -1,5 +1,4 @@
 import {Editor} from "../../Editor";
-import {defaults} from "../../Properties";
 import {HTMLUtils} from "../../utils/HTMLUtils";
 import {Scrolling, ScrollMode} from "../scrollbar/Scroll";
 import {RenderedLineData} from "../../core/components/WidgetRenderer";
@@ -7,32 +6,18 @@ import {LogicalPosition} from "../../core/coordinate/LogicalPosition";
 import {VisualPosition} from "../../core/coordinate/VisualPosition";
 import {CaretMovedEvent} from "../../core/caret/events/CaretMovedEvent";
 import {ViewPainter} from "./ViewPainter";
+import {ViewPropertiesManager} from "./properties/ViewPropertiesManager";
 
-
-function _sizer(view: View) {
-    let sizer = HTMLUtils.createElement("div.editor-sizer", view.view);
-    sizer.innerHTML = "a";
-
-    return () => sizer.getBoundingClientRect().width;
-}
 
 export class View {
     editor: Editor;
+    view: HTMLDivElement;
 
     myPainter: ViewPainter;
 
-    view: HTMLDivElement;
+    myProperties: ViewPropertiesManager;
 
     scroll: Scrolling;
-
-    // Properties
-    getCharSize: () => number;
-    getLineHeight: () => number;
-    getViewWidth: () => number;
-    getViewHeight: () => number;
-
-    visualLineCount: number;
-    visualCharCount: number;
 
     // Data
     lines: RenderedLineData[];
@@ -43,6 +28,7 @@ export class View {
     constructor(editor: Editor) {
         this.editor = editor;
         this.myPainter = new ViewPainter(this);
+        this.myProperties = new ViewPropertiesManager(this);
 
         this.editor.getEventBus().subscribe(this, CaretMovedEvent.SUBSCRIBER, () => {
             this.ensureCaretVisible();
@@ -54,12 +40,9 @@ export class View {
      |          Config          |
      +--------------------------+    */
 
-    onAttached(editor: Editor, root: HTMLElement) {
+    onAttached(root: HTMLElement) {
         this.view = HTMLUtils.createElement('div.editor-view', root) as HTMLDivElement;
-
         this.scroll = new Scrolling(this, 0, 0);
-
-        this.myPainter = new ViewPainter(this);
 
         this.initCSS();
 
@@ -84,8 +67,8 @@ export class View {
         let newDeltaX = this.scroll.scrollX + deltaX / 2;
         if (newDeltaX < 0) {
             this.scroll.scrollX = 0;
-        } else if (newDeltaX > (this.editor.getOpenedDocument().getMaxLengthLine() - this.visualCharCount + 2) * this.getCharSize()) {
-            this.scroll.scrollX = Math.max(0, (this.editor.getOpenedDocument().getMaxLengthLine() - this.visualCharCount + 2) * this.getCharSize());
+        } else if (newDeltaX > (this.editor.getOpenedDocument().getMaxLengthLine() - this.getVisualCharCount() + 2) * this.getCharSize()) {
+            this.scroll.scrollX = Math.max(0, (this.editor.getOpenedDocument().getMaxLengthLine() - this.getVisualCharCount() + 2) * this.getCharSize());
         } else {
             this.scroll.scrollX = newDeltaX;
         }
@@ -93,8 +76,8 @@ export class View {
         let newDeltaY = this.scroll.scrollY + deltaY;
         if (newDeltaY < 0) {
             this.scroll.scrollY = 0;
-        } else if (newDeltaY > (this.editor.getLineCount() - this.visualLineCount + 2) * this.getLineHeight()) {
-            this.scroll.scrollY = Math.max(0, (this.editor.getLineCount() - this.visualLineCount + 2) * this.getLineHeight());
+        } else if (newDeltaY > (this.editor.getLineCount() - this.getVisualLineCount() + 2) * this.getLineHeight()) {
+            this.scroll.scrollY = Math.max(0, (this.editor.getLineCount() - this.getVisualLineCount() + 2) * this.getLineHeight());
         } else {
             this.scroll.scrollY = newDeltaY;
         }
@@ -103,8 +86,8 @@ export class View {
     }
 
     scrollIntoView(position: LogicalPosition, mode: ScrollMode) {
-        let scrollX = this.scrollIntoViewAlong(position.col, this.scroll.scrollXChars, this.scroll.scrollXChars + this.visualCharCount - 1);
-        let scrollY = this.scrollIntoViewAlong(position.row, this.scroll.scrollYLines, this.scroll.scrollYLines + this.visualLineCount - 1);
+        let scrollX = this.scrollIntoViewAlong(position.col, this.scroll.scrollXChars, this.scroll.scrollXChars + this.getVisualCharCount() - 1);
+        let scrollY = this.scrollIntoViewAlong(position.row, this.scroll.scrollYLines, this.scroll.scrollYLines + this.getVisualLineCount() - 1);
         if (scrollX !== null) {
             this.scroll.scrollX = scrollX * this.getCharSize();
         }
@@ -120,19 +103,71 @@ export class View {
             this.scrollIntoView(this.editor.getPrimaryCaret().getLogical(), ScrollMode.Smooth);
     }
 
-    /**
-     +-------------------------+
-     |          Logic          |
-     +-------------------------+    */
+    getEditor(): Editor {
+        return this.editor;
+    }
 
-    getMaxHeight() {
-        const lineCount = Math.max(this.editor.getLineCount() + 2, this.visualLineCount);
-        return lineCount * this.getLineHeight();
+    getScroll(): Scrolling {
+        return this.scroll;
+    }
+
+    getLayers() {
+        return this.myPainter.getLayers();
+    }
+
+    getPainter(): ViewPainter {
+        return this.myPainter;
+    }
+
+    getProperties(): ViewPropertiesManager {
+        return this.myProperties;
+    }
+
+    getRootElement(): HTMLElement {
+        return this.editor.root;
+    }
+
+    getViewElement(): HTMLDivElement {
+        return this.view;
+    }
+
+    getViewWidth() {
+        return this.myProperties.getWidth();
+    }
+
+    getViewHeight() {
+        return this.myProperties.getHeight();
+    }
+
+    getCharSize(): number {
+        return this.myProperties.getCharSize();
+    }
+
+    getLineHeight(): number {
+        return this.myProperties.getLineHeight();
+    }
+
+    resize(width: number, height: number) {
+        this.myProperties.setWidth(width);
+        this.myProperties.setHeight(height);
+    }
+
+    getVisualLineCount(): number {
+        return this.myProperties.getVisualLineCount();
+    }
+
+    getVisualCharCount(): number {
+        return this.myProperties.getVisualCharCount();
     }
 
     getMaxWidth() {
-        const maxLineLength = Math.max(this.editor.getOpenedDocument().getMaxLengthLine(), this.visualCharCount);
+        const maxLineLength = Math.max(this.editor.getOpenedDocument().getMaxLengthLine(), this.getVisualCharCount());
         return maxLineLength * this.getCharSize();
+    }
+
+    getMaxHeight() {
+        const lineCount = Math.max(this.editor.getLineCount() + 2, this.getVisualLineCount());
+        return lineCount * this.getLineHeight();
     }
 
     getRelativePos(event: MouseEvent) {
@@ -223,18 +258,6 @@ export class View {
         this.editor.onKeyUp(e);
     }
 
-    getEditor(): Editor {
-        return this.editor;
-    }
-
-    getScroll(): Scrolling {
-        return this.scroll;
-    }
-
-    getLayers() {
-        return this.myPainter.getLayers();
-    }
-
     private scrollIntoViewAlong(position: number, scrollStart: number, scrollEnd: number): number | null {
         if (position > scrollStart && position < scrollEnd) {
             return null;  // Already in view
@@ -266,37 +289,6 @@ export class View {
     /**
      * Initialise the styling of the editor according to the `editor.properties`*/
     private initCSS() {
-        const P = this.editor.properties.view || (this.editor.properties.view = {});
-
-        function orDefault(key: string): string {
-            return P[key] || (P[key] = defaults.view[key]);
-        }
-
-
-        this.setCSSProperties(this.editor.root, {
-            '--editor-width': HTMLUtils.px(orDefault('width')),
-            '--editor-height': HTMLUtils.px(orDefault('height')),
-            '--editor-root-bg': orDefault('rootBgColor'),
-            '--editor-root-border-color': orDefault('rootBorderColor'),
-            '--editor-font-size': HTMLUtils.px(orDefault('fontSize')),
-            '--editor-line-height': HTMLUtils.px(orDefault('lineHeight')),
-            '--editor-gutter-width': HTMLUtils.px(orDefault('gutterWidth')),
-            '--editor-caret-height': HTMLUtils.px(orDefault('caretHeight')),
-            '--editor-gutter-color': orDefault('gutterColor'),
-            '--editor-caret-color': orDefault('caretColor'),
-            '--editor-selection-color': orDefault('selectionColor'),
-            '--editor-active-line-color': orDefault('activeLineColor'),
-        });
-
-        this.getCharSize = _sizer(this);
-        this.getLineHeight = () => P.lineHeight!;
-        this.getViewWidth = () => P.width!;
-        this.getViewHeight = () => P.height!;
-        this.visualLineCount = Math.floor(P.height! / this.getLineHeight())
-        setTimeout(() => {
-            this.visualCharCount = Math.floor(this.myPainter.getLayers().layers_el.getBoundingClientRect().width / this.getCharSize())
-        }, 100);
-
         this.setCSSProperties(this.view, {
             '--editor-scroll-offsetY': HTMLUtils.px(this.getLineHeight()),
         });

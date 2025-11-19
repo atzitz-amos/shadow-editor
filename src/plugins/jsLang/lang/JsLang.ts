@@ -1,9 +1,9 @@
-import {LanguageBase} from "../../../editor/lang/LanguageBase";
-import {IncrementalLexer} from "../../../editor/lang/lexer/IncrementalLexer";
-import {ASTBuilder} from "../../../editor/lang/ast/builder/ASTBuilder";
-import {IParser} from "../../../editor/lang/ast/IParser";
+import {LanguageBase} from "../../../core/lang/LanguageBase";
+import {IncrementalLexer} from "../../../core/lang/lexer/IncrementalLexer";
+import {ASTBuilder} from "../../../core/lang/ast/builder/ASTBuilder";
+import {IParser} from "../../../core/lang/ast/IParser";
 import {JsParser} from "./parser/JsParser";
-import {HighlighterBase} from "../../../editor/lang/highlighter/HighlighterBase";
+import {HighlighterBase} from "../../../core/lang/highlighter/HighlighterBase";
 import {JsHighlighter} from "./highlighter/JsHighlighter";
 import JsIncrLexer from "./lexer/JsIncrLexer";
 

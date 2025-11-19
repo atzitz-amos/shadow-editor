@@ -1,6 +1,6 @@
-import {EventSubscriber} from "../core/events/EventSubscriber";
+import {EventSubscriber} from "../../core/events/EventSubscriber";
 import {Editor} from "../Editor";
-import {EditorEventBase} from "../core/events/EditorEventBase";
+import {EditorEventBase} from "../../core/events/EditorEventBase";
 
 /**
  * Fired when the editor is first attached to an html component

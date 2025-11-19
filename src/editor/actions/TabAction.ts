@@ -1,6 +1,6 @@
-import {AbstractAction} from "../core/actions/AbstractAction";
-import {Key} from "../core/events/Keybind";
-import {Editor} from "../Editor";
+import {AbstractAction} from "../../core/actions/AbstractAction";
+import {Key} from "../../core/keybinds/Keybind";
+import {KeybindContext} from "../../core/keybinds/context/KeybindContext";
 
 
 export class TabAction extends AbstractAction {
@@ -14,8 +14,10 @@ export class TabAction extends AbstractAction {
         shift: false
     };
 
-    run(editor: Editor, event: KeyboardEvent) {
-        event.preventDefault();
+    run(ctx: KeybindContext) {
+        const editor = ctx.requireEditor();
+
+        ctx.getEvent().preventDefault();
         editor.caretModel.forEachCaret(caret => {
             editor.insertText(caret.getOffset(), '    ');
             editor.caretModel.shift(4);

@@ -1,14 +1,13 @@
 import {View} from "./ui/view/View";
-import {Project} from "./core/project/Project";
-import {ProjectFile} from "./core/project/File";
+import {Project} from "../core/project/Project";
+import {ProjectFile} from "../core/project/filetree/ProjectFile";
 import {EditorProperties} from "./Properties";
 import {TextContext, TextRange} from "./core/coordinate/TextRange";
 import {Caret, CaretModel} from "./core/caret/Caret";
-import {Key, ModifierKeyHolder} from "./core/events/Keybind";
+import {Key, ModifierKeyHolder} from "../core/keybinds/Keybind";
 
 import {HTMLUtils} from "./utils/HTMLUtils";
-import {EditorInstance} from "./EditorInstance";
-import {TokenStream} from "./lang/tokens/TokenStream";
+import {TokenStream} from "../core/lang/tokens/TokenStream";
 import {Document} from "./core/document/Document";
 import {WidgetManager} from "./core/components/WidgetManager";
 import {LogicalPosition} from "./core/coordinate/LogicalPosition";
@@ -16,70 +15,52 @@ import {VisualPosition} from "./core/coordinate/VisualPosition";
 import {XYPoint} from "./core/coordinate/XYPoint";
 import {EditorCoordinateMapper} from "./core/coordinate/EditorCoordinateMapper";
 import {InlayManager} from "./core/inlay/InlayManager";
-import {ProcessManager} from "./core/processManager/ProcessManager";
-import {PluginManager} from "./plugins/PluginManager";
-import {EditorPlugin} from "./plugins/loader/Plugin";
-import {LanguageBase} from "./lang/LanguageBase";
-import {ASTBuilder} from "./lang/ast/builder/ASTBuilder";
+import {ProcessManager} from "../core/processManager/ProcessManager";
+import {PluginManager} from "../core/plugins/PluginManager";
+import {LanguageBase} from "../core/lang/LanguageBase";
+import {ASTBuilder} from "../core/lang/ast/builder/ASTBuilder";
 import JsLang from "../plugins/jsLang/lang/JsLang";
-import {ASTNode} from "./lang/ast/nodes/ASTNode";
-import {LangSupport} from "./core/lang/LangSupport";
+import {ASTNode} from "../core/lang/ast/nodes/ASTNode";
+import {LangSupport} from "../core/lang/LangSupport";
 import {LangService} from "./core/lang/LangService";
-import {EventBus} from "./core/events/EventBus";
-import {KeybindManager} from "./core/events/KeybindManager";
+import {EventBus} from "../core/events/EventBus";
+import {KeybindManager} from "../core/keybinds/KeybindManager";
 import {EditorAttachedEvent} from "./events/EditorAttachedEvent";
 import {KeyPressedEvent, KeyReleasedEvent, MousePressedEvent, MouseReleasedEvent} from "./events/PhysicalEvents";
 import {InlayWidget} from "./ui/inline/inlay/InlayWidget";
+import {KeybindContext} from "../core/keybinds/context/KeybindContext";
 
 export class Editor {
-    static ID = 0;
+    private static ID_COUNTER = 0;
 
     id: number;
     properties: EditorProperties;
-
-    file: ProjectFile;
+    file: ProjectFile | undefined;
     project: Project;
-
     view: View;
     root: HTMLElement;
-
     document: Document;
     langService: LangService;
     widgetManager: WidgetManager;
-
     inlayManager: InlayManager;
     coordinateMapper: EditorCoordinateMapper;
-
     caretModel: CaretModel;
-
     processManager: ProcessManager;
-    keybindManager: KeybindManager;
     eventBus: EventBus;
-
-    langSupport: LangSupport;
-    pluginManager: PluginManager;
-
     perfCheckRunning: boolean = false;
-
     private renderingProcess: any;
 
-    constructor(project?: Project | null, options?: EditorProperties) {
-        this.id = Editor.ID++;
+    constructor(project: Project, options?: EditorProperties) {
+        this.id = Editor.ID_COUNTER++;
+
+        this.project = project;
 
         this.properties = options || {};
-
-        this.file = this.properties.file || new ProjectFile('temp.js', '');
-        if (project) project.addFile(this.file);
-
-        // TODO
-        this.file.setLanguage(JsLang.class);
-
-        this.project = project || Project.singleFileProject(this.file);
+        this.file = this.properties.file;
 
         this.eventBus = new EventBus('editor.bus');
-        this.keybindManager = new KeybindManager(this);
 
-        this.document = new Document(this, this.file);
+        this.document = new Document(this, "");
         this.langService = new LangService(this);
         this.widgetManager = new WidgetManager(this);
 
@@ -94,34 +75,18 @@ export class Editor {
 
         this.processManager = new ProcessManager();
 
-        this.langSupport = new LangSupport();
-        this.pluginManager = new PluginManager(this);
-        this.pluginManager.loadAll();
-
         this.renderingProcess = setInterval(() => {
-            EditorInstance.with(this, () => {
-                this.view.render();
-            });
+            this.view.render();
         }, 20);
     }
 
     attach(element: HTMLElement) {
         // We assume plugins have loaded by now, so we can finally parse the file content
-        EditorInstance.with(this, () => {
-            this.root = HTMLUtils.createElement('div.editor', element) as HTMLDivElement;
-            this.view.onAttached(this, this.root);
+        this.root = HTMLUtils.createElement('div.editor', element) as HTMLDivElement;
+        setTimeout(() => this.view.onAttached(this.root), 0);
 
-            this.eventBus.syncPublish(new EditorAttachedEvent(this, this.root));
-        });
+        this.eventBus.syncPublish(new EditorAttachedEvent(this, this.root));
 
-    }
-
-    enable(plugin: Class<EditorPlugin>) {
-        this.pluginManager.enable(plugin);
-    }
-
-    disable(plugin: Class<EditorPlugin>) {
-        this.pluginManager.enable(plugin);
     }
 
     /**
@@ -132,15 +97,11 @@ export class Editor {
         return this.eventBus;
     }
 
-    getKeybindManager(): KeybindManager {
-        return this.keybindManager;
-    }
-
     getProject(): Project {
         return this.project;
     }
 
-    getOpenedFile(): ProjectFile {
+    getOpenedFile(): ProjectFile | undefined {
         return this.file;
     }
 
@@ -149,11 +110,11 @@ export class Editor {
     }
 
     getCurrentLanguage(): LanguageBase | null {
-        return this.file.getLanguage();
+        return this.langService.getCurrentLanguage();
     }
 
     getLangSupport() {
-        return this.langSupport;
+        return LangSupport.getInstance();
     }
 
     getLangService(): LangService {
@@ -177,7 +138,7 @@ export class Editor {
     }
 
     getPluginManager(): PluginManager {
-        return this.pluginManager;
+        return PluginManager.getInstance();
     }
 
     getInlayManager(): InlayManager {
@@ -255,17 +216,15 @@ export class Editor {
     }
 
     type(char: string) {
-        EditorInstance.with(this, () => {
-            this.caretModel.forEachCaret(caret => {
-                if (caret.getSelectionModel().isSelectionActive) {
-                    this.deleteSelection(caret);
-                }
+        this.caretModel.forEachCaret(caret => {
+            if (caret.getSelectionModel().isSelectionActive) {
+                this.deleteSelection(caret);
+            }
 
-                this.insertText(caret.getOffset(), char)
-                caret.shiftRight(false);
-                caret.refresh();
-                this.view.resetBlink();
-            });
+            this.insertText(caret.getOffset(), char)
+            caret.shiftRight(false);
+            caret.refresh();
+            this.view.resetBlink();
         });
     }
 
@@ -386,7 +345,7 @@ export class Editor {
         }
         ModifierKeyHolder.getInstance().set(event);
 
-        this.keybindManager.onKeydown(event);
+        KeybindManager.getInstance().onKeydown(KeybindContext.EDITOR_CONTEXT(this, event));
         this.eventBus.syncPublish(new KeyPressedEvent(this, event));
     }
 
@@ -396,7 +355,7 @@ export class Editor {
         this.caretModel.removeAll();
         this.moveCursorToMouseEvent(event);
 
-        this.keybindManager.onMousedown(event);
+        KeybindManager.getInstance().onMousedown(KeybindContext.EDITOR_CONTEXT(this, event));
         this.eventBus.syncPublish(new MousePressedEvent(this, event));
     }
 
@@ -448,9 +407,7 @@ export class Editor {
 
     resumeRender() {
         this.renderingProcess = setInterval(() => {
-            EditorInstance.with(this, () => {
-                this.view.render();
-            });
+            this.view.render();
         }, 20);
     }
 }

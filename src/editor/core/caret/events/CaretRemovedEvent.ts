@@ -1,5 +1,5 @@
-import {EventSubscriber} from "../../events/EventSubscriber";
-import {EditorEventBase} from "../../events/EditorEventBase";
+import {EventSubscriber} from "../../../../core/events/EventSubscriber";
+import {EditorEventBase} from "../../../../core/events/EditorEventBase";
 import {Caret} from "../Caret";
 
 /**

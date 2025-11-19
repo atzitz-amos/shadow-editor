@@ -9,9 +9,9 @@ export class InlayUtils {
         span.style.position = "absolute";
         span.style.visibility = "hidden";
 
-        view.layers.getTextLayer().lines[0].appendChild(span);
+        view.getLayers().getTextLayer().lines[0].appendChild(span);
         const width = span.getBoundingClientRect().width;
-        view.layers.getTextLayer().lines[0].removeChild(span);
+        view.getLayers().getTextLayer().lines[0].removeChild(span);
         return width;
     }
 

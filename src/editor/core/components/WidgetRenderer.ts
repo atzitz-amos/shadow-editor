@@ -12,7 +12,7 @@ export type RenderedLineData = {
 }
 
 export class WidgetRenderer {
-    private manager: WidgetManager;
+    private readonly manager: WidgetManager;
 
     constructor(manager: WidgetManager) {
         this.manager = manager;
