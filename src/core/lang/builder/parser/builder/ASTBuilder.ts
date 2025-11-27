@@ -1,17 +1,18 @@
 import {TokenStream} from "../../tokens/TokenStream";
 import {Token} from "../../tokens/Token";
 import {Marker, TokenStreamMarker} from "./Marker";
-import {ASTNode} from "../nodes/ASTNode";
-import {ASTTokenNode} from "../nodes/ASTTokenNode";
+import {SynTokenNode} from "../../syntax/impl/SynTokenNode";
 import {TokenType} from "../../tokens/TokenType";
-import {TextRange} from "../../../../editor/core/coordinate/TextRange";
-import {ASTErrorNode} from "../nodes/ASTErrorNode";
-import {ASTGrammar, ASTType} from "../ASTGrammar";
-import {ASTElementNode} from "../nodes/ASTElementNode";
+import {TextRange} from "../../../../../editor/core/coordinate/TextRange";
+import {SynErrorNode} from "../../syntax/impl/SynErrorNode";
+import {ASTGrammar, ASTType} from "../nodes/ASTGrammar";
 import {TokenExpectation} from "./TokenExpectation";
+import {SynNode} from "../../syntax/api/SynNode";
+import {ASTNode} from "../nodes/ASTNode";
+import {DefaultSynElement} from "../../syntax/impl/DefaultSynElement";
 
 export class ASTBuilder {
-    private readonly production: ASTNode[] = [];
+    private readonly production: SynNode[] = [];
     private currentOffset: number = 0;
 
     private isErrorState: boolean = false;
@@ -81,7 +82,7 @@ export class ASTBuilder {
         }
         this.currentOffset = token.getRange().end;
         if (shouldAppend && !token.shouldSkip())
-            this.production.push(new ASTTokenNode(token));
+            this.production.push(new SynTokenNode(token));
         if (token.isCommentToken() || token.shouldSkip()) {
             return this.advance(shouldAppend);
         }
@@ -123,17 +124,17 @@ export class ASTBuilder {
 
     error(msg: string) {
         this.isErrorState = true;
-        this.production.push(new ASTErrorNode(new TextRange(this.currentOffset, this.currentOffset), msg));
+        this.production.push(new SynErrorNode(new TextRange(this.currentOffset, this.currentOffset), msg));
     }
 
     errorBefore(token: Token, msg: string) {
         this.isErrorState = true;
-        this.production.push(new ASTErrorNode(new TextRange(token.getRange().start, token.getRange().start), msg));
+        this.production.push(new SynErrorNode(new TextRange(token.getRange().start, token.getRange().start), msg));
     }
 
     errorOn(token: Token, msg: string) {
         this.isErrorState = true;
-        this.production.push(new ASTErrorNode(token.getRange(), msg));
+        this.production.push(new SynErrorNode(token.getRange(), msg));
     }
 
     markErrorAndRemove(token: Token, msg: string) {
@@ -142,7 +143,7 @@ export class ASTBuilder {
             if (ast.getTextRange().is(token.getRange())) {
                 this.production.splice(i, 1);
                 this.isErrorState = true;
-                this.production.push(new ASTErrorNode(token.getRange(), msg));
+                this.production.push(new SynErrorNode(token.getRange(), msg));
                 return;
             }
         }
@@ -150,12 +151,12 @@ export class ASTBuilder {
 
     popAndError(msg: string) {
         this.isErrorState = true;
-        this.production.push(new ASTErrorNode(this.production.pop()!.getTextRange(), msg));
+        this.production.push(new SynErrorNode(this.production.pop()!.getTextRange(), msg));
     }
 
     errorAt(range: TextRange, msg: string) {
         this.isErrorState = true;
-        this.production.push(new ASTErrorNode(range, msg));
+        this.production.push(new SynErrorNode(range, msg));
     }
 
     build(marker: Marker, type: ASTType) {
@@ -164,13 +165,22 @@ export class ASTBuilder {
         if (children.length === 1 && type === ASTGrammar.Expression)
             this.production.push(children[0]);
         else
-            this.production.push(new ASTElementNode(type, children, range));
+            this.addToProduction(type, children, range);
         this.wasInErrorState = this.isErrorState;
         this.isErrorState = false;
     }
 
     add(type: ASTType) {
-        this.production.push(new ASTElementNode(type, [], new TextRange(this.currentOffset, this.currentOffset)));
+        this.addToProduction(type, [], new TextRange(this.currentOffset, this.currentOffset));
+    }
+
+    addToProduction(type: ASTType, children: SynNode[], range: TextRange) {
+        const node = new ASTNode(type, children, range);
+        if (type.treeBuilder) {
+            this.production.push(type.treeBuilder(node));
+        } else {
+            this.production.push(new DefaultSynElement(node));
+        }
     }
 
     clearWhitespace() {
@@ -179,7 +189,7 @@ export class ASTBuilder {
             this.currentOffset = token.getRange().end;
             this.stream.consume();
             if (token.isCommentToken())
-                this.production.push(new ASTTokenNode(token));
+                this.production.push(new SynTokenNode(token));
         }
     }
 

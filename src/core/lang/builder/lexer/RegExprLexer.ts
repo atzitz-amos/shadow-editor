@@ -2,9 +2,9 @@ import {Source, TokenStream} from "../tokens/TokenStream";
 import {Token} from "../tokens/Token";
 import {TokenType} from "../tokens/TokenType";
 import {LexicalGrammar} from "./LexicalGrammar";
-import {TextRange} from "../../../editor/core/coordinate/TextRange";
+import {TextRange} from "../../../../editor/core/coordinate/TextRange";
 import {ILexer} from "./ILexer";
-import {DocumentModificationEvent} from "../../../editor/core/document/events/DocumentModificationEvent";
+import {DocumentModificationEvent} from "../../../../editor/core/document/events/DocumentModificationEvent";
 
 /**
  * Special Lexer that aims at simplifying the development of lexers by relying essentially on regular expressions.<br>

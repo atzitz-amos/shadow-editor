@@ -1,4 +1,4 @@
-import {IncrementalLexer} from "./lexer/IncrementalLexer";
+import {IncrementalLexer} from "./builder/lexer/IncrementalLexer";
 import {IParser} from "./ast/IParser";
 import {ASTBuilder} from "./ast/builder/ASTBuilder";
 import {ExtensionPointSupplier} from "../plugins/extensionPoints/ExtensionPointSupplier";

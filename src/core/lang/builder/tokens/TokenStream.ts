@@ -1,6 +1,6 @@
 import {Token} from "./Token";
 import {OutdatedTokenStreamError} from "./OutdatedTokenStreamError";
-import {TextRange} from "../../../editor/core/coordinate/TextRange";
+import {TextRange} from "../../../../editor/core/coordinate/TextRange";
 
 export class Source {
     src: string;

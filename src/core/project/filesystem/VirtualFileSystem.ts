@@ -39,7 +39,8 @@ export class VirtualFileSystem implements FileSystem {
             throw new Error("VirtualFileSystem instance already exists.");
         this.instance = new VirtualFileSystem(project);
 
-        const handle = await navigator.storage.getDirectory();
+        const rootHandle = await navigator.storage.getDirectory();
+        const handle = await rootHandle.getDirectoryHandle(project.name, {create: true});
 
         if (persistence === PersistenceStrategy.PERSIST) {
             this.instance.setRoot(handle);

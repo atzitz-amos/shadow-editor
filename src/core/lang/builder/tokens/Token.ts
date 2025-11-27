@@ -1,5 +1,5 @@
 import {TokenType} from "./TokenType";
-import {TextRange} from "../../../editor/core/coordinate/TextRange";
+import {TextRange} from "../../../../editor/core/coordinate/TextRange";
 
 export class Token {
     private readonly isComment: boolean;

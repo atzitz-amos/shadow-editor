@@ -1,12 +1,13 @@
 import {Editor} from "../../Editor";
 import {LanguageBase} from "../../../core/lang/LanguageBase";
-import {IncrementalLexer} from "../../../core/lang/lexer/IncrementalLexer";
+import {IncrementalLexer} from "../../../core/lang/builder/lexer/IncrementalLexer";
 import {IncrementalHighlighter} from "../../../core/lang/highlighter/IncrementalHighlighter";
-import {IParser} from "../../../core/lang/ast/IParser";
-import {ASTBuilder} from "../../../core/lang/ast/builder/ASTBuilder";
 import {DocumentModificationEvent} from "../document/events/DocumentModificationEvent";
 import {HighlighterBase} from "../../../core/lang/highlighter/HighlighterBase";
-import {ASTNode} from "../../../core/lang/ast/nodes/ASTNode";
+import {IParser} from "../../../core/lang/builder/parser/IParser";
+import {ASTNode} from "../../../core/lang/builder/parser/nodes/ASTNode";
+import {ASTBuilder} from "../../../core/lang/builder/parser/builder/ASTBuilder";
+import {SynNode} from "../../../core/lang/builder/syntax/api/SynNode";
 
 /**
  * Class associated with an editor that holds the current language, lexer, parser, highlighter as
@@ -23,7 +24,7 @@ export class LangService {
     private myHighlighter: HighlighterBase | null = null;
     private myIncrementalHighlighter: IncrementalHighlighter | null = null;
     private myParser: IParser | null = null;  // TODO: support incremental parsing
-    private myProduction: ASTNode[];
+    private myProduction: SynNode[];
 
     constructor(private editor: Editor) {
         editor.getEventBus().subscribe(this, DocumentModificationEvent.SUBSCRIBER, this.onDocumentChange);

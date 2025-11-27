@@ -1,4 +1,6 @@
-import {TreeComponentBase} from "../tree/TreeComponentBase";
+import {SynElement} from "../../syntax/api/SynElement";
+import {ASTNode} from "./ASTNode";
+import {SynNode} from "../../syntax/api/SynNode";
 
 export enum ASTGrammarRole {
     DEFAULT,
@@ -9,7 +11,7 @@ export enum ASTGrammarRole {
 }
 
 export class ASTType {
-    constructor(public debugName: string, public role: ASTGrammarRole, public treeBuilder?: (node: ASTGrammar) => TreeComponentBase) {
+    constructor(public debugName: string, public role: ASTGrammarRole, public treeBuilder?: (node: ASTNode) => SynNode) {
     }
 }
 
@@ -18,11 +20,11 @@ export class ASTGrammar {
     public static readonly SYNTAX_ERROR = new ASTType("SYNTAX_ERROR", ASTGrammarRole.ERROR);
     public static readonly Expression = new ASTType("EXPR", ASTGrammarRole.EXPR);
 
-    public static create(debugName: string, treeBuilder?: (node: ASTGrammar) => TreeComponentBase): ASTType {
+    public static create(debugName: string, treeBuilder?: (node: ASTNode) => SynNode): ASTType {
         return new ASTType(debugName, ASTGrammarRole.DEFAULT, treeBuilder);
     }
 
-    public static createCodeBlock(debugName: string, treeBuilder?: (node: ASTGrammar) => TreeComponentBase): ASTType {
+    public static createCodeBlock(debugName: string, treeBuilder?: (node: ASTNode) => SynNode): ASTType {
         return new ASTType(debugName, ASTGrammarRole.CODEBLOCK, treeBuilder);
     }
 }

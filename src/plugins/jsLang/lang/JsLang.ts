@@ -1,5 +1,5 @@
 import {LanguageBase} from "../../../core/lang/LanguageBase";
-import {IncrementalLexer} from "../../../core/lang/lexer/IncrementalLexer";
+import {IncrementalLexer} from "../../../core/lang/builder/lexer/IncrementalLexer";
 import {ASTBuilder} from "../../../core/lang/ast/builder/ASTBuilder";
 import {IParser} from "../../../core/lang/ast/IParser";
 import {JsParser} from "./parser/JsParser";

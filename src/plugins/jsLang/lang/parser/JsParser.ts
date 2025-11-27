@@ -1,9 +1,9 @@
-import {ASTBuilder} from "../../../../core/lang/ast/builder/ASTBuilder";
-import {IParser} from "../../../../core/lang/ast/IParser";
 import {JsGrammar} from "./JsGrammar";
 import {JsLexicalGrammar} from "../lexer/JsLexicalGrammar";
-import {Marker} from "../../../../core/lang/ast/builder/Marker";
 import {JsExprParser} from "./JsExprParser";
+import {ASTBuilder} from "../../../../core/lang/builder/parser/builder/ASTBuilder";
+import {IParser} from "../../../../core/lang/builder/parser/IParser";
+import {Marker} from "../../../../core/lang/builder/parser/builder/Marker";
 
 
 export class JsParser implements IParser {

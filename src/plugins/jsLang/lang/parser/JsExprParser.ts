@@ -1,9 +1,9 @@
 import {JsParser} from "./JsParser";
-import {ASTBuilder} from "../../../../core/lang/ast/builder/ASTBuilder";
 import {JsLexicalGrammar} from "../lexer/JsLexicalGrammar";
 import {JsGrammar} from "./JsGrammar";
 import {ErrorHandlingMode, JsPrattParser, OperatorPrecedence} from "./JsPrattParser";
-import {Marker} from "../../../../core/lang/ast/builder/Marker";
+import {ASTBuilder} from "../../../../core/lang/builder/parser/builder/ASTBuilder";
+import {Marker} from "../../../../core/lang/builder/parser/builder/Marker";
 
 export class JsExprParser {
     private myPrattParser: JsPrattParser;
@@ -31,7 +31,7 @@ export class JsExprParser {
     }
 
     parseExpression(allowComma = true): void {
-        const isError = this.myPrattParser.parseExpression(allowComma ? 0 : OperatorPrecedence.NOCOMMA);
+        const isError = this.myPrattParser.parseExpression(allowComma ? 0 : OperatorPrecedence.NO_COMMA);
         if (isError === ErrorHandlingMode.ROLLBACK) {
             this.builder.advance(false); // Ensure the parser does not get stuck
             this.builder.error("Unexpected token");

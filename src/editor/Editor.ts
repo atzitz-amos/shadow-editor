@@ -7,7 +7,6 @@ import {Caret, CaretModel} from "./core/caret/Caret";
 import {Key, ModifierKeyHolder} from "../core/keybinds/Keybind";
 
 import {HTMLUtils} from "./utils/HTMLUtils";
-import {TokenStream} from "../core/lang/tokens/TokenStream";
 import {Document} from "./core/document/Document";
 import {WidgetManager} from "./core/components/WidgetManager";
 import {LogicalPosition} from "./core/coordinate/LogicalPosition";
@@ -18,9 +17,7 @@ import {InlayManager} from "./core/inlay/InlayManager";
 import {ProcessManager} from "../core/processManager/ProcessManager";
 import {PluginManager} from "../core/plugins/PluginManager";
 import {LanguageBase} from "../core/lang/LanguageBase";
-import {ASTBuilder} from "../core/lang/ast/builder/ASTBuilder";
 import JsLang from "../plugins/jsLang/lang/JsLang";
-import {ASTNode} from "../core/lang/ast/nodes/ASTNode";
 import {LangSupport} from "../core/lang/LangSupport";
 import {LangService} from "./core/lang/LangService";
 import {EventBus} from "../core/events/EventBus";
@@ -143,13 +140,6 @@ export class Editor {
 
     getInlayManager(): InlayManager {
         return this.inlayManager;
-    }
-
-    parse(stream: TokenStream): ASTNode[] {
-        const builder = new ASTBuilder(stream);
-        const parser = this.langService.makeParser(builder)!;  // TODO: handle no parser
-        parser.parse();
-        return builder.getProduction();
     }
 
     /**

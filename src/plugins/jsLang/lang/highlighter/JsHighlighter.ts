@@ -4,7 +4,7 @@
  */
 
 import {HighlighterBase} from "../../../../core/lang/highlighter/HighlighterBase";
-import {Token} from "../../../../core/lang/tokens/Token";
+import {Token} from "../../../../core/lang/builder/tokens/Token";
 import {HighlightHolder} from "../../../../editor/ui/highlighter/HighlightHolder";
 import {TextAttributes} from "../../../../editor/ui/highlighter/style/TextAttributes";
 import {JsColorScheme} from "./JsColorScheme";

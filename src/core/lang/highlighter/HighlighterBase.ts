@@ -4,7 +4,7 @@
  */
 
 import {HighlightHolder} from "../../../editor/ui/highlighter/HighlightHolder";
-import {Token} from "../tokens/Token";
+import {Token} from "../builder/tokens/Token";
 
 export abstract class HighlighterBase {
     abstract performHighlighting(holder: HighlightHolder, token: Token): void;

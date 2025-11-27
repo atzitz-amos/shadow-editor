@@ -1,8 +1,8 @@
 import {Source, StaticTokenStream, TokenStream} from "../tokens/TokenStream";
 import {ILexer} from "./ILexer";
-import {TokenCache} from "../../../editor/core/lang/TokenCache";
+import {TokenCache} from "../../../../editor/core/lang/TokenCache";
 import {Token} from "../tokens/Token";
-import {DocumentModificationEvent} from "../../../editor/core/document/events/DocumentModificationEvent";
+import {DocumentModificationEvent} from "../../../../editor/core/document/events/DocumentModificationEvent";
 
 /**
  * An abstract class for incremental lexers that support re-lexing of modified text ranges.

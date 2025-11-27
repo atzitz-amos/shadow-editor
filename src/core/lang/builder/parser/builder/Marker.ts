@@ -1,6 +1,6 @@
 import {Token} from "../../tokens/Token";
 import {ASTBuilder} from "./ASTBuilder";
-import {ASTType} from "../ASTGrammar";
+import {ASTType} from "../nodes/ASTGrammar";
 
 export interface Marker {
     getOffset(): number;

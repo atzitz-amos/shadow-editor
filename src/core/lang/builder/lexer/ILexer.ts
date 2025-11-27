@@ -1,6 +1,6 @@
 import {Source, TokenStream} from "../tokens/TokenStream";
 import {Token} from "../tokens/Token";
-import {DocumentModificationEvent} from "../../../editor/core/document/events/DocumentModificationEvent";
+import {DocumentModificationEvent} from "../../../../editor/core/document/events/DocumentModificationEvent";
 
 /**
  * Represents a lexer interface for tokenizing source code.

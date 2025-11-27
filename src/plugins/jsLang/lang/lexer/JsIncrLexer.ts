@@ -3,11 +3,11 @@
  * Date: 10/18/2025
  */
 
-import {IncrementalLexer} from "../../../../core/lang/lexer/IncrementalLexer";
-import {Token} from "../../../../core/lang/tokens/Token";
-import {Source} from "../../../../core/lang/tokens/TokenStream";
+import {IncrementalLexer} from "../../../../core/lang/builder/lexer/IncrementalLexer";
+import {Token} from "../../../../core/lang/builder/tokens/Token";
+import {Source} from "../../../../core/lang/builder/tokens/TokenStream";
 import {JsLexicalGrammar} from "./JsLexicalGrammar";
-import {TokenType} from "../../../../core/lang/tokens/TokenType";
+import {TokenType} from "../../../../core/lang/builder/tokens/TokenType";
 import {TextRange} from "../../../../editor/core/coordinate/TextRange";
 
 export default class JsIncrLexer extends IncrementalLexer {
@@ -135,12 +135,8 @@ export default class JsIncrLexer extends IncrementalLexer {
             return new Token(JsLexicalGrammar.COMPARISON_OPERATOR, triple, input.getRange(start));
         }
 
-        // DOT or ?.
+        // DOT
         if (c1 === ".") {
-            if (c2 === "?") {
-                c1 += "?";
-                input.jump(1);
-            }
             return new Token(JsLexicalGrammar.DOT, c1, input.getRange(start));
         }
 
@@ -155,7 +151,6 @@ export default class JsIncrLexer extends IncrementalLexer {
             ";": JsLexicalGrammar.SEMICOLON,
             ",": JsLexicalGrammar.COMMA,
             ":": JsLexicalGrammar.COLON,
-            "?": JsLexicalGrammar.QUESTION_MARK,
             "#": JsLexicalGrammar.HASHTAG
         };
         if (singleMap[c1]) {
@@ -211,6 +206,9 @@ export default class JsIncrLexer extends IncrementalLexer {
             case "**":
                 input.jump(1);
                 return new Token(JsLexicalGrammar.MATHEMATICAL_OPERATOR, double, input.getRange(start));
+            case "?.":
+                input.jump(1);
+                return new Token(JsLexicalGrammar.DOT, double, input.getRange(start));
         }
 
         switch (c1) {
@@ -231,6 +229,8 @@ export default class JsIncrLexer extends IncrementalLexer {
             case "<":
             case ">":
                 return new Token(JsLexicalGrammar.COMPARISON_OPERATOR, c1, input.getRange(start));
+            case "?":
+                return new Token(JsLexicalGrammar.QUESTION_MARK, c1, input.getRange(start));
 
         }
 

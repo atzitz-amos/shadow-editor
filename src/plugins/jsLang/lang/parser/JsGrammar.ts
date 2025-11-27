@@ -1,7 +1,15 @@
-import {ASTGrammar} from "../../../../core/lang/ast/ASTGrammar";
+import {ASTGrammar} from "../../../../core/lang/builder/parser/nodes/ASTGrammar";
+import {JsCodeBlock} from "../syntax/JsCodeBlock";
+import {JsBinaryExpr} from "../syntax/expr/JsBinaryExpr";
+import {JsTernaryExpr} from "../syntax/expr/JsTernaryExpr";
+import {JsAssignmentExpr} from "../syntax/expr/JsAssignmentExpr";
+import {JsMemberAccessExpr} from "../syntax/expr/JsMemberAccessExpr";
+import {JsCallExpr} from "../syntax/expr/JsCallExpr";
+import {JsArrayAccessExpr} from "../syntax/expr/JsArrayAccessExpr";
+import {JsNewExpr} from "../syntax/expr/JsNewExpr";
 
 export class JsGrammar {
-    public static readonly CodeBlock = ASTGrammar.createCodeBlock("CodeBlock");
+    public static readonly CodeBlock = ASTGrammar.createCodeBlock("CodeBlock", JsCodeBlock.builder());
     public static readonly EmptyStatement = ASTGrammar.create("EmptyStatement");
     public static readonly IfStatement = ASTGrammar.create("IfStatement");
     public static readonly IfClause = ASTGrammar.create("IfClause");
@@ -53,14 +61,14 @@ export class JsGrammar {
 
     public static readonly PrefixOperator = ASTGrammar.create("PrefixOp");
     public static readonly PostfixOperator = ASTGrammar.create("PostfixOp");
-    public static readonly BinaryExpr = ASTGrammar.create("BinaryOp");
-    public static readonly TernaryExpr = ASTGrammar.create("TernaryOp");
-    public static readonly AssignmentExpr = ASTGrammar.create("AssignmentOp");
+    public static readonly BinaryExpr = ASTGrammar.create("BinaryOp", JsBinaryExpr.builder());
+    public static readonly TernaryExpr = ASTGrammar.create("TernaryOp", JsTernaryExpr.builder());
+    public static readonly AssignmentExpr = ASTGrammar.create("AssignmentOp", JsAssignmentExpr.builder());
 
-    public static readonly MemberAccessExpr = ASTGrammar.create("MemberAccessExpr");
-    public static readonly ArrayAccessExpr = ASTGrammar.create("ArrayAccessExpr");
-    public static readonly CallExpr = ASTGrammar.create("CallExpr");
-    public static readonly NewExpr = ASTGrammar.create("NewExpr");
+    public static readonly MemberAccessExpr = ASTGrammar.create("MemberAccessExpr", JsMemberAccessExpr.builder());
+    public static readonly ArrayAccessExpr = ASTGrammar.create("ArrayAccessExpr", JsArrayAccessExpr.builder());
+    public static readonly CallExpr = ASTGrammar.create("CallExpr", JsCallExpr.builder());
+    public static readonly NewExpr = ASTGrammar.create("NewExpr", JsNewExpr.builder());
     public static readonly SpreadExpr = ASTGrammar.create("SpreadExpr");
     public static readonly GroupExpr = ASTGrammar.create("GroupExpr");
 
