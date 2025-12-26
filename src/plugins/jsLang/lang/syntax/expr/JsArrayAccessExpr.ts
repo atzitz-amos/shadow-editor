@@ -10,6 +10,5 @@ import {ASTNode} from "../../../../../core/lang/builder/parser/nodes/ASTNode";
 export class JsArrayAccessExpr extends SynElementImpl {
     constructor(node: ASTNode) {
         super(node);
-        console.log("ArrayAccess: ", node);
     }
 }

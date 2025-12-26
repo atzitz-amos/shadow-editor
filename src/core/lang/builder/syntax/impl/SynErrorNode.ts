@@ -2,12 +2,23 @@ import {TextRange} from "../../../../../editor/core/coordinate/TextRange";
 import {ASTGrammar, ASTType} from "../../parser/nodes/ASTGrammar";
 import {SynNode} from "../api/SynNode";
 import {SynElement} from "../api/SynElement";
+import {SynFile} from "../api/SynFile";
+import { EditorURI } from "../../../../project/uri/EditorURI";
+import {URITargetType} from "../../../../project/uri/URITargetType";
 
 
 export class SynErrorNode implements SynNode {
     private parent: SynElement | null = null;
 
-    constructor(private range: TextRange, private message: string) {
+    constructor(private range: TextRange, private message: string, private file: SynFile) {
+    }
+
+    getURI(): EditorURI {
+        return this.file.getURI().selectedRegion(this.range, URITargetType.ERROR);
+    }
+
+    getSynFile(): SynFile {
+        return this.file;
     }
 
     getType(): ASTType {

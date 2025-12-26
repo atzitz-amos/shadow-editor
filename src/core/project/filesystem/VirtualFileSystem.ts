@@ -31,7 +31,7 @@ export class VirtualFileSystem implements FileSystem {
     private flushed: boolean = false;
 
     constructor(private project: Project) {
-        this.fileTree = new FileTree(this, project.name, true);
+        this.fileTree = new FileTree(this, project.getName(), true);
     }
 
     public static async load(project: Project, persistence: PersistenceStrategy) {
@@ -40,7 +40,7 @@ export class VirtualFileSystem implements FileSystem {
         this.instance = new VirtualFileSystem(project);
 
         const rootHandle = await navigator.storage.getDirectory();
-        const handle = await rootHandle.getDirectoryHandle(project.name, {create: true});
+        const handle = await rootHandle.getDirectoryHandle(project.getName(), {create: true});
 
         if (persistence === PersistenceStrategy.PERSIST) {
             this.instance.setRoot(handle);

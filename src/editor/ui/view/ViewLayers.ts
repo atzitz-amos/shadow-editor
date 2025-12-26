@@ -44,7 +44,7 @@ export class TextLayer {
 export class CaretLayer {
     private _caret: HTMLDivElement;
     private _input: HTMLInputElement;
-    private _blink: number;
+    private _blink: NodeJS.Timeout;
     private readonly view: View;
     private readonly element: HTMLDivElement;
 

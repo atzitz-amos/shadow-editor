@@ -1,3 +1,6 @@
+import {EditorURI} from "../uri/EditorURI";
+import {URITargetType} from "../uri/URITargetType";
+
 /**
  * Represents a file system path within the project.
  * It can be either virtual or physical.
@@ -53,6 +56,10 @@ export abstract class Path {
 
     getSegments(): string[] {
         return this.parts;
+    }
+
+    asURI() {
+        return new EditorURI(this.path, URITargetType.PROJECT);
     }
 
     abstract extendFile(fileName: string): Path;

@@ -11,7 +11,6 @@ export class JsAssignmentExpr extends SynElementImpl {
     constructor(node: ASTNode) {
         super(node);
         // obj op value
-        console.log("Assignment: ", node);
     }
 }
 

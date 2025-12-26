@@ -11,8 +11,4 @@ export class JsCodeBlock extends SynCodeBlock {
     constructor(node: ASTNode) {
         super(node);
     }
-
-    specialMethod() {
-        return 1;
-    }
 }

@@ -11,6 +11,5 @@ export class JsTernaryExpr extends SynElementImpl {
     constructor(node: ASTNode) {
         super(node);
         // Expr '?' Expr ':' Expr
-        console.log("Ternary: ", node);
     }
 }

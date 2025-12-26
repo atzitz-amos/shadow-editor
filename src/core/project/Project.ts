@@ -1,22 +1,36 @@
-import {VirtualFileSystem} from "./filesystem/VirtualFileSystem";
-import {PersistenceStrategy} from "../persistence/PersistenceStrategy";
+import {URILocatedResource} from "./uri/URILocatedResource";
+import {EditorURI} from "./uri/EditorURI";
+import {URITargetType} from "./uri/URITargetType";
+import {ProjectFile} from "./filetree/ProjectFile";
+import {Path} from "./path/Path";
+import {RelativePath} from "./path/RelativePath";
 
-export class Project {
-    name: string;
+export class Project implements URILocatedResource {
+    private readonly name: string;
 
-    directoryHandle: FileSystemDirectoryHandle | null = null;
+    private rootPath: Path;
+
+    private directoryHandle: FileSystemDirectoryHandle | null = null;
 
     constructor(name: string) {
         this.name = name;
+
+        this.rootPath = new RelativePath("/", true, false);
     }
 
     public static emptyProject(name: string) {
         return new this(name);
     }
 
-    public static openProject(name: string, strategy: PersistenceStrategy = PersistenceStrategy.PERSIST) {
-        const project = new this(name);
-        VirtualFileSystem.load(this, strategy);
-        return project;
+    getName(): string {
+        return this.name;
+    }
+
+    getURI(): EditorURI {
+        return new EditorURI(this.name, URITargetType.PROJECT);
+    }
+
+    createNewUntitledFile(): ProjectFile {
+        return new ProjectFile(this, "<untitled>", this.rootPath);
     }
 }

@@ -139,7 +139,7 @@ export class ViewPropertiesManager {
 
     private recomputeCounts() {
         this.visualLineCount = Math.floor(this.height / this.lineHeight);
-        this.visualCharCount = Math.floor(this.view.getLayers().layers_el.getBoundingClientRect().width / this.charSize);
+        this.visualCharCount = Math.floor(this.view.getLayers().layers_el.getBoundingClientRect().width / this.getCharSize());
     }
 }
 

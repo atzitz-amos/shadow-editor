@@ -5,21 +5,29 @@ import {SynTokenNode} from "../../syntax/impl/SynTokenNode";
 import {TokenType} from "../../tokens/TokenType";
 import {TextRange} from "../../../../../editor/core/coordinate/TextRange";
 import {SynErrorNode} from "../../syntax/impl/SynErrorNode";
-import {ASTGrammar, ASTType} from "../nodes/ASTGrammar";
+import {ASTGrammar, ASTGrammarRole, ASTType} from "../nodes/ASTGrammar";
 import {TokenExpectation} from "./TokenExpectation";
 import {SynNode} from "../../syntax/api/SynNode";
 import {ASTNode} from "../nodes/ASTNode";
 import {DefaultSynElement} from "../../syntax/impl/DefaultSynElement";
+import {SynScopeTree} from "../scopes/SynScopeTree";
+import {SynScopeType} from "../scopes/SynScopeType";
+import {SynCodeBlock} from "../../syntax/api/SynCodeBlock";
+import {SynFileImpl} from "../../syntax/impl/SynFileImpl";
+import {SynDeclaration} from "../../syntax/impl/SynDeclaration";
 
 export class ASTBuilder {
     private readonly production: SynNode[] = [];
+
+    private readonly scopeTree: SynScopeTree;
+
     private currentOffset: number = 0;
 
     private isErrorState: boolean = false;
     private wasInErrorState: boolean = false;
 
-    constructor(private stream: TokenStream) {
-
+    constructor(private stream: TokenStream, private file: SynFileImpl) {
+        this.scopeTree = new SynScopeTree();
     }
 
     getTokenAt(tokenOffset: number): Token | null {
@@ -54,8 +62,11 @@ export class ASTBuilder {
         return token;
     }
 
-    mark(): Marker {
+    mark(scopeType?: SynScopeType): Marker {
         this.clearWhitespace();
+        if (scopeType) {
+            this.scopeTree.enterScope(scopeType);
+        }
         return new TokenStreamMarker(this, this.currentOffset, this.stream.getIndex(), this.production.length, this.isErrorState)
     }
 
@@ -82,7 +93,7 @@ export class ASTBuilder {
         }
         this.currentOffset = token.getRange().end;
         if (shouldAppend && !token.shouldSkip())
-            this.production.push(new SynTokenNode(token));
+            this.production.push(new SynTokenNode(token, this.file));
         if (token.isCommentToken() || token.shouldSkip()) {
             return this.advance(shouldAppend);
         }
@@ -124,17 +135,17 @@ export class ASTBuilder {
 
     error(msg: string) {
         this.isErrorState = true;
-        this.production.push(new SynErrorNode(new TextRange(this.currentOffset, this.currentOffset), msg));
+        this.production.push(new SynErrorNode(new TextRange(this.currentOffset, this.currentOffset), msg, this.file));
     }
 
     errorBefore(token: Token, msg: string) {
         this.isErrorState = true;
-        this.production.push(new SynErrorNode(new TextRange(token.getRange().start, token.getRange().start), msg));
+        this.production.push(new SynErrorNode(new TextRange(token.getRange().start, token.getRange().start), msg, this.file));
     }
 
     errorOn(token: Token, msg: string) {
         this.isErrorState = true;
-        this.production.push(new SynErrorNode(token.getRange(), msg));
+        this.production.push(new SynErrorNode(token.getRange(), msg, this.file));
     }
 
     markErrorAndRemove(token: Token, msg: string) {
@@ -143,7 +154,7 @@ export class ASTBuilder {
             if (ast.getTextRange().is(token.getRange())) {
                 this.production.splice(i, 1);
                 this.isErrorState = true;
-                this.production.push(new SynErrorNode(token.getRange(), msg));
+                this.production.push(new SynErrorNode(token.getRange(), msg, this.file));
                 return;
             }
         }
@@ -151,12 +162,12 @@ export class ASTBuilder {
 
     popAndError(msg: string) {
         this.isErrorState = true;
-        this.production.push(new SynErrorNode(this.production.pop()!.getTextRange(), msg));
+        this.production.push(new SynErrorNode(this.production.pop()!.getTextRange(), msg, this.file));
     }
 
     errorAt(range: TextRange, msg: string) {
         this.isErrorState = true;
-        this.production.push(new SynErrorNode(range, msg));
+        this.production.push(new SynErrorNode(range, msg, this.file));
     }
 
     build(marker: Marker, type: ASTType) {
@@ -175,9 +186,18 @@ export class ASTBuilder {
     }
 
     addToProduction(type: ASTType, children: SynNode[], range: TextRange) {
-        const node = new ASTNode(type, children, range);
+        let node: ASTNode;
+        if (type.role === ASTGrammarRole.CODEBLOCK) node = new ASTNode(type, this.file, children, range, this.scopeTree.getCurrentScope()!.getParent());
+        else node = new ASTNode(type, this.file, children, range, this.scopeTree.getCurrentScope()!);
+
         if (type.treeBuilder) {
-            this.production.push(type.treeBuilder(node));
+            let synElement = type.treeBuilder(node);
+            if (synElement instanceof SynCodeBlock) {
+                this.scopeTree.exitScope(synElement);
+            } else if (synElement instanceof SynDeclaration) {
+                this.scopeTree.getCurrentScope()?.addDeclaration(synElement);
+            }
+            this.production.push(synElement);
         } else {
             this.production.push(new DefaultSynElement(node));
         }
@@ -189,7 +209,7 @@ export class ASTBuilder {
             this.currentOffset = token.getRange().end;
             this.stream.consume();
             if (token.isCommentToken())
-                this.production.push(new SynTokenNode(token));
+                this.production.push(new SynTokenNode(token, this.file));
         }
     }
 

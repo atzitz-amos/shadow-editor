@@ -11,6 +11,5 @@ export class JsBinaryExpr extends SynElementImpl {
     constructor(node: ASTNode) {
         super(node);
         // left op right
-        console.log("Binary: ", node);
     }
 }

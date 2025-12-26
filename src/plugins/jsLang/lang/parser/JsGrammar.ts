@@ -7,6 +7,8 @@ import {JsMemberAccessExpr} from "../syntax/expr/JsMemberAccessExpr";
 import {JsCallExpr} from "../syntax/expr/JsCallExpr";
 import {JsArrayAccessExpr} from "../syntax/expr/JsArrayAccessExpr";
 import {JsNewExpr} from "../syntax/expr/JsNewExpr";
+import {JsIdentifier} from "../syntax/expr/JsIdentifier";
+import {JsDeclarator} from "../syntax/statements/JsDeclarator";
 
 export class JsGrammar {
     public static readonly CodeBlock = ASTGrammar.createCodeBlock("CodeBlock", JsCodeBlock.builder());
@@ -44,7 +46,7 @@ export class JsGrammar {
     public static readonly ClassField = ASTGrammar.create("ClassField");
 
     public static readonly VariableDeclaration = ASTGrammar.create("VariableDeclaration");
-    public static readonly VariableDeclarator = ASTGrammar.create("VariableDeclarator");
+    public static readonly VariableDeclarator = ASTGrammar.create("VariableDeclarator", JsDeclarator.builder());
 
     /* EXPRESSIONS */
     public static readonly NumberLiteral = ASTGrammar.create("NumberLiteral");
@@ -52,7 +54,7 @@ export class JsGrammar {
     public static readonly BooleanLiteral = ASTGrammar.create("BooleanLiteral");
     public static readonly NullLiteral = ASTGrammar.create("NullLiteral");
     public static readonly UndefinedLiteral = ASTGrammar.create("UndefinedLiteral");
-    public static readonly Identifier = ASTGrammar.create("Identifier");
+    public static readonly Identifier = ASTGrammar.create("Identifier", JsIdentifier.builder());
     public static readonly ThisExpr = ASTGrammar.create("ThisExpression");
     public static readonly ArrayLiteral = ASTGrammar.create("ArrayLiteral");
     public static readonly ObjectLiteral = ASTGrammar.create("ObjectLiteral");

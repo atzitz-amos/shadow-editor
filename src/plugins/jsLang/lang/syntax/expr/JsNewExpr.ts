@@ -10,6 +10,5 @@ import {ASTNode} from "../../../../../core/lang/builder/parser/nodes/ASTNode";
 export class JsNewExpr  extends SynElementImpl {
     constructor(node: ASTNode) {
         super(node);
-        console.log("New: ", node);
     }
 }

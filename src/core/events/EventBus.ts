@@ -19,7 +19,7 @@ export class EventBus {
     private static MAIN_EVENT_BUS: EventBus = new EventBus("MainEventBus");
     private subscriptions = new Map<Function, Map<object, SubscriptionEntry<any>>>();
 
-    private readonly parentBus: EventBus | null = null;
+    private parentBus: EventBus | null = null;
     private children: EventBus[] = [];
 
     constructor(private debugName: string) {

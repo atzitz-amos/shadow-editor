@@ -3,8 +3,12 @@ import {Path} from "../path/Path";
 import {Project} from "../Project";
 import {FileTreeEntry} from "./FileTreeEntry";
 import {Directory} from "./Directory";
+import {URILocatedResource} from "../uri/URILocatedResource";
+import {EditorURI} from "../uri/EditorURI";
+import {SynFile} from "../../lang/builder/syntax/api/SynFile";
+import {SynFileImpl} from "../../lang/builder/syntax/impl/SynFileImpl";
 
-export class ProjectFile implements FileTreeEntry {
+export class ProjectFile implements FileTreeEntry, URILocatedResource {
     private path: Path;
 
     private parent: Directory | null = null;
@@ -14,6 +18,10 @@ export class ProjectFile implements FileTreeEntry {
 
     constructor(private project: Project, private name: string, private rootPath: Path) {
         this.path = rootPath.extendFile(name);
+    }
+
+    getURI(): EditorURI {
+        return this.project.getURI().extend(this.path.asURI());
     }
 
     setHandle(handle: FileSystemFileHandle | null): void {
@@ -40,6 +48,10 @@ export class ProjectFile implements FileTreeEntry {
 
     getVirtualFile(): VirtualFile {
         return new VirtualFile(this);
+    }
+
+    createSynFile(): SynFileImpl {
+        return new SynFileImpl(this);
     }
 
     getPath(): Path {

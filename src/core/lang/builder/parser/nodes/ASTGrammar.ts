@@ -1,6 +1,6 @@
-import {SynElement} from "../../syntax/api/SynElement";
 import {ASTNode} from "./ASTNode";
 import {SynNode} from "../../syntax/api/SynNode";
+import {SynCodeBlock} from "../../syntax/api/SynCodeBlock";
 
 export enum ASTGrammarRole {
     DEFAULT,
@@ -24,7 +24,7 @@ export class ASTGrammar {
         return new ASTType(debugName, ASTGrammarRole.DEFAULT, treeBuilder);
     }
 
-    public static createCodeBlock(debugName: string, treeBuilder?: (node: ASTNode) => SynNode): ASTType {
+    public static createCodeBlock(debugName: string, treeBuilder: (node: ASTNode) => SynCodeBlock): ASTType {
         return new ASTType(debugName, ASTGrammarRole.CODEBLOCK, treeBuilder);
     }
 }

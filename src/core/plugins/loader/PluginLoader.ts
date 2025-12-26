@@ -51,12 +51,12 @@ export class PluginLoader {
         }
     }
 
-    private effectiveImport(): { pluginCls: Class<EditorPlugin>, pluginName: string }[] {
+    private effectiveImport(): { pluginCls: Constructor<EditorPlugin>, pluginName: string }[] {
         const imports = import.meta.glob("/src/plugins/*/*.ts", {eager: true});
-        const plugins: { pluginCls: Class<EditorPlugin>, pluginName: string }[] = [];
+        const plugins: { pluginCls: Constructor<EditorPlugin>, pluginName: string }[] = [];
 
         for (const path in imports) {
-            const module = imports[path] as { default: Class<EditorPlugin> };
+            const module = imports[path] as { default: Constructor<EditorPlugin> };
             if (module && module.default) {
                 let split = path.split('/');
                 plugins.push({pluginCls: module.default, pluginName: split[split.length - 2]});
@@ -69,18 +69,18 @@ export class PluginLoader {
     }
 
     private resolveExtensionPoints(): {
-        extCls: Class<ExtensionPointSupplier>,
+        extCls: Constructor<ExtensionPointSupplier>,
         pluginName: string,
         extPoint: string
     }[] {
         const imports = import.meta.glob("/src/plugins/*/*/*.ts", {eager: true});
         const extensionPoints: {
-            extCls: Class<ExtensionPointSupplier>,
+            extCls: Constructor<ExtensionPointSupplier>,
             pluginName: string,
             extPoint: string
         }[] = [];
         for (const path in imports) {
-            const module = imports[path] as { default: Class<ExtensionPointSupplier> };
+            const module = imports[path] as { default: Constructor<ExtensionPointSupplier> };
             if (module && module.default) {
                 const split = path.split('/');
                 extensionPoints.push({

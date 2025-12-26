@@ -1,7 +1,7 @@
 import {AbsolutePath} from "./AbsolutePath";
 import {PathUtils} from "./PathUtils";
-import * as Path from "node:path";
 import {RelativePath} from "./RelativePath";
+import {Path} from "./Path";
 
 /**
  *

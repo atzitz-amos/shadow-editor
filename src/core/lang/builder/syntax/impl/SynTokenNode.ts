@@ -3,15 +3,29 @@ import {Token} from "../../tokens/Token";
 import {ASTGrammar, ASTType} from "../../parser/nodes/ASTGrammar";
 import {SynNode} from "../api/SynNode";
 import {SynElement} from "../api/SynElement";
+import {SynFile} from "../api/SynFile";
+import {EditorURI} from "../../../../project/uri/EditorURI";
 
 export class SynTokenNode implements SynNode {
     private parent: SynElement | null = null;
 
-    constructor(public token: Token) {
+    constructor(public token: Token, public file: SynFile) {
+    }
+
+    getURI(): EditorURI {
+        return this.file.getURI().selectedRegion(this.getTextRange());
+    }
+
+    getSynFile(): SynFile {
+        return this.file;
     }
 
     getType(): ASTType {
         return ASTGrammar.TOKEN;
+    }
+
+    getValue(): string {
+        return this.token.getValue();
     }
 
     getChildren(): SynNode[] {

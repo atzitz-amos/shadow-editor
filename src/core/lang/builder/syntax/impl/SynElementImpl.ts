@@ -2,6 +2,9 @@ import {SynElement} from "../api/SynElement";
 import {SynNode} from "../api/SynNode";
 import {TextRange} from "../../../../../editor/core/coordinate/TextRange";
 import {ASTNode} from "../../parser/nodes/ASTNode";
+import {SynScope} from "../../parser/scopes/SynScope";
+import {SynFile} from "../api/SynFile";
+import {EditorURI} from "../../../../project/uri/EditorURI";
 
 /**
  * Provides a lot of standard functionality for syntax elements.
@@ -11,15 +14,18 @@ import {ASTNode} from "../../parser/nodes/ASTNode";
  * @since 1.0.0
  */
 export abstract class SynElementImpl implements SynElement {
+    protected readonly scope: SynScope;
     private readonly elementChildren: SynElement[];
     private readonly range: TextRange;
-    private readonly children: SynNode[]
-
+    private readonly children: SynNode[];
     private parent: SynElement | null = null;
+    private readonly file: SynFile;
 
     protected constructor(node: ASTNode) {
         this.range = node.range;
         this.children = node.children;
+        this.scope = node.scope;
+        this.file = node.file;
 
         this.elementChildren = this.children.filter(child => child.isSynElement()) as SynElement[];
 
@@ -30,6 +36,10 @@ export abstract class SynElementImpl implements SynElement {
 
     public static builder<T extends SynElementImpl>(this: new (node: ASTNode) => T): (node: ASTNode) => T {
         return (node: ASTNode) => new this(node);
+    }
+
+    getURI(): EditorURI {
+        return this.file.getURI().selectedRegion(this.range);
     }
 
     * childrenIterator(filter: (element: SynElement) => boolean): Iterable<SynElement> {
@@ -83,6 +93,26 @@ export abstract class SynElementImpl implements SynElement {
             }
         }
         return null;
+    }
+
+    findAllChildrenOfType<T extends SynElement>(type: Class<T>): T[] {
+        let result: T[] = [];
+        for (let child of this.children) {
+            if (child instanceof type) {
+                result.push(child);
+            }
+            if (child instanceof SynElementImpl)
+                result = result.concat(child.findAllChildrenOfType(type));
+        }
+        return result;
+    }
+
+    getSynFile(): SynFile {
+        return this.file;
+    }
+
+    getParentScope(): SynScope {
+        return this.scope;
     }
 
     getElementChildren(): SynElement[] {

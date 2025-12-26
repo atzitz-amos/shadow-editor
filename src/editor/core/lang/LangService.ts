@@ -5,9 +5,9 @@ import {IncrementalHighlighter} from "../../../core/lang/highlighter/Incremental
 import {DocumentModificationEvent} from "../document/events/DocumentModificationEvent";
 import {HighlighterBase} from "../../../core/lang/highlighter/HighlighterBase";
 import {IParser} from "../../../core/lang/builder/parser/IParser";
-import {ASTNode} from "../../../core/lang/builder/parser/nodes/ASTNode";
 import {ASTBuilder} from "../../../core/lang/builder/parser/builder/ASTBuilder";
 import {SynNode} from "../../../core/lang/builder/syntax/api/SynNode";
+import {SynFileImpl} from "../../../core/lang/builder/syntax/impl/SynFileImpl";
 
 /**
  * Class associated with an editor that holds the current language, lexer, parser, highlighter as
@@ -24,7 +24,9 @@ export class LangService {
     private myHighlighter: HighlighterBase | null = null;
     private myIncrementalHighlighter: IncrementalHighlighter | null = null;
     private myParser: IParser | null = null;  // TODO: support incremental parsing
-    private myProduction: SynNode[];
+    private debugProduction: SynNode[];
+
+    private parsingTimeout: NodeJS.Timeout | null = null;
 
     constructor(private editor: Editor) {
         editor.getEventBus().subscribe(this, DocumentModificationEvent.SUBSCRIBER, this.onDocumentChange);
@@ -77,15 +79,24 @@ export class LangService {
         highlightsHolder.clear();
         this.myIncrementalHighlighter?.highlight(this.myLexer!.createTokenStream(), highlightsHolder);
 
-        const start = performance.now();
-        const builder = new ASTBuilder(this.myLexer!.createTokenStream());
-        this.makeParser(builder)?.parse().then(() => {
-            console.log("Successfully parsed "
-                + this.editor.getOpenedDocument().getLineCount()
-                + " lines (" + this.editor.getOpenedDocument().getTotalDocumentLength()
-                + " chars) in "
-                + (performance.now() - start) + "ms");
-            this.myProduction = builder.getProduction();
-        });
+        this.scheduleParsing();
+    }
+
+    private scheduleParsing() {
+        if (this.parsingTimeout !== null) {
+            clearTimeout(this.parsingTimeout);
+        }
+        this.parsingTimeout = setTimeout(() => {
+            const start = performance.now();
+            const builder = new ASTBuilder(this.myLexer!.createTokenStream(), new SynFileImpl(this.editor.getOpenedFile()!));
+            this.makeParser(builder)?.parse().then(() => {
+                console.log("Successfully parsed "
+                    + this.editor.getOpenedDocument().getLineCount()
+                    + " lines (" + this.editor.getOpenedDocument().getTotalDocumentLength()
+                    + " chars) in "
+                    + (performance.now() - start) + "ms");
+                this.debugProduction = builder.getProduction();
+            });
+        }, 10 * Math.log(this.editor.getOpenedDocument().getTotalDocumentLength()));
     }
 }

@@ -53,7 +53,7 @@ export class Editor {
         this.project = project;
 
         this.properties = options || {};
-        this.file = this.properties.file;
+        this.file = this.properties.file || project.createNewUntitledFile();
 
         this.eventBus = new EventBus('editor.bus');
 
