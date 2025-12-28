@@ -1,4 +1,4 @@
-import {View} from "../View";
+import {View} from "../view/View";
 import {HTMLUtils} from "../../utils/HTMLUtils";
 
 export class Gutter {
@@ -11,19 +11,21 @@ export class Gutter {
 
     constructor(view: View) {
         this.view = view;
-        this.element = HTMLUtils.createElement("div.editor-gutter", view.view) as HTMLDivElement;
+        this.element = HTMLUtils.createElement("div.editor-gutter") as HTMLDivElement;
     }
 
     init() {
         this.lines = [];
 
         let firstEdgeline = HTMLUtils.createElement('div.editor-gutter-line.editor-line-edge', this.element) as HTMLDivElement;
-        for (let i = 0; i < this.view.visualLineCount; i++) {
+        for (let i = 0; i < this.view.getVisualLineCount(); i++) {
             this.lines.push(HTMLUtils.createElement("div.editor-gutter-line.gutter-line-" + i, this.element) as HTMLDivElement);
         }
         let secondEdgeline = HTMLUtils.createElement('div.editor-gutter-line.editor-line-edge', this.element) as HTMLDivElement;
 
         this.edgelines = [firstEdgeline, secondEdgeline];
+
+        this.view.getViewElement().appendChild(this.element);
     }
 
     initCSS() {

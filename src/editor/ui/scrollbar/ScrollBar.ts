@@ -1,6 +1,6 @@
 import {HScrollBar} from "./HScrollBar";
 import {VScrollBar} from "./VScrollBar";
-import {View} from "../View";
+import {View} from "../view/View";
 
 export class EditorScrollBar {
     private readonly hScrollBar: HScrollBar;
