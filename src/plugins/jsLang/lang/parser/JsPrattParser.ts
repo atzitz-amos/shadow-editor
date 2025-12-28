@@ -1,12 +1,12 @@
 import {JsParser} from "./JsParser";
 import {JsGrammar} from "./JsGrammar";
-import {TokenType} from "../../../../core/lang/builder/tokens/TokenType";
+import {TokenType} from "../../../../core/lang/syntax/builder/tokens/TokenType";
 import {JsLexicalGrammar} from "../lexer/JsLexicalGrammar";
-import {Token} from "../../../../core/lang/builder/tokens/Token";
+import {Token} from "../../../../core/lang/syntax/builder/tokens/Token";
 import {JsExprParser} from "./JsExprParser";
-import {ASTGrammar, ASTType} from "../../../../core/lang/builder/parser/nodes/ASTGrammar";
-import {ASTBuilder} from "../../../../core/lang/builder/parser/builder/ASTBuilder";
-import {Marker} from "../../../../core/lang/builder/parser/builder/Marker";
+import {ASTGrammar, ASTType} from "../../../../core/lang/syntax/builder/parser/nodes/ASTGrammar";
+import {ASTBuilder} from "../../../../core/lang/syntax/builder/parser/builder/ASTBuilder";
+import {Marker} from "../../../../core/lang/syntax/builder/parser/builder/Marker";
 
 export enum OperatorPrecedence {
     COMMA = 10,

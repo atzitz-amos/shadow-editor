@@ -15,16 +15,16 @@
             import {TextRange} from "./src/editor/core/coordinate/TextRange";
             import {SerializationUtils} from "./src/editor/core/serializable/SerializationUtils";
             import {JsLexicalGrammar} from "./src/plugins/jsLang/lang/lexer/JsLexicalGrammar";
-            import {RegExpLexer} from "./src/core/lang/builder/lexer/RegExprLexer";
+            import {RegExpLexer} from "./src/core/lang/syntax/builder/lexer/RegExprLexer";
             import {JsGrammar} from "./src/plugins/jsLang/lang/parser/JsGrammar";
             import {JsParser} from "./src/plugins/jsLang/lang/parser/JsParser";
             import JSLangPlugin from "./src/plugins/jsLang/JSLangPlugin";
             import JsIncrLexer from "./src/plugins/jsLang/lang/lexer/JsIncrLexer";
-            import {Source} from "./src/core/lang/builder/tokens/TokenStream";
+            import {Source} from "./src/core/lang/syntax/builder/tokens/TokenStream";
             import {DocumentModificationEvent} from "./src/editor/core/document/events/DocumentModificationEvent";
             import {InlineError} from "./src/editor/ui/inline/error/InlineError";
             import {Project} from "./src/core/project/Project";
-            import {ASTBuilder} from "./src/core/lang/builder/parser/builder/ASTBuilder";
+            import {ASTBuilder} from "./src/core/lang/syntax/builder/parser/builder/ASTBuilder";
             import {GlobalProject} from "./src/core/global/GlobalProject";
             import {PluginManager} from "./src/core/plugins/PluginManager";
             import {ShadowApp} from "./src/app/ShadowApp";
@@ -33,12 +33,11 @@
             import {ProjectFile} from "./src/core/project/filetree/ProjectFile";
             import {PersistenceStrategy} from "./src/core/persistence/PersistenceStrategy";
             import {RelativePath} from "./src/core/project/path/RelativePath";
-            import {SynDepthFirstIterator} from "./src/core/lang/builder/syntax/iterators/SynDepthFirstIterator";
             import {EditorURI} from "./src/core/project/uri/EditorURI";
             import {JsCodeBlock} from "./src/plugins/jsLang/lang/syntax/JsCodeBlock";
             import {JsDeclarator} from "./src/plugins/jsLang/lang/syntax/statements/JsDeclarator";
             import {JsIdentifier} from "./src/plugins/jsLang/lang/syntax/expr/JsIdentifier";
-            import {SynFileImpl} from "./src/core/lang/builder/syntax/impl/SynFileImpl";
+            import {SynFileImpl} from "./src/core/lang/syntax/impl/SynFileImpl";
 
             ShadowApp.launch();
 
@@ -61,8 +60,6 @@
             window.JsLex = new RegLex(JsGr);
             window.JsIncrLex = JsIncrLexer;
             window.DocumentModificationEvent = DocumentModificationEvent;
-
-            window.SynDepthFirstIterator = SynDepthFirstIterator;
 
             window.lex = new JsIncrLex();
 

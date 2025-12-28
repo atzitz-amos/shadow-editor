@@ -1,11 +1,11 @@
 import {LanguageBase} from "../../../core/lang/LanguageBase";
-import {IncrementalLexer} from "../../../core/lang/builder/lexer/IncrementalLexer";
+import {IncrementalLexer} from "../../../core/lang/syntax/builder/lexer/IncrementalLexer";
 import {JsParser} from "./parser/JsParser";
 import {HighlighterBase} from "../../../core/lang/highlighter/HighlighterBase";
 import {JsHighlighter} from "./highlighter/JsHighlighter";
 import JsIncrLexer from "./lexer/JsIncrLexer";
-import {ASTBuilder} from "../../../core/lang/builder/parser/builder/ASTBuilder";
-import {IParser} from "../../../core/lang/builder/parser/IParser";
+import {ASTBuilder} from "../../../core/lang/syntax/builder/parser/builder/ASTBuilder";
+import {IParser} from "../../../core/lang/syntax/builder/parser/IParser";
 
 
 export default class JsLang extends LanguageBase {

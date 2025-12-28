@@ -5,8 +5,7 @@ import {FileTreeEntry} from "./FileTreeEntry";
 import {Directory} from "./Directory";
 import {URILocatedResource} from "../uri/URILocatedResource";
 import {EditorURI} from "../uri/EditorURI";
-import {SynFile} from "../../lang/builder/syntax/api/SynFile";
-import {SynFileImpl} from "../../lang/builder/syntax/impl/SynFileImpl";
+import {SynFileImpl} from "../../lang/syntax/impl/SynFileImpl";
 
 export class ProjectFile implements FileTreeEntry, URILocatedResource {
     private path: Path;

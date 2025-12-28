@@ -1,4 +1,4 @@
-import {ASTGrammar} from "../../../../core/lang/builder/parser/nodes/ASTGrammar";
+import {ASTGrammar} from "../../../../core/lang/syntax/builder/parser/nodes/ASTGrammar";
 import {JsCodeBlock} from "../syntax/JsCodeBlock";
 import {JsBinaryExpr} from "../syntax/expr/JsBinaryExpr";
 import {JsTernaryExpr} from "../syntax/expr/JsTernaryExpr";

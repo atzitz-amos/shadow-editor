@@ -1,5 +1,5 @@
-import {SynElementImpl} from "../../../../../core/lang/builder/syntax/impl/SynElementImpl";
-import {ASTNode} from "../../../../../core/lang/builder/parser/nodes/ASTNode";
+import {SynElementImpl} from "../../../../../core/lang/syntax/impl/SynElementImpl";
+import {ASTNode} from "../../../../../core/lang/syntax/builder/parser/nodes/ASTNode";
 
 /**
  *
@@ -7,7 +7,7 @@ import {ASTNode} from "../../../../../core/lang/builder/parser/nodes/ASTNode";
  * @date 11/27/2025
  * @since 1.0.0
  */
-export class JsNewExpr  extends SynElementImpl {
+export class JsNewExpr extends SynElementImpl {
     constructor(node: ASTNode) {
         super(node);
     }

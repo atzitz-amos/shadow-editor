@@ -4,7 +4,7 @@
  */
 
 import {LangService} from "../../../editor/core/lang/LangService";
-import {TokenStream} from "../builder/tokens/TokenStream";
+import {TokenStream} from "../syntax/builder/tokens/TokenStream";
 import {HighlightHolder} from "../../../editor/ui/highlighter/HighlightHolder";
 
 export class IncrementalHighlighter {

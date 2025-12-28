@@ -1,8 +1,8 @@
-import {SynElementImpl} from "../../../../../core/lang/builder/syntax/impl/SynElementImpl";
-import {SynSymbol} from "../../../../../core/lang/builder/syntax/api/SynSymbol";
-import {ASTNode} from "../../../../../core/lang/builder/parser/nodes/ASTNode";
-import {SynTokenNode} from "../../../../../core/lang/builder/syntax/impl/SynTokenNode";
-import {SynDeclaration} from "../../../../../core/lang/builder/syntax/impl/SynDeclaration";
+import {SynElementImpl} from "../../../../../core/lang/syntax/impl/SynElementImpl";
+import {SynSymbol} from "../../../../../core/lang/syntax/api/SynSymbol";
+import {ASTNode} from "../../../../../core/lang/syntax/builder/parser/nodes/ASTNode";
+import {SynTokenNode} from "../../../../../core/lang/syntax/impl/SynTokenNode";
+import {SynDeclaration} from "../../../../../core/lang/syntax/impl/SynDeclaration";
 
 /**
  *

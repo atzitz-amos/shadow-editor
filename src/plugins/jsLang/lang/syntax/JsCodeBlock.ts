@@ -1,5 +1,5 @@
-import {SynCodeBlock} from "../../../../core/lang/builder/syntax/api/SynCodeBlock";
-import {ASTNode} from "../../../../core/lang/builder/parser/nodes/ASTNode";
+import {SynCodeBlock} from "../../../../core/lang/syntax/api/SynCodeBlock";
+import {ASTNode} from "../../../../core/lang/syntax/builder/parser/nodes/ASTNode";
 
 /**
  *

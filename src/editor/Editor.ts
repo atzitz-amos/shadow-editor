@@ -2,7 +2,7 @@ import {View} from "./ui/view/View";
 import {Project} from "../core/project/Project";
 import {ProjectFile} from "../core/project/filetree/ProjectFile";
 import {EditorProperties} from "./Properties";
-import {TextContext, TextRange} from "./core/coordinate/TextRange";
+import {TextRange} from "./core/coordinate/TextRange";
 import {Caret, CaretModel} from "./core/caret/Caret";
 import {Key, ModifierKeyHolder} from "../core/keybinds/Keybind";
 
@@ -14,7 +14,6 @@ import {VisualPosition} from "./core/coordinate/VisualPosition";
 import {XYPoint} from "./core/coordinate/XYPoint";
 import {EditorCoordinateMapper} from "./core/coordinate/EditorCoordinateMapper";
 import {InlayManager} from "./core/inlay/InlayManager";
-import {ProcessManager} from "../core/processManager/ProcessManager";
 import {PluginManager} from "../core/plugins/PluginManager";
 import {LanguageBase} from "../core/lang/LanguageBase";
 import JsLang from "../plugins/jsLang/lang/JsLang";
@@ -26,13 +25,14 @@ import {EditorAttachedEvent} from "./events/EditorAttachedEvent";
 import {KeyPressedEvent, KeyReleasedEvent, MousePressedEvent, MouseReleasedEvent} from "./events/PhysicalEvents";
 import {InlayWidget} from "./ui/inline/inlay/InlayWidget";
 import {KeybindContext} from "../core/keybinds/context/KeybindContext";
+import {ShadowApp} from "../app/ShadowApp";
 
 export class Editor {
     private static ID_COUNTER = 0;
 
     id: number;
     properties: EditorProperties;
-    file: ProjectFile | undefined;
+    openedFile: ProjectFile | undefined;
     project: Project;
     view: View;
     root: HTMLElement;
@@ -42,18 +42,22 @@ export class Editor {
     inlayManager: InlayManager;
     coordinateMapper: EditorCoordinateMapper;
     caretModel: CaretModel;
-    processManager: ProcessManager;
     eventBus: EventBus;
     perfCheckRunning: boolean = false;
+
     private renderingProcess: any;
 
     constructor(project: Project, options?: EditorProperties) {
         this.id = Editor.ID_COUNTER++;
 
+        if (!ShadowApp.isRunning) {
+            throw new Error("No running shadow app instance found");
+        }
+
         this.project = project;
 
         this.properties = options || {};
-        this.file = this.properties.file || project.createNewUntitledFile();
+        this.openedFile = this.properties.file || project.createNewUntitledFile();
 
         this.eventBus = new EventBus('editor.bus');
 
@@ -70,20 +74,16 @@ export class Editor {
 
         this.caretModel = new CaretModel(this);
 
-        this.processManager = new ProcessManager();
-
         this.renderingProcess = setInterval(() => {
             this.view.render();
         }, 20);
     }
 
     attach(element: HTMLElement) {
-        // We assume plugins have loaded by now, so we can finally parse the file content
         this.root = HTMLUtils.createElement('div.editor', element) as HTMLDivElement;
         setTimeout(() => this.view.onAttached(this.root), 0);
 
         this.eventBus.syncPublish(new EditorAttachedEvent(this, this.root));
-
     }
 
     /**
@@ -99,7 +99,7 @@ export class Editor {
     }
 
     getOpenedFile(): ProjectFile | undefined {
-        return this.file;
+        return this.openedFile;
     }
 
     getOpenedDocument(): Document {
@@ -107,7 +107,7 @@ export class Editor {
     }
 
     getCurrentLanguage(): LanguageBase | null {
-        return this.langService.getCurrentLanguage();
+        return this.document.getLanguage();
     }
 
     getLangSupport() {
@@ -128,10 +128,6 @@ export class Editor {
 
     getPrimaryCaret(): Caret {
         return this.caretModel.getPrimary();
-    }
-
-    getProcessManager(): ProcessManager {
-        return this.processManager;
     }
 
     getPluginManager(): PluginManager {
@@ -218,43 +214,9 @@ export class Editor {
         });
     }
 
-    invalidate(ctx: TextContext) {
-        // TODO
-        // ctx.scope.clear();
-        // this.inlayManager.clear();
-    }
-
     insertText(offset: Offset, text: string) {
         // Insert the text at the specified offset
         this.document.insertText(offset, text);
-
-        // Get the current lexer and highlighter
-        // const lexer = this.langService.getLexer();
-        // const highlighter = this.langService.createHighlighter()
-
-        // Get the context that should be updated
-        let ctx = this.document.getAssociatedContext(offset);
-        this.invalidate(ctx);
-
-        // Reparse the context with the new text
-        // let tokens = lexer.asTokenStream(ctx.text);
-        // let nodes = this.parse(ctx.scope, tokens.clone()).children;
-        // this.document.getSrTree().patch(
-        //     ctx.containingNode,
-        //     nodes,
-        // );
-
-        // Perform syntax highlighting on the tokens
-        // let highlightedTokens = highlighter.highlightAll(tokens.clone());
-        // this.componentManager.setRange(this.getFullRange(), highlightedTokens);
-
-        // this.fire('onHighlightingPerformed', this.getFullRange(), highlightedTokens);
-        //this.fireLangEvent("onSrLoaded", ctx, nodes, tokens);
-
-        // const builder = new ASTBuilder(tokens.clone());
-        // this.createParser(builder).parse();
-        // console.log(builder);
-
         this.view.triggerRepaint();
     }
 
@@ -264,30 +226,7 @@ export class Editor {
         }
 
         // Delete the character at the specified offset
-        const deleted = this.document.deleteAt(offset, n);
-
-        // Get the current lexer and highlighter
-        // let lexer = this.getCurrentLexer();
-        // let highlighter = this.getIncrementalHighlighter();
-
-        // Get the context that should be updated
-        let ctx = this.document.getAssociatedContext(offset);
-        this.invalidate(ctx);
-
-        // Reparse the context with the new text
-        // let stream = lexer.asTokenStream(ctx.text);
-        // let nodes = this.parse(ctx.scope, tokens.clone()).children;
-        // this.document.getSrTree().patch(
-        //     ctx.containingNode,
-        //     nodes,
-        // );
-
-        // Perform syntax highlighting on the tokens
-        // let highlightedTokens = highlighter.highlightAll(stream.clone());
-        // this.componentManager.setRange(this.getFullRange(), highlightedTokens);
-
-        // this.fire('onHighlightingPerformed', this.getFullRange(), highlightedTokens);
-        //this.fireLangEvent("onSrLoaded", ctx, nodes, tokens);
+        this.document.deleteAt(offset, n);
 
         this.view.triggerRepaint();
     }

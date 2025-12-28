@@ -1,4 +1,4 @@
-import {Token} from "../../../core/lang/builder/tokens/Token";
+import {Token} from "../../../core/lang/syntax/builder/tokens/Token";
 
 /**
  * A cache for the incremental parser that stores the current tokens and their states.

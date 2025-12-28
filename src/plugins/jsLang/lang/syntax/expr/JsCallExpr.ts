@@ -1,5 +1,5 @@
-import {SynElementImpl} from "../../../../../core/lang/builder/syntax/impl/SynElementImpl";
-import {ASTNode} from "../../../../../core/lang/builder/parser/nodes/ASTNode";
+import {SynElementImpl} from "../../../../../core/lang/syntax/impl/SynElementImpl";
+import {ASTNode} from "../../../../../core/lang/syntax/builder/parser/nodes/ASTNode";
 
 /**
  *

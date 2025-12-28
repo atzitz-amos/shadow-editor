@@ -1,8 +1,8 @@
-import {IncrementalLexer} from "./builder/lexer/IncrementalLexer";
+import {IncrementalLexer} from "./syntax/builder/lexer/IncrementalLexer";
 import {ExtensionPointSupplier} from "../plugins/extensionPoints/ExtensionPointSupplier";
 import {HighlighterBase} from "./highlighter/HighlighterBase";
-import {ASTBuilder} from "./builder/parser/builder/ASTBuilder";
-import {IParser} from "./builder/parser/IParser";
+import {ASTBuilder} from "./syntax/builder/parser/builder/ASTBuilder";
+import {IParser} from "./syntax/builder/parser/IParser";
 
 export abstract class LanguageBase implements ExtensionPointSupplier {
     private static _instance: LanguageBase | null = null;

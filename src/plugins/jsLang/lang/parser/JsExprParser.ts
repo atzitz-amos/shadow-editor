@@ -2,8 +2,8 @@ import {JsParser} from "./JsParser";
 import {JsLexicalGrammar} from "../lexer/JsLexicalGrammar";
 import {JsGrammar} from "./JsGrammar";
 import {ErrorHandlingMode, JsPrattParser, OperatorPrecedence} from "./JsPrattParser";
-import {ASTBuilder} from "../../../../core/lang/builder/parser/builder/ASTBuilder";
-import {Marker} from "../../../../core/lang/builder/parser/builder/Marker";
+import {ASTBuilder} from "../../../../core/lang/syntax/builder/parser/builder/ASTBuilder";
+import {Marker} from "../../../../core/lang/syntax/builder/parser/builder/Marker";
 
 export class JsExprParser {
     private myPrattParser: JsPrattParser;

@@ -7,6 +7,7 @@ import {PluginManager} from "../plugins/PluginManager";
 import {LangSupport} from "../lang/LangSupport";
 import {SettingsManager} from "../settings/SettingsManager";
 import {ActionManager} from "../actions/ActionManager";
+import {ProcessManager} from "../processManager/ProcessManager";
 
 /**
  *
@@ -48,6 +49,10 @@ export class GlobalState {
 
     public static getSettingsManager() {
         return SettingsManager.getInstance();
+    }
+
+    public static getProcessManager(): ProcessManager {
+        return this.shadowApp.getProcessManager();
     }
 
     public static setReady(flag: boolean) {

@@ -1,13 +1,13 @@
 import {Editor} from "../../Editor";
 import {LanguageBase} from "../../../core/lang/LanguageBase";
-import {IncrementalLexer} from "../../../core/lang/builder/lexer/IncrementalLexer";
+import {IncrementalLexer} from "../../../core/lang/syntax/builder/lexer/IncrementalLexer";
 import {IncrementalHighlighter} from "../../../core/lang/highlighter/IncrementalHighlighter";
 import {DocumentModificationEvent} from "../document/events/DocumentModificationEvent";
 import {HighlighterBase} from "../../../core/lang/highlighter/HighlighterBase";
-import {IParser} from "../../../core/lang/builder/parser/IParser";
-import {ASTBuilder} from "../../../core/lang/builder/parser/builder/ASTBuilder";
-import {SynNode} from "../../../core/lang/builder/syntax/api/SynNode";
-import {SynFileImpl} from "../../../core/lang/builder/syntax/impl/SynFileImpl";
+import {IParser} from "../../../core/lang/syntax/builder/parser/IParser";
+import {ASTBuilder} from "../../../core/lang/syntax/builder/parser/builder/ASTBuilder";
+import {SynNode} from "../../../core/lang/syntax/api/SynNode";
+import {SynFileImpl} from "../../../core/lang/syntax/impl/SynFileImpl";
 
 /**
  * Class associated with an editor that holds the current language, lexer, parser, highlighter as

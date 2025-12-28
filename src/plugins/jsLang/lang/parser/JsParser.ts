@@ -1,10 +1,10 @@
 import {JsGrammar} from "./JsGrammar";
 import {JsLexicalGrammar} from "../lexer/JsLexicalGrammar";
 import {JsExprParser} from "./JsExprParser";
-import {ASTBuilder} from "../../../../core/lang/builder/parser/builder/ASTBuilder";
-import {IParser} from "../../../../core/lang/builder/parser/IParser";
-import {Marker} from "../../../../core/lang/builder/parser/builder/Marker";
-import {SynScopeType} from "../../../../core/lang/builder/parser/scopes/SynScopeType";
+import {ASTBuilder} from "../../../../core/lang/syntax/builder/parser/builder/ASTBuilder";
+import {IParser} from "../../../../core/lang/syntax/builder/parser/IParser";
+import {Marker} from "../../../../core/lang/syntax/builder/parser/builder/Marker";
+import {SynScopeType} from "../../../../core/lang/syntax/builder/parser/scopes/SynScopeType";
 
 
 export class JsParser implements IParser {

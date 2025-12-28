@@ -1,18 +1,19 @@
 import {Editor} from "../../Editor";
 import {EditorRawData} from "./RawData";
 import {LineData} from "./LineData";
-import {TextContext, TextRange} from "../coordinate/TextRange";
+import {TextRange} from "../coordinate/TextRange";
 import {LanguageBase} from "../../../core/lang/LanguageBase";
 import {DocumentInsertEvent} from "./events/DocumentInsertEvent";
 import {DocumentModificationEvent} from "./events/DocumentModificationEvent";
 import {DocumentDeleteEvent} from "./events/DocumentDeleteEvent";
+import {ProjectFile} from "../../../core/project/filetree/ProjectFile";
 
 /**
  * Represents an opened file in the editor
  * Store the language, the line-breaks, the components and the AST of a file */
 export class Document {
     private data: EditorRawData;
-    private srTree: SRTree;
+    private file: ProjectFile;
 
     private lines: LineData[];
     private lineBreaks: Offset[] = [];
@@ -129,10 +130,6 @@ export class Document {
         return this.editor.getCurrentLanguage();
     }
 
-    public getSrTree(): SRTree {
-        return this.srTree;
-    }
-
     public insertText(offset: Offset, text: string): void {
         this.data.insert(offset, text);
 
@@ -152,28 +149,6 @@ export class Document {
         this.editor.getEventBus().asyncPublish(new DocumentDeleteEvent(this, affectedRange));
 
         return deleted;
-    }
-
-    public getAssociatedContext(at: Offset): TextContext {
-        // TODO
-        /*let scope = this.srTree.scoping.toplevel(); // TODO: this.srTree.scoping.getScopeAt(at);
-        return {
-            begin: scope.range.start,
-            end: scope.range.end,
-            text: this.data.getTextInRange(scope.range),
-            scope: scope,
-            containingNode: this.srTree.getContainingNodeAt(at)
-        }*/
-        return {
-            begin: 0,
-            end: this.getTotalDocumentLength(),
-            text: this.getTextContent(),
-            scope: null,
-            containingNode: null
-        }
-    }
-
-    private loadSRTree(editor: Editor) {
     }
 
     private parseLines(): void {
