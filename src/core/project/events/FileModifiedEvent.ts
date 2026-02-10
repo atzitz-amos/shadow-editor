@@ -17,7 +17,7 @@ export class FileModifiedEvent implements EventBase {
     }
 
     getBubbleDirection(): BubbleDirection {
-        return BubbleDirection.BUBBLE_DOWN;
+        return BubbleDirection.BUBBLE_BOTH;
     }
 
     getFile(): ProjectFile {

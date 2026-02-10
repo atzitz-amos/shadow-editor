@@ -12,6 +12,6 @@ export class GlobalProjectChangedEvent implements EventBase {
     public static readonly SUBSCRIBER = EventSubscriber.create(this);
 
     getBubbleDirection(): BubbleDirection {
-        return BubbleDirection.BUBBLE_DOWN;
+        return BubbleDirection.BUBBLE_BOTH;
     }
 }

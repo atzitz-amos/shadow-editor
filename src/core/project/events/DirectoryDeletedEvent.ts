@@ -16,7 +16,7 @@ export class DirectoryDeletedEvent implements EventBase {
     }
 
     getBubbleDirection(): BubbleDirection {
-        return BubbleDirection.BUBBLE_DOWN;
+        return BubbleDirection.BUBBLE_BOTH;
     }
 
     public getDirectory(): Directory {

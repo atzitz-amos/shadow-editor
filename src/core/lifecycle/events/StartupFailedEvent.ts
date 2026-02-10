@@ -41,7 +41,7 @@ export class StartupFailedEvent implements EventBase {
     }
 
     getBubbleDirection(): BubbleDirection {
-        return BubbleDirection.BUBBLE_DOWN;
+        return BubbleDirection.BUBBLE_BOTH;
     }
 }
 

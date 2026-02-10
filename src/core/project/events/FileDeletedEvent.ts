@@ -16,7 +16,7 @@ export class FileDeletedEvent implements EventBase {
     }
 
     getBubbleDirection(): BubbleDirection {
-        return BubbleDirection.BUBBLE_DOWN;
+        return BubbleDirection.BUBBLE_BOTH;
     }
 
     public getFile(): ProjectFile {

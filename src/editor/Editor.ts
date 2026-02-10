@@ -341,4 +341,8 @@ export class Editor {
             this.view.render();
         }, 20);
     }
+
+    triggerRepaint() {
+        this.view.triggerRepaint();
+    }
 }

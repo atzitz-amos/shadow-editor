@@ -60,7 +60,7 @@ export class StartupProgressEvent implements EventBase {
     }
 
     getBubbleDirection(): BubbleDirection {
-        return BubbleDirection.BUBBLE_DOWN;
+        return BubbleDirection.BUBBLE_BOTH;
     }
 }
 
