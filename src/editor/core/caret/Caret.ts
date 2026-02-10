@@ -6,6 +6,7 @@ import {CaretMovedEvent} from "./events/CaretMovedEvent";
 import {CaretRemovedEvent} from "./events/CaretRemovedEvent";
 
 
+
 export class Caret {
     id: number = 0;
 
