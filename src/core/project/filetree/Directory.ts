@@ -75,15 +75,17 @@ export class Directory implements FileTreeEntry {
     }
 
     public createDirectory(name: string) {
-        const dir = new Directory(this.filesystem,name, this.path.extendDir(name));
-        this.addEntry(dir);
-        return dir;
+        return this.filesystem.createDirectory(this, name);
+    }
+
+    public createFile(name: string) {
+        return this.filesystem.createFile(this, name, "");
     }
 
     public removeSelf(): void {
         if (!this.parent)
             throw new Error(`Cannot remove root directory.`);
-        this.parent.removeEntry(this);
+        this.filesystem.deleteDirectory(this);
     }
 
     public openDirectory(name: string): Directory {

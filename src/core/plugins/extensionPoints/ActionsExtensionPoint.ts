@@ -2,6 +2,7 @@ import {PluginManager} from "../PluginManager";
 import {ExtensionPoint} from "./ExtensionPoint";
 import {EditorPlugin} from "../loader/Plugin";
 import {AbstractAction} from "../../actions/AbstractAction";
+import {GlobalState} from "../../global/GlobalState";
 
 
 export class ActionsExtensionPoint implements ExtensionPoint {
@@ -18,7 +19,7 @@ export class ActionsExtensionPoint implements ExtensionPoint {
     }
 
     register(manager: PluginManager, owner: EditorPlugin, action: AbstractAction): void {
-        manager.getActionManager().addAction(action);
+        GlobalState.getActionManager().addAction(action);
 
         if (!this.actions[owner.constructor.name]) {
             this.actions[owner.constructor.name] = [];
@@ -31,7 +32,7 @@ export class ActionsExtensionPoint implements ExtensionPoint {
         if (actions) {
             delete this.actions[owner.constructor.name];
             for (let action of actions) {
-                manager.getActionManager().removeAction(action);
+                GlobalState.getActionManager().removeAction(action);
             }
         }
     }

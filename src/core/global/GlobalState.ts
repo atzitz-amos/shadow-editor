@@ -8,6 +8,7 @@ import {LangSupport} from "../lang/LangSupport";
 import {SettingsManager} from "../settings/SettingsManager";
 import {ActionManager} from "../actions/ActionManager";
 import {ProcessManager} from "../processManager/ProcessManager";
+import {PersistenceModel} from "../persistence/PersistenceModel";
 
 /**
  *
@@ -55,17 +56,19 @@ export class GlobalState {
         return this.shadowApp.getProcessManager();
     }
 
+    public static getActionManager(): ActionManager {
+        return ActionManager.getInstance();
+    }
+
+    public static getPersistenceModel() {
+        return PersistenceModel.getInstance();
+    }
+
     public static setReady(flag: boolean) {
         this._isReady = flag;
     }
 
     public static isReady(): boolean {
         return this._isReady;
-    }
-
-    public static load() {
-        ActionManager.getInstance().loadAll();
-        PluginManager.getInstance().loadAll();
-        SettingsManager.getInstance().loadAll();
     }
 }

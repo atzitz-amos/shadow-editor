@@ -63,7 +63,7 @@ export abstract class SettingBase<T> {
     }
 
     public getCurrentValue(): T {
-        return this.currentValue;
+        return this.currentValue ?? this.defaultValue;
     }
 
     public getCategory(): SettingCategory {

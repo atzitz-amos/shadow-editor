@@ -2,6 +2,7 @@ import {PluginManager} from "../PluginManager";
 import {EditorPlugin} from "../loader/Plugin";
 import {LangExtensionPoint} from "./LangExtensionPoint";
 import {ActionsExtensionPoint} from "./ActionsExtensionPoint";
+import {StartupPhaseExtensionPoint} from "./StartupPhaseExtensionPoint";
 
 export interface ExtensionPoint {
     getName(): string;
@@ -14,7 +15,8 @@ export interface ExtensionPoint {
 export class ExtensionPointsLoader {
     public static readonly EXTENSION_POINTS = {
         "lang": LangExtensionPoint.class,
-        "actions": ActionsExtensionPoint.class
+        "actions": ActionsExtensionPoint.class,
+        "startupPhase": StartupPhaseExtensionPoint.class
     };
 
     public static forName(name: string) {

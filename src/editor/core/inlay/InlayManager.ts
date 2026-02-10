@@ -19,6 +19,9 @@ export class InlayManager {
         this.addInlay(InlayUtils.toInlayRecord(inlay, this.editor));
     }
 
+    /**
+     * Add an InlayRecord to the inlay manager.
+     */
     public addInlay(inlay: InlayRecord) {
         if (this.inlays.length === 0) {
             this.inlays.push(inlay);
@@ -36,10 +39,15 @@ export class InlayManager {
         }
     }
 
+    /**
+     * Clear all InlayRecords
+     */
     public clear(): void {
         this.inlays.length = 0;
     }
 
+    /**
+     * Get list of InlayRecords. This list is guaranteed to be sorted based on offset position.*/
     public getInlays(): InlayRecord[] {
         return this.inlays;
     }

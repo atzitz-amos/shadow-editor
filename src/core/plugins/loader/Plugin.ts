@@ -7,23 +7,35 @@ export abstract class EditorPlugin {
         return this;
     }
 
+    /**
+     * Called when the plugin is enabled.
+     */
     public onEnable(): void {
         // TODO: Enable context
-
     }
 
+    /**
+     * Called when the plugin is disabled.
+     */
     public onDisable(): void {
-
     }
+
+    /**
+     * Optional async initialization called during plugin loading phase.
+     * Override this if your plugin needs async setup (e.g., loading resources).
+     */
+    public onLoadAsync?(): Promise<void>;
 }
 
 
 export class LoadedPlugin {
     private readonly plugin: EditorPlugin;
     private readonly extensionPoints: Record<string, LoadedExtensionPoint[]>;
+    private readonly name: string;
     private isEnabled: boolean = false;
 
-    constructor(plugin: EditorPlugin, extensionPoints: Record<string, LoadedExtensionPoint[]>) {
+    constructor(plugin: EditorPlugin, name: string, extensionPoints: Record<string, LoadedExtensionPoint[]>) {
+        this.name = name;
         this.plugin = plugin;
         this.extensionPoints = extensionPoints;
 
@@ -50,5 +62,9 @@ export class LoadedPlugin {
     disable() {
         this.isEnabled = false;
         this.plugin.onDisable();
+    }
+
+    getPluginName() {
+        return this.name;
     }
 }

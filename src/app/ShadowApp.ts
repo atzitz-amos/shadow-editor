@@ -1,9 +1,7 @@
 import {ShadowUI} from "./ui/ShadowUI";
-import {PersistenceModel} from "../core/persistence/PersistenceModel";
-import {PersistenceStrategy} from "../core/persistence/PersistenceStrategy";
 import {GlobalState} from "../core/global/GlobalState";
-import {ShadowAppLoadedEvent} from "./events/ShadowAppLoadedEvent";
 import {ProcessManager} from "../core/processManager/ProcessManager";
+import {Lifecycle} from "../core/lifecycle/Lifecycle";
 
 /**
  * Represents an opened editor. It manages the panes, tabs, and documents within the editor.
@@ -17,38 +15,60 @@ import {ProcessManager} from "../core/processManager/ProcessManager";
  */
 export class ShadowApp {
     public static isRunning = false;
+    private static instance: ShadowApp;
 
     private readonly processManager: ProcessManager;
 
-    constructor() {
-        if (ShadowApp.isRunning) throw new Error("Shadow app is already running");
-        ShadowUI.launch(this);
-
+    private constructor() {
         this.processManager = new ProcessManager();
     }
 
-    public static launch(): void {
-        new ShadowApp().init();
-        ShadowApp.isRunning = true;
+    /**
+     * Launch the ShadowApp. This is the single entry point for the application.
+     * Initializes the UI (with progress bar), runs all startup phases via Lifecycle,
+     * and resolves when the app is fully ready.
+     *
+     * @returns A promise that resolves to true if startup succeeded, false if aborted.
+     */
+    public static async launch(): Promise<boolean> {
+        if (ShadowApp.isRunning) {
+            throw new Error("Shadow app is already running");
+        }
+
+        // Create the app instance
+        ShadowApp.instance = new ShadowApp();
+
+        // Initialize GlobalState with the app
+        GlobalState.init(ShadowApp.instance);
+
+        // Launch the UI (this will display the progress bar)
+        ShadowUI.launch(ShadowApp.instance);
+
+        // Get the lifecycle instance (creates it if needed)
+        const lifecycle = Lifecycle.getInstance();
+
+        // Run all startup phases
+        const success = await lifecycle.start(ShadowApp.instance);
+
+        if (success) {
+            ShadowApp.isRunning = true;
+        }
+
+        return success;
     }
 
-    public init(): void {
-        PersistenceModel.recover(PersistenceStrategy.PERSIST);
-        GlobalState.load();
-
-        this.delayedStart();
+    /**
+     * Get the running ShadowApp instance.
+     * @throws Error if the app has not been launched yet.
+     */
+    public static getInstance(): ShadowApp {
+        if (!ShadowApp.instance) {
+            throw new Error("ShadowApp has not been launched yet. Call ShadowApp.launch() first.");
+        }
+        return ShadowApp.instance;
     }
 
     getProcessManager(): ProcessManager {
         return this.processManager;
-    }
-
-    private delayedStart(): void {
-        // Wait for the plugins to load
-        setTimeout(() => {
-            GlobalState.setReady(true);
-
-            GlobalState.getMainEventBus().syncPublish(new ShadowAppLoadedEvent(this));
-        }, 0);
     }
 }

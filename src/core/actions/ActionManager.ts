@@ -6,12 +6,16 @@ import * as MoveCaret from "../../editor/actions/MoveCaret";
 import {TabAction} from "../../editor/actions/TabAction";
 import {SelectAllAction, SelectDoubleClickAction} from "../../editor/actions/SelectActions";
 import {KeybindManager} from "../keybinds/KeybindManager";
+import {Service} from "../lifecycle/Service";
+import {Logger, UseLogger} from "../logging/Logger";
 
 
+@Service
+@UseLogger("ActionManager")
 export class ActionManager {
     private static instance: ActionManager;
-
     actions: AbstractAction[] = [];
+    private declare readonly logger: Logger;
 
     public static getInstance() {
         if (!ActionManager.instance) {
@@ -36,7 +40,7 @@ export class ActionManager {
         }
     }
 
-    loadAll() {
+    begin() {
         // Register default actions
         this.addAction(new MoveCaret.MoveCaretLeftAction());
         this.addAction(new MoveCaret.MoveCaretRightAction());
@@ -52,6 +56,8 @@ export class ActionManager {
         this.addAction(new CtrlBackspaceAction());
         this.addAction(new SelectAllAction());
         this.addAction(new SelectDoubleClickAction());
+
+        this.logger.info("Successfully registered default actions.");
     }
 }
 
