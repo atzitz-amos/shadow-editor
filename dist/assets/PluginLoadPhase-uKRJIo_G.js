@@ -1,0 +1,1 @@
+import{A as a}from"./StartupPhase-BKxihHec.js";import{b as n}from"./index-BZDBR4GD.js";class s extends a{name="Loading Plugins";priority=10;critical=!0;async run(){await n.getInstance().beginAsync()}}export{s as PluginLoadPhase};

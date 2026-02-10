@@ -1,0 +1,1 @@
+import{A as r}from"./StartupPhase-BKxihHec.js";class c extends r{constructor(e){super(),this.services=e}name="Starting Services";priority=30;critical=!0;async run(){for(const e of this.services){const t=e.begin();t&&typeof t.then=="function"&&await t}}}export{c as ServiceBeginPhase};
