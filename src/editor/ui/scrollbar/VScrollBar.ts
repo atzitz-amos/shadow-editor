@@ -1,6 +1,6 @@
 import {Component} from "../../core/components/Component";
 import {Editor} from "../../Editor";
-import {View} from "../View";
+import {View} from "../view/View";
 import {HTMLUtils} from "../../utils/HTMLUtils";
 import {Registry} from "../../core/Registry";
 
@@ -24,7 +24,7 @@ export class VScrollBar implements Component {
     }
 
     onRender() {
-        this.scrollbar = HTMLUtils.createElement("div.scrollbar.v-scroll", this.view.layers.layers_el);
+        this.scrollbar = HTMLUtils.createElement("div.scrollbar.v-scroll", this.view.getLayers().layers_el);
         this.handle = HTMLUtils.createElement("div.scrollbar-handle", this.scrollbar);
         this.handle.style.height = "0";
 

@@ -1,5 +1,5 @@
 export class HTMLUtils {
-    static createElement(s: string, x?: HTMLElement): HTMLElement {
+    static createElement<T extends HTMLElement>(s: string, x?: HTMLElement): T {
         function _(e, t, v) {
             switch (t) {
                 case '.':
@@ -30,7 +30,7 @@ export class HTMLUtils {
         if (x) {
             x.appendChild(el as HTMLElement);
         }
-        return el as HTMLElement;
+        return el as T;
     }
 
     static px(value: number | string): string {

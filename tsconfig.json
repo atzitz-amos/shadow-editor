@@ -8,6 +8,7 @@
     "forceConsistentCasingInFileNames": false,
     "strictPropertyInitialization": false,
     "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     "noImplicitAny": false,
     "outDir": "dist",
     "rootDir": "src"
