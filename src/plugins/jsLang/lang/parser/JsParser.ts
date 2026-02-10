@@ -250,7 +250,9 @@ export class JsParser implements IParser {
     }
 
     parseForStatement() {
-        // TODO
+        const marker = this.builder.mark();
+        this.builder.advance(); // consume 'for'
+        marker.done(JsGrammar.ForIStatement); // TODO
     }
 
     parseWhileStatement() {
