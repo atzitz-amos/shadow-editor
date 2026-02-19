@@ -1,0 +1,27 @@
+.editor .editor-gutter {
+    width: calc(var(--editor-gutter-width) + var(--editor-gutter-num-size));
+    height: var(--editor-height);
+    padding-right: 2px;
+    border-right: 1px solid var(--editor-gutter-separator-color);
+    color: var(--editor-gutter-color);
+    flex-direction: column;
+    justify-content: flex-start;
+    overflow: hidden;
+    position: relative;
+
+    --editor-gutter-num-size: 0;
+}
+
+.editor .editor-gutter-line {
+    width: 100%;
+    padding-left: calc(max(20px - var(--editor-gutter-num-size) / 2, 10px));
+}
+
+.editor .gutter-line-number {
+    width: var(--editor-gutter-num-size);
+
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+

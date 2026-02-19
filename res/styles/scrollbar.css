@@ -1,0 +1,34 @@
+.scrollbar {
+    position: absolute;
+    z-index: 100;
+    cursor: pointer;
+}
+
+.v-scroll {
+    right: 0;
+    height: 100%;
+    width: 10px;
+}
+
+.h-scroll {
+    bottom: 0;
+    width: 100%;
+    height: 10px;
+}
+
+.scrollbar-handle {
+    position: relative;
+    background: rgba(166, 166, 166, 0.4);
+    cursor: auto;
+}
+
+.v-scroll .scrollbar-handle {
+    width: 100%;
+    top: 0;
+}
+
+.h-scroll .scrollbar-handle {
+    height: 100%;
+    left: 0;
+}
+

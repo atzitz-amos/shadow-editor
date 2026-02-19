@@ -1,0 +1,16 @@
+.editor-selection {
+    position: absolute;
+    background: var(--editor-selection-color);
+    height: var(--editor-line-height);
+    translate: 3px 0;
+}
+
+.selection-body {
+    width: 100%;
+    left: 0;
+}
+
+.selection-end {
+    left: 0;
+}
+

@@ -1,0 +1,44 @@
+.editor .editor-layers {
+    cursor: text;
+    flex-direction: column;
+    position: relative;
+
+    height: 100%;
+
+    flex-grow: 1;
+}
+
+.editor .editor-layer {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+
+    padding-left: 2px;
+}
+
+.editor .layer-active-line {
+    z-index: 1;
+    padding-left: 0;
+}
+
+.editor .layer-selection {
+    z-index: 2;
+}
+
+.editor .layer-inner {
+    z-index: 3;
+    flex-direction: column;
+    color: white;
+    background: transparent;
+}
+
+.editor .layer-caret {
+    z-index: 5;
+    pointer-events: none;
+}
+
+.editor .layer-overlays {
+    z-index: 4;
+}
+

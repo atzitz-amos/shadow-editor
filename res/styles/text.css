@@ -1,0 +1,42 @@
+.editor .editor-line,
+.editor .editor-active-line,
+.editor .editor-gutter-line {
+    position: relative;
+    top: calc(-1 * var(--editor-scroll-offsetY));
+    left: 0;
+
+    width: 100%;
+    height: var(--editor-line-height);
+    max-height: var(--editor-line-height);
+    min-height: var(--editor-line-height);
+
+    padding-left: 2px;
+}
+
+.editor .editor-line {
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.editor .editor-line * {
+    translate: calc(-1 * var(--editor-scroll-x)) 0;
+}
+
+.editor .editor-active-line {
+    position: absolute;
+    background: var(--editor-active-line-color);
+}
+
+.editor-ht {
+    box-sizing: content-box;
+}
+
+.highlighted-token {
+    text-underline-offset: 2px;
+    text-decoration-thickness: 1px !important;
+}
+
+.punctuation {
+    transform: translateY(1px);
+}
+

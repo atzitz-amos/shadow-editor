@@ -1,0 +1,61 @@
+.editor * {
+    font-family: 'JetBrains', 'monospace';
+    font-size: var(--editor-font-size);
+    font-variant: no-contextual !important;
+    letter-spacing: 0.3px;
+    white-space: pre;
+    tab-size: 4;
+    user-select: none;
+
+    box-sizing: border-box;
+}
+
+.editor div {
+    display: flex;
+}
+
+.editor {
+    width: min-content;
+    height: min-content;
+    box-shadow: -3px 3px 20px 1px black;
+
+    --editor-width: 0;
+    --editor-height: 0;
+    --editor-root-bg-color: 0;
+    --editor-root-border-color: 0;
+    --editor-font-size: 0;
+    --editor-line-height: 0;
+    --editor-gutter-width: 0;
+    --editor-caret-color: 0;
+    --editor-caret-height: 0;
+    --editor-selection-color: 0;
+    --editor-active-line-color: 0;
+    --editor-gutter-color: 0;
+    --editor-gutter-separator-color: 0;
+}
+
+.editor .editor-sizer {
+    position: absolute;
+    opacity: 0;
+    top: -200px;
+    width: min-content;
+    height: min-content;
+}
+
+.editor .editor-view {
+    position: relative;
+
+    background: var(--editor-root-bg-color);
+    width: var(--editor-width);
+    height: var(--editor-height);
+
+    border: 1px solid var(--editor-root-border-color);
+
+    overflow: hidden;
+
+    box-sizing: border-box;
+
+    --editor-scroll-offsetY: 0px;
+    --editor-scroll-x: 0px;
+}
+

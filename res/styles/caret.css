@@ -1,0 +1,35 @@
+.editor .editor-caret {
+    position: absolute;
+    pointer-events: none;
+    opacity: 1;
+
+    width: 0;
+    height: var(--editor-caret-height);
+
+    border-right: 2px solid var(--editor-caret-color);
+
+    margin-top: calc((var(--editor-line-height) - var(--editor-caret-height)) / 2);
+    top: 0;
+    left: 0;
+}
+
+.editor:not(.focused) .editor-caret {
+    opacity: 0 !important;
+}
+
+.editor .editor-caret.blink {
+    opacity: 0;
+}
+
+.editor-input {
+    width: 1em;
+    height: var(--editor-line-height);
+    opacity: 0;
+    position: relative;
+    caret-color: transparent;
+}
+
+.editor .editor-input, .editor .editor-caret {
+    translate: 2px 0;
+}
+
