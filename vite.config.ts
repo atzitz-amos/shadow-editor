@@ -3,4 +3,12 @@ import {defineConfig} from "vite";
 
 export default defineConfig({
     root: ".", // your project root
+    build: {
+        rollupOptions: {
+            output: {
+                inlineDynamicImports: true,
+                manualChunks: undefined
+            }
+        }
+    }
 });

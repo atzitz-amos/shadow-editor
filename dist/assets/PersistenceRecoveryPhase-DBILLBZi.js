@@ -1,1 +1,0 @@
-import{A as t}from"./StartupPhase-BKxihHec.js";import{P as s,a as r}from"./index-BZDBR4GD.js";class o extends t{constructor(e){super(),this.persistedObjects=e}name="Recovering Data";priority=20;critical=!0;async run(){await s.getInstance().recover(r.PERSIST,this.persistedObjects)}}export{o as PersistenceRecoveryPhase};

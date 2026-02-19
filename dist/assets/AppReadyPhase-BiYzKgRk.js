@@ -1,1 +1,0 @@
-import{A as s}from"./StartupPhase-BKxihHec.js";import{G as a,S as e}from"./index-BZDBR4GD.js";class n extends s{constructor(t){super(),this.app=t}name="Finalizing";priority=100;critical=!1;async run(){a.setReady(!0),a.getMainEventBus().syncPublish(new e(this.app))}}export{n as AppReadyPhase};

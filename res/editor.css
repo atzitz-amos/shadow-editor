@@ -47,7 +47,7 @@
 .editor .editor-sizer {
     position: absolute;
     opacity: 0;
-    left: 10000px;
+    top: -200px;
     width: min-content;
     height: min-content;
 }
