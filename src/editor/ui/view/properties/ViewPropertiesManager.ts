@@ -6,7 +6,6 @@ import {EditorAttachedEvent} from "../../../events/EditorAttachedEvent";
 import {SettingChangedEvent} from "../../../../core/settings/events/SettingChangedEvent";
 import {ViewVisualPropertiesChangedEvent} from "./ViewVisualPropertiesChangedEvent";
 import {HTMLUtils} from "../../../utils/HTMLUtils";
-import {ShadowAppLoadedEvent} from "../../../../app/events/ShadowAppLoadedEvent";
 import {SettingCreateEvent} from "../../../../core/settings/events/SettingCreateEvent";
 import {SettingBase} from "../../../../core/settings/base/SettingBase";
 
@@ -46,7 +45,6 @@ export class ViewPropertiesManager {
 
         view.getEditor().getEventBus()
             .subscribe(this, EditorAttachedEvent.SUBSCRIBER, ev => this.load(ev))
-            .subscribe(this, ShadowAppLoadedEvent.SUBSCRIBER, ev => this.recomputeCounts())
             .subscribe(this, SettingChangedEvent.SUBSCRIBER, ev => this.updateSettingEvent)
             .subscribe(this, SettingCreateEvent.SUBSCRIBER, ev => this.updateSettingEvent);
     }
@@ -107,8 +105,11 @@ export class ViewPropertiesManager {
         this.lineHeight = SettingsManager.getValue(VisualSettings.LINE_HEIGHT);
         this.fontSize = SettingsManager.getValue(VisualSettings.FONT_SIZE);
 
+        const settings = SettingsManager.getInstance();
+        for (const setting of settings.getAllSettings())
+            this.updateSetting(setting, setting.getCurrentValue());
+
         this.syncCSS();
-        SettingsManager.getInstance().getAllSettings().forEach(setting => this.updateSetting(setting, setting.getCurrentValue()));
     }
 
     private syncCSS() {

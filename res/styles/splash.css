@@ -23,6 +23,8 @@
     text-align: center;
     color: #cccccc;
     font-family: 'JetBrains Mono', monospace;
+    max-width: 560px;
+    width: 90vw;
 }
 
 .shadow-splash-title {
@@ -38,7 +40,7 @@
     background: #333333;
     border-radius: 2px;
     overflow: hidden;
-    margin-bottom: 16px;
+    margin: 0 auto 16px;
 }
 
 .shadow-splash-progress-bar {
@@ -61,7 +63,8 @@
     background: rgba(255, 107, 107, 0.1);
     border: 1px solid #ff6b6b;
     border-radius: 8px;
-    max-width: 500px;
+    text-align: left;
+    overflow: hidden;
 }
 
 .shadow-splash-error-phase {
@@ -81,5 +84,57 @@
     color: #666666;
     font-size: 11px;
     font-style: italic;
+}
+
+.shadow-splash-error-location {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: #888888;
+    margin-bottom: 10px;
+}
+
+.shadow-splash-error-link {
+    color: #6fb3d2;
+    text-decoration: underline;
+    text-decoration-color: rgba(111, 179, 210, 0.4);
+    text-underline-offset: 2px;
+}
+
+.shadow-splash-error-link:hover {
+    color: #9dd0eb;
+    text-decoration-color: rgba(157, 208, 235, 0.7);
+}
+
+.shadow-splash-error-details {
+    margin: 10px 0;
+    text-align: left;
+}
+
+.shadow-splash-error-details summary {
+    cursor: pointer;
+    color: #888888;
+    font-size: 12px;
+    user-select: none;
+    padding: 4px 0;
+    outline: none;
+}
+
+.shadow-splash-error-details summary:hover {
+    color: #bbbbbb;
+}
+
+.shadow-splash-error-stack {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: #cc8888;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 12px;
+    border-radius: 4px;
+    margin: 8px 0 0 0;
+    max-height: 200px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+    line-height: 1.5;
 }
 

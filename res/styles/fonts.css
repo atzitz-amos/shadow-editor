@@ -1,10 +1,10 @@
 @font-face {
-    src: url("../JetBrainsMonoNL-Thin.ttf");
+    src: url("../fonts/JetBrainsMonoNL-Thin.ttf");
     font-family: JetBrains_Thin;
 }
 
 @font-face {
-    src: url("../JetBrainsMono-Light.ttf");
+    src: url("../fonts/JetBrainsMono-Light.ttf");
     font-family: JetBrains;
 }
 

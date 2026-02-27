@@ -6,7 +6,7 @@ import {Logger, UseLogger} from "../logging/Logger";
  *
  * Each stylesheet is tracked by a unique ID to prevent duplicates and allow clean removal.
  *
- * @author Shadow Editor
+ * @author Atzitz Amos
  * @date 2/19/2026
  * @since 1.0.0
  */

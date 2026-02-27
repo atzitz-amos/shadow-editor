@@ -73,19 +73,16 @@ export class Editor {
         this.coordinateMapper = new EditorCoordinateMapper(this.view);
 
         this.caretModel = new CaretModel(this);
-
-        this.renderingProcess = setInterval(() => {
-            this.view.render();
-        }, 20);
     }
 
     attach(element: HTMLElement) {
         this.root = HTMLUtils.createElement('div.editor', element) as HTMLDivElement;
         setTimeout(() => {
-            this.view.onAttached(this.root)
+            this.view.onAttached(this.root);
         }, 0);
 
         this.eventBus.asyncPublish(new EditorAttachedEvent(this, this.root));
+        this.resumeRender();
     }
 
     /**

@@ -35,6 +35,7 @@ export class PluginLoader {
     public loadAll(): void {
         const modules = this.effectiveImport();
         const extensionPoints = this.resolveExtensionPoints();
+        const stylesheets = this.resolveStylesheets();
 
         for (const module of modules) {
             const plugin = new module.pluginCls();
@@ -54,7 +55,8 @@ export class PluginLoader {
                 }
             }
 
-            this.manager.registerPlugin(plugin, module.pluginName, loadedExtensionPoints);
+            const pluginStyles = stylesheets.filter(s => s.pluginName === module.pluginName).map(s => s.url);
+            this.manager.registerPlugin(plugin, module.pluginName, loadedExtensionPoints, pluginStyles);
         }
     }
 
@@ -64,6 +66,7 @@ export class PluginLoader {
     public async loadAllAsync(): Promise<void> {
         const modules = this.effectiveImport();
         const extensionPoints = this.resolveExtensionPoints();
+        const stylesheets = this.resolveStylesheets();
 
         for (const module of modules) {
             const plugin = new module.pluginCls();
@@ -84,7 +87,8 @@ export class PluginLoader {
                 }
             }
 
-            this.manager.registerPlugin(plugin, module.pluginName, loadedExtensionPoints);
+            const pluginStyles = stylesheets.filter(s => s.pluginName === module.pluginName).map(s => s.url);
+            this.manager.registerPlugin(plugin, module.pluginName, loadedExtensionPoints, pluginStyles);
 
             // Await plugin's async onLoad if it exists
             if (typeof plugin.onLoadAsync === 'function') {
@@ -149,5 +153,28 @@ export class PluginLoader {
 
         this.logger.debug("Finished scanning. Found " + extensionPoints.length + " extension points.");
         return extensionPoints;
+    }
+
+    /**
+     * Auto-discovers CSS files from each plugin's styles/ directory.
+     * Convention: /src/plugins/{pluginName}/styles/*.css
+     */
+    private resolveStylesheets(): { pluginName: string, url: string }[] {
+        this.logger.debug("Scanning for plugin stylesheets...");
+
+        const imports = import.meta.glob("/src/plugins/*/styles/*.css", {eager: false, query: "?url", import: "default"});
+        const stylesheets: { pluginName: string, url: string }[] = [];
+
+        for (const path in imports) {
+            const split = path.split('/');
+            // path = /src/plugins/{pluginName}/styles/{file}.css
+            const pluginName = split[split.length - 3];
+
+            stylesheets.push({pluginName, url: path});
+            this.logger.debug("Found stylesheet: " + path + " for plugin: " + pluginName);
+        }
+
+        this.logger.debug("Finished scanning. Found " + stylesheets.length + " plugin stylesheets.");
+        return stylesheets;
     }
 }

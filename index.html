@@ -39,9 +39,10 @@
             import {JsIdentifier} from "./src/plugins/jsLang/lang/syntax/expr/JsIdentifier";
             import {SynFileImpl} from "./src/core/lang/syntax/impl/SynFileImpl";
             import {GlobalState} from "./src/core/global/GlobalState";
+            import {ShadowUI} from "./src/app/ui/ShadowUI";
 
             // Main entry point - launch the app and wait for startup to complete
-            const success = await ShadowApp.launch();
+            const success = await ShadowApp.launch(true);
 
             if (!success) {
                 console.error("ShadowApp startup failed!");
@@ -50,15 +51,17 @@
                 const project = new Project("myProject");
                 GlobalProject.open(project);
 
-                const editor = new Editor(project);
+                ShadowUI.singleEditorUI(project, () => document.querySelector(".editor-c"));
+
                 PluginManager.getInstance().enable(JSLangPlugin.class);
 
-                editor.attach(document.querySelector('.editor-c'));
 
-                window.editor = editor;
+                window.editor = null;
                 window.project = project;
                 window.TextRange = TextRange;
                 window.SerializationUtils = SerializationUtils;
+
+                window.JsLangPlugin = JSLangPlugin.class;
 
                 window.JsGr = JsLexicalGrammar;
                 window.RegLex = RegExpLexer;

@@ -10,7 +10,7 @@ export abstract class FileTypeHandler implements ExtensionPointSupplier {
 
 export enum SupportLevel {
     DOESNT = 0,
-    BASIC_FUNCTIONALITIES = 1,
+    BASIC = 1,
     SUPPORTS = 2,
-    SHOULD_OVERRIDE = 3
+    OVERRIDE = 3
 }

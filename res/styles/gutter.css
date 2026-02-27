@@ -14,7 +14,7 @@
 
 .editor .editor-gutter-line {
     width: 100%;
-    padding-left: calc(max(20px - var(--editor-gutter-num-size) / 2, 10px));
+    padding-left: calc(max(20px - var(--editor-gutter-num-size) / 2, 10px)) !important;
 }
 
 .editor .gutter-line-number {

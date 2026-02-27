@@ -37,7 +37,27 @@ export class SelectDoubleClickAction extends AbstractAction {
 
         const caret = editor.getPrimaryCaret();
         const wordRange = editor.getOpenedDocument().getWordAt(caret.getOffset(), SelectDoubleClickAction.DELIMITER);
-        caret.selectionModel.select(wordRange.start, wordRange.end);
+        caret.getSelectionModel().select(wordRange.start, wordRange.end);
+        editor.view.resetBlink();
+    }
+}
+
+
+export class SelectTripleClickAction extends AbstractAction {
+    name = 'SelectTripleClick';
+    description = 'Select the whole line.';
+    defaultKeybinding = {
+        key: Key.LeftTripleClick,
+        shift: false
+    }
+
+    run(ctx: KeybindContext) {
+        const editor = ctx.requireEditor();
+
+        const caret = editor.getPrimaryCaret();
+        const line = editor.getOpenedDocument().getLineAt(caret.getOffset());
+        const range = line.getAssociatedRange();
+        caret.getSelectionModel().select(range.start, range.end);
         editor.view.resetBlink();
     }
 }

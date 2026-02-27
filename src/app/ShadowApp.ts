@@ -30,7 +30,7 @@ export class ShadowApp {
      *
      * @returns A promise that resolves to true if startup succeeded, false if aborted.
      */
-    public static async launch(): Promise<boolean> {
+    public static async launch(showProgressBar: boolean): Promise<boolean> {
         if (ShadowApp.isRunning) {
             throw new Error("Shadow app is already running");
         }
@@ -41,8 +41,9 @@ export class ShadowApp {
         // Initialize GlobalState with the app
         GlobalState.init(ShadowApp.instance);
 
-        // Launch the UI (this will display the progress bar)
-        ShadowUI.launch(ShadowApp.instance);
+        if (showProgressBar)
+            // Launch the UI (this will display the progress bar)
+            ShadowUI.showLaunchComponent();
 
         // Get the lifecycle instance (creates it if needed)
         const lifecycle = Lifecycle.getInstance();

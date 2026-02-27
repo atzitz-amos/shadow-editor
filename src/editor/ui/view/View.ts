@@ -7,6 +7,7 @@ import {VisualPosition} from "../../core/coordinate/VisualPosition";
 import {CaretMovedEvent} from "../../core/caret/events/CaretMovedEvent";
 import {ViewPainter} from "./ViewPainter";
 import {ViewPropertiesManager} from "./properties/ViewPropertiesManager";
+import {Critical} from "../../../core/critical/Critical";
 
 
 export class View {
@@ -176,6 +177,7 @@ export class View {
         return [x, y];
     }
 
+    @Critical
     render() {
         if (this.isDirty) {
             this.isDirty = false;
