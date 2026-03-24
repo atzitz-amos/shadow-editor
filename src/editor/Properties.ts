@@ -1,4 +1,4 @@
-import {ProjectFile} from "../core/project/filetree/ProjectFile";
+import {ProjectFile} from "../core/workspace/filetree/ProjectFile";
 
 export type ViewProperties = {
     width?: int;

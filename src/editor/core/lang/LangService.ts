@@ -8,6 +8,7 @@ import {IParser} from "../../../core/lang/syntax/builder/parser/IParser";
 import {ASTBuilder} from "../../../core/lang/syntax/builder/parser/builder/ASTBuilder";
 import {SynNode} from "../../../core/lang/syntax/api/SynNode";
 import {SynFileImpl} from "../../../core/lang/syntax/impl/SynFileImpl";
+import {Scheduler} from "../../../core/scheduler/Scheduler";
 
 /**
  * Class associated with an editor that holds the current language, lexer, parser, highlighter as
@@ -25,8 +26,6 @@ export class LangService {
     private myIncrementalHighlighter: IncrementalHighlighter | null = null;
     private myParser: IParser | null = null;  // TODO: support incremental parsing
     private debugProduction: SynNode[];
-
-    private parsingTimeout: NodeJS.Timeout | null = null;
 
     constructor(private editor: Editor) {
         editor.getEventBus().subscribe(this, DocumentModificationEvent.SUBSCRIBER, this.onDocumentChange);
@@ -83,10 +82,7 @@ export class LangService {
     }
 
     private scheduleParsing() {
-        if (this.parsingTimeout !== null) {
-            clearTimeout(this.parsingTimeout);
-        }
-        this.parsingTimeout = setTimeout(() => {
+        Scheduler.debounce(() => {
             const start = performance.now();
             const builder = new ASTBuilder(this.myLexer!.createTokenStream(), new SynFileImpl(this.editor.getOpenedFile()!));
             this.makeParser(builder)?.parse().then(() => {

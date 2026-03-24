@@ -8,3 +8,7 @@
     font-family: JetBrains;
 }
 
+@font-face {
+    src: url("../fonts/JetBrainsMono-Regular.ttf");
+    font-family: JetBrains_Regular;
+}

@@ -4,7 +4,7 @@ import {ASTGrammar, ASTType} from "../builder/parser/nodes/ASTGrammar";
 import {SynNode} from "../api/SynNode";
 import {SynElement} from "../api/SynElement";
 import {SynFile} from "../api/SynFile";
-import {EditorURI} from "../../../project/uri/EditorURI";
+import {EditorURI} from "../../../uri/EditorURI";
 
 export class SynTokenNode implements SynNode {
     private parent: SynElement | null = null;

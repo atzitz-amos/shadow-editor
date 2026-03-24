@@ -1,0 +1,181 @@
+/* Variant 1: "Intentional" – softer teal accent, flatter, less IDE-ish */
+
+@font-face {
+    src: url("../../res/fonts/JetBrainsMono-Thin.ttf");
+    font-family: JetBrains_Thin;
+}
+
+@font-face {
+    src: url("../../res/fonts/JetBrainsMono-Regular.ttf");
+    font-family: JetBrains;
+}
+
+/* Base layout copied from test2.css, but with tweaked palette and shadows */
+
+*:not(.editor-code *) {
+    box-sizing: border-box;
+    font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+body {
+    margin: 0;
+    overflow: hidden;
+    background: linear-gradient(170deg, #050709 0%, #0a0f13 50%, #050709 100%);
+    color: #e3e6ef;
+}
+
+div.app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100vw;
+}
+
+/* Shell: topbar + footer */
+
+div.footer,
+div.topbar {
+    background: #10141c;
+}
+
+div.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 16px;
+    height: 52px;
+    gap: 16px;
+    border-bottom: 1px solid #202632;
+}
+
+.topbar-left,
+.topbar-center,
+.topbar-right {
+    display: flex;
+    align-items: center;
+}
+
+.topbar-left {
+    gap: 10px;
+}
+
+.topbar-center {
+    flex: 1;
+    max-width: 640px;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.topbar-right {
+    gap: 12px;
+}
+
+div.icon svg {
+    width: 26px;
+    height: 26px;
+    background: #151a24;
+    border-radius: 999px;
+    padding: 3px;
+    box-shadow: 0 0 0 1px #242a35;
+}
+
+/* ...existing topbar content selectors copied from test2.css... */
+
+.status-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: transparent;
+    border: 1px solid #27353e;
+    font-size: 11px;
+    color: #b9c2cf;
+}
+
+.window-dot.minimize {
+    background: #4a3e2a;
+}
+
+.window-dot.maximize {
+    background: #285145;
+}
+
+.window-dot.close {
+    background: #4b2b32;
+}
+
+/* Layout */
+
+div.main {
+    display: flex;
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+div.sidebar {
+    width: 260px;
+    background: #0e121a;
+    border-right: 1px solid #202632;
+    box-shadow: none;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-section {
+    border-radius: 8px;
+    background: #101520;
+    border: 1px solid #262e3a;
+    padding: 8px 9px 9px;
+}
+
+.sidebar-tree-item-active {
+    background: #141a24;
+    border-left: 2px solid #3fb1a2;
+    border-radius: 0;
+}
+
+.sidebar-tree-item:not(.sidebar-tree-item-active):hover {
+    background: #151b26;
+}
+
+/* Main editor */
+
+.editor-region {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    border-radius: 8px;
+    background: #101520;
+    box-shadow: 0 0 0 1px #202632;
+    overflow: hidden;
+}
+
+.editor-tab-active {
+    color: #e3e6ef;
+    background: #141a24;
+    border-color: #2a3543;
+    border-bottom-color: #141a24;
+}
+
+/* swap blue gradients for teal */
+
+.code-keyword {
+    color: #7dc5c0;
+}
+
+.code-type {
+    color: #9ad5d0;
+}
+
+.footer-branch i {
+    color: #3fb1a2;
+}
+
+.command-palette-item-active {
+    background: #141a24;
+    border-left: 2px solid #3fb1a2;
+}
+
+/* ...rest of rules can follow test2.css if you want parity, but with these accent changes it will already feel distinct... */

@@ -19,7 +19,7 @@ export class JsExprParser {
             this.builder.consumeIf(JsLexicalGrammar.ELLIPSIS);
             let isValid = this.builder.expect(JsLexicalGrammar.IDENTIFIER).orError("Expected parameter name") !== null;
             if (!isValid) {
-                for (; !this.builder.done() && !this.builder.isNext(JsLexicalGrammar.COMMA) && !this.builder.isNext(JsLexicalGrammar.RPAREN);) {
+                while (!this.builder.done() && !this.builder.isNext(JsLexicalGrammar.COMMA) && !this.builder.isNext(JsLexicalGrammar.RPAREN)) {
                     this.builder.advance(false);
                 }
                 return;

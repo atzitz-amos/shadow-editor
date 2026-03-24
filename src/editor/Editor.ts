@@ -1,6 +1,4 @@
 import {View} from "./ui/view/View";
-import {Project} from "../core/project/Project";
-import {ProjectFile} from "../core/project/filetree/ProjectFile";
 import {EditorProperties} from "./Properties";
 import {TextRange} from "./core/coordinate/TextRange";
 import {Caret, CaretModel} from "./core/caret/Caret";
@@ -25,15 +23,14 @@ import {EditorAttachedEvent} from "./events/EditorAttachedEvent";
 import {KeyPressedEvent, KeyReleasedEvent, MousePressedEvent, MouseReleasedEvent} from "./events/PhysicalEvents";
 import {InlayWidget} from "./ui/inline/inlay/InlayWidget";
 import {KeybindContext} from "../core/keybinds/context/KeybindContext";
-import {ShadowApp} from "../app/ShadowApp";
+import {GlobalState} from "../core/global/GlobalState";
+import {Scheduler} from "../core/scheduler/Scheduler";
 
 export class Editor {
     private static ID_COUNTER = 0;
 
     id: number;
     properties: EditorProperties;
-    openedFile: ProjectFile | undefined;
-    project: Project;
     view: View;
     root: HTMLElement;
     document: Document;
@@ -47,17 +44,14 @@ export class Editor {
 
     private renderingProcess: any;
 
-    constructor(project: Project, options?: EditorProperties) {
+    constructor(options?: EditorProperties) {
         this.id = Editor.ID_COUNTER++;
 
-        if (!ShadowApp.isRunning) {
+        if (!GlobalState.isReady()) {
             throw new Error("No running shadow app instance found");
         }
 
-        this.project = project;
-
         this.properties = options || {};
-        this.openedFile = this.properties.file || project.createNewUntitledFile();
 
         this.eventBus = new EventBus('editor.bus');
 
@@ -77,9 +71,9 @@ export class Editor {
 
     attach(element: HTMLElement) {
         this.root = HTMLUtils.createElement('div.editor', element) as HTMLDivElement;
-        setTimeout(() => {
+        Scheduler.defer(() => {
             this.view.onAttached(this.root);
-        }, 0);
+        });
 
         this.eventBus.asyncPublish(new EditorAttachedEvent(this, this.root));
         this.resumeRender();
@@ -91,14 +85,6 @@ export class Editor {
      +--------------------------+    */
     getEventBus(): EventBus {
         return this.eventBus;
-    }
-
-    getProject(): Project {
-        return this.project;
-    }
-
-    getOpenedFile(): ProjectFile | undefined {
-        return this.openedFile;
     }
 
     getOpenedDocument(): Document {
@@ -135,6 +121,15 @@ export class Editor {
 
     getInlayManager(): InlayManager {
         return this.inlayManager;
+    }
+
+    setWidthHeight(width: number, height: number) {
+        const vLineCount = Math.floor(height / this.view.getLineHeight());
+        const vCharCount = Math.floor(width / this.view.getCharSize());
+
+        this.view.getProperties().setWidth(vCharCount * this.view.getCharSize());
+        this.view.getProperties().setHeight(vLineCount * this.view.getLineHeight());
+        this.view.setResizeDirty();
     }
 
     /**

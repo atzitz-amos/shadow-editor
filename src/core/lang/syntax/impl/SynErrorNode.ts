@@ -3,8 +3,8 @@ import {ASTGrammar, ASTType} from "../builder/parser/nodes/ASTGrammar";
 import {SynNode} from "../api/SynNode";
 import {SynElement} from "../api/SynElement";
 import {SynFile} from "../api/SynFile";
-import { EditorURI } from "../../../project/uri/EditorURI";
-import {URITargetType} from "../../../project/uri/URITargetType";
+import { EditorURI } from "../../../uri/EditorURI";
+import {URITargetType} from "../../../uri/URITargetType";
 
 
 export class SynErrorNode implements SynNode {

@@ -1,5 +1,5 @@
-import {Project} from "../project/Project";
-import {GlobalProjectChangedEvent} from "../project/events/GlobalProjectChangedEvent";
+import {Workspace} from "../workspace/Workspace";
+import {GlobalProjectChangedEvent} from "../workspace/events/GlobalProjectChangedEvent";
 import {GlobalState} from "./GlobalState";
 
 /**
@@ -10,13 +10,13 @@ import {GlobalState} from "./GlobalState";
  * @since 1.0.0
  */
 export class GlobalProject {
-    private static instance: Project | null = null;
+    private static instance: Workspace | null = null;
 
-    public static getInstance(): Project | null {
+    public static getInstance(): Workspace | null {
         return this.instance;
     }
 
-    public static open(project: Project): void {
+    public static open(project: Workspace): void {
         this.instance = project;
 
         GlobalState.getMainEventBus().syncPublish(new GlobalProjectChangedEvent());

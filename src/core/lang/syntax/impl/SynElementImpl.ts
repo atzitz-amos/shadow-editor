@@ -4,7 +4,7 @@ import {TextRange} from "../../../../editor/core/coordinate/TextRange";
 import {ASTNode} from "../builder/parser/nodes/ASTNode";
 import {SynScope} from "../builder/parser/scopes/SynScope";
 import {SynFile} from "../api/SynFile";
-import {EditorURI} from "../../../project/uri/EditorURI";
+import {EditorURI} from "../../../uri/EditorURI";
 
 /**
  * Provides a lot of standard functionality for syntax elements.

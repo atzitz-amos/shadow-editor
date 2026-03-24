@@ -2,7 +2,7 @@ import {BubbleDirection} from "../../core/events/BubbleDirection";
 import {EventBase} from "../../core/events/EventBase";
 import {EventSubscriber} from "../../core/events/EventSubscriber";
 import {ShadowApp} from "../ShadowApp";
-import {ShadowUI} from "../ui/ShadowUI";
+import {ShadowUIFactory} from "../ui/ShadowUIFactory";
 
 /**
  *
@@ -13,14 +13,10 @@ import {ShadowUI} from "../ui/ShadowUI";
 export class ShadowAppGUILoadedEvent implements EventBase {
     public static readonly SUBSCRIBER = EventSubscriber.create(this);
 
-    constructor(private shadowUI: ShadowUI) {
+    constructor(private shadowUI: ShadowUIFactory) {
     }
 
-    public getShadowApp(): ShadowApp {
-        return this.shadowUI.getApp();
-    }
-
-    public getShadowUI(): ShadowUI {
+    public getShadowUI(): ShadowUIFactory {
         return this.shadowUI;
     }
 

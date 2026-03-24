@@ -39,6 +39,25 @@ export class TextLayer {
         this.edgelines[n].innerHTML = '';
         this.edgelines[n].append(...content);
     }
+
+    notifyResize() {
+        // update line count
+        let newVisualLineCount = this.view.getVisualLineCount();
+        if (newVisualLineCount > this.visualLineCount) {
+            for (let i = this.visualLineCount; i < newVisualLineCount; i++) {
+                // we need to insert the new line before the second edgeline
+                let newLine = HTMLUtils.createElement("div.editor-line.line-" + i, this.element) as HTMLDivElement;
+                this.element.insertBefore(newLine, this.edgelines[1]);
+                this.lines.push(newLine);
+            }
+        } else if (newVisualLineCount < this.visualLineCount) {
+            for (let i = newVisualLineCount; i < this.visualLineCount; i++) {
+                this.lines[i].remove();
+            }
+            this.lines.splice(newVisualLineCount, this.visualLineCount - newVisualLineCount);
+        }
+        this.visualLineCount = newVisualLineCount;
+    }
 }
 
 export class CaretLayer {

@@ -2,6 +2,7 @@ import {SynDeclaration} from "../../../../../core/lang/syntax/impl/SynDeclaratio
 import {ASTNode} from "../../../../../core/lang/syntax/builder/parser/nodes/ASTNode";
 import {SynElement} from "../../../../../core/lang/syntax/api/SynElement";
 import {SynTokenNode} from "../../../../../core/lang/syntax/impl/SynTokenNode";
+import {SynErrorNode} from "../../../../../core/lang/syntax/impl/SynErrorNode";
 
 /**
  *
@@ -29,7 +30,7 @@ export class JsDeclarator extends SynDeclaration {
     }
 
     getName(): string {
-        return this.name.getValue();
+        return (this.name instanceof SynErrorNode) ? "" : this.name.getValue();
     }
 
     getEQToken(): SynTokenNode | null {

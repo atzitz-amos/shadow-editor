@@ -23,8 +23,13 @@ export class View {
     // Data
     lines: RenderedLineData[];
 
-    isDirty: boolean = true;
-    areOverlaysDirty: boolean = true;
+
+    private readonly dirtyFlags = {
+        isDirty: true,
+        areOverlaysDirty: true,
+        isResizeDirty: false
+    };
+
 
     constructor(editor: Editor) {
         this.editor = editor;
@@ -33,7 +38,7 @@ export class View {
 
         this.editor.getEventBus().subscribe(this, CaretMovedEvent.SUBSCRIBER, () => {
             this.ensureCaretVisible();
-        })
+        });
     }
 
     /**
@@ -179,22 +184,32 @@ export class View {
 
     @Critical
     render() {
-        if (this.isDirty) {
-            this.isDirty = false;
+        if (this.dirtyFlags.isResizeDirty) {
+            this.dirtyFlags.isResizeDirty = false;
+            this.myPainter.notifyResize();
+        }
+
+        if (this.dirtyFlags.isDirty) {
+            this.dirtyFlags.isDirty = false;
             this.myPainter.repaint();
         }
 
-        if (this.areOverlaysDirty) {
-            this.areOverlaysDirty = false;
+        if (this.dirtyFlags.areOverlaysDirty) {
+            this.dirtyFlags.areOverlaysDirty = false;
             this.myPainter.repaintOverlays();
         }
 
         this.update();
     }
 
+    setResizeDirty() {
+        this.dirtyFlags.isResizeDirty = true;
+        this.triggerRepaint();
+    }
+
     triggerRepaint() {
-        this.isDirty = true;
-        this.areOverlaysDirty = true;
+        this.dirtyFlags.isDirty = true;
+        this.dirtyFlags.areOverlaysDirty = true;
     }
 
     update() {

@@ -1,10 +1,10 @@
 import {SynFile} from "../api/SynFile";
 import {SynElement} from "../api/SynElement";
-import {ProjectFile} from "../../../project/filetree/ProjectFile";
+import {ProjectFile} from "../../../workspace/filetree/ProjectFile";
 import {TextRange} from "../../../../editor/core/coordinate/TextRange";
 import {SynNode} from "../api/SynNode";
-import {Path} from "../../../project/path/Path";
-import {EditorURI} from "../../../project/uri/EditorURI";
+import {Path} from "../../../workspace/filesystem/path/Path";
+import {EditorURI} from "../../../uri/EditorURI";
 
 /**
  *

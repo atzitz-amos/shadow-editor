@@ -5,7 +5,7 @@
 
 import {LanguageBase} from "./LanguageBase";
 import {FileTypeHandler} from "./FileTypeHandler";
-import {ProjectFile} from "../project/filetree/ProjectFile";
+import {ProjectFile} from "../workspace/filetree/ProjectFile";
 
 export class LangSupport {
     private static instance: LangSupport;

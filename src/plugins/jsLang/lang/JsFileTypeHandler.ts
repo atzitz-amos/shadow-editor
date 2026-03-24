@@ -3,7 +3,7 @@
  * Date: 10/5/2025
  */
 
-import {ProjectFile} from "../../../core/project/filetree/ProjectFile";
+import {ProjectFile} from "../../../core/workspace/filetree/ProjectFile";
 import {FileTypeHandler, SupportLevel} from "../../../core/lang/FileTypeHandler";
 import JsLang from "./JsLang";
 import {LanguageBase} from "../../../core/lang/LanguageBase";

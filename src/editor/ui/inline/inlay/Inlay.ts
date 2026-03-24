@@ -2,6 +2,7 @@ import {Editor} from "../../../Editor";
 import {TextRange} from "../../../core/coordinate/TextRange";
 import {EditorCallbacksUtils} from "../../../utils/EditorCallbacksUtils";
 import {InlayEvent} from "./InlayEvent";
+import {Scheduler} from "../../../../core/scheduler/Scheduler";
 
 /**
  * A wrapper around an HTMLSpan that represents an inlay in the editor.
@@ -12,7 +13,7 @@ import {InlayEvent} from "./InlayEvent";
  * @since 1.0.0
  */
 export class Inlay {
-    private hoverTimeoutId: number | null = null;
+    private hoverTimeoutId: NodeJS.Timeout | null = null;
 
     constructor(private span: HTMLSpanElement, private editor: Editor, private range: TextRange) {
     }
@@ -48,10 +49,10 @@ export class Inlay {
             throw new Error("Hover listener with delay is already set up.");
         }
         this.span.addEventListener("mouseover", (e: MouseEvent) => {
-            this.hoverTimeoutId = window.setTimeout(() => {
+            this.hoverTimeoutId = Scheduler.after(delayMs, () => {
                 callback(new InlayEvent(this.editor, e));
                 this.hoverTimeoutId = null;
-            }, delayMs);
+            });
         }, true);
 
         this.span.addEventListener("mouseout", () => {

@@ -1,7 +1,7 @@
 import {SynElement} from "./SynElement";
 import {TextRange} from "../../../../editor/core/coordinate/TextRange";
 import {SynFile} from "./SynFile";
-import {URILocatedResource} from "../../../project/uri/URILocatedResource";
+import {URILocatedResource} from "../../../uri/URILocatedResource";
 
 /**
  * Most basic syntax node in the syntax tree.

@@ -3,7 +3,8 @@ import {EventBus} from "../../../core/events/EventBus";
 import {StartupProgressEvent} from "../../../core/lifecycle/events/StartupProgressEvent";
 import {StartupFailedEvent} from "../../../core/lifecycle/events/StartupFailedEvent";
 import {CriticalErrorRenderer} from "../../../core/critical/renderer/CriticalErrorRenderer";
-import {ShadowUI} from "../ShadowUI";
+import {ShadowUIFactory} from "../ShadowUIFactory";
+import {Scheduler} from "../../../core/scheduler/Scheduler";
 
 /**
  *
@@ -21,10 +22,10 @@ export class LaunchComponent {
     private progressText: HTMLElement | null = null;
     private splashCreatedAt: number = 0;
 
-    constructor(private ui: ShadowUI) {
+    constructor(private ui: ShadowUIFactory) {
     }
 
-    public static showSplashScreen(ui: ShadowUI) {
+    public static showSplashScreen(ui: ShadowUIFactory) {
         new LaunchComponent(ui).display();
     }
 
@@ -97,9 +98,9 @@ export class LaunchComponent {
         const remainingTime = Math.max(0, LaunchComponent.MIN_SPLASH_DURATION - elapsed);
 
         // Wait for minimum duration before hiding
-        setTimeout(() => {
+        Scheduler.after(remainingTime, () => {
             this.hideSplashScreen();
-        }, remainingTime);
+        });
 
         // Unsubscribe from startup events
         const eventBus = EventBus.getMainEventBus();
@@ -111,12 +112,12 @@ export class LaunchComponent {
     private hideSplashScreen(): void {
         if (this.splashOverlay) {
             this.splashOverlay.classList.add('fade-out');
-            setTimeout(() => {
+            Scheduler.after(300, () => {
                 this.splashOverlay?.remove();
                 this.splashOverlay = null;
                 this.progressBar = null;
                 this.progressText = null;
-            }, 300);
+            });
         }
     }
 

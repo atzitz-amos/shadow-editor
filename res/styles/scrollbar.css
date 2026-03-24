@@ -20,6 +20,8 @@
     position: relative;
     background: rgba(166, 166, 166, 0.4);
     cursor: auto;
+
+    will-change: transform, translate;
 }
 
 .v-scroll .scrollbar-handle {

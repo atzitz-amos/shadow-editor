@@ -1,7 +1,7 @@
 import {SynNode} from "./SynNode";
-import {ProjectFile} from "../../../project/filetree/ProjectFile";
-import {Path} from "../../../project/path/Path";
-import {URILocatedResource} from "../../../project/uri/URILocatedResource";
+import {ProjectFile} from "../../../workspace/filetree/ProjectFile";
+import {Path} from "../../../workspace/filesystem/path/Path";
+import {URILocatedResource} from "../../../uri/URILocatedResource";
 
 /**
  *

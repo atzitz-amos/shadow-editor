@@ -1,5 +1,6 @@
 import {ProcessExecutable} from "./processors/ProcessExecutable";
 import {ProcessGatewayMessage} from "./processors/ProcessGatewayMessage";
+import {Scheduler} from "../scheduler/Scheduler";
 
 export enum ProcessState {
     RUNNING,
@@ -45,13 +46,13 @@ export class ProcessMonitor {
     }
 
     public timeoutAfter(ms: number) {
-        setTimeout(() => {
+        Scheduler.after(ms, () => {
             if (this.state === ProcessState.RUNNING) {
                 this.worker.terminate();
                 this.state = ProcessState.CANCELLED;
                 console.warn(`Process ${this.getProcessName()} timed out after ${ms}ms`);
             }
-        }, ms);
+        });
     }
 
     public cancel() {

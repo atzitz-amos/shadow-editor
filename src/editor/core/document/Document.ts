@@ -6,14 +6,13 @@ import {LanguageBase} from "../../../core/lang/LanguageBase";
 import {DocumentInsertEvent} from "./events/DocumentInsertEvent";
 import {DocumentModificationEvent} from "./events/DocumentModificationEvent";
 import {DocumentDeleteEvent} from "./events/DocumentDeleteEvent";
-import {ProjectFile} from "../../../core/project/filetree/ProjectFile";
+import {WorkspaceFile} from "../../../core/workspace/filesystem/tree/WorkspaceFile";
 
 /**
  * Represents an opened file in the editor
  * Store the language, the line-breaks, the components and the AST of a file */
 export class Document {
     private data: EditorRawData;
-    private file: ProjectFile;
 
     private lines: LineData[];
     private lineBreaks: Offset[] = [];
@@ -25,6 +24,10 @@ export class Document {
 
     public getEditor(): Editor {
         return this.editor;
+    }
+
+    public getAssociatedFile(): WorkspaceFile {
+
     }
 
     public getTextContent(): string {

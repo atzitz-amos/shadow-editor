@@ -14,37 +14,37 @@ export class VisualSettings {
         .in(SettingCategories.APPEARANCE)
         .setDescription("The line height of the editor in pixels")
         .asCssProperty("--editor-line-height", "px")
-        .defaultsTo(25);
+        .defaultsTo(20);
 
     public static readonly CARET_HEIGHT = new IntSetting("editor.visual.caretHeight")
         .in(SettingCategories.APPEARANCE)
         .setDescription("The height of the caret in pixels")
         .asCssProperty("--editor-caret-height", "px")
-        .defaultsTo(20);
+        .defaultsTo(18);
 
     public static readonly FONT_SIZE = new IntSetting("editor.visual.fontSize")
         .in(SettingCategories.APPEARANCE)
         .setDescription("The font size of the editor in pixels")
         .asCssProperty("--editor-font-size", "px")
-        .defaultsTo(16);
+        .defaultsTo(15);
 
     public static readonly THEME_ROOT_BG_COLOR = new ColorSetting("editor.visual.theme.rootBackgroundColor")
         .in(SettingCategories.THEMES)
         .setDescription("The background color of the editor")
         .asCssProperty("--editor-root-bg-color")
-        .defaultsTo("#1e1f22");
+        .defaultsTo("#090c14");
 
     public static readonly THEME_ROOT_BORDER_COLOR = new ColorSetting("editor.visual.theme.rootBorderColor")
         .in(SettingCategories.THEMES)
         .setDescription("The color of the editor border")
         .asCssProperty("--editor-root-border-color")
-        .defaultsTo("#93969f");
+        .defaultsTo("none");
 
     public static readonly THEME_GUTTER_SEPARATOR_COLOR = new ColorSetting("editor.visual.theme.gutterSeparatorColor")
         .in(SettingCategories.THEMES)
         .setDescription("The color of the gutter separator")
         .asCssProperty("--editor-gutter-separator-color")
-        .defaultsTo("#93969f");
+        .defaultsTo("#181d2c");
 
     public static readonly THEME_CARET_COLOR = new ColorSetting("editor.visual.theme.caretColor")
         .in(SettingCategories.THEMES)
@@ -63,7 +63,7 @@ export class VisualSettings {
         .in(SettingCategories.THEMES)
         .setDescription("The color of the selection highlight")
         .asCssProperty("--editor-selection-color")
-        .defaultsTo("#214283");
+        .defaultsTo("#154077");
 
     public static readonly THEME_ACTIVE_LINE_COLOR = new ColorSetting("editor.visual.theme.activeLineColor")
         .in(SettingCategories.THEMES)

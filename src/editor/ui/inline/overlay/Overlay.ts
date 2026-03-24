@@ -3,6 +3,7 @@ import {TextRange} from "../../../core/coordinate/TextRange";
 import {EditorCallbacksUtils} from "../../../utils/EditorCallbacksUtils";
 import {HTMLView} from "../view/HTMLView";
 import {OverlayEvent} from "./OverlayEvent";
+import {Scheduler} from "../../../../core/scheduler/Scheduler";
 
 /**
  * A wrapper around an HTMLSpanView that represents an overlay in the editor.
@@ -13,7 +14,7 @@ import {OverlayEvent} from "./OverlayEvent";
  * @since 1.0.0
  */
 export class Overlay {
-    private hoverTimeoutId: number | null = null;
+    private hoverTimeoutId: NodeJS.Timeout | null = null;
     private readonly editor: Editor;
 
     constructor(private view: HTMLView, private range: TextRange) {
@@ -52,10 +53,10 @@ export class Overlay {
             throw new Error("Hover listener with delay is already set up.");
         }
         this.view.addEventListener("mouseover", (e: MouseEvent) => {
-            this.hoverTimeoutId = window.setTimeout(() => {
+            this.hoverTimeoutId = Scheduler.after(delayMs, () => {
                 callback(new OverlayEvent(this.editor, e));
                 this.hoverTimeoutId = null;
-            }, delayMs);
+            });
         });
 
         this.view.addEventListener("mouseout", () => {

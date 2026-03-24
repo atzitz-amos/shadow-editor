@@ -1,22 +1,25 @@
-import {ShadowUI} from "./ui/ShadowUI";
+import {ShadowUIFactory} from "./ui/ShadowUIFactory";
 import {GlobalState} from "../core/global/GlobalState";
 import {ProcessManager} from "../core/processManager/ProcessManager";
 import {Lifecycle} from "../core/lifecycle/Lifecycle";
+import {Workspace} from "../core/workspace/Workspace";
+import {GlobalProject} from "../core/global/GlobalProject";
+import {EditorPlugin} from "../core/plugins/loader/Plugin";
 
 /**
- * Represents an opened editor. It manages the panes, tabs, and documents within the editor.
- *
- * *Warning: This class will take up the whole UI space. If you want to integrate an editor into an existing UI,
- * consider using the {@link Editor} class instead.*
+ * Represents the backend of the Shadow Editor application. It is responsible for managing
+ * the app's lifecycle, processes, and providing access to core services.
  *
  * @author Atzitz Amos
  * @date 11/2/2025
  * @since 1.0.0
  */
 export class ShadowApp {
-    public static isRunning = false;
+    private static isRunning = false;
     private static instance: ShadowApp;
 
+    /**
+     * Our process manager*/
     private readonly processManager: ProcessManager;
 
     private constructor() {
@@ -30,7 +33,7 @@ export class ShadowApp {
      *
      * @returns A promise that resolves to true if startup succeeded, false if aborted.
      */
-    public static async launch(showProgressBar: boolean): Promise<boolean> {
+    public static async launch(showProgressBar: boolean): Promise<ShadowApp | undefined> {
         if (ShadowApp.isRunning) {
             throw new Error("Shadow app is already running");
         }
@@ -43,7 +46,7 @@ export class ShadowApp {
 
         if (showProgressBar)
             // Launch the UI (this will display the progress bar)
-            ShadowUI.showLaunchComponent();
+            ShadowUIFactory.showLaunchComponent();
 
         // Get the lifecycle instance (creates it if needed)
         const lifecycle = Lifecycle.getInstance();
@@ -53,9 +56,10 @@ export class ShadowApp {
 
         if (success) {
             ShadowApp.isRunning = true;
+            return ShadowApp.instance;
         }
 
-        return success;
+        return undefined;
     }
 
     /**
@@ -69,7 +73,20 @@ export class ShadowApp {
         return ShadowApp.instance;
     }
 
-    getProcessManager(): ProcessManager {
+    public enable(plugin: Class<EditorPlugin>): void {
+        GlobalState.getPluginManager().enable(plugin);
+    }
+
+    /**
+     * Get the process manager of the app
+     */
+    public getProcessManager(): ProcessManager {
         return this.processManager;
+    }
+
+    /**
+     * Open a project.*/
+    public openProject(project: Workspace): void {
+        GlobalProject.open(project);
     }
 }

@@ -17,7 +17,6 @@
 .editor {
     width: min-content;
     height: min-content;
-    box-shadow: -3px 3px 20px 1px black;
 
     --editor-width: 0;
     --editor-height: 0;

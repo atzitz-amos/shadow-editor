@@ -1,6 +1,6 @@
 import {SynElementImpl} from "./SynElementImpl";
-import {EditorURI} from "../../../project/uri/EditorURI";
-import {URITargetType} from "../../../project/uri/URITargetType";
+import {EditorURI} from "../../../uri/EditorURI";
+import {URITargetType} from "../../../uri/URITargetType";
 
 /**
  *

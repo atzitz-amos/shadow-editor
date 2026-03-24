@@ -41,4 +41,15 @@ export class HTMLUtils {
         let bbox = element.getBoundingClientRect();
         return bbox.left - delta <= x && bbox.right + delta >= x && bbox.top - delta <= y && bbox.bottom + delta >= y;
     }
+
+    static createDiv(className?: string, parent?: HTMLElement): HTMLDivElement {
+        const div = document.createElement('div');
+        if (className) {
+            div.className = className;
+        }
+        if (parent) {
+            parent.appendChild(div);
+        }
+        return div;
+    }
 }

@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <title>Shadow Studio Mock IDE</title>
-        <link rel="stylesheet" href="test.css">
+        <link rel="stylesheet" href="test2.css">
         <script src="https://kit.fontawesome.com/cb36336f7b.js" crossorigin="anonymous"></script>
     </head>
     <body>
@@ -369,7 +369,9 @@
                             <div class="problem-item problem-error">
                                 <div class="problem-icon"><span></span></div>
                                 <div class="problem-content">
-                                    <div class="problem-message">Property 'revealProject' does not exist on type 'ShadowUI'.</div>
+                                    <div class="problem-message">Property 'revealProject' does not exist on type
+                                        'ShadowUI'.
+                                    </div>
                                     <div class="problem-meta">ShadowApp.ts · line 42 · error</div>
                                 </div>
                                 <div class="problem-tags">
@@ -401,12 +403,16 @@
                             <div class="inspector-section-header">Run snapshot</div>
                             <div class="run-stat-row">
                                 <span class="run-label">CPU</span>
-                                <div class="run-bar"><div class="run-bar-fill"></div></div>
+                                <div class="run-bar">
+                                    <div class="run-bar-fill"></div>
+                                </div>
                                 <span class="run-value">23%</span>
                             </div>
                             <div class="run-stat-row">
                                 <span class="run-label">Latency</span>
-                                <div class="run-bar run-bar-soft"><div class="run-bar-fill"></div></div>
+                                <div class="run-bar run-bar-soft">
+                                    <div class="run-bar-fill"></div>
+                                </div>
                                 <span class="run-value">16 ms</span>
                             </div>
                             <div class="run-log">
@@ -447,47 +453,6 @@
                     <div class="footer-tile footer-perf">
                         <i class="fa-solid fa-wave-square"></i>
                         <span>16 ms</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="command-palette-overlay">
-            <div class="command-palette-backdrop"></div>
-            <div class="command-palette">
-                <div class="command-palette-input-row">
-                    <div class="command-icon"><i class="fa-solid fa-terminal"></i></div>
-                    <div class="command-input-mock">Run command or search files…</div>
-                    <div class="command-scope-pill">Project · shadow-editor</div>
-                </div>
-                <div class="command-palette-list">
-                    <div class="command-palette-item command-palette-item-active">
-                        <div class="command-main">Open recent workspace</div>
-                        <div class="command-sub">Switch between last 5 workspaces</div>
-                        <div class="command-keys">
-                            <span>Ctrl</span><span>K</span><span>R</span>
-                        </div>
-                    </div>
-                    <div class="command-palette-item">
-                        <div class="command-main">Toggle inspector panel</div>
-                        <div class="command-sub">Show or hide diagnostics &amp; run snapshot</div>
-                        <div class="command-keys">
-                            <span>Ctrl</span><span>Alt</span><span>I</span>
-                        </div>
-                    </div>
-                    <div class="command-palette-item">
-                        <div class="command-main">Switch theme channel</div>
-                        <div class="command-sub">Cycle between Dawn, Nocturne, Mono</div>
-                        <div class="command-keys">
-                            <span>Ctrl</span><span>K</span><span>T</span>
-                        </div>
-                    </div>
-                    <div class="command-palette-item">
-                        <div class="command-main">Run all tests</div>
-                        <div class="command-sub">Execute Jest + web workers suite</div>
-                        <div class="command-keys">
-                            <span>Ctrl</span><span>Shift</span><span>T</span>
-                        </div>
                     </div>
                 </div>
             </div>

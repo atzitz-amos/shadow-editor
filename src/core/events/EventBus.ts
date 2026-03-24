@@ -23,10 +23,9 @@ export class EventBus {
     private children: EventBus[] = [];
 
     constructor(private debugName: string) {
-        if (debugName !== "MainEventBus") {
-            EventBus.MAIN_EVENT_BUS.children.push(this);
-            this.parentBus = EventBus.MAIN_EVENT_BUS;
-        }
+        // NOTE:
+        // Sub-buses are attached explicitly via createSubBus().
+        // Auto-attaching here caused incorrect double-parenting when callers used createSubBus().
     }
 
     public static getMainEventBus() {
@@ -87,7 +86,12 @@ export class EventBus {
         event: EventSubscriber<T>
     ): void {
         const subs = this.subscriptions.get(event.cls);
-        subs?.delete(subscriber);
+        if (!subs) return;
+        subs.delete(subscriber);
+        // Prune empty per-event subscription maps to reduce retained memory.
+        if (subs.size === 0) {
+            this.subscriptions.delete(event.cls);
+        }
     }
 
     /**
@@ -122,42 +126,51 @@ export class EventBus {
     }
 
     unsubscribeAll(obj: Object) {
+        // Keep this O(number-of-event-types) but prune empty maps.
+        // (A reverse index would be faster but adds complexity & memory overhead.)
         for (const [eventCls, subs] of this.subscriptions) {
-            if (subs.has(obj)) {
-                subs.delete(obj);
+            if (subs.delete(obj)) {
+                if (subs.size === 0) {
+                    this.subscriptions.delete(eventCls);
+                }
             }
         }
     }
 
     private bubbleUp<T extends EventBase>(event: T): void {
-        this.dispatchLocal(event);
+        // Already dispatched on this bus by the child that initiated bubbling.
         if (typeof event.getBubbleDirection === "function") {
             if (event.getBubbleDirection() & BubbleDirection.BUBBLE_UP) {
                 // Bubble up to parent if any
                 if (this.parentBus) {
-                    this.parentBus.syncPublish(event);
+                    this.parentBus.dispatchLocal(event);
+                    this.parentBus.bubbleUp(event);
                 }
             }
         }
     }
 
     private bubbleDown<T extends EventBase>(event: T): void {
-        this.dispatchLocal(event);
+        // Already dispatched on this bus by the parent that initiated bubbling.
 
         if (typeof event.getBubbleDirection === "function") {
             if (event.getBubbleDirection() & BubbleDirection.BUBBLE_DOWN) {
                 for (const childBus of this.children) {
-                    childBus.syncPublish(event);
+                    childBus.dispatchLocal(event);
+                    childBus.bubbleDown(event);
                 }
             }
         }
     }
 
     private dispatchLocal<T extends EventBase>(event: T) {
-        const subs = this.subscriptions.get(event.constructor);
+        // Use the concrete runtime class as the subscription key.
+        // (Currently does not dispatch to base-class listeners.)
+        const subs = this.subscriptions.get(event.constructor as Function);
         if (subs) {
             for (const [subscriber, {callback}] of subs) {
-                callback.apply(subscriber, [event]);
+                // Avoid array allocation from apply().
+                callback.call(subscriber, event);
             }
         }
     }

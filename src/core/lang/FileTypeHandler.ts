@@ -1,4 +1,4 @@
-import {ProjectFile} from "../project/filetree/ProjectFile";
+import {ProjectFile} from "../workspace/filetree/ProjectFile";
 import {LanguageBase} from "./LanguageBase";
 import {ExtensionPointSupplier} from "../plugins/extensionPoints/ExtensionPointSupplier";
 

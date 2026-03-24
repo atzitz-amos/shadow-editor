@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Shadow Studio · Split Focus Mock</title>
+    <link rel="stylesheet" href="test3.css" />
+    <script src="https://kit.fontawesome.com/cb36336f7b.js" crossorigin="anonymous"></script>
+  </head>
+  <body>
+    <div class="shell">
+      <header class="shell-topbar">
+        <div class="topbar-brand">
+          <div class="logo-mark">
+            <span class="logo-dot"></span>
+          </div>
+          <div class="brand-text">
+            <div class="brand-title">Shadow Studio</div>
+            <div class="brand-sub">Session · split focus</div>
+          </div>
+        </div>
+        <div class="topbar-middle">
+          <div class="topbar-search">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <span class="search-placeholder">Search files, symbols or tasks</span>
+            <span class="kbd">Ctrl</span><span class="kbd">K</span>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <div class="topbar-pulse">
+            <span class="pulse-dot"></span>
+            <span class="pulse-text">Focused · 27m</span>
+          </div>
+          <button class="icon-button" title="Notifications">
+            <i class="fa-regular fa-bell"></i>
+          </button>
+          <button class="icon-button" title="Profile">
+            <span class="avatar">AS</span>
+          </button>
+        </div>
+      </header>
+
+      <main class="shell-main">
+        <nav class="rail">
+          <button class="rail-item rail-item-active" title="Projects">
+            <i class="fa-solid fa-diagram-project"></i>
+          </button>
+          <button class="rail-item" title="Commits">
+            <i class="fa-solid fa-timeline"></i>
+          </button>
+          <button class="rail-item" title="Tasks">
+            <i class="fa-solid fa-list-check"></i>
+          </button>
+          <button class="rail-item" title="Snippets">
+            <i class="fa-solid fa-scissors"></i>
+          </button>
+          <div class="rail-separator"></div>
+          <button class="rail-item" title="Settings">
+            <i class="fa-solid fa-gear"></i>
+          </button>
+        </nav>
+
+        <section class="workspace">
+          <aside class="focus-column-left">
+            <header class="workspace-list-header">
+              <div>
+                <div class="overline">WORKSPACES</div>
+                <div class="workspace-count">3 open · 1 detached</div>
+              </div>
+              <button class="pill-button">
+                <i class="fa-solid fa-plus"></i>
+                New
+              </button>
+            </header>
+            <div class="workspace-cards">
+              <article class="workspace-card workspace-card-active">
+                <div class="workspace-card-main">
+                  <div class="workspace-card-title">shadow-editor</div>
+                  <div class="workspace-card-sub">TypeScript · UX sandbox</div>
+                </div>
+                <div class="workspace-card-meta">
+                  <span class="badge">main</span>
+                  <span class="badge badge-soft">+2 ~1</span>
+                </div>
+              </article>
+              <article class="workspace-card">
+                <div class="workspace-card-main">
+                  <div class="workspace-card-title">shadow-runtime</div>
+                  <div class="workspace-card-sub">Runtime harness</div>
+                </div>
+                <div class="workspace-card-meta">
+                  <span class="badge">release/1.2</span>
+                </div>
+              </article>
+              <article class="workspace-card">
+                <div class="workspace-card-main">
+                  <div class="workspace-card-title">shadow-lab</div>
+                  <div class="workspace-card-sub">Experiments · detached</div>
+                </div>
+                <div class="workspace-card-meta">
+                  <span class="badge badge-soft">detached</span>
+                </div>
+              </article>
+            </div>
+
+            <div class="workspace-footer">
+              <div class="workspace-footer-label">Pinned tasks</div>
+              <div class="workspace-footer-items">
+                <span class="tag-chip">
+                  <i class="fa-solid fa-bolt-lightning"></i>
+                  Smoke tests
+                </span>
+                <span class="tag-chip">
+                  <i class="fa-solid fa-wand-magic-sparkles"></i>
+                  Tune theme
+                </span>
+              </div>
+            </div>
+          </aside>
+
+          <section class="focus-columns">
+            <div class="focus-column primary">
+              <header class="column-header">
+                <div class="column-breadcrumbs">
+                  <span>shadow-editor</span>
+                  <span class="crumb-sep">/</span>
+                  <span>src</span>
+                  <span class="crumb-sep">/</span>
+                  <span>app</span>
+                  <span class="crumb-sep">/</span>
+                  <span class="crumb-active">ShadowApp.ts</span>
+                </div>
+                <div class="column-header-actions">
+                  <span class="pill-reading">Read-only snapshot</span>
+                  <button class="icon-button subtle" title="Split column">
+                    <i class="fa-solid fa-up-down-left-right"></i>
+                  </button>
+                </div>
+              </header>
+              <div class="column-body">
+                <div class="column-tabs">
+                  <div class="column-tab column-tab-active">ShadowApp.ts</div>
+                  <div class="column-tab">ShadowUI.ts</div>
+                  <div class="column-tab">editor-theme.map.json</div>
+                </div>
+                <div class="column-editor">
+                  <div class="editor-meta-row">
+                    <span>TypeScript</span>
+                    <span>UTF-8</span>
+                    <span>LF</span>
+                    <span>Ln 42, Col 17</span>
+                  </div>
+                  <div class="column-editor-body">
+                    <div class="mini-gutter">
+                      <span class="mini-line highlighted">38</span>
+                      <span class="mini-line">39</span>
+                      <span class="mini-line">40</span>
+                      <span class="mini-line">41</span>
+                      <span class="mini-line">42</span>
+                      <span class="mini-line">43</span>
+                      <span class="mini-line">44</span>
+                    </div>
+                    <div class="code-block">
+                      <div class="code-row muted">
+                        <span class="code-comment">// shadow boot cluster</span>
+                      </div>
+                      <div class="code-row">
+                        <span class="code-keyword">export</span>
+                        <span class="code-plain"> </span>
+                        <span class="code-keyword">class</span>
+                        <span class="code-plain"> </span>
+                        <span class="code-class">ShadowApp</span>
+                        <span class="code-plain"> </span>
+                        <span class="code-brace">{</span>
+                      </div>
+                      <div class="code-row">
+                        <span class="code-plain">  </span>
+                        <span class="code-keyword">constructor</span>
+                        <span class="code-punctuation">(</span>
+                        <span class="code-plain">root</span>
+                        <span class="code-punctuation">:</span>
+                        <span class="code-plain"> </span>
+                        <span class="code-type">HTMLElement</span>
+                        <span class="code-punctuation">)</span>
+                        <span class="code-plain"> </span>
+                        <span class="code-brace">{</span>
+                      </div>
+                      <div class="code-row code-row-highlight">
+                        <span class="code-plain">    </span>
+                        <span class="code-keyword">this</span>
+                        <span class="code-punctuation">.</span>
+                        <span class="code-property">ui</span>
+                        <span class="code-plain"> </span>
+                        <span class="code-operator">=</span>
+                        <span class="code-plain"> </span>
+                        <span class="code-keyword">new</span>
+                        <span class="code-plain"> </span>
+                        <span class="code-function">ShadowUI</span>
+                        <span class="code-punctuation">(</span>
+                        <span class="code-plain">root</span>
+                        <span class="code-punctuation">)</span>
+                        <span class="code-punctuation">;</span>
+                      </div>
+                      <div class="code-row">
+                        <span class="code-plain">  </span>
+                        <span class="code-brace">}</span>
+                      </div>
+                      <div class="code-row">
+                        <span class="code-plain">  </span>
+                        <span class="code-function">boot</span>
+                        <span class="code-punctuation">()</span>
+                        <span class="code-plain"> </span>
+                        <span class="code-brace">{</span>
+                      </div>
+                      <div class="code-row">
+                        <span class="code-plain">    </span>
+                        <span class="code-keyword">try</span>
+                        <span class="code-plain"> </span>
+                        <span class="code-brace">{</span>
+                      </div>
+                      <div class="code-row">
+                        <span class="code-plain">      </span>
+                        <span class="code-comment">// simulated restore for mock UI</span>
+                      </div>
+                      <div class="code-row">
+                        <span class="code-plain">      </span>
+                        <span class="code-keyword">this</span>
+                        <span class="code-punctuation">.</span>
+                        <span class="code-property">ui</span>
+                        <span class="code-punctuation">.</span>
+                        <span class="code-function">revealProject</span>
+                        <span class="code-punctuation">(</span>
+                        <span class="code-string">"shadow-editor"</span>
+                        <span class="code-punctuation">)</span>
+                        <span class="code-punctuation">;</span>
+                      </div>
+                      <div class="code-row">
+                        <span class="code-plain">    </span>
+                        <span class="code-brace">}</span>
+                        <span class="code-plain"> </span>
+                        <span class="code-keyword">catch</span>
+                        <span class="code-punctuation">(</span>
+                        <span class="code-plain">error</span>
+                        <span class="code-punctuation">)</span>
+                        <span class="code-plain"> </span>
+                        <span class="code-brace">{</span>
+                      </div>
+                      <div class="code-row">
+                        <span class="code-plain">      </span>
+                        <span class="code-type">Critical</span>
+                        <span class="code-punctuation">.</span>
+                        <span class="code-function">report</span>
+                        <span class="code-punctuation">(</span>
+                        <span class="code-plain">error</span>
+                        <span class="code-punctuation">)</span>
+                        <span class="code-punctuation">;</span>
+                      </div>
+                      <div class="code-row">
+                        <span class="code-plain">    </span>
+                        <span class="code-brace">}</span>
+                      </div>
+                      <div class="code-row">
+                        <span class="code-plain">  </span>
+                        <span class="code-brace">}</span>
+                      </div>
+                      <div class="code-row">
+                        <span class="code-brace">}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="focus-column secondary">
+              <header class="column-header">
+                <div class="column-breadcrumbs">
+                  <span>shadow-editor</span>
+                  <span class="crumb-sep">/</span>
+                  <span>tests</span>
+                  <span class="crumb-sep">/</span>
+                  <span class="crumb-active">timeline</span>
+                </div>
+                <div class="column-header-actions">
+                  <span class="pill-reading">Run timeline</span>
+                </div>
+              </header>
+              <div class="column-body">
+                <div class="timeline">
+                  <div class="timeline-row">
+                    <div class="timeline-time">21:44</div>
+                    <div class="timeline-dot error"></div>
+                    <div class="timeline-content">
+                      <div class="timeline-title">Type error in ShadowApp.ts</div>
+                      <div class="timeline-sub">TS2339 · revealProject</div>
+                    </div>
+                  </div>
+                  <div class="timeline-row">
+                    <div class="timeline-time">21:45</div>
+                    <div class="timeline-dot warning"></div>
+                    <div class="timeline-content">
+                      <div class="timeline-title">Unused parameter root</div>
+                      <div class="timeline-sub">TS6133 · boot constructor</div>
+                    </div>
+                  </div>
+                  <div class="timeline-row">
+                    <div class="timeline-time">21:46</div>
+                    <div class="timeline-dot info"></div>
+                    <div class="timeline-content">
+                      <div class="timeline-title">Workspace restored</div>
+                      <div class="timeline-sub">shadow-editor · nocturne channel</div>
+                    </div>
+                  </div>
+                  <div class="timeline-row muted">
+                    <div class="timeline-time">21:47</div>
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                      <div class="timeline-title">Idle · waiting for input</div>
+                      <div class="timeline-sub">Focus marker pinned</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="metrics">
+                  <div class="metrics-card">
+                    <div class="metrics-label">Diagnostics</div>
+                    <div class="metrics-main">1 error · 1 warning</div>
+                    <div class="metrics-sub">ShadowApp.ts</div>
+                  </div>
+                  <div class="metrics-card">
+                    <div class="metrics-label">Latency</div>
+                    <div class="metrics-main">16 ms</div>
+                    <div class="metrics-sub">Web workers channel</div>
+                  </div>
+                  <div class="metrics-card">
+                    <div class="metrics-label">Tests</div>
+                    <div class="metrics-main">128 · passing</div>
+                    <div class="metrics-sub">3 muted suites</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </section>
+      </main>
+
+      <footer class="shell-footer">
+        <div class="footer-left">
+          <span class="footer-pill">
+            <i class="fa-brands fa-git-alt"></i>
+            main
+          </span>
+          <span class="footer-pill">shadow-editor</span>
+          <span class="footer-pill">Nocturne profile</span>
+        </div>
+        <div class="footer-right">
+          <span class="footer-pill soft">Spaces: 4</span>
+          <span class="footer-pill soft">UTF-8</span>
+          <span class="footer-pill error">1 error</span>
+          <span class="footer-pill warning">1 warning</span>
+          <span class="footer-pill soft">16 ms</span>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>
+

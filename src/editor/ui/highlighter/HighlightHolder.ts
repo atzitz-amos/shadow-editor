@@ -3,7 +3,7 @@
  * Date: 10/6/2025
  */
 
-import {TextAttributes} from "./style/TextAttributes";
+import {TextAttributeKey} from "./style/TextAttributeKey";
 import {TextRange} from "../../core/coordinate/TextRange";
 import {Editor} from "../../Editor";
 import {Fragment} from "../../core/components/fragments/Fragment";
@@ -14,7 +14,7 @@ export class HighlightHolder {
     constructor(private editor: Editor) {
     }
 
-    highlightRange(range: TextRange, attributes: TextAttributes, classNames?: string[]) {
+    highlightRange(range: TextRange, attributes: TextAttributeKey, classNames?: string[]) {
         this.fragments.push(new Fragment(range, attributes, classNames ?? []));
     }
 

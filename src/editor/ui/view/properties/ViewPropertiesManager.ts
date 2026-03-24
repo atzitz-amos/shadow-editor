@@ -29,7 +29,8 @@ export class ViewPropertiesManager {
     private lineHeight: number;
     private fontSize: number;
 
-    private computeCharSize: () => number;
+    private cachedCharSize: number = 0;
+    private sizerCleanup: (() => void) | null = null;
 
     private visualLineCount: number;
     private visualCharCount: number;
@@ -55,6 +56,7 @@ export class ViewPropertiesManager {
 
     public setWidth(width: number) {
         this.width = width;
+        this.recomputeCounts()
         this.syncCSS();
     }
 
@@ -64,6 +66,7 @@ export class ViewPropertiesManager {
 
     public setHeight(height: number) {
         this.height = height;
+        this.recomputeCounts()
         this.syncCSS();
     }
 
@@ -77,10 +80,7 @@ export class ViewPropertiesManager {
     }
 
     public getCharSize() {
-        if (!this.computeCharSize) {
-            this.computeCharSize = _sizer(this.root);
-        }
-        return this.computeCharSize();
+        return this.cachedCharSize;
     }
 
     public getFontSize(): number {
@@ -108,6 +108,11 @@ export class ViewPropertiesManager {
         const settings = SettingsManager.getInstance();
         for (const setting of settings.getAllSettings())
             this.updateSetting(setting, setting.getCurrentValue());
+
+        this.sizerCleanup = _sizer(this.root, (charSize) => {
+            this.cachedCharSize = charSize;
+            this.recomputeCounts();
+        });
 
         this.syncCSS();
     }
@@ -145,9 +150,23 @@ export class ViewPropertiesManager {
 }
 
 
-function _sizer(root: HTMLElement) {
-    let sizer = HTMLUtils.createElement("div.editor-sizer", root);
+function _sizer(root: HTMLElement, onChange: (charSize: number) => void): () => void {
+    const sizer = HTMLUtils.createElement("div.editor-sizer", root);
     sizer.innerHTML = "a";
 
-    return () => sizer.getBoundingClientRect().width;
+    const observer = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+            onChange(entry.contentRect.width);
+        }
+    });
+
+    observer.observe(sizer);
+
+    // Fire initial measurement
+    onChange(sizer.getBoundingClientRect().width);
+
+    return () => {
+        observer.disconnect();
+        sizer.remove();
+    };
 }

@@ -45,6 +45,11 @@ export class ViewPainter {
 
         this.gutter.nDigits = Math.floor(Math.log10(this.view.getEditor().getLineCount())) + 1
 
+        this.layers.getTextLayer().renderEdgeLine(1, []);
+        this.gutter.renderEdgeLine(1, []);
+        this.layers.getTextLayer().renderEdgeLine(0, []);
+        this.gutter.renderEdgeLine(0, []);
+
         if (scrollOffset) {
             if (scrollLines > 0) {
                 let line = this.componentsRenderer.renderLine(scrollLines - 1);
@@ -106,6 +111,12 @@ export class ViewPainter {
         }
 
         this.layers.getOverlayLayer().renderAndClear();
+    }
+
+    notifyResize() {
+        this.layers.getTextLayer().notifyResize();
+        this.layers.getOverlayLayer().notifyResize()
+        this.gutter.notifyResize();
     }
 
     init() {

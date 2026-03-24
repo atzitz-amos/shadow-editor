@@ -1,0 +1,90 @@
+/* Variant 2: "Board" – same DOM as test2, styled like a dashboard */
+
+@font-face {
+    src: url("../../res/fonts/JetBrainsMono-Regular.ttf");
+    font-family: JetBrains;
+}
+
+*:not(.editor-code *) {
+    box-sizing: border-box;
+    font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+body {
+    margin: 0;
+    overflow: hidden;
+    background: #050609;
+    color: #f1f2f7;
+}
+
+/* Treat the top as a slim dashboard header */
+
+div.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 16px;
+    height: 48px;
+    background: #0b0e15;
+    border-bottom: 1px solid #1a1f2b;
+}
+
+/* ...you can keep most of the topbar internals from test2.css if desired... */
+
+/* Main area: make sidebar + inspector look like columns of cards */
+
+div.main {
+    display: grid;
+    grid-template-columns: 260px minmax(0, 2.3fr) 260px;
+    grid-template-rows: 1fr;
+    height: calc(100vh - 48px - 28px);
+}
+
+div.sidebar {
+    background: #060910;
+    border-right: 1px solid #171c27;
+    box-shadow: none;
+    padding: 10px 10px 12px;
+}
+
+.sidebar-section {
+    border-radius: 10px;
+    background: #0d111a;
+    border: 1px solid #202636;
+}
+
+.editor-region {
+    margin: 10px 8px 12px;
+    border-radius: 12px;
+    background: #090d16;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.75);
+}
+
+.inspector-pane {
+    background: #060910;
+    border-left: 1px solid #171c27;
+    box-shadow: none;
+    padding: 10px 10px 12px;
+}
+
+.problem-item {
+    background: #0d111a;
+    border-radius: 10px;
+}
+
+.metrics-like {
+    /* you could add extra classes in HTML to create more card rows; CSS here is a placeholder */
+}
+
+/* Footer kept very subtle */
+
+div.footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 28px;
+    padding: 0 8px;
+    background: #080b12;
+    border-top: 1px solid #171c27;
+    font-size: 11px;
+}

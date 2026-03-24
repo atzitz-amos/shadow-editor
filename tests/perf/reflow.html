@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Title</title>
+    </head>
+    <body>
+        <div class="a"></div>
+
+        <button onclick="c()">Reflow (getBoundingClientRect)</button>
+        <button onclick="c2()">Reflow (observer)</button>
+
+        <script>
+            const d = document.querySelector(".a");
+
+            function c() {
+                console.time("getBoundingClientRect");
+                for (let i = 0; i < 1_000_000; i++) {
+                    let w = d.getBoundingClientRect().width;
+                }
+                console.timeEnd("getBoundingClientRect");
+            }
+
+                console.time("observer");
+
+
+                for (let i = 0; i < 1_000_000; i++) {
+                    let w = d.getBoundingClientRect().width;
+                }
+                console.timeEnd("observer");
+            }
+        </script>
+    </body>
+</html>

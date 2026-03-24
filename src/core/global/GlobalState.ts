@@ -1,6 +1,6 @@
 import {ShadowApp} from "../../app/ShadowApp";
-import {ShadowUI} from "../../app/ui/ShadowUI";
-import {Project} from "../project/Project";
+import {ShadowUIFactory} from "../../app/ui/ShadowUIFactory";
+import {Workspace} from "../workspace/Workspace";
 import {GlobalProject} from "./GlobalProject";
 import {EventBus} from "../events/EventBus";
 import {PluginManager} from "../plugins/PluginManager";
@@ -28,11 +28,7 @@ export class GlobalState {
         return this.shadowApp;
     }
 
-    public static getShadowUI(): ShadowUI {
-        return ShadowUI.getRunningInstance();
-    }
-
-    public static getProject(): Project {
+    public static getCurrentWorkspace(): Workspace {
         return GlobalProject.getInstance()!;
     }
 

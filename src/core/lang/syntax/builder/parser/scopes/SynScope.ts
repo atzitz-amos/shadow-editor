@@ -1,9 +1,9 @@
 import {SynScopeType} from "./SynScopeType";
 import {SynCodeBlock} from "../../../api/SynCodeBlock";
 import {SynDeclaration} from "../../../impl/SynDeclaration";
-import {URILocatedResource} from "../../../../../project/uri/URILocatedResource";
-import {EditorURI} from "../../../../../project/uri/EditorURI";
-import {URITargetType} from "../../../../../project/uri/URITargetType";
+import {URILocatedResource} from "../../../../../uri/URILocatedResource";
+import {EditorURI} from "../../../../../uri/EditorURI";
+import {URITargetType} from "../../../../../uri/URITargetType";
 
 
 /**
