@@ -7,11 +7,11 @@ export class SerializationUtils {
      * @param value The object to serialize.
      * @return The serialized object.
      * */
-    public static serializeAny(value: any): AnySerializationResult {
+    public static serializeAny(value: any): any {
         // return AnySerializer.serialize(value);
     }
 
-    public static deserializeAny(value: AnySerializationResult): any {
+    public static deserializeAny(value: any): any {
         // return AnySerializer.deserialize(value);
     }
 }

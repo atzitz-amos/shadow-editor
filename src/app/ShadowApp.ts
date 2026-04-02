@@ -1,6 +1,5 @@
 import {ShadowUIFactory} from "./ui/ShadowUIFactory";
 import {GlobalState} from "../core/global/GlobalState";
-import {ProcessManager} from "../core/processManager/ProcessManager";
 import {Lifecycle} from "../core/lifecycle/Lifecycle";
 import {Workspace} from "../core/workspace/Workspace";
 import {GlobalProject} from "../core/global/GlobalProject";
@@ -18,12 +17,8 @@ export class ShadowApp {
     private static isRunning = false;
     private static instance: ShadowApp;
 
-    /**
-     * Our process manager*/
-    private readonly processManager: ProcessManager;
 
     private constructor() {
-        this.processManager = new ProcessManager();
     }
 
     /**
@@ -75,13 +70,6 @@ export class ShadowApp {
 
     public enable(plugin: Class<EditorPlugin>): void {
         GlobalState.getPluginManager().enable(plugin);
-    }
-
-    /**
-     * Get the process manager of the app
-     */
-    public getProcessManager(): ProcessManager {
-        return this.processManager;
     }
 
     /**

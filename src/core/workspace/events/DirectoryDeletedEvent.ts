@@ -1,7 +1,8 @@
 import {EventBase} from "../../events/EventBase";
 import {EventSubscriber} from "../../events/EventSubscriber";
-import {Directory} from "../filetree/Directory";
 import {BubbleDirection} from "../../events/BubbleDirection";
+import {Workspace} from "../Workspace";
+import {WorkspaceDirectory} from "../filesystem/tree/WorkspaceDirectory";
 
 /**
  *
@@ -12,14 +13,14 @@ import {BubbleDirection} from "../../events/BubbleDirection";
 export class DirectoryDeletedEvent implements EventBase {
     public static readonly SUBSCRIBER = EventSubscriber.create(this);
 
-    constructor(private dir: Directory) {
+    constructor(private dir: WorkspaceDirectory) {
     }
 
     getBubbleDirection(): BubbleDirection {
         return BubbleDirection.BUBBLE_BOTH;
     }
 
-    public getDirectory(): Directory {
+    public getDirectory(): WorkspaceDirectory {
         return this.dir;
     }
 }

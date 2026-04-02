@@ -13,6 +13,8 @@
   "devDependencies": {
     "ts-node": "^10.9.2",
     "tsx": "^4.20.3",
+    "typedoc": "^0.28.18",
+    "typedoc-material-theme": "^1.4.1",
     "typescript": "^5.8.3",
     "vite": "^7.3.0"
   },

@@ -24,7 +24,7 @@ export class KeybindContext {
         }
     }
 
-    public static EDITOR_CONTEXT(editor: Editor, event: KeyboardEvent | MouseEvent) {
+    public static fromEditor(editor: Editor, event: KeyboardEvent | MouseEvent) {
         return new KeybindContext(KeybindContextDescriptor.IN_MAIN_EDITOR | KeybindContextDescriptor.IN_TEXT_AREA, event, editor, null);
     }
 
@@ -34,7 +34,23 @@ export class KeybindContext {
         return this.editor;
     }
 
-    public getPane(): any {
+    public isTextAreaEvent(): boolean {
+        return (this.ctx & KeybindContextDescriptor.IN_TEXT_AREA) !== 0;
+    }
+
+    public isEditorEvent(): boolean {
+        return (this.ctx & KeybindContextDescriptor.IN_MAIN_EDITOR) !== 0;
+    }
+
+    public isPaneEvent(): boolean {
+        return (this.ctx & KeybindContextDescriptor.IN_PANE) !== 0;
+    }
+
+    public isMainWindowEvent(): boolean {
+        return (this.ctx & KeybindContextDescriptor.IN_MAIN_WINDOW) !== 0;
+    }
+
+    public requirePane(): any {
         if (!this.pane)
             throw new Error(`No pane associated with this KeybindContext.`);
         return this.pane;

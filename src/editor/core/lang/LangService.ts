@@ -84,7 +84,7 @@ export class LangService {
     private scheduleParsing() {
         Scheduler.debounce(() => {
             const start = performance.now();
-            const builder = new ASTBuilder(this.myLexer!.createTokenStream(), new SynFileImpl(this.editor.getOpenedFile()!));
+            const builder = new ASTBuilder(this.myLexer!.createTokenStream(), new SynFileImpl(this.editor.getOpenedFile()));
             this.makeParser(builder)?.parse().then(() => {
                 console.log("Successfully parsed "
                     + this.editor.getOpenedDocument().getLineCount()

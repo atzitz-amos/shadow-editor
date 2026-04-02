@@ -30,6 +30,20 @@ export abstract class HtmlComponent implements Component {
         return this.children;
     }
 
+    getChild<T extends HtmlComponent>(cls: Class<T>): T | null {
+        for (const child of this.children) {
+            if (child instanceof cls) {
+                return child;
+            } else if (child instanceof HtmlComponent) {
+                let found = child.getChild(cls);
+                if (found !== null) {
+                    return found;
+                }
+            }
+        }
+        return null;
+    }
+
     addChild(child: Component): void {
         this.children.push(child);
 

@@ -1,7 +1,8 @@
 import {ProcessExecutable} from "./ProcessExecutable";
 import {Process} from "./Process";
 import {ProcessGateway} from "./ProcessGateway";
-import {ProcessMonitor} from "../ProcessMonitor";
+import {ProcessMonitor} from "./manager/ProcessMonitor";
+import {ThreadedUtils} from "../ThreadedUtils";
 
 export class ProcessLauncherUtils {
     public static createWorker(executable: ProcessExecutable): Worker {
@@ -21,19 +22,8 @@ export class ProcessLauncherUtils {
         });
     }
 
-    public static isWorkerThread(): boolean {
-        return typeof self !== 'undefined' &&
-            typeof (self as any).importScripts === 'function';
-    }
-
-    public static assertWorkerThread() {
-        if (!this.isWorkerThread()) {
-            throw new Error("Expected to be called from a worker thread.");
-        }
-    }
-
     static awaitCreation<T extends Process>(process: new () => T) {
-        ProcessLauncherUtils.assertWorkerThread();
+        ThreadedUtils.assertWorkerThread();
 
         self.addEventListener("message", event => {
             let data = event.data;

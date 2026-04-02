@@ -1,6 +1,6 @@
 import {EditorPlugin, LoadedPlugin} from "./loader/Plugin";
 import {LoadedExtensionPoint, PluginLoader} from "./loader/PluginLoader";
-import {Service} from "../lifecycle/Service";
+import {Service} from "../threaded/service/Service";
 import {Logger, UseLogger} from "../logging/Logger";
 
 @Service

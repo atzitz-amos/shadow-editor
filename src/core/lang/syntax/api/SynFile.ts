@@ -1,7 +1,7 @@
 import {SynNode} from "./SynNode";
-import {ProjectFile} from "../../../workspace/filetree/ProjectFile";
-import {Path} from "../../../workspace/filesystem/path/Path";
 import {URILocatedResource} from "../../../uri/URILocatedResource";
+import {RelativePath} from "../../../workspace/filesystem/path/RelativePath";
+import {WorkspaceFile} from "../../../workspace/filesystem/tree/WorkspaceFile";
 
 /**
  *
@@ -10,7 +10,7 @@ import {URILocatedResource} from "../../../uri/URILocatedResource";
  * @since 1.0.0
  */
 export interface SynFile extends SynNode, URILocatedResource {
-    getProjectFile(): ProjectFile;
+    getWorkspaceFile(): WorkspaceFile;
 
-    getPath(): Path;
+    getPath(): RelativePath;
 }

@@ -1,6 +1,6 @@
 import {ProcessMonitor} from "./ProcessMonitor";
-import {ProcessExecutable} from "./processors/ProcessExecutable";
-import {ProcessLauncherUtils} from "./processors/ProcessLauncherUtils";
+import {ProcessExecutable} from "../ProcessExecutable";
+import {ProcessLauncherUtils} from "../ProcessLauncherUtils";
 
 export class ProcessManager {
     private processes: ProcessMonitor[] = [];

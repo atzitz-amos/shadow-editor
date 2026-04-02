@@ -1,4 +1,4 @@
-import {Service} from "../lifecycle/Service";
+import {Service} from "../threaded/service/Service";
 import {SettingBase} from "./base/SettingBase";
 import {PersistedObject} from "../persistence/transaction/PersistedObject";
 import {PersistedData} from "../persistence/transaction/PersistedData";

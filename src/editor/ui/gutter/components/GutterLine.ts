@@ -5,14 +5,11 @@ import {Editor} from "../../../Editor";
 
 export class GutterLine implements GutterComponent {
     name: "gutter-line";
-    id: string;
 
     line: number;
     element: HTMLSpanElement;
 
     constructor(line: number) {
-        this.id = Registry.getComponentIDFor(this);
-
         this.line = line;
     }
 

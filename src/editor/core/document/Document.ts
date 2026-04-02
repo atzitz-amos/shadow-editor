@@ -27,7 +27,7 @@ export class Document {
     }
 
     public getAssociatedFile(): WorkspaceFile {
-
+        return null as any; // TODO: implement
     }
 
     public getTextContent(): string {
@@ -152,6 +152,11 @@ export class Document {
         this.editor.getEventBus().asyncPublish(new DocumentDeleteEvent(this, affectedRange));
 
         return deleted;
+    }
+
+    public replaceRange(range: TextRange, text: string): void {
+        this.deleteAt(range.start, range.getLength());
+        this.insertText(range.start, text);
     }
 
     private parseLines(): void {

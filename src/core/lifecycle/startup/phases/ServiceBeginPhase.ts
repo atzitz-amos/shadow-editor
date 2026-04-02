@@ -1,5 +1,5 @@
 import {AbstractStartupPhase} from "../StartupPhase";
-import {ServiceImpl} from "../../Service";
+import {ServiceImpl} from "../../../threaded/service/Service";
 
 /**
  * Phase that calls begin() on all registered services.

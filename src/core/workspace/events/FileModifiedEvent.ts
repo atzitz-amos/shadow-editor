@@ -1,7 +1,7 @@
 import {EventBase} from "../../events/EventBase";
 import {EventSubscriber} from "../../events/EventSubscriber";
-import {ProjectFile} from "../filetree/ProjectFile";
 import {BubbleDirection} from "../../events/BubbleDirection";
+import {WorkspaceFile} from "../filesystem/tree/WorkspaceFile";
 
 /**
  *
@@ -12,7 +12,7 @@ import {BubbleDirection} from "../../events/BubbleDirection";
 export class FileModifiedEvent implements EventBase {
     public static readonly SUBSCRIBER = EventSubscriber.create(this);
 
-    constructor(private file: ProjectFile, private oldContent: string, private newContent: string) {
+    constructor(private file: WorkspaceFile, private oldContent: string, private newContent: string) {
 
     }
 
@@ -20,7 +20,7 @@ export class FileModifiedEvent implements EventBase {
         return BubbleDirection.BUBBLE_BOTH;
     }
 
-    getFile(): ProjectFile {
+    getFile(): WorkspaceFile {
         return this.file;
     }
 

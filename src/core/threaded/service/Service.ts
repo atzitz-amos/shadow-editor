@@ -1,5 +1,5 @@
-import {Lifecycle} from "./Lifecycle";
-import {PersistedObject} from "../persistence/transaction/PersistedObject";
+import {Lifecycle} from "../../lifecycle/Lifecycle";
+import {PersistedObject} from "../../persistence/transaction/PersistedObject";
 
 /**
  * Represents a service. Must be a singleton, which will be registered to the Lifecycle of the app.
@@ -18,7 +18,7 @@ export interface ServiceImpl {
 }
 
 /**
- * A decorator to indicate that the class is a Service. It must be a singleton and implement the Service interface.
+ * A decorator to indicate that the class is a Service. It must be a singleton and implement the ServiceImpl interface.
  * Uses queueMicrotask to defer registration until after module initialization to avoid circular dependency issues.
  **/
 export function Service<T extends Constructor<ServiceImpl> & { getInstance(): InstanceType<T> }>(ctor: T) {
@@ -31,3 +31,4 @@ export function Service<T extends Constructor<ServiceImpl> & { getInstance(): In
         }
     });
 }
+

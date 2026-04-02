@@ -1,6 +1,6 @@
-import {ProcessExecutable} from "./processors/ProcessExecutable";
-import {ProcessGatewayMessage} from "./processors/ProcessGatewayMessage";
-import {Scheduler} from "../scheduler/Scheduler";
+import {ProcessExecutable} from "../ProcessExecutable";
+import {ProcessGatewayMessage} from "../ProcessGatewayMessage";
+import {Scheduler} from "../../../scheduler/Scheduler";
 
 export enum ProcessState {
     RUNNING,

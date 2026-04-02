@@ -1,5 +1,4 @@
 import {ShadowApp} from "../../app/ShadowApp";
-import {ShadowUIFactory} from "../../app/ui/ShadowUIFactory";
 import {Workspace} from "../workspace/Workspace";
 import {GlobalProject} from "./GlobalProject";
 import {EventBus} from "../events/EventBus";
@@ -7,10 +6,12 @@ import {PluginManager} from "../plugins/PluginManager";
 import {LangSupport} from "../lang/LangSupport";
 import {SettingsManager} from "../settings/SettingsManager";
 import {ActionManager} from "../actions/ActionManager";
-import {ProcessManager} from "../processManager/ProcessManager";
+import {ProcessManager} from "../threaded/process/manager/ProcessManager";
 import {PersistenceModel} from "../persistence/PersistenceModel";
+import {Lifecycle} from "../lifecycle/Lifecycle";
 
 /**
+ * Provides a single class that regroups all useful singletons and global services of the application
  *
  * @author Atzitz Amos
  * @date 11/14/2025
@@ -26,6 +27,10 @@ export class GlobalState {
 
     public static getShadowApp(): ShadowApp {
         return this.shadowApp;
+    }
+
+    public static getLifecycle(): Lifecycle {
+        return Lifecycle.getInstance();
     }
 
     public static getCurrentWorkspace(): Workspace {
@@ -49,7 +54,7 @@ export class GlobalState {
     }
 
     public static getProcessManager(): ProcessManager {
-        return this.shadowApp.getProcessManager();
+        return Lifecycle.getProcessManager();
     }
 
     public static getActionManager(): ActionManager {

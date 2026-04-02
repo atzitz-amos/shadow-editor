@@ -2,13 +2,15 @@
 
 # Shadow Editor
 
-A complete editor written from scratch in TypeScript supporting text highlighting, AST parsers, and more. 
+A complete editor written from scratch in TypeScript supporting text highlighting, AST parsers, and more.
 
 This file aims at providing with the basic functionality
-and installation features. In case you are interested by plugin development, you can check out [DOCUMENTATION.md](/DOCUMENTATION.md).  
+and installation features. In case you are interested by plugin development, you can check
+out [DOCUMENTATION.md](/DOCUMENTATION.md).  
 <br>
 > [!NOTE]
-> This project is still under developpment and hence doesn't provide a release bundle. The only way to use this project for now is to download the source code directly.
+> This project is still under developpment and hence doesn't provide a release bundle. The only way to use this project
+> for now is to download the source code directly.
 
 ***
 
@@ -42,77 +44,71 @@ and installation features. In case you are interested by plugin development, you
 ## Basic Usage
 
 ### Launching the application
-The simplest way to use Shadow Editor is through the ShadowApp class:
+
+The ShadowEditor can be launched in two distinct modes: FullUI and EditorOnly. The first one provides with a complete
+user interface, while the second one only renders the editor component, allowing you to integrate it into your own
+application.
+In any case, the `ShadowApp` class must be running as it manages the lifecycle of the application. Here is how to launch
+the app in both modes:
 
 ```typescript
-import { ShadowApp } from './src/app/ShadowApp';
-import { Project } from './src/core/project/Project';
-import { GlobalProject } from './src/core/global/GlobalProject';
-import { Editor } from './src/editor/Editor';
+import {ShadowUIFactory} from "./src/app/ui/ShadowUIFactory";
+import {ShadowApp} from "./src/app/ShadowApp";
 
-// Launch the application
-const success = await ShadowApp.launch();
+const app = await ShadowApp.launch(true); // true if you want to show the progress bar as the app is loading, false otherwise
 
-if (success) {
-    // Create a project and editor
-    const project = new Project("myProject");
-    GlobalProject.open(project);
-    
-    const editor = new Editor(project);
-    editor.attach(document.querySelector('.editor-container'));
+if (!app) {
+    console.error("Failed to launch the Shadow Editor application.");
+} else {
+    console.log("Shadow Editor application launched successfully.");
+
+    // FullUI mode
+    ui = await ShadowUIFactory.fullAppUI();
+
+    // EditorOnly mode
+    ui = await ShadowUIFactory.singleEditorUI();
 }
 ```
 
+### Plugins
 
-### Enabling 
+The Shadow Editor is extremely configurable by using Plugins. Plugins can be used for a wide variety of purposes, such
+as adding support for new languages, providing with new actions, or even modifying the user interface. You can check
+out [DOCUMENTATION.md](/DOCUMENTATION.md) for more details about plugin development. However, here
+are some examples of how to use plugins in your application:
 
-Plugins are disabled by default. You need to enable them explicitly using PluginManager.
+### Enabling
+
+Plugins are automatically loaded from the `src.plugins` directory. However, plugins are always loaded in disabled mode.
+To enable a plugin, you have to use explicitly tell the app to do so. For instance, to enable javascript support:
 
 ```typescript
-import { PluginManager } from './src/core/plugins/PluginManager';
-import JSLangPlugin from './src/plugins/jsLang/JSLangPlugin';
+import JSLangPlugin from "./src/plugins/jsLang/JSLangPlugin"; // exported default
 
-// Enable JavaScript language support
-PluginManager.getInstance().enable(JSLangPlugin.class);
+
+app.enable(JSLangPlugin.class); // The `class` property of a plugin is a special variable holding a reference to the plugin class itself, which is singleton. 
 ```
 
-### Listening to events
-The editor is constantly broadcasting events. To listen to them, first obtain an EventBus. 
+### Events
+
+The editor is constantly broadcasting events about its state. You can listen to these events by using
+the `EventBus` class. For instance, to listen to document changes:
 
 ```typescript
-// GlobalState contains many useful functions to access singleton instances.
-import {GlobalState} from "./src/core/global/GlobalState";
+const bus = GlobalState.getMainEventBus(); // GlobalState is a special class that holds references
+                                           // to the most important components of the app, such as the main event bus
 
-const eventBus = GlobalState.getMainEventBus();
-```
+bus.subscribe(this, DocumentModificationEvent.SUBSCRIBER, (event: DocumentModificationEvent) => {
+    // Do something when the document is modified
+});
 
-You can then subscribe to a specific event. For instance, to listen to any document modification:
-```typescript
-import {DocumentModificationEvent} from "./src/editor/core/document/events/DocumentModificationEvent";
-
-eventBus.subscribe(this, DocumentModificationEvent.SUBSCRIBER, (ev : DocumentModificationEvent) => {/* ... */});
-```
-
-### Manipulating the document
-The content of the currently opened file is stored in a `Document` class. You can get it with:
-```typescript
-const document = editor.getOpenedDocument();
-```
-
-This class has many useful features to edit the text content of the currently opened file, for instance:
-```typescript
-document.insertText(0, "Hello World\n"); // Add "Hello World\n" at offset 0
-document.deleteAt(1, 3); // Delete 3 characters starting from offset 1.
-document.getTotalDocumentLength(); // 9
-```
-
-These changes won't be updated to the UI however until a repaint is triggered. You can manually trigger one with:
-```typescript
-editor.triggerRepaint();
 ```
 
 ## Acknowledgments
 
-Although the code for this project was entirely written by me, its core concepts are inspired by those of [JetBrains intellij-community](https://github.com/JetBrains/intellij-community) *(logical/visual position, ASTBuilder, Actions, etc...).*
+Although the code for this project was entirely written by me, some of its core concepts are inspired by those
+of [JetBrains intellij-community](https://github.com/JetBrains/intellij-community) *(logical/visual position,
+ASTBuilder, Actions, etc...).*
 
-This project also uses [JetBrains Mono](https://www.jetbrains.com/lp/mono/), licensed under the [Apache 2.0 License](https://www.apache.org/licenses/LICENSE-2.0).
+This project also uses [JetBrains Mono](https://www.jetbrains.com/lp/mono/), licensed under
+the [Apache 2.0 License](https://www.apache.org/licenses/LICENSE-2.0).

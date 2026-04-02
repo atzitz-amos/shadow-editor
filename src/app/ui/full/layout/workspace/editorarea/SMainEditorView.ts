@@ -48,6 +48,10 @@ export class SMainEditorView extends HtmlComponent {
         });
     }
 
+    getMainEditor() {
+        return this.currentEditor;
+    }
+
     private onResize() {
         Scheduler.defer(() => {
             const bbox = this.editorElement.getBoundingClientRect();

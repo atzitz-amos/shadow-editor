@@ -7,7 +7,6 @@ import {Registry} from "../../core/Registry";
 
 export class HScrollBar implements Component {
     name: string = "h-scrollbar";
-    id: string = Registry.getComponentIDFor(this);
 
     private scrollbar: HTMLElement;
     private handle: HTMLElement;

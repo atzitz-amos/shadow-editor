@@ -25,6 +25,6 @@ export class Workspace implements URILocatedResource {
 
 
     getFS(): WorkspaceFS {
-
+        return null as any; // TODO: implement
     }
 }

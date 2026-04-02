@@ -1,10 +1,10 @@
 import {SynFile} from "../api/SynFile";
 import {SynElement} from "../api/SynElement";
-import {ProjectFile} from "../../../workspace/filetree/ProjectFile";
 import {TextRange} from "../../../../editor/core/coordinate/TextRange";
 import {SynNode} from "../api/SynNode";
-import {Path} from "../../../workspace/filesystem/path/Path";
 import {EditorURI} from "../../../uri/EditorURI";
+import {WorkspaceFile} from "../../../workspace/filesystem/tree/WorkspaceFile";
+import {RelativePath} from "../../../workspace/filesystem/path/RelativePath";
 
 /**
  *
@@ -15,7 +15,7 @@ import {EditorURI} from "../../../uri/EditorURI";
 export class SynFileImpl implements SynFile {
     private readonly children: SynNode[] = [];
 
-    constructor(private file: ProjectFile) {
+    constructor(private file: WorkspaceFile) {
     }
 
     getURI(): EditorURI {
@@ -26,7 +26,7 @@ export class SynFileImpl implements SynFile {
         return this;
     }
 
-    getProjectFile(): ProjectFile {
+    getWorkspaceFile(): WorkspaceFile {
         return this.file;
     }
 
@@ -35,10 +35,10 @@ export class SynFileImpl implements SynFile {
     }
 
     getTextRange(): TextRange {
-        return new TextRange(0, this.file.getContent().length);
+        return new TextRange(0, this.file.getLength());
     }
 
-    getPath(): Path {
+    getPath(): RelativePath {
         return this.file.getPath();
     }
 

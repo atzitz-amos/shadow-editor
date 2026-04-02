@@ -87,6 +87,10 @@ export class Editor {
         return this.eventBus;
     }
 
+    getOpenedFile() {
+        return this.document.getAssociatedFile();
+    }
+
     getOpenedDocument(): Document {
         return this.document;
     }
@@ -268,7 +272,7 @@ export class Editor {
         }
         ModifierKeyHolder.getInstance().set(event);
 
-        KeybindManager.getInstance().onKeydown(KeybindContext.EDITOR_CONTEXT(this, event));
+        KeybindManager.getInstance().onKeydown(KeybindContext.fromEditor(this, event));
         this.eventBus.syncPublish(new KeyPressedEvent(this, event));
     }
 
@@ -278,7 +282,7 @@ export class Editor {
         this.caretModel.removeAll();
         this.moveCursorToMouseEvent(event);
 
-        KeybindManager.getInstance().onMousedown(KeybindContext.EDITOR_CONTEXT(this, event));
+        KeybindManager.getInstance().onMousedown(KeybindContext.fromEditor(this, event));
         this.eventBus.syncPublish(new MousePressedEvent(this, event));
     }
 
@@ -334,7 +338,7 @@ export class Editor {
         }, 20);
     }
 
-    triggerRepaint() {
+    refreshView() {
         this.view.triggerRepaint();
     }
 }

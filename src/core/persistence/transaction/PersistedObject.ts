@@ -2,6 +2,9 @@ import {PersistedData} from "./PersistedData";
 import {Updater} from "./Updater";
 
 /**
+ * Represents an object that can be persisted and loaded from a data source.
+ * Loading is handled automatically if the object is registered to the Lifecycle (ie. if it's a {@link Service}),
+ * but can also be called manually if needed.
  *
  * @author Atzitz Amos
  * @date 12/29/2025

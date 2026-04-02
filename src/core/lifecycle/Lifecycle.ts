@@ -1,5 +1,5 @@
 import {PersistedObject} from "../persistence/transaction/PersistedObject";
-import {ServiceImpl} from "./Service";
+import {ServiceImpl} from "../threaded/service/Service";
 import {Logger, UseLogger} from "../logging/Logger";
 import {StartupPhase} from "./startup/StartupPhase";
 import {StartupProgressEvent} from "./events/StartupProgressEvent";
@@ -7,6 +7,7 @@ import {StartupFailedEvent} from "./events/StartupFailedEvent";
 import {EventBus} from "../events/EventBus";
 import {ShadowApp} from "../../app/ShadowApp";
 import {LifecycleStartedEvent} from "./events/LifecycleStartedEvent";
+import {ProcessManager} from "../threaded/process/manager/ProcessManager";
 
 /**
  * The lifecycle of the application, manages the persistence of PersistedObject,
@@ -21,16 +22,22 @@ export class Lifecycle {
     private static _instance: Lifecycle;
     declare private logger: Logger;
 
+    /**
+     * Our process manager*/
+    private readonly processManager: ProcessManager;
+
     private readonly services: ServiceImpl[] = [];
     private readonly persistedObjects: PersistedObject<any>[] = [];
-    private readonly phases: StartupPhase[] = [];
 
+    private readonly phases: StartupPhase[] = [];
     private started: boolean = false;
     private phasesLocked: boolean = false;
+
     private startupAborted: boolean = false;
 
     public constructor() {
-        // No longer auto-start with queueMicrotask
+        this.processManager = new ProcessManager();
+
     }
 
     static getInstance(): Lifecycle {
@@ -38,6 +45,14 @@ export class Lifecycle {
             this._instance = new Lifecycle();
         }
         return this._instance;
+    }
+
+    static getProcessManager(): ProcessManager {
+        return Lifecycle.getInstance().getProcessManager();
+    }
+
+    getProcessManager(): ProcessManager {
+        return this.processManager;
     }
 
     /**
@@ -191,9 +206,9 @@ export class Lifecycle {
 
     private async registerBuiltInPhases(app: ShadowApp) {
         // Dynamic imports to avoid circular dependency with @Service decorator
-        const { PersistenceRecoveryPhase } = await import("./startup/phases/PersistenceRecoveryPhase");
-        const { ServiceBeginPhase } = await import("./startup/phases/ServiceBeginPhase");
-        const { AppReadyPhase } = await import("./startup/phases/AppReadyPhase");
+        const {PersistenceRecoveryPhase} = await import("./startup/phases/PersistenceRecoveryPhase");
+        const {ServiceBeginPhase} = await import("./startup/phases/ServiceBeginPhase");
+        const {AppReadyPhase} = await import("./startup/phases/AppReadyPhase");
 
         // Priority 20: Recover persisted data
         this.phases.push(new PersistenceRecoveryPhase(this.persistedObjects));
@@ -206,7 +221,7 @@ export class Lifecycle {
     }
 
     private async loadPlugins(): Promise<boolean> {
-        const { PluginLoadPhase } = await import("./startup/phases/PluginLoadPhase");
+        const {PluginLoadPhase} = await import("./startup/phases/PluginLoadPhase");
         const eventBus = EventBus.getMainEventBus();
         const phase = new PluginLoadPhase();
 

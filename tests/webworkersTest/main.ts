@@ -1,11 +1,12 @@
+import {ProcessMonitor} from "../../src/core/threaded/process/manager/ProcessMonitor";
+import {ProcessManager} from "../../src/core/threaded/process/manager/ProcessManager";
+// @ts-ignore
 import {FloatSumProcessor, SumProcessor} from "./sumProcessor";
-import {ProcessMonitor} from "../../src/core/processManager/ProcessMonitor";
-import {ProcessManager} from "../../src/core/processManager/ProcessManager";
 
 export async function main() {
     const manager = new ProcessManager();
-    const task1: ProcessMonitor = manager.launch(SumProcessor.executable(1e9));
-    const task2: ProcessMonitor = manager.launch(SumProcessor.executable(1e9));
+    const task1: ProcessMonitor = manager.launch(SumProcessor.executable(1e9, "d"));
+    const task2: ProcessMonitor = manager.launch(SumProcessor.executable(1e9, "d"));
     const task3: ProcessMonitor = manager.launch(FloatSumProcessor.executable(1e9));
 
     for (let i = 0; i < 3; i++) {

@@ -1,13 +1,13 @@
-import {Service} from "../../../lifecycle/Service";
-import {GlobalState} from "../../../global/GlobalState";
-import {DocumentModificationEvent} from "../../../../editor/core/document/events/DocumentModificationEvent";
-import {Scheduler} from "../../../scheduler/Scheduler";
-import {EditorSaveRequestEvent} from "../../../../editor/events/EditorSaveRequestEvent";
-import {PersistedObject} from "../../../persistence/transaction/PersistedObject";
+import {Service} from "../threaded/service/Service";
+import {GlobalState} from "../global/GlobalState";
+import {DocumentModificationEvent} from "../../editor/core/document/events/DocumentModificationEvent";
+import {Scheduler} from "../scheduler/Scheduler";
+import {EditorSaveRequestEvent} from "../../editor/events/EditorSaveRequestEvent";
+import {PersistedObject} from "../persistence/transaction/PersistedObject";
 import {SyncPersistedModel} from "./SyncPersistedModel";
-import {PersistedData} from "../../../persistence/transaction/PersistedData";
-import {Updater} from "../../../persistence/transaction/Updater";
-import {Logger, UseLogger} from "../../../logging/Logger";
+import {PersistedData} from "../persistence/transaction/PersistedData";
+import {Updater} from "../persistence/transaction/Updater";
+import {Logger, UseLogger} from "../logging/Logger";
 
 /**
  *
@@ -16,9 +16,9 @@ import {Logger, UseLogger} from "../../../logging/Logger";
  * @since 1.0.0
  */
 @Service
-@UseLogger("SyncService")
-export class SyncService implements PersistedObject<SyncPersistedModel> {
-    private static instance: SyncService;
+@UseLogger("SaveService")
+export class SaveService implements PersistedObject<SyncPersistedModel> {
+    private static instance: SaveService;
 
     declare private logger: Logger;
 
@@ -27,15 +27,15 @@ export class SyncService implements PersistedObject<SyncPersistedModel> {
     public constructor() {
     }
 
-    static getInstance(): SyncService {
-        if (SyncService.instance === undefined) {
-            SyncService.instance = new SyncService();
+    static getInstance(): SaveService {
+        if (SaveService.instance === undefined) {
+            SaveService.instance = new SaveService();
         }
-        return SyncService.instance;
+        return SaveService.instance;
     }
 
     getPersistedKey(): string {
-        return "shadow.sync.service";
+        return "shadow.sync.save";
     }
 
     getPersistedModel(): SyncPersistedModel {

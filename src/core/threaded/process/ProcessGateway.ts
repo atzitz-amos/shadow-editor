@@ -2,10 +2,11 @@ import {Process} from "./Process";
 import {ProcessLauncherUtils} from "./ProcessLauncherUtils";
 import {ProcessGatewayMessage, ProcessGatewayMessageData, ProcessGatewayWorkerCommand} from "./ProcessGatewayMessage";
 import {SerializationUtils} from "../../../editor/core/serializable/SerializationUtils";
+import {ThreadedUtils} from "../ThreadedUtils";
 
 export class ProcessGateway {
     public initialize() {
-        ProcessLauncherUtils.assertWorkerThread();
+        ThreadedUtils.assertWorkerThread();
 
         self.addEventListener("message", this.onMessage.bind(this), true);
     }

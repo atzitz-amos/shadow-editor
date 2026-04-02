@@ -7,7 +7,6 @@ import {Registry} from "../../core/Registry";
 
 export class VScrollBar implements Component {
     name: string = "v-scrollbar";
-    id: string = Registry.getComponentIDFor(this);
 
     private scrollbar: HTMLElement;
     private handle: HTMLElement;

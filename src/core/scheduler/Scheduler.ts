@@ -5,8 +5,7 @@
  * @since 1.0.0
  */
 export class Scheduler {
-
-    private static readonly taskQueue: Map<string, NodeJS.Timeout>;
+    private static readonly taskQueue: Map<string, NodeJS.Timeout> = new Map<string, NodeJS.Timeout>();
 
 
     public static after(delay: number, task: () => void): NodeJS.Timeout {
@@ -74,4 +73,7 @@ export class Scheduler {
         return true;
     }
 
+    public static periodically(task: () => void, interval: number): void {
+
+    }
 }

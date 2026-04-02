@@ -13,7 +13,6 @@
         <div class="editor-c" style="display: flex; flex-direction: row"></div>
         <div class="editor-c2"></div>
         <script type="module">
-            import {Editor} from './src/editor/Editor.ts';
             import {TextRange} from "./src/editor/core/coordinate/TextRange";
             import {SerializationUtils} from "./src/editor/core/serializable/SerializationUtils";
             import {JsLexicalGrammar} from "./src/plugins/jsLang/lang/lexer/JsLexicalGrammar";
@@ -25,21 +24,14 @@
             import {Source} from "./src/core/lang/syntax/builder/tokens/TokenStream";
             import {DocumentModificationEvent} from "./src/editor/core/document/events/DocumentModificationEvent";
             import {InlineError} from "./src/editor/ui/inline/error/InlineError";
-            import {Workspace, Workspace} from "./src/core/workspace/Workspace";
+            import {Workspace} from "./src/core/workspace/Workspace";
             import {ASTBuilder} from "./src/core/lang/syntax/builder/parser/builder/ASTBuilder";
-            import {GlobalProject} from "./src/core/global/GlobalProject";
-            import {PluginManager} from "./src/core/plugins/PluginManager";
             import {ShadowApp} from "./src/app/ShadowApp";
-            import {VirtualFileSystem} from "./src/core/workspace/filesystem/VirtualFileSystem";
-            import {Directory} from "./src/core/workspace/filetree/Directory";
-            import {ProjectFile} from "./src/core/workspace/filetree/ProjectFile";
-            import {PersistenceStrategy} from "./src/core/persistence/PersistenceStrategy";
             import {RelativePath} from "./src/core/workspace/filesystem/path/RelativePath";
             import {EditorURI} from "./src/core/uri/EditorURI";
             import {JsCodeBlock} from "./src/plugins/jsLang/lang/syntax/JsCodeBlock";
             import {JsDeclarator} from "./src/plugins/jsLang/lang/syntax/statements/JsDeclarator";
             import {JsIdentifier} from "./src/plugins/jsLang/lang/syntax/expr/JsIdentifier";
-            import {SynFileImpl} from "./src/core/lang/syntax/impl/SynFileImpl";
             import {GlobalState} from "./src/core/global/GlobalState";
             import {ShadowUIFactory} from "./src/app/ui/ShadowUIFactory";
 
@@ -61,7 +53,8 @@
                 app.enable(JSLangPlugin.class);
 
 
-                window.editor = null;
+                window.editor = ui.getMainEditor();
+
                 window.workspace = workspace;
                 window.TextRange = TextRange;
                 window.SerializationUtils = SerializationUtils;
@@ -90,19 +83,12 @@
 
                 window.Parser = JsParser;
 
-                window.VFS = VirtualFileSystem;
                 window.Directory = Directory;
-                window.ProjectFile = ProjectFile;
                 window.RelativePath = RelativePath;
 
                 window.EditorURI = EditorURI;
 
                 window.GlobalState = GlobalState;
-
-                (async () => {
-                    await window.VFS.load(GlobalProject.getInstance(), PersistenceStrategy.PERSIST);
-                    window.vfs = window.VFS.getInstance();
-                })();
 
                 window.fill = (n = 1000) => {
                     let s = "";

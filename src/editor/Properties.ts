@@ -1,5 +1,3 @@
-import {ProjectFile} from "../core/workspace/filetree/ProjectFile";
-
 export type ViewProperties = {
     width?: int;
     height?: int;
@@ -7,7 +5,6 @@ export type ViewProperties = {
 };
 
 export type EditorProperties = {
-    file?: ProjectFile;
     view?: ViewProperties;
 };
 

@@ -5,7 +5,7 @@
 
 import {LanguageBase} from "./LanguageBase";
 import {FileTypeHandler} from "./FileTypeHandler";
-import {ProjectFile} from "../workspace/filetree/ProjectFile";
+import {WorkspaceFile} from "../workspace/filesystem/tree/WorkspaceFile";
 
 export class LangSupport {
     private static instance: LangSupport;
@@ -39,7 +39,7 @@ export class LangSupport {
         return this.fileTypeHandlers;
     }
 
-    getFileTypeHandler(file: ProjectFile): FileTypeHandler | null {
+    getFileTypeHandler(file: WorkspaceFile): FileTypeHandler | null {
         let bestHandler: FileTypeHandler | null = null;
         let bestSupportLevel = 0;
         for (const handler of this.fileTypeHandlers) {
@@ -61,7 +61,7 @@ export class LangSupport {
         }
     }
 
-    getAssociatedLanguage(file: ProjectFile) {
+    getAssociatedLanguage(file: WorkspaceFile) {
         let handler = this.getFileTypeHandler(file);
         return handler ? handler.getLanguageForFile(file) : null;
     }

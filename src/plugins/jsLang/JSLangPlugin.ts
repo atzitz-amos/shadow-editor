@@ -4,4 +4,6 @@ export default class JSLangPlugin extends EditorPlugin {
     constructor() {
         super();
     }
+
+
 }

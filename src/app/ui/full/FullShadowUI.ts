@@ -6,6 +6,8 @@ import {SLeftActionRail} from "./layout/rail/SLeftActionRail";
 import {SEditorWorkspace} from "./layout/workspace/SEditorWorkspace";
 import {GlobalState} from "../../../core/global/GlobalState";
 import {UIResizeEvent} from "../events/UIResizeEvent";
+import {Editor} from "../../../editor/Editor";
+import {SMainEditorView} from "./layout/workspace/editorarea/SMainEditorView";
 
 
 /**
@@ -31,6 +33,14 @@ export class FullShadowUI implements ShadowUI {
         this.myLeftActionRail = new SLeftActionRail(mainContent);
         this.myWorkspace = new SEditorWorkspace(mainContent);
         this.myFooter = new SFooter(root);
+    }
+
+    getMainEditor(): Editor {
+        let child = this.myWorkspace.getChild(SMainEditorView);
+        if (child === null) {
+            throw new Error("Could not find editor area in workspace");
+        }
+        return child.getMainEditor();
     }
 
     draw(): void {

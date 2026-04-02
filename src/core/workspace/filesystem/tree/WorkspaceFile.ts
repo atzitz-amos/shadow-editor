@@ -2,6 +2,7 @@ import {NodeEntry} from "./NodeEntry";
 import {WorkspaceDirectory} from "./WorkspaceDirectory";
 import {WorkspaceFS} from "../WorkspaceFS";
 import {RelativePath} from "../path/RelativePath";
+import {EditorURI} from "../../../uri/EditorURI";
 
 /**
  *
@@ -30,7 +31,27 @@ export class WorkspaceFile implements NodeEntry {
         return this.parent.getPath().join(this.name);
     }
 
+    getExtension(): string {
+        const dotIndex = this.name.lastIndexOf(".");
+        if (dotIndex === -1) return "";
+        return this.name.substring(dotIndex + 1);
+    }
+
     async getTextContent(): Promise<string> {
         return await this.handle.getFile().then(file => file.text());
+    }
+
+    async save() {
+        const writable = await this.handle.createWritable();
+        await writable.write(await this.getTextContent());
+        await writable.close();
+    }
+
+    getURI(): EditorURI {
+        return null as any; // TODO
+    }
+
+    getLength() {
+        return 0; // TODO
     }
 }

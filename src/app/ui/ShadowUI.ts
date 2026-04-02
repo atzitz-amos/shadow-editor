@@ -1,3 +1,5 @@
+import {Editor} from "../../editor/Editor";
+
 /**
  *
  * @author Atzitz Amos
@@ -6,4 +8,6 @@
  */
 export interface ShadowUI {
     draw(): void;
+
+    getMainEditor(): Editor;
 }

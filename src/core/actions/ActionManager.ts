@@ -6,7 +6,7 @@ import * as MoveCaret from "../../editor/actions/MoveCaret";
 import {TabAction} from "../../editor/actions/TabAction";
 import {SelectAllAction, SelectDoubleClickAction} from "../../editor/actions/SelectActions";
 import {KeybindManager} from "../keybinds/KeybindManager";
-import {Service} from "../lifecycle/Service";
+import {Service} from "../threaded/service/Service";
 import {Logger, UseLogger} from "../logging/Logger";
 
 
@@ -15,6 +15,7 @@ import {Logger, UseLogger} from "../logging/Logger";
 export class ActionManager {
     private static instance: ActionManager;
     actions: AbstractAction[] = [];
+
     private declare readonly logger: Logger;
 
     public static getInstance() {
