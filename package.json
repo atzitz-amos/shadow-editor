@@ -16,7 +16,7 @@
     "typedoc": "^0.28.18",
     "typedoc-material-theme": "^1.4.1",
     "typescript": "^5.8.3",
-    "vite": "^7.3.0"
+    "vite": "^7.3.2"
   },
   "directories": {
     "test": "tests"
