@@ -4,6 +4,7 @@ import {ShadowAppLoadedEvent} from "../events/ShadowAppLoadedEvent";
 import {ShadowUI} from "./ShadowUI";
 import {FullShadowUI} from "./full/FullShadowUI";
 import {HTMLUtils} from "../../editor/utils/HTMLUtils";
+import {ShadowUILoadedEvent} from "../events/ShadowUILoadedEvent";
 
 /**
  * A factory to create most UI components of the app. It may schedule the creation of components if the app is not fully loaded yet.
@@ -52,6 +53,9 @@ export class ShadowUIFactory {
         const ui = new FullShadowUI(HTMLUtils.createElement("div.app", document.body));
         ui.draw();
         ui.addEventListeners();
+
+        GlobalState.getMainEventBus().asyncPublish(new ShadowUILoadedEvent(ui));
+
         return ui;
     }
 }

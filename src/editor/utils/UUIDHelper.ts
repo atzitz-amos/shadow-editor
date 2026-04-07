@@ -1,5 +1,5 @@
 export class UUIDHelper {
-    public static generateUUID(): string {
+    public static newUUID(): string {
         return crypto.randomUUID();
     }
 }

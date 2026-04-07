@@ -4,6 +4,8 @@ import {Lifecycle} from "../core/lifecycle/Lifecycle";
 import {Workspace} from "../core/workspace/Workspace";
 import {GlobalProject} from "../core/global/GlobalProject";
 import {EditorPlugin} from "../core/plugins/loader/Plugin";
+import {ShadowUI} from "./ui/ShadowUI";
+import {ShadowUILoadedEvent} from "./events/ShadowUILoadedEvent";
 
 /**
  * Represents the backend of the Shadow Editor application. It is responsible for managing
@@ -17,8 +19,13 @@ export class ShadowApp {
     private static isRunning = false;
     private static instance: ShadowApp;
 
+    private ui: ShadowUI | undefined = undefined;
+
 
     private constructor() {
+        GlobalState.getMainEventBus().subscribe(this, ShadowUILoadedEvent.SUBSCRIBER, (ev) => {
+            this.ui = ev.getShadowUI();
+        });
     }
 
     /**
@@ -76,5 +83,9 @@ export class ShadowApp {
      * Open a project.*/
     public openProject(project: Workspace): void {
         GlobalProject.open(project);
+    }
+
+    getUI(): ShadowUI | undefined {
+        return this.ui;
     }
 }

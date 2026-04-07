@@ -2,7 +2,7 @@ import {Process} from "../../src/core/threaded/process/Process";
 import {ProcessGateway} from "../../src/core/threaded/process/ProcessGateway";
 
 export class SumProcessor extends Process {
-    getLaunchURL(): string {
+    getWorkerScriptPath(): string {
         return import.meta.url;
     }
 
@@ -18,7 +18,7 @@ export class SumProcessor extends Process {
 }
 
 export class FloatSumProcessor extends Process {
-    getLaunchURL(): string {
+    getWorkerScriptPath(): string {
         return import.meta.url;
     }
 

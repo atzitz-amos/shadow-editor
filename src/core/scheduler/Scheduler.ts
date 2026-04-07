@@ -73,7 +73,7 @@ export class Scheduler {
         return true;
     }
 
-    public static periodically(task: () => void, interval: number): void {
+    public static every(interval: number, task: () => void): void {
 
     }
 }

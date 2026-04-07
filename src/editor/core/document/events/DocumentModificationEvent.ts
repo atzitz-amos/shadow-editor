@@ -13,7 +13,7 @@ import {TextRange} from "../../coordinate/TextRange";
 export class DocumentModificationEvent extends EditorEventBase {
     public static readonly SUBSCRIBER = EventSubscriber.create(this);
 
-    constructor(private document: Document, private affectedRange: TextRange, private text: string | null) {
+    constructor(private document: Document, private affectedRange: TextRange, private text: string | null, private deleted: string | null) {
         super(document.getEditor());
     }
 
@@ -31,6 +31,10 @@ export class DocumentModificationEvent extends EditorEventBase {
 
     getInsertedText(): string {
         return this.text || "";
+    }
+
+    getDeletedText(): string {
+        return this.deleted || "";
     }
 
     getType(): DocumentModificationType {

@@ -1,3 +1,5 @@
+// noinspection ES6UnusedImports
+
 import {ShadowApp} from "../../app/ShadowApp";
 import {Workspace} from "../workspace/Workspace";
 import {GlobalProject} from "./GlobalProject";
@@ -9,6 +11,11 @@ import {ActionManager} from "../actions/ActionManager";
 import {ProcessManager} from "../threaded/process/manager/ProcessManager";
 import {PersistenceModel} from "../persistence/PersistenceModel";
 import {Lifecycle} from "../lifecycle/Lifecycle";
+import {Editor} from "../../editor/Editor";
+import {ShadowUI} from "../../app/ui/ShadowUI";
+
+// Load DistantGlobalState service
+import {DistantGlobalState} from "./DistantGlobalState";
 
 /**
  * Provides a single class that regroups all useful singletons and global services of the application
@@ -27,6 +34,14 @@ export class GlobalState {
 
     public static getShadowApp(): ShadowApp {
         return this.shadowApp;
+    }
+
+    public static getUI(): ShadowUI {
+        let ui = this.shadowApp.getUI();
+        if (ui === undefined) {
+            throw new Error("UI is not initialized yet");
+        }
+        return ui;
     }
 
     public static getLifecycle(): Lifecycle {
@@ -63,6 +78,10 @@ export class GlobalState {
 
     public static getPersistenceModel() {
         return PersistenceModel.getInstance();
+    }
+
+    public static getMainEditor(): Editor {
+        return GlobalState.getUI().getMainEditor();
     }
 
     public static setReady(flag: boolean) {

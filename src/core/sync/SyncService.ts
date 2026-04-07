@@ -1,5 +1,6 @@
-import {UseLogger} from "../logging/Logger";
-import {DistantService} from "../threaded/service/DistantService";
+import {DistantService, DistantServiceImpl} from "../threaded/service/DistantService";
+import {Scheduler} from "../scheduler/Scheduler";
+import {RefUtils} from "../threaded/tcsp/ref/RefUtils";
 
 /**
  *
@@ -8,9 +9,10 @@ import {DistantService} from "../threaded/service/DistantService";
  * @since 1.0.0
  */
 @DistantService
-@UseLogger("SyncService")
-export class SyncService {
+export class SyncService implements DistantServiceImpl {
     private static instance: SyncService;
+
+    private static readonly DELAY = 10 * 60 * 1000;
 
     public static getInstance(): SyncService {
         if (SyncService.instance === undefined) {
@@ -19,11 +21,21 @@ export class SyncService {
         return SyncService.instance;
     }
 
-    getLaunchURL(): string {
+    getWorkerScriptPath(): string {
         return import.meta.url;
     }
 
     async begin() {
+        this.sync();
+        Scheduler.every(SyncService.DELAY, this.sync);
+
+        const windowRef = await RefUtils.getDistantWindowRef();
+        await windowRef.addEventListener("visibilitychange", e => {
+            console.log(e);
+        });
     }
 
+    private sync() {
+
+    }
 }

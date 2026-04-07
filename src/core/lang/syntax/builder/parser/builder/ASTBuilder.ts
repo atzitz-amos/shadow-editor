@@ -77,7 +77,7 @@ export class ASTBuilder {
         for (let i = 0; i < this.production.length;) {
             const ast = this.production[i];
             if (ast.getTextRange().start >= this.currentOffset) {
-                this.production.pop();
+                this.production.splice(i, 1);
             } else {
                 i++;
             }

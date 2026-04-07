@@ -81,18 +81,36 @@ export class EditorRawData {
         return this.root.getTotalWeight();
     }
 
-    substring(start: Offset, end?: Offset): string {
+    substring(start: number, end?: number): string {
+        const len = this.length();
         if (end === undefined) {
-            end = this.length();
+            end = len;
         }
-        if (start < 0 || end > this.length() || start > end) {
+        if (start < 0 || end > len || start > end) {
             throw new Error("Invalid range for substring");
         }
-        return this._toString(this.root).substring(start, end);
+        return this._substring(this.root, start, end);
     }
 
     getTextInRange(range: TextRange): string {
         return this.substring(range.start, range.end);
+    }
+
+    private _substring(node: RopeNode, start: number, end: number): string {
+        if (start >= end) return "";
+        if (node.isLeaf()) {
+            return node.value ? node.value.substring(start, end) : "";
+        }
+
+        const leftWeight = node.weight;
+        if (end <= leftWeight) {
+            return this._substring(node.left!, start, end);
+        } else if (start >= leftWeight) {
+            return this._substring(node.right!, start - leftWeight, end - leftWeight);
+        } else {
+            return this._substring(node.left!, start, leftWeight) +
+                   this._substring(node.right!, 0, end - leftWeight);
+        }
     }
 
     private _index(node: RopeNode, i: number): string {

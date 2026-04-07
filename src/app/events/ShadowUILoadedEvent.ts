@@ -1,8 +1,7 @@
 import {BubbleDirection} from "../../core/events/BubbleDirection";
 import {EventBase} from "../../core/events/EventBase";
 import {EventSubscriber} from "../../core/events/EventSubscriber";
-import {ShadowApp} from "../ShadowApp";
-import {ShadowUIFactory} from "../ui/ShadowUIFactory";
+import {ShadowUI} from "../ui/ShadowUI";
 
 /**
  *
@@ -10,13 +9,13 @@ import {ShadowUIFactory} from "../ui/ShadowUIFactory";
  * @date 11/5/2025
  * @since 1.0.0
  */
-export class ShadowAppGUILoadedEvent implements EventBase {
+export class ShadowUILoadedEvent implements EventBase {
     public static readonly SUBSCRIBER = EventSubscriber.create(this);
 
-    constructor(private shadowUI: ShadowUIFactory) {
+    constructor(private shadowUI: ShadowUI) {
     }
 
-    public getShadowUI(): ShadowUIFactory {
+    public getShadowUI(): ShadowUI {
         return this.shadowUI;
     }
 

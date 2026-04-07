@@ -34,10 +34,14 @@
             import {JsIdentifier} from "./src/plugins/jsLang/lang/syntax/expr/JsIdentifier";
             import {GlobalState} from "./src/core/global/GlobalState";
             import {ShadowUIFactory} from "./src/app/ui/ShadowUIFactory";
+            import {SyncService} from "./src/core/sync/SyncService";
 
             // Main entry point - launch the app and wait for startup to complete
             const app = await ShadowApp.launch(true);
             window.app = app;
+
+
+            SyncService.getInstance();
 
             if (!app) {
                 console.error("ShadowApp startup failed!");

@@ -36,7 +36,7 @@ export class JsLexicalGrammar implements LexicalGrammar {
     /**
      * Token for number literals (decimal, hex, binary, octal, scientific).
      */
-    public static readonly NUMBER_LITERAL = LexicalBuilder.make("NUMBER_LITERAL", /^(?:0[xX](?:[0-9a-fA-F]_?)+|0[bB](?:[01]_?)+|0[oO](?:[0-7]_?)+|(?:(?:\d(?:_?\d)*)?(?:\.(?:\d(?:_?\d)*)?)?|\.\d(?:_?\d)*)(?:[eE][+-]?\d(?:_?\d)*)?)$/);
+    public static readonly NUMBER_LITERAL = LexicalBuilder.make("NUMBER_LITERAL", /^(?:0[xX](?:[0-9a-fA-F]_?)+|0[bB](?:[01]_?)+|0[oO](?:[0-7]_?)+|(?:(?:\d(?:_?\d)*)?(?:\.(?:\d(?:_?\d)*)?)?|\.\d(?:_?\d)*)(?:[eE][+-]?\d(?:_?\d)*)?)(?![0-9_.eE])/);
 
     /**
      * Token for string literals (single, double, template).
@@ -161,6 +161,6 @@ export class JsLexicalGrammar implements LexicalGrammar {
     /**
      * Regex to match JS numbers
      * */
-    public static readonly NUMBER_REGEX = /^(?:0[xX](?:[0-9a-fA-F]_?)+|0[bB](?:[01]_?)+|0[oO](?:[0-7]_?)+|(?:(?:\d(?:_?\d)*)\.(?:\d(?:_?\d)*)?|(?:\d(?:_?\d)*)|\.(?:\d(?:_?\d)*))(?:[eE][+-]?\d(?:_?\d)*)?)(?![0-9A-Fa-f_.eE])/;
+    public static readonly NUMBER_REGEX = /^(?:0[xX](?:[0-9a-fA-F]_?)+|0[bB](?:[01]_?)+|0[oO](?:[0-7]_?)+|(?:(?:\d(?:_?\d)*)\.(?:\d(?:_?\d)*)?|(?:\d(?:_?\d)*)|\.(?:\d(?:_?\d)*))(?:[eE][+-]?\d(?:_?\d)*)?)(?![0-9_.eE])/;
 
 }

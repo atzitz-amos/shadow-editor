@@ -8,7 +8,7 @@ export class ProcessLauncherUtils {
     public static createWorker(executable: ProcessExecutable): Worker {
         const process = executable.getProcess();
 
-        return new Worker(process.getLaunchURL(), {
+        return new Worker(process.getWorkerScriptPath(), {
             type: 'module'
         });
     }

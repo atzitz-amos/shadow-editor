@@ -20,8 +20,8 @@ export class TabAction extends AbstractAction {
         ctx.getEvent().preventDefault();
         editor.caretModel.forEachCaret(caret => {
             editor.insertText(caret.getOffset(), '    ');
-            editor.caretModel.shift(4);
         });
+        editor.caretModel.shift(4);
         editor.view.resetBlink();
     }
 }

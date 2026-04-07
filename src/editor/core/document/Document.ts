@@ -122,7 +122,7 @@ export class Document {
     }
 
     public getMaxLengthLine() {
-        return Math.max(...this.lines.map(l => l.getLineLength()));
+        return this.lines.reduce((maxLine, line) => line.getLineLength() > maxLine.getLineLength() ? line : maxLine, this.lines[0]).getLineLength();
     }
 
     public getLineCount(): number {
@@ -138,7 +138,7 @@ export class Document {
 
         this.recomputeLines(offset, text, false);
 
-        this.editor.getEventBus().syncPublish(new DocumentModificationEvent(this, new TextRange(offset, offset), text));
+        this.editor.getEventBus().syncPublish(new DocumentModificationEvent(this, new TextRange(offset, offset), text, null));
         this.editor.getEventBus().asyncPublish(new DocumentInsertEvent(this, offset, text));
     }
 
@@ -148,7 +148,7 @@ export class Document {
         this.recomputeLines(at, deleted, true);
 
         let affectedRange = new TextRange(at, at + n);
-        this.editor.getEventBus().syncPublish(new DocumentModificationEvent(this, affectedRange, null));
+        this.editor.getEventBus().syncPublish(new DocumentModificationEvent(this, affectedRange, null, deleted));
         this.editor.getEventBus().asyncPublish(new DocumentDeleteEvent(this, affectedRange));
 
         return deleted;
@@ -157,6 +157,10 @@ export class Document {
     public replaceRange(range: TextRange, text: string): void {
         this.deleteAt(range.start, range.getLength());
         this.insertText(range.start, text);
+    }
+
+    substring(start: number, end?: number) {
+        return this.data.substring(start, end);
     }
 
     private parseLines(): void {

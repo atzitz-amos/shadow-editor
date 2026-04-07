@@ -1,7 +1,14 @@
 import {ServiceImpl} from "./Service";
+import {Lifecycle} from "../../lifecycle/Lifecycle";
+import {PersistedObject} from "../../persistence/transaction/PersistedObject";
+import {ThreadedUtils} from "../ThreadedUtils";
+import {Launchable} from "../Launchable";
 
-export interface DistantServiceImpl extends ServiceImpl {
-    getLaunchURL(): string;
+export interface DistantServiceImpl extends ServiceImpl, Launchable {
+    /**
+     * @returns <code>import.meta.url</code>
+     */
+    getWorkerScriptPath(): string;
 }
 
 /**
@@ -11,4 +18,18 @@ export interface DistantServiceImpl extends ServiceImpl {
 export function DistantService<T extends Constructor<DistantServiceImpl> & {
     getInstance(): InstanceType<T>
 }>(ctor: T) {
+    // Defer registration to next microtask to avoid "Cannot access before initialization" errors
+    queueMicrotask(() => {
+        if (!ThreadedUtils.isWorkerThread()) {
+            Lifecycle.getInstance().addDistantService(ctor.getInstance());
+
+            if (ctor.prototype.hasOwnProperty("getPersistedKey") && ctor.prototype.hasOwnProperty("persist") && ctor.prototype.hasOwnProperty("load")) {
+                Lifecycle.getInstance().addPersistedObject(<PersistedObject<any>>ctor.getInstance());
+            }
+        } else {
+            ctor.getInstance().begin();
+        }
+
+        console.log("distant worker: ", ctor.name, ThreadedUtils.isWorkerThread());
+    });
 }

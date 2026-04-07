@@ -91,23 +91,23 @@ export class HScrollBar implements Component {
 
     private clicked(e: MouseEvent) {
         const rect = this.scrollbar.getBoundingClientRect();
-        const clickY = e.clientY - rect.left;
+        const clickX = e.clientX - rect.left;
 
-        const scrollbarWidth = this.scrollbar.clientWidth;
-        const handleWidth = this.handle.clientWidth;
-        const maxHandleLeft = scrollbarWidth - handleWidth;
+        const scrollbarHeight = this.scrollbar.clientHeight;
+        const handleHeight = this.handle.clientHeight;
+        const maxHandleLeft = scrollbarHeight - handleHeight;
 
         // Center the handle where the user clicked
         let newLeft = Math.min(
-            Math.max(clickY - handleWidth / 2, 0),
+            Math.max(clickX - handleHeight / 2, 0),
             maxHandleLeft
         );
 
-        const contentWidth = this.view.getMaxWidth();
-        const viewportWidth = this.scrollbar.getBoundingClientRect().width;
-        const maxScrollLeft = contentWidth - viewportWidth;
+        const contentHeight = this.view.getMaxHeight();
+        const viewportHeight = this.scrollbar.getBoundingClientRect().height;
+        const maxScrollLeft = contentHeight - viewportHeight;
 
         const scrollRatio = newLeft / maxHandleLeft;
-        this.view.scrollBy(scrollRatio * maxScrollLeft - this.view.scroll.scrollX, 0);
+        this.view.scrollBy(0, scrollRatio * maxScrollLeft - this.view.scroll.scrollX);
     }
 }

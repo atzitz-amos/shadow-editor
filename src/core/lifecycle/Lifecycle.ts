@@ -8,6 +8,7 @@ import {EventBus} from "../events/EventBus";
 import {ShadowApp} from "../../app/ShadowApp";
 import {LifecycleStartedEvent} from "./events/LifecycleStartedEvent";
 import {ProcessManager} from "../threaded/process/manager/ProcessManager";
+import {DistantServiceImpl} from "../threaded/service/DistantService";
 
 /**
  * The lifecycle of the application, manages the persistence of PersistedObject,
@@ -27,6 +28,7 @@ export class Lifecycle {
     private readonly processManager: ProcessManager;
 
     private readonly services: ServiceImpl[] = [];
+    private readonly distantServices: DistantServiceImpl[] = [];
     private readonly persistedObjects: PersistedObject<any>[] = [];
 
     private readonly phases: StartupPhase[] = [];
@@ -37,7 +39,6 @@ export class Lifecycle {
 
     public constructor() {
         this.processManager = new ProcessManager();
-
     }
 
     static getInstance(): Lifecycle {
@@ -60,6 +61,10 @@ export class Lifecycle {
      */
     addService(instance: ServiceImpl) {
         this.services.push(instance);
+    }
+
+    addDistantService(instance: DistantServiceImpl) {
+        this.distantServices.push(instance);
     }
 
     /**
@@ -214,7 +219,7 @@ export class Lifecycle {
         this.phases.push(new PersistenceRecoveryPhase(this.persistedObjects));
 
         // Priority 30: Start services
-        this.phases.push(new ServiceBeginPhase(this.services));
+        this.phases.push(new ServiceBeginPhase(this.services, this.distantServices));
 
         // Priority 100: Mark app as ready
         this.phases.push(new AppReadyPhase(app));

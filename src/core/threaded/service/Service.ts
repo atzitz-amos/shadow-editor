@@ -1,5 +1,6 @@
 import {Lifecycle} from "../../lifecycle/Lifecycle";
 import {PersistedObject} from "../../persistence/transaction/PersistedObject";
+import {ThreadedUtils} from "../ThreadedUtils";
 
 /**
  * Represents a service. Must be a singleton, which will be registered to the Lifecycle of the app.
@@ -24,10 +25,12 @@ export interface ServiceImpl {
 export function Service<T extends Constructor<ServiceImpl> & { getInstance(): InstanceType<T> }>(ctor: T) {
     // Defer registration to next microtask to avoid "Cannot access before initialization" errors
     queueMicrotask(() => {
-        Lifecycle.getInstance().addService(ctor.getInstance());
+        if (!ThreadedUtils.isWorkerThread()) {
+            Lifecycle.getInstance().addService(ctor.getInstance());
 
-        if (ctor.prototype.hasOwnProperty("getPersistedKey") && ctor.prototype.hasOwnProperty("persist") && ctor.prototype.hasOwnProperty("load")) {
-            Lifecycle.getInstance().addPersistedObject(<PersistedObject<any>>ctor.getInstance());
+            if (ctor.prototype.hasOwnProperty("getPersistedKey") && ctor.prototype.hasOwnProperty("persist") && ctor.prototype.hasOwnProperty("load")) {
+                Lifecycle.getInstance().addPersistedObject(<PersistedObject<any>>ctor.getInstance());
+            }
         }
     });
 }

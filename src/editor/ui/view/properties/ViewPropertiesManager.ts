@@ -6,7 +6,6 @@ import {EditorAttachedEvent} from "../../../events/EditorAttachedEvent";
 import {SettingChangedEvent} from "../../../../core/settings/events/SettingChangedEvent";
 import {ViewVisualPropertiesChangedEvent} from "./ViewVisualPropertiesChangedEvent";
 import {HTMLUtils} from "../../../utils/HTMLUtils";
-import {SettingCreateEvent} from "../../../../core/settings/events/SettingCreateEvent";
 import {SettingBase} from "../../../../core/settings/base/SettingBase";
 
 /**
@@ -46,8 +45,7 @@ export class ViewPropertiesManager {
 
         view.getEditor().getEventBus()
             .subscribe(this, EditorAttachedEvent.SUBSCRIBER, ev => this.load(ev))
-            .subscribe(this, SettingChangedEvent.SUBSCRIBER, ev => this.updateSettingEvent)
-            .subscribe(this, SettingCreateEvent.SUBSCRIBER, ev => this.updateSettingEvent);
+            .subscribe(this, SettingChangedEvent.SUBSCRIBER, ev => this.updateSettingEvent(ev))
     }
 
     public getWidth(): number {

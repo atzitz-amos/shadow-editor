@@ -22,7 +22,7 @@ export abstract class IncrementalLexer implements ILexer {
         let endOffset = this.cache.findNextWhitespaceToken(event.getAffectedRange().end) + event.getInsertedText().length;
         let changedOffset = event.getInsertedText().length - event.getAffectedRange().getLength();
 
-        const text = event.getDocument().getTextContent().substring(startOffset);
+        const text = event.getDocument().substring(startOffset);
         const source = new Source(text, startOffset);
 
         const tokens: Token[] = [];
