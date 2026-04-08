@@ -3,7 +3,7 @@ import {ASTGrammar, ASTType} from "../builder/parser/nodes/ASTGrammar";
 import {SynNode} from "../api/SynNode";
 import {SynElement} from "../api/SynElement";
 import {SynFile} from "../api/SynFile";
-import { EditorURI } from "../../../uri/EditorURI";
+import {EditorURI} from "../../../uri/EditorURI";
 import {URITargetType} from "../../../uri/URITargetType";
 
 

@@ -1,6 +1,7 @@
 import {GlobalState} from "../../../global/GlobalState";
 import {UUIDHelper} from "../../../../editor/utils/UUIDHelper";
 import {ThreadedUtils} from "../../ThreadedUtils";
+import {Logger} from "../../../logging/logger/LoggerCore";
 
 /**
  *
@@ -13,6 +14,7 @@ export class TRefRegistry {
 
     public constructor() {
         this.registry.set("GlobalState", GlobalState);
+        this.registry.set("Logger", Logger);
         if (ThreadedUtils.isMainThread()) this.registry.set("window", window);
     }
 

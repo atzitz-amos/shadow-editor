@@ -34,12 +34,14 @@
             import {JsIdentifier} from "./src/plugins/jsLang/lang/syntax/expr/JsIdentifier";
             import {GlobalState} from "./src/core/global/GlobalState";
             import {ShadowUIFactory} from "./src/app/ui/ShadowUIFactory";
-            import {SyncService} from "./src/core/sync/SyncService";
+            import {SyncService} from "./src/core/sync/sync/SyncService";
 
             // Main entry point - launch the app and wait for startup to complete
             const app = await ShadowApp.launch(true);
             window.app = app;
 
+
+            window.GlobalState = GlobalState;
 
             SyncService.getInstance();
 
@@ -87,7 +89,6 @@
 
                 window.Parser = JsParser;
 
-                window.Directory = Directory;
                 window.RelativePath = RelativePath;
 
                 window.EditorURI = EditorURI;

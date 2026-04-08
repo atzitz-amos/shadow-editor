@@ -8,5 +8,6 @@
  */
 export interface IPane {
     getId(): string;
+
     get
 }

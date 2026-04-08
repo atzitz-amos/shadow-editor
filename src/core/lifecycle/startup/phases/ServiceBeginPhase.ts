@@ -1,7 +1,7 @@
 import {AbstractStartupPhase} from "../StartupPhase";
 import {ServiceImpl} from "../../../threaded/service/Service";
-import {TCSP} from "../../../threaded/tcsp/TCSP";
 import {DistantServiceImpl} from "../../../threaded/service/DistantService";
+import {WCP} from "../../../threaded/wcp/api/WCP";
 
 /**
  * Phase that calls begin() on all registered services.
@@ -30,7 +30,7 @@ export class ServiceBeginPhase extends AbstractStartupPhase {
         }
 
         for (const distantService of this.distantServices) {
-            TCSP.createWorker(distantService);
+            WCP.createWorker(distantService);
         }
     }
 }

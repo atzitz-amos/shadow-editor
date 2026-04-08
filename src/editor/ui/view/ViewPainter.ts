@@ -6,7 +6,6 @@ import {ViewLayers} from "./ViewLayers";
 import {EditorScrollBar} from "../scrollbar/ScrollBar";
 import {HTMLUtils} from "../../utils/HTMLUtils";
 import {OverlayWidget} from "../inline/overlay/OverlayWidget";
-import {ThreadedUtils} from "../../../core/threaded/ThreadedUtils";
 
 /**
  * Responsible for painting the view of the editor when content is changed or updated.
@@ -34,7 +33,6 @@ export class ViewPainter {
     }
 
     repaint() {
-        console.log(ThreadedUtils.isWorkerThread());
         let scrollLines = this.view.getScroll().scrollYLines;
         let scrollOffset = this.view.getScroll().scrollYOffset;
 

@@ -4,15 +4,15 @@ import {EventSubscriber} from "../../events/EventSubscriber";
 import {WorkerRemote} from "../wcp/remote/WorkerRemote";
 
 /**
- *
- * @author Atzitz Amos
- * @date 4/6/2026
- * @since 1.0.0
+ * Published when a worker remote is terminated or closed.
  */
-export class WebWorkerCreatedEvent implements EventBase {
+export class WebWorkerTerminateEvent implements EventBase {
     public static readonly SUBSCRIBER = EventSubscriber.create(this);
 
-    constructor(private readonly remote: WorkerRemote) {
+    constructor(
+        private readonly remote: WorkerRemote,
+        private readonly reason: string = "terminated"
+    ) {
     }
 
     getBubbleDirection(): BubbleDirection {
@@ -23,7 +23,8 @@ export class WebWorkerCreatedEvent implements EventBase {
         return this.remote;
     }
 
-    getWorker(): Worker {
-        return this.remote.getWorker();
+    getReason(): string {
+        return this.reason;
     }
 }
+

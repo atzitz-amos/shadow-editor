@@ -1,7 +1,6 @@
 import {Key, Keybind} from "./Keybind";
 import {AbstractAction} from "../actions/AbstractAction";
 import {KeybindContext} from "./context/KeybindContext";
-import {Critical} from "../critical/Critical";
 
 /**
  *

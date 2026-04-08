@@ -1,13 +1,13 @@
-import {Service} from "../threaded/service/Service";
-import {GlobalState} from "../global/GlobalState";
-import {DocumentModificationEvent} from "../../editor/core/document/events/DocumentModificationEvent";
-import {Scheduler} from "../scheduler/Scheduler";
-import {EditorSaveRequestEvent} from "../../editor/events/EditorSaveRequestEvent";
-import {PersistedObject} from "../persistence/transaction/PersistedObject";
-import {SyncPersistedModel} from "./SyncPersistedModel";
-import {PersistedData} from "../persistence/transaction/PersistedData";
-import {Updater} from "../persistence/transaction/Updater";
-import {Logger, UseLogger} from "../logging/Logger";
+import {Service} from "../../threaded/service/Service";
+import {GlobalState} from "../../global/GlobalState";
+import {DocumentModificationEvent} from "../../../editor/core/document/events/DocumentModificationEvent";
+import {Scheduler} from "../../scheduler/Scheduler";
+import {EditorSaveRequestEvent} from "../../../editor/events/EditorSaveRequestEvent";
+import {PersistedObject} from "../../persistence/transaction/PersistedObject";
+import {SyncPersistedModel} from "../sync/state/SyncPersistedModel";
+import {PersistedData} from "../../persistence/transaction/PersistedData";
+import {Updater} from "../../persistence/transaction/Updater";
+import {Logger, UseLogger} from "../../logging/Logger";
 
 /**
  *

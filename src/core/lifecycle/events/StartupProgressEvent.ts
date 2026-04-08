@@ -18,7 +18,8 @@ export class StartupProgressEvent implements EventBase {
         private readonly phaseIndex: number,
         private readonly totalPhases: number,
         private readonly completed: boolean = false
-    ) {}
+    ) {
+    }
 
     /**
      * Get the name of the current phase being executed.

@@ -17,7 +17,8 @@ export class StartupFailedEvent implements EventBase {
         private readonly phase: StartupPhase,
         private readonly error: Error,
         private readonly aborted: boolean
-    ) {}
+    ) {
+    }
 
     /**
      * Get the phase that failed.

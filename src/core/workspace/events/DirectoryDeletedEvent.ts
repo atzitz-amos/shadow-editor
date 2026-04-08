@@ -1,7 +1,6 @@
 import {EventBase} from "../../events/EventBase";
 import {EventSubscriber} from "../../events/EventSubscriber";
 import {BubbleDirection} from "../../events/BubbleDirection";
-import {Workspace} from "../Workspace";
 import {WorkspaceDirectory} from "../filesystem/tree/WorkspaceDirectory";
 
 /**

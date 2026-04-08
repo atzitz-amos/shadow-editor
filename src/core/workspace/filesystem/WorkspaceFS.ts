@@ -16,7 +16,7 @@ export class WorkspaceFS {
     private readonly name: string;
 
     private readonly virtualHandle: FileSystemDirectoryHandle;
-    private readonly metaDataStore: MetadataStore;
+    private readonly metadataStore: MetadataStore;
 
     private linkedHandle: FileSystemDirectoryHandle | null = null;
 
@@ -34,7 +34,7 @@ export class WorkspaceFS {
         this.virtualHandle = virtualHandle;
 
         this.name = name;
-        this.metaDataStore = new MetadataStore(this);
+        this.metadataStore = new MetadataStore(this);
     }
 
     public static isNotFoundError(e: unknown): boolean {
@@ -290,14 +290,35 @@ export class WorkspaceFS {
         this.invalidateChild(parent.getHandle(), arg.getHandle().name);
     }
 
+    async recursiveGetAllFiles(dir?: WorkspaceDirectory): Promise<WorkspaceFile[]> {
+        if (!dir) {
+            dir = this.getRoot();
+        }
+        const files: WorkspaceFile[] = [];
+
+        for await (const [name, handle] of dir.getHandle().entries()) {
+            if (handle.kind === "file") {
+                const file = new WorkspaceFile(this, name, dir, handle as FileSystemFileHandle);
+                this.cacheChild(dir.getHandle(), name, file);
+                files.push(file);
+            } else if (handle.kind === "directory") {
+                const subdir = new WorkspaceDirectory(this, name, dir, handle as FileSystemDirectoryHandle);
+                this.cacheChild(dir.getHandle(), name, subdir);
+                const subFiles = await this.recursiveGetAllFiles(subdir);
+                files.push(...subFiles);
+            }
+        }
+
+        return files;
+    }
+
     async getMetadata(path: RelativePathInput): Promise<NodeMetadata>;
     async getMetadata(file: WorkspaceFile): Promise<NodeMetadata>;
-
     async getMetadata(arg: RelativePathInput | WorkspaceFile): Promise<NodeMetadata | null> {
         if (typeof arg === "string" || Array.isArray(arg) || arg instanceof RelativePath) {
-            return this.metaDataStore.getMetadata(RelativePath.of(arg));
+            return this.metadataStore.getMetadata(RelativePath.of(arg));
         }
-        return this.metaDataStore.getMetadata(arg.getPath());
+        return this.metadataStore.getMetadata(arg.getPath());
     }
 
 

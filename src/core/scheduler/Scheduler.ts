@@ -16,6 +16,10 @@ export class Scheduler {
         return setTimeout(task, 0);
     }
 
+    public static every(interval: number, task: () => void): NodeJS.Timeout {
+        return setInterval(task, interval);
+    }
+
     public static queueMicrotask(task: () => void): void {
         if (typeof queueMicrotask === "function") {
             queueMicrotask(task);
@@ -65,15 +69,12 @@ export class Scheduler {
             return false;
         }
         task();
+
         const timeoutId = setTimeout(() => {
             this.taskQueue.delete(key);
         }, delay);
         this.taskQueue.set(key, timeoutId);
 
         return true;
-    }
-
-    public static every(interval: number, task: () => void): void {
-
     }
 }

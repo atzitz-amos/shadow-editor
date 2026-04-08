@@ -109,7 +109,7 @@ export class EditorRawData {
             return this._substring(node.right!, start - leftWeight, end - leftWeight);
         } else {
             return this._substring(node.left!, start, leftWeight) +
-                   this._substring(node.right!, 0, end - leftWeight);
+                this._substring(node.right!, 0, end - leftWeight);
         }
     }
 

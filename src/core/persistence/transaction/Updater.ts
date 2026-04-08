@@ -80,7 +80,7 @@ export class Updater {
      * Set a value by key. Creates a new entry or updates existing.
      */
     set<T>(key: string, value: T): this {
-        return this.put({ id: key, value } as any);
+        return this.put({id: key, value} as any);
     }
 
     /**
@@ -111,9 +111,9 @@ export class Updater {
         this.queue.push(async () => {
             const existing = await this.get<T>(id);
             if (existing) {
-                await this.putImmediate({ ...existing, ...fields });
+                await this.putImmediate({...existing, ...fields});
             } else {
-                await this.putImmediate({ id, ...fields } as T);
+                await this.putImmediate({id, ...fields} as T);
             }
         });
         return this;
@@ -125,7 +125,7 @@ export class Updater {
      */
     setField<T extends { id: string }>(id: string, path: string, value: any): this {
         this.queue.push(async () => {
-            const existing = await this.get<T>(id) || { id } as T;
+            const existing = await this.get<T>(id) || {id} as T;
             const keys = path.split('.');
             let current: any = existing;
 
@@ -164,7 +164,7 @@ export class Updater {
      */
     pushToList<T extends { id: string }>(id: string, field: string, item: any): this {
         this.queue.push(async () => {
-            const existing = await this.get<T>(id) || { id } as T;
+            const existing = await this.get<T>(id) || {id} as T;
             const list = (existing as any)[field];
 
             if (Array.isArray(list)) {

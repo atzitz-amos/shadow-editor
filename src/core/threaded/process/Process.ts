@@ -4,7 +4,7 @@ import {ProcessLauncherUtils} from "./ProcessLauncherUtils";
 import {ThreadedUtils} from "../ThreadedUtils";
 import {Launchable} from "../Launchable";
 
-export abstract class Process implements Launchable{
+export abstract class Process implements Launchable {
     static executable<T extends new () => Process>(this: T, ...args: Tail<Parameters<InstanceType<T>['run']>>): ProcessExecutable {
         return new ProcessExecutable(this.name, new this(), args);
     }

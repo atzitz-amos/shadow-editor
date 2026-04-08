@@ -29,7 +29,5 @@ export function DistantService<T extends Constructor<DistantServiceImpl> & {
         } else {
             ctor.getInstance().begin();
         }
-
-        console.log("distant worker: ", ctor.name, ThreadedUtils.isWorkerThread());
     });
 }

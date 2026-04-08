@@ -54,7 +54,6 @@ export class Gutter {
         let lineCount = this.view.getVisualLineCount();
         while (this.lines.length < lineCount) {
             // we need to add a line before the last edgeline
-            console.log(this.lines.length)
             let line = HTMLUtils.createElement("div.editor-gutter-line.gutter-line-" + this.lines.length) as HTMLDivElement;
             this.element.insertBefore(line, this.edgelines[1]);
             this.lines.push(line);

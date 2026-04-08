@@ -2,7 +2,6 @@ import {Component} from "../../core/components/Component";
 import {Editor} from "../../Editor";
 import {View} from "../view/View";
 import {HTMLUtils} from "../../utils/HTMLUtils";
-import {Registry} from "../../core/Registry";
 
 
 export class VScrollBar implements Component {

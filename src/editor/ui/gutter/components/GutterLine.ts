@@ -1,6 +1,5 @@
 import {View} from "../../view/View";
 import {GutterComponent} from "./GutterComponent";
-import {Registry} from "../../../core/Registry";
 import {Editor} from "../../../Editor";
 
 export class GutterLine implements GutterComponent {

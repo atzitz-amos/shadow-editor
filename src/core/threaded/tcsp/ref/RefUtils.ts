@@ -40,12 +40,7 @@ if (typeof self !== 'undefined' && typeof window === 'undefined') {
         } else if (event.data?.type === "cb_invoke") {
             const cb = RefCallbackRegistry.get(event.data.uuid);
             if (cb) {
-                const mappedArgs = (event.data.args ?? []).map((arg: any) => {
-                    if (arg && typeof arg === "object" && arg.__is_ref) {
-                        return RefUtils.wrapping(arg.uuid);
-                    }
-                    return arg;
-                });
+                const mappedArgs = (event.data.args ?? []).map((arg: any) => RefUtils.deserializeCallbackArg(arg));
                 cb(...mappedArgs);
             }
         }
@@ -60,6 +55,18 @@ export class RefUtils {
     private static gcRegistry = new FinalizationRegistry<string>((uuid) => {
         ThreadedRefEngine.freeRef(uuid).catch(console.error);
     });
+
+    static deserializeCallbackArg(arg: any): any {
+        if (Array.isArray(arg)) {
+            return arg.map(item => RefUtils.deserializeCallbackArg(item));
+        }
+
+        if (arg && typeof arg === "object" && arg.__is_ref) {
+            return RefUtils.wrapping(arg.uuid);
+        }
+
+        return arg;
+    }
 
     public static ofCallChain<T extends Constructor>(callChain: string, type: T): Promise<Ref<InstanceType<T>>> {
         return new Promise(async (resolve, reject) => {
@@ -77,13 +84,7 @@ export class RefUtils {
                 if (prop === "then") return undefined;
 
                 const callable: any = async (...args: any[]) => {
-                    const serializedArgs = args.map(arg => {
-                        if (typeof arg === "function") {
-                            return { __is_cb: true, uuid: RefCallbackRegistry.register(arg) };
-                        }
-                        return arg;
-                    });
-                    console.log("Calling", objId, prop);
+                    const serializedArgs = args.map(arg => RefUtils.serializeInvocationArg(arg));
                     return RefUtils.wrapping(await ThreadedRefEngine.invokeMethod(
                         target.__ref_id,
                         prop,
@@ -102,11 +103,23 @@ export class RefUtils {
         return proxy;
     }
 
-    static async createRef(name: string) {
-        return RefUtils.wrapping(await ThreadedRefEngine.createRef(name));
+    static async createRef<T>(name: string, type?: T): Promise<Ref<T>> {
+        return RefUtils.wrapping(await ThreadedRefEngine.createRef(name)) as Ref<T>;
     }
 
     static async getDistantWindowRef(): Promise<Ref<Window>> {
         return await RefUtils.createRef("window") as Ref<Window>;
+    }
+
+    private static serializeInvocationArg(arg: any): any {
+        if (Array.isArray(arg)) {
+            return arg.map(item => RefUtils.serializeInvocationArg(item));
+        }
+
+        if (typeof arg === "function") {
+            return {__is_cb: true, uuid: RefCallbackRegistry.register(arg)};
+        }
+
+        return arg;
     }
 }

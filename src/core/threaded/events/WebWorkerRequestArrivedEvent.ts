@@ -3,16 +3,15 @@ import {EventBase} from "../../events/EventBase";
 import {EventSubscriber} from "../../events/EventSubscriber";
 import {WorkerRemote} from "../wcp/remote/WorkerRemote";
 
-/**
- *
- * @author Atzitz Amos
- * @date 4/6/2026
- * @since 1.0.0
- */
-export class WebWorkerCreatedEvent implements EventBase {
+export class WebWorkerRequestArrivedEvent implements EventBase {
     public static readonly SUBSCRIBER = EventSubscriber.create(this);
 
-    constructor(private readonly remote: WorkerRemote) {
+    constructor(
+        private readonly remote: WorkerRemote,
+        private readonly requestId: string,
+        private readonly portId: string,
+        private readonly endpoint: string
+    ) {
     }
 
     getBubbleDirection(): BubbleDirection {
@@ -23,7 +22,16 @@ export class WebWorkerCreatedEvent implements EventBase {
         return this.remote;
     }
 
-    getWorker(): Worker {
-        return this.remote.getWorker();
+    getRequestId(): string {
+        return this.requestId;
+    }
+
+    getPortId(): string {
+        return this.portId;
+    }
+
+    getEndpoint(): string {
+        return this.endpoint;
     }
 }
+

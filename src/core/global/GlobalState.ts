@@ -16,6 +16,8 @@ import {ShadowUI} from "../../app/ui/ShadowUI";
 
 // Load DistantGlobalState service
 import {DistantGlobalState} from "./DistantGlobalState";
+// Load WCPService tracker
+import {WCPService} from "../threaded/wcp/WCPMetricsService";
 
 /**
  * Provides a single class that regroups all useful singletons and global services of the application
@@ -74,6 +76,10 @@ export class GlobalState {
 
     public static getActionManager(): ActionManager {
         return ActionManager.getInstance();
+    }
+
+    public static getWCPService(): WCPService {
+        return WCPService.getInstance();
     }
 
     public static getPersistenceModel() {

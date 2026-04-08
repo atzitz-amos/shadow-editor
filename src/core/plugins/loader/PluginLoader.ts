@@ -162,7 +162,11 @@ export class PluginLoader {
     private resolveStylesheets(): { pluginName: string, url: string }[] {
         this.logger.debug("Scanning for plugin stylesheets...");
 
-        const imports = import.meta.glob("/src/plugins/*/styles/*.css", {eager: false, query: "?url", import: "default"});
+        const imports = import.meta.glob("/src/plugins/*/styles/*.css", {
+            eager: false,
+            query: "?url",
+            import: "default"
+        });
         const stylesheets: { pluginName: string, url: string }[] = [];
 
         for (const path in imports) {
