@@ -1,10 +1,12 @@
-import {HtmlComponent} from "../../../../../../core/ui/engine/components/HtmlComponent";
 import {HTMLUtils} from "../../../../../../editor/utils/HTMLUtils";
 import {Editor} from "../../../../../../editor/Editor";
 import {GlobalState} from "../../../../../../core/global/GlobalState";
 import {UIResizeEvent} from "../../../../events/UIResizeEvent";
 import {CaretMovedEvent} from "../../../../../../editor/core/caret/events/CaretMovedEvent";
 import {Scheduler} from "../../../../../../core/scheduler/Scheduler";
+import {UIComponent} from "../../../../../../core/ui/engine/components/UIComponent";
+import {CommonKey} from "../../../../../../core/utils/CommonKey";
+import {UICommonKeys} from "../../../../keys/UICommonKeys";
 
 /**
  *
@@ -12,10 +14,11 @@ import {Scheduler} from "../../../../../../core/scheduler/Scheduler";
  * @date 3/7/2026
  * @since 1.0.0
  */
-export class SMainEditorView extends HtmlComponent {
+export class SMainEditorView extends UIComponent {
     private metaRowElement: HTMLElement;
     private readonly editorElement: HTMLElement;
 
+    @CommonKey(UICommonKeys.MAIN_EDITOR)
     private currentEditor: Editor = new Editor({});
 
     constructor(root: HTMLElement) {

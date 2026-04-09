@@ -26,11 +26,14 @@ import {CriticalErrorRenderer} from "./renderer/CriticalErrorRenderer";
  * @date 2/19/2026
  * @since 1.0.0
  */
-export function Critical(_target: any, propertyKey: string, descriptor: PropertyDescriptor): void {
-    const original = descriptor.value;
+export function Critical<This, Args extends any[], Return>(
+    original: (this: This, ...args: Args) => Return,
+    context: ClassMethodDecoratorContext<This, (this: This, ...args: Args) => Return>
+) {
+    const methodName = String(context.name);
 
-    descriptor.value = function (...args: any[]) {
-        const source = `${this.constructor.name}.${propertyKey}`;
+    return function (this: This, ...args: Args) {
+        const source = `${(this as any).constructor?.name ?? "Unknown"}.${methodName}`;
 
         try {
             const result = original.apply(this, args);

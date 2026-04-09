@@ -1,6 +1,6 @@
-import {HtmlComponent} from "../../../../../../core/ui/engine/components/HtmlComponent";
 import {HTMLUtils} from "../../../../../../editor/utils/HTMLUtils";
 import {SEditorBreadcrumbs} from "./SEditorBreadcrumbs";
+import {UIComponent} from "../../../../../../core/ui/engine/components/UIComponent";
 
 /**
  *
@@ -8,7 +8,7 @@ import {SEditorBreadcrumbs} from "./SEditorBreadcrumbs";
  * @date 3/7/2026
  * @since 1.0.0
  */
-export class SEditorAreaHeader extends HtmlComponent {
+export class SEditorAreaHeader extends UIComponent {
     private readonly actionsElement: HTMLElement;
 
     constructor(root: HTMLElement) {

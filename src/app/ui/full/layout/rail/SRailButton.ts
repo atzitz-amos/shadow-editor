@@ -1,4 +1,5 @@
-import {HtmlComponent} from "../../../../../core/ui/engine/components/HtmlComponent";
+import {UIComponent} from "../../../../../core/ui/engine/components/UIComponent";
+import {Icon} from "../../../../../core/ui/icons/Icon";
 import {HTMLUtils} from "../../../../../editor/utils/HTMLUtils";
 
 /**
@@ -7,18 +8,21 @@ import {HTMLUtils} from "../../../../../editor/utils/HTMLUtils";
  * @date 3/3/2026
  * @since 1.0.0
  */
-export class SRailButton extends HtmlComponent {
-    private readonly icon: string;
+export class SRailButton extends UIComponent {
 
-    constructor(root: HTMLElement, title: string, icon: string) {
-        super(HTMLUtils.createElement("button.rail-item", root));
+    constructor(private readonly id: string, title: string, icon: Icon) {
+        super(HTMLUtils.createElement("button.rail-item"));
 
         this.getUnderlyingElement().title = title;
-        this.icon = icon;
+        this.addChild(icon);
     }
 
     draw(): void {
-        this.setInnerHTML(`<i class="fa-solid ${this.icon}"></i>`);
+
+    }
+
+    getPaneId(): string {
+        return this.id;
     }
 
     setActive(b: boolean) {

@@ -35,6 +35,8 @@
             import {GlobalState} from "./src/core/global/GlobalState";
             import {ShadowUIFactory} from "./src/app/ui/ShadowUIFactory";
             import {SyncService} from "./src/core/sync/sync/SyncService";
+            import {CommonKeyImpl} from "./src/core/utils/CommonKey";
+            import {WorkspaceChooserPane} from "./src/app/ui/full/panes/workspaceChooser/WorkspaceChooserPane";
 
             // Main entry point - launch the app and wait for startup to complete
             const app = await ShadowApp.launch(true);
@@ -58,6 +60,8 @@
 
                 app.enable(JSLangPlugin.class);
 
+                window.CommonKeyImpl = CommonKeyImpl;
+                window.WorkspacePane = WorkspaceChooserPane;
 
                 window.editor = ui.getMainEditor();
 

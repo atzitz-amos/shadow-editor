@@ -1,8 +1,8 @@
-import {HtmlComponent} from "../../../../../core/ui/engine/components/HtmlComponent";
 import {HTMLUtils} from "../../../../../editor/utils/HTMLUtils";
 import {TaskbarBrand} from "./TaskbarBrand";
 import {TaskbarSearchBar} from "./TaskbarSearchBar";
 import {TaskbarTopbarActions} from "./TaskbarTopbarActions";
+import {UIComponent} from "../../../../../core/ui/engine/components/UIComponent";
 
 /**
  * The editor main taskbar
@@ -11,7 +11,7 @@ import {TaskbarTopbarActions} from "./TaskbarTopbarActions";
  * @date 11/6/2025
  * @since 1.0.0
  */
-export class ShadowTaskbar extends HtmlComponent {
+export class ShadowTaskbar extends UIComponent {
     constructor(root: HTMLElement) {
         super(HTMLUtils.createDiv("shadow-taskbar", root));
 

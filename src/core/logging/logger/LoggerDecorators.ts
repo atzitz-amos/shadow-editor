@@ -7,7 +7,7 @@ export function UseLogger(name: string) {
         : name;
     const loggerInstance = Logger.for(filename);
 
-    return function <T extends new (...args: any[]) => object>(constructor: T) {
+    return function <T extends new (...args: any[]) => object>(constructor: T, _context: ClassDecoratorContext<T>) {
         Object.defineProperty(constructor.prototype, "logger", {
             get() {
                 return loggerInstance;

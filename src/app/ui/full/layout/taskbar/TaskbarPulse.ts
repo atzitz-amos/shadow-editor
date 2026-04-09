@@ -1,5 +1,5 @@
-import {HtmlComponent} from "../../../../../core/ui/engine/components/HtmlComponent";
 import {HTMLUtils} from "../../../../../editor/utils/HTMLUtils";
+import {UIComponent} from "../../../../../core/ui/engine/components/UIComponent";
 
 /**
  *
@@ -7,7 +7,7 @@ import {HTMLUtils} from "../../../../../editor/utils/HTMLUtils";
  * @date 2/28/2026
  * @since 1.0.0
  */
-export class TaskbarPulse extends HtmlComponent {
+export class TaskbarPulse extends UIComponent {
     private readonly pulseDot: HTMLElement;
     private readonly pulseText: HTMLElement;
 

@@ -1,5 +1,5 @@
-import {HtmlComponent} from "../../../../../../core/ui/engine/components/HtmlComponent";
 import {HTMLUtils} from "../../../../../../editor/utils/HTMLUtils";
+import {UIComponent} from "../../../../../../core/ui/engine/components/UIComponent";
 
 /**
  *
@@ -7,7 +7,7 @@ import {HTMLUtils} from "../../../../../../editor/utils/HTMLUtils";
  * @date 3/7/2026
  * @since 1.0.0
  */
-export class SEditorBreadcrumbs extends HtmlComponent {
+export class SEditorBreadcrumbs extends UIComponent {
     constructor(root: HTMLElement) {
         super(HTMLUtils.createDiv("column-breadcrumbs", root));
     }
@@ -23,5 +23,4 @@ export class SEditorBreadcrumbs extends HtmlComponent {
             <span class="crumb-active">ShadowApp.ts</span>`
         );
     }
-
 }

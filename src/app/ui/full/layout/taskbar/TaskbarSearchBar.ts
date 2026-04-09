@@ -1,7 +1,7 @@
-import {HtmlComponent} from "../../../../../core/ui/engine/components/HtmlComponent";
 import {HTMLUtils} from "../../../../../editor/utils/HTMLUtils";
+import {UIComponent} from "../../../../../core/ui/engine/components/UIComponent";
 
-export class TaskbarSearchBar extends HtmlComponent {
+export class TaskbarSearchBar extends UIComponent {
     private readonly iconElement: HTMLElement;
     private readonly inputElement: HTMLInputElement;
     private readonly ctrlKeyElement: HTMLElement;
@@ -29,5 +29,4 @@ export class TaskbarSearchBar extends HtmlComponent {
         this.addHtmlElement(this.ctrlKeyElement);
         this.addHtmlElement(this.kKeyElement);
     }
-
 }
