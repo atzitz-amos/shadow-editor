@@ -1,5 +1,5 @@
-import {HtmlComponent} from "../../../../../core/ui/engine/components/HtmlComponent";
 import {HTMLUtils} from "../../../../../editor/utils/HTMLUtils";
+import {UIComponent} from "../../../../../core/ui/engine/components/UIComponent";
 
 /**
  *
@@ -7,7 +7,7 @@ import {HTMLUtils} from "../../../../../editor/utils/HTMLUtils";
  * @date 3/4/2026
  * @since 1.0.0
  */
-export class SFooterPill extends HtmlComponent {
+export class SFooterPill extends UIComponent {
     private readonly text: string;
     private readonly icon: string | null = null;
 

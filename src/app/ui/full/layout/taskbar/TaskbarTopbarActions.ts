@@ -1,6 +1,6 @@
-import {HtmlComponent} from "../../../../../core/ui/engine/components/HtmlComponent";
 import {HTMLUtils} from "../../../../../editor/utils/HTMLUtils";
 import {TaskbarPulse} from "./TaskbarPulse";
+import {UIComponent} from "../../../../../core/ui/engine/components/UIComponent";
 
 /**
  *
@@ -8,7 +8,7 @@ import {TaskbarPulse} from "./TaskbarPulse";
  * @date 2/28/2026
  * @since 1.0.0
  */
-export class TaskbarTopbarActions extends HtmlComponent {
+export class TaskbarTopbarActions extends UIComponent {
     private readonly notificationsButton: HTMLElement;
     private readonly profileIcon: HTMLElement
 

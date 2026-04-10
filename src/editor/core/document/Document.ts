@@ -7,23 +7,29 @@ import {DocumentInsertEvent} from "./events/DocumentInsertEvent";
 import {DocumentModificationEvent} from "./events/DocumentModificationEvent";
 import {DocumentDeleteEvent} from "./events/DocumentDeleteEvent";
 import {WorkspaceFile} from "../../../core/workspace/filesystem/tree/WorkspaceFile";
+import {GlobalState} from "../../../core/global/GlobalState";
 
 /**
  * Represents an opened file in the editor
  * Store the language, the line-breaks, the components and the AST of a file */
 export class Document {
     private data: EditorRawData;
-
     private lines: LineData[];
-    private lineBreaks: Offset[] = [];
 
-    constructor(private editor: Editor, content: string) {
+    private lineBreaks: Offset[] = [];
+    private editor: Editor;
+
+    constructor(content: string, private language: LanguageBase | null = null) {
         this.data = new EditorRawData(content);
         this.parseLines();
     }
 
     public getEditor(): Editor {
         return this.editor;
+    }
+
+    public attachToEditor(editor: Editor): void {
+        this.editor = editor;
     }
 
     public getAssociatedFile(): WorkspaceFile {
@@ -86,6 +92,10 @@ export class Document {
         return this.lines[line];
     }
 
+    public getFullRange(): TextRange {
+        return new TextRange(0, this.getTotalDocumentLength());
+    }
+
     public getLineStart(at: Offset): Offset {
         for (let i = 0; i < this.lineBreaks.length; i++) {
             if (this.lineBreaks[i] > at) {
@@ -130,7 +140,7 @@ export class Document {
     }
 
     public getLanguage(): LanguageBase | null {
-        return this.editor.getCurrentLanguage();
+        return this.language;
     }
 
     public insertText(offset: Offset, text: string): void {
@@ -138,8 +148,8 @@ export class Document {
 
         this.recomputeLines(offset, text, false);
 
-        this.editor.getEventBus().syncPublish(new DocumentModificationEvent(this, new TextRange(offset, offset), text, null));
-        this.editor.getEventBus().asyncPublish(new DocumentInsertEvent(this, offset, text));
+        GlobalState.getMainEventBus().syncPublish(new DocumentModificationEvent(this, new TextRange(offset, offset), text, null));
+        GlobalState.getMainEventBus().asyncPublish(new DocumentInsertEvent(this, offset, text));
     }
 
     public deleteAt(at: Offset, n: number): string {
@@ -148,8 +158,8 @@ export class Document {
         this.recomputeLines(at, deleted, true);
 
         let affectedRange = new TextRange(at, at + n);
-        this.editor.getEventBus().syncPublish(new DocumentModificationEvent(this, affectedRange, null, deleted));
-        this.editor.getEventBus().asyncPublish(new DocumentDeleteEvent(this, affectedRange));
+        GlobalState.getMainEventBus().syncPublish(new DocumentModificationEvent(this, affectedRange, null, deleted));
+        GlobalState.getMainEventBus().asyncPublish(new DocumentDeleteEvent(this, affectedRange));
 
         return deleted;
     }

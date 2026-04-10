@@ -17,7 +17,7 @@ export interface DistantServiceImpl extends ServiceImpl, Launchable {
  */
 export function DistantService<T extends Constructor<DistantServiceImpl> & {
     getInstance(): InstanceType<T>
-}>(ctor: T) {
+}>(ctor: T, _context: ClassDecoratorContext<T>) {
     // Defer registration to next microtask to avoid "Cannot access before initialization" errors
     queueMicrotask(() => {
         if (!ThreadedUtils.isWorkerThread()) {

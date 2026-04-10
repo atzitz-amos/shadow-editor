@@ -1,3 +1,5 @@
+import {ITab} from "../../app/ui/tabs/tab/ITab";
+
 export type HasId = { id: string };
 
 export class Registry {
@@ -5,5 +7,9 @@ export class Registry {
 
     static getActionIdFor(name: string): string {
         return `${this.actionIdCounter++}-${name}`;
+    }
+
+    static getTabId(tab: ITab) {
+        return `tab-${tab.getTitle().replaceAll(" ", "-").toLowerCase()}`;
     }
 }

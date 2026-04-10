@@ -1,8 +1,8 @@
 import {HTMLUtils} from "../../../../../../editor/utils/HTMLUtils";
-import {HtmlComponent} from "../../../../../../core/ui/engine/components/HtmlComponent";
 import {SEditorAreaHeader} from "./SEditorAreaHeader";
 import {SEditorTabs} from "./SEditorTabs";
 import {SMainEditorView} from "./SMainEditorView";
+import {UIComponent} from "../../../../../../core/ui/engine/components/UIComponent";
 
 /**
  *
@@ -10,7 +10,7 @@ import {SMainEditorView} from "./SMainEditorView";
  * @date 2/28/2026
  * @since 1.0.0
  */
-export class SEditorArea extends HtmlComponent {
+export class SEditorArea extends UIComponent {
     private bodyElement: HTMLElement;
 
     constructor(root: HTMLElement) {

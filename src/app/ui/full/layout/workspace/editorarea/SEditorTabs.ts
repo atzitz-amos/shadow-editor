@@ -1,5 +1,5 @@
-import {HtmlComponent} from "../../../../../../core/ui/engine/components/HtmlComponent";
 import {HTMLUtils} from "../../../../../../editor/utils/HTMLUtils";
+import {UIComponent} from "../../../../../../core/ui/engine/components/UIComponent";
 
 /**
  *
@@ -7,7 +7,7 @@ import {HTMLUtils} from "../../../../../../editor/utils/HTMLUtils";
  * @date 3/7/2026
  * @since 1.0.0
  */
-export class SEditorTabs extends HtmlComponent {
+export class SEditorTabs extends UIComponent {
     constructor(root: HTMLElement) {
         super(HTMLUtils.createDiv("column-tabs", root));
     }

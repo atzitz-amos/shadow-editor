@@ -25,6 +25,7 @@ import {InlayWidget} from "./ui/inline/inlay/InlayWidget";
 import {KeybindContext} from "../core/keybinds/context/KeybindContext";
 import {GlobalState} from "../core/global/GlobalState";
 import {Scheduler} from "../core/scheduler/Scheduler";
+import {DocumentModificationEvent} from "./core/document/events/DocumentModificationEvent";
 
 export class Editor {
     private static ID_COUNTER = 0;
@@ -44,6 +45,8 @@ export class Editor {
 
     private renderingProcess: any;
 
+    private _attached: boolean = false;
+
     constructor(options?: EditorProperties) {
         this.id = Editor.ID_COUNTER++;
 
@@ -53,13 +56,11 @@ export class Editor {
 
         this.properties = options || {};
 
-        this.eventBus = new EventBus('editor.bus');
+        this.eventBus = GlobalState.getMainEventBus().createSubBus('editor.bus');
 
-        this.document = new Document(this, "");
+        this.document = new Document("", JsLang.class); // TODO
         this.langService = new LangService(this);
         this.widgetManager = new WidgetManager(this);
-
-        this.langService.setCurrentLanguage(JsLang.class);
 
         this.view = new View(this);
 
@@ -67,6 +68,10 @@ export class Editor {
         this.coordinateMapper = new EditorCoordinateMapper(this.view);
 
         this.caretModel = new CaretModel(this);
+    }
+
+    isAttached() {
+        return this._attached;
     }
 
     attach(element: HTMLElement) {
@@ -77,6 +82,20 @@ export class Editor {
 
         this.eventBus.asyncPublish(new EditorAttachedEvent(this, this.root));
         this.resumeRender();
+
+        this._attached = true;
+    }
+
+    attachDocument(document: Document) {
+        this.document = document;
+        this.langService.setCurrentLanguage(document.getLanguage());
+        this.caretModel.removeAll();
+        this.eventBus.syncPublish(new DocumentModificationEvent(this.document, this.document.getFullRange(), this.document.getTextContent(), null));
+        this.view.triggerRepaint();
+    }
+
+    detachDocument() {
+        this.document = new Document("", JsLang.class); // TODO
     }
 
     /**

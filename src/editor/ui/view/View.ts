@@ -92,8 +92,8 @@ export class View {
     }
 
     scrollIntoView(position: LogicalPosition, mode: ScrollMode) {
-        let scrollX = this.scrollIntoViewAlong(position.col, this.scroll.scrollXChars, this.scroll.scrollXChars + this.getVisualCharCount() - 1);
-        let scrollY = this.scrollIntoViewAlong(position.row, this.scroll.scrollYLines, this.scroll.scrollYLines + this.getVisualLineCount() - 1);
+        let scrollX = this.scrollIntoViewAlongX(position.col, this.scroll.scrollXChars, this.scroll.scrollXChars + this.getVisualCharCount() - 1);
+        let scrollY = this.scrollIntoViewAlongY(position.row, this.scroll.scrollYLines, this.scroll.scrollYLines + this.getVisualLineCount() - 1);
         if (scrollX !== null) {
             this.scroll.scrollX = scrollX * this.getCharSize();
         }
@@ -231,7 +231,7 @@ export class View {
 
     offScreen(pos: VisualPosition): boolean {
         let visual = this.editor.visualToXY(pos);
-        return visual.x < 0 || visual.x >= this.getViewWidth() || visual.y < 0 || visual.y >= this.getViewHeight();
+        return visual.x < 0 || visual.x >= this.getViewWidth() - 2 || visual.y < 0 || visual.y >= this.getViewHeight() - 2;
     }
 
     onBlur(event: FocusEvent): void {
@@ -275,7 +275,21 @@ export class View {
         this.editor.onKeyUp(e);
     }
 
-    private scrollIntoViewAlong(position: number, scrollStart: number, scrollEnd: number): number | null {
+    private scrollIntoViewAlongX(position: number, scrollStart: number, scrollEnd: number): number | null {
+        if (position > scrollStart && position < scrollEnd) {
+            return null;  // Already in view
+        } else if (position <= scrollStart) {
+            return Math.max(0, position - 2);
+        } else {
+            let diff = scrollEnd - scrollStart;
+            if (position + 1 >= this.editor.getOpenedDocument().getMaxLengthLine()) {
+                return Math.max(0, this.editor.getOpenedDocument().getMaxLengthLine() - diff);
+            }
+            return Math.max(0, position - diff);
+        }
+    }
+
+    private scrollIntoViewAlongY(position: number, scrollStart: number, scrollEnd: number): number | null {
         if (position > scrollStart && position < scrollEnd) {
             return null;  // Already in view
         } else if (position <= scrollStart) {

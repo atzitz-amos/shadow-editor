@@ -35,6 +35,12 @@
             import {GlobalState} from "./src/core/global/GlobalState";
             import {ShadowUIFactory} from "./src/app/ui/ShadowUIFactory";
             import {SyncService} from "./src/core/sync/sync/SyncService";
+            import {CommonKeyImpl} from "./src/core/utils/CommonKey";
+            import {WorkspaceChooserPane} from "./src/app/ui/full/panes/workspaceChooser/WorkspaceChooserPane";
+            import {BlankPane} from "./src/app/ui/full/panes/blank/BlankPane";
+            import {EditorTab} from "./src/app/ui/tabs/tab/EditorTab";
+            import JsLang from "./src/plugins/jsLang/lang/JsLang";
+            import {Document} from "./src/editor/core/document/Document";
 
             // Main entry point - launch the app and wait for startup to complete
             const app = await ShadowApp.launch(true);
@@ -58,6 +64,17 @@
 
                 app.enable(JSLangPlugin.class);
 
+                window.CommonKeyImpl = CommonKeyImpl;
+                window.WorkspacePane = WorkspaceChooserPane;
+                window.BlankPane = BlankPane;
+
+                window.EditorTab = EditorTab;
+                window.TM = GlobalState.getTabsManager();
+
+                setTimeout(() => {
+                    GlobalState.getPaneManager().open(new WorkspaceChooserPane());
+                    GlobalState.getPaneManager().open(new BlankPane());
+                }, 0);
 
                 window.editor = ui.getMainEditor();
 
@@ -65,7 +82,9 @@
                 window.TextRange = TextRange;
                 window.SerializationUtils = SerializationUtils;
 
+                window.EDoc = Document;
                 window.JsLangPlugin = JSLangPlugin.class;
+                window.JsLang = JsLang;
 
                 window.JsGr = JsLexicalGrammar;
                 window.RegLex = RegExpLexer;

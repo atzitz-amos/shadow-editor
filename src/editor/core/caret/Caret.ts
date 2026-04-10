@@ -58,7 +58,7 @@ export class Caret {
     }
 
     onCaretMove(old: LogicalPosition) {
-        this.editor.getEventBus().asyncPublish(new CaretMovedEvent(this, old, this.myLogical));
+        this.editor.getEventBus().syncPublish(new CaretMovedEvent(this, old, this.myLogical));
 
         this.selectionModel.onCaretMove();
     }
@@ -160,7 +160,7 @@ export class CaretModel {
     }
 
     addCaret(position: LogicalPosition) {
-        const caret = new Caret(this, false);
+        const caret = new Caret(this, this.getPrimary() === null);
         // TODO set caret position
 
         this.carets.push(caret);

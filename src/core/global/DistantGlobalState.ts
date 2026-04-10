@@ -9,6 +9,8 @@ import {PersistenceModel} from "../persistence/PersistenceModel";
 import {Editor} from "../../editor/Editor";
 import {Ref, RefUtils} from "../threaded/tcsp/ref/RefUtils";
 import {EventBus} from "../events/EventBus";
+import {PaneManager} from "../../app/ui/panes/PaneManager";
+import {TabsManager} from "../../app/ui/tabs/TabsManager";
 
 /**
  *
@@ -51,6 +53,14 @@ export class DistantGlobalState {
 
     public static getPersistenceModel(): Promise<Ref<PersistenceModel>> {
         return RefUtils.ofCallChain("GlobalState.getPersistenceModel", PersistenceModel);
+    }
+
+    public static getPaneManager(): Promise<Ref<PaneManager>> {
+        return RefUtils.ofCallChain("GlobalState.getPaneManager", PaneManager);
+    }
+
+    public static getTabsManager(): Promise<Ref<TabsManager>> {
+        return RefUtils.ofCallChain("GlobalState.getTabsManager", TabsManager);
     }
 
     public static getMainEditor(): Promise<Ref<Editor>> {

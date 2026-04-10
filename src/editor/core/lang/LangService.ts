@@ -20,13 +20,12 @@ import {Scheduler} from "../../../core/scheduler/Scheduler";
  */
 export class LangService {
     private currentLanguage: LanguageBase | null = null;  // TODO: support null language (plain text)
-
     private myLexer: IncrementalLexer | null = null;
+
     private myHighlighter: HighlighterBase | null = null;
     private myIncrementalHighlighter: IncrementalHighlighter | null = null;
     private myParser: IParser | null = null;  // TODO: support incremental parsing
     private debugProduction: SynNode[];
-
     constructor(private editor: Editor) {
         editor.getEventBus().subscribe(this, DocumentModificationEvent.SUBSCRIBER, this.onDocumentChange);
     }

@@ -18,6 +18,8 @@ import {ShadowUI} from "../../app/ui/ShadowUI";
 import {DistantGlobalState} from "./DistantGlobalState";
 // Load WCPService tracker
 import {WCPService} from "../threaded/wcp/WCPMetricsService";
+import {PaneManager} from "../../app/ui/panes/PaneManager";
+import {TabsManager} from "../../app/ui/tabs/TabsManager";
 
 /**
  * Provides a single class that regroups all useful singletons and global services of the application
@@ -84,6 +86,14 @@ export class GlobalState {
 
     public static getPersistenceModel() {
         return PersistenceModel.getInstance();
+    }
+
+    public static getPaneManager(): PaneManager {
+        return PaneManager.getInstance();
+    }
+
+    public static getTabsManager(): TabsManager {
+        return TabsManager.getInstance();
     }
 
     public static getMainEditor(): Editor {

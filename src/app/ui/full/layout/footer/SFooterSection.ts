@@ -1,6 +1,6 @@
-import {HtmlComponent} from "../../../../../core/ui/engine/components/HtmlComponent";
 import {HTMLUtils} from "../../../../../editor/utils/HTMLUtils";
 import {SFooterPill} from "./SFooterPill";
+import {UIComponent} from "../../../../../core/ui/engine/components/UIComponent";
 
 /**
  *
@@ -8,7 +8,7 @@ import {SFooterPill} from "./SFooterPill";
  * @date 3/4/2026
  * @since 1.0.0
  */
-export class SFooterSection extends HtmlComponent {
+export class SFooterSection extends UIComponent {
     constructor(root: HTMLElement, className: string) {
         super(HTMLUtils.createDiv(className, root));
     }

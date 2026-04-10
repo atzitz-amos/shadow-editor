@@ -40,7 +40,6 @@ export class InlineError extends OverlayWidget {
 
         overlay.whenHoveredWithDelay(600, (event) => {
             PopupFactory.createTooltipPopup(event.getEditor(), this.message, event.getXY(), event.getBounds());
-            console.log(1);
         }, true);
     }
 }

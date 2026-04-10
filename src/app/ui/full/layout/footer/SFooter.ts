@@ -1,6 +1,6 @@
 import {HTMLUtils} from "../../../../../editor/utils/HTMLUtils";
-import {HtmlComponent} from "../../../../../core/ui/engine/components/HtmlComponent";
 import {SFooterSection} from "./SFooterSection";
+import {UIComponent} from "../../../../../core/ui/engine/components/UIComponent";
 
 /**
  *
@@ -8,7 +8,7 @@ import {SFooterSection} from "./SFooterSection";
  * @date 2/28/2026
  * @since 1.0.0
  */
-export class SFooter extends HtmlComponent {
+export class SFooter extends UIComponent {
     private readonly left: SFooterSection;
     private readonly right: SFooterSection;
 

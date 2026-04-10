@@ -5,9 +5,9 @@ import {HTMLUtils} from "../../../editor/utils/HTMLUtils";
 import {SLeftActionRail} from "./layout/rail/SLeftActionRail";
 import {SEditorWorkspace} from "./layout/workspace/SEditorWorkspace";
 import {GlobalState} from "../../../core/global/GlobalState";
-import {UIResizeEvent} from "../events/UIResizeEvent";
+import {UIResizeEvent} from "../../core/events/UIResizeEvent";
 import {Editor} from "../../../editor/Editor";
-import {SMainEditorView} from "./layout/workspace/editorarea/SMainEditorView";
+import {UICommonKeys} from "../../core/UICommonKeys";
 
 
 /**
@@ -36,11 +36,7 @@ export class FullShadowUI implements ShadowUI {
     }
 
     getMainEditor(): Editor {
-        let child = this.myWorkspace.getChild(SMainEditorView);
-        if (child === null) {
-            throw new Error("Could not find editor area in workspace");
-        }
-        return child.getMainEditor();
+        return this.myWorkspace.getCommonKey(UICommonKeys.MAIN_EDITOR)!;
     }
 
     draw(): void {
