@@ -1,0 +1,43 @@
+.shell-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 10px;
+    border-top: 1px solid #202438;
+    background: #0c1019;
+    font-size: 11px;
+}
+
+.footer-left,
+.footer-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.footer-pill {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    border-radius: 999px;
+    padding: 2px 7px;
+    border: 1px solid #262c3f;
+    background: #101520;
+    line-height: 1;
+}
+
+.footer-pill.soft {
+    color: #c0c5d7;
+}
+
+.footer-pill.error {
+    border-color: #52303b;
+    color: #f1c0c7;
+}
+
+.footer-pill.warning {
+    border-color: #4c3a22;
+    color: #e4d4b0;
+}
+

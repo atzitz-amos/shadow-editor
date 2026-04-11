@@ -41,20 +41,20 @@
 
       <main class="shell-main">
         <nav class="rail">
-          <button class="rail-item rail-item-active" title="Projects">
+          <button class="rail-item rail-item-active show-tooltip" data-tooltip="Projects" data-tooltip-position="right" aria-label="Projects">
             <i class="fa-solid fa-diagram-project"></i>
           </button>
-          <button class="rail-item" title="Commits">
+          <button class="rail-item show-tooltip" data-tooltip="Commits" data-tooltip-position="right" aria-label="Commits">
             <i class="fa-solid fa-timeline"></i>
           </button>
-          <button class="rail-item" title="Tasks">
+          <button class="rail-item show-tooltip" data-tooltip="Tasks" data-tooltip-position="right" aria-label="Tasks">
             <i class="fa-solid fa-list-check"></i>
           </button>
-          <button class="rail-item" title="Snippets">
+          <button class="rail-item show-tooltip" data-tooltip="Snippets" data-tooltip-position="right" aria-label="Snippets">
             <i class="fa-solid fa-scissors"></i>
           </button>
           <div class="rail-separator"></div>
-          <button class="rail-item" title="Settings">
+          <button class="rail-item show-tooltip" data-tooltip="Settings" data-tooltip-position="right" aria-label="Settings">
             <i class="fa-solid fa-gear"></i>
           </button>
         </nav>
@@ -115,6 +115,88 @@
                 </span>
               </div>
             </div>
+          </aside>
+
+          <aside class="focus-column-structure">
+            <section class="project-pane">
+              <header class="project-pane-header">
+                <div>
+                  <div class="overline">Project Structure</div>
+                  <div class="project-pane-meta">shadow-editor · 42 files</div>
+                </div>
+                <details class="project-menu">
+                  <summary class="icon-button subtle project-pane-action show-tooltip" data-tooltip="Pane actions" data-tooltip-position="top" aria-label="Pane actions">
+                    <i class="fa-solid fa-ellipsis-vertical"></i>
+                  </summary>
+                  <div class="project-menu-list" role="menu" aria-label="Pane actions">
+                    <button class="project-menu-item" role="menuitem">
+                      <i class="fa-solid fa-angle-up"></i>
+                      <span class="menu-item-label">Collapse all</span>
+                      <span class="menu-item-shortcut">Alt+[</span>
+                    </button>
+                    <button class="project-menu-item" role="menuitem">
+                      <i class="fa-solid fa-angle-down"></i>
+                      <span class="menu-item-label">Expand all</span>
+                      <span class="menu-item-shortcut">Alt+]</span>
+                    </button>
+                    <div class="project-menu-divider" role="separator"></div>
+                    <button class="project-menu-item" role="menuitem">
+                      <i class="fa-solid fa-eye"></i>
+                      <span class="menu-item-label">Reveal active file</span>
+                      <span class="menu-item-shortcut">Ctrl+R</span>
+                    </button>
+                  </div>
+                </details>
+              </header>
+
+              <div class="project-pane-tools">
+                <div class="project-filter">
+                  <i class="fa-solid fa-magnifying-glass"></i>
+                  <span>Filter files</span>
+                </div>
+                <span class="project-scope">src</span>
+              </div>
+
+              <div class="project-tree">
+                <div class="tree-item depth-0 expanded">
+                  <i class="fa-solid fa-chevron-down tree-caret"></i>
+                  <i class="fa-regular fa-folder-open tree-icon folder"></i>
+                  <span class="tree-name">src</span>
+                </div>
+                <div class="tree-item depth-1 expanded">
+                  <i class="fa-solid fa-chevron-down tree-caret"></i>
+                  <i class="fa-regular fa-folder-open tree-icon folder"></i>
+                  <span class="tree-name">app</span>
+                </div>
+                <div class="tree-item depth-2 active">
+                  <i class="fa-solid fa-file-lines tree-icon file"></i>
+                  <span class="tree-name">ShadowApp.ts</span>
+                  <span class="tree-state state-error">1</span>
+                </div>
+                <div class="tree-item depth-2">
+                  <i class="fa-solid fa-file-lines tree-icon file"></i>
+                  <span class="tree-name">ShadowUI.ts</span>
+                  <span class="tree-state state-modified">M</span>
+                </div>
+                <div class="tree-item depth-1">
+                  <i class="fa-solid fa-file-lines tree-icon file"></i>
+                  <span class="tree-name">index.ts</span>
+                </div>
+                <div class="tree-item depth-0 expanded">
+                  <i class="fa-solid fa-chevron-down tree-caret"></i>
+                  <i class="fa-regular fa-folder-open tree-icon folder"></i>
+                  <span class="tree-name">tests</span>
+                </div>
+                <div class="tree-item depth-1">
+                  <i class="fa-solid fa-file-lines tree-icon file"></i>
+                  <span class="tree-name">timeline.spec.ts</span>
+                </div>
+                <div class="tree-item depth-0">
+                  <i class="fa-solid fa-file-lines tree-icon file"></i>
+                  <span class="tree-name">README.md</span>
+                </div>
+              </div>
+            </section>
           </aside>
 
           <section class="focus-columns">
