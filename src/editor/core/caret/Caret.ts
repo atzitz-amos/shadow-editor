@@ -4,6 +4,7 @@ import {LogicalPosition} from "../coordinate/LogicalPosition";
 import {VisualPosition} from "../coordinate/VisualPosition";
 import {CaretMovedEvent} from "./events/CaretMovedEvent";
 import {CaretRemovedEvent} from "./events/CaretRemovedEvent";
+import {CaretAddedEvent} from "./events/CaretAddedEvent";
 
 
 export class Caret {
@@ -21,15 +22,17 @@ export class Caret {
     private myLogical: LogicalPosition;
     private myVisual: VisualPosition;
 
-    constructor(caretModel: CaretModel, isPrimary: boolean) {
+    constructor(caretModel: CaretModel, pos: LogicalPosition, isPrimary: boolean) {
         this.caretModel = caretModel;
         this.editor = caretModel.editor;
         this.isPrimary = isPrimary;
 
-        this.myLogical = new LogicalPosition(0, 0);
-        this.myVisual = new VisualPosition(0, 0);
+        this.myLogical = pos;
+        this.myVisual = this.editor.logicalToVisual(pos);
 
         this.selectionModel = new SelectionModel(this);
+
+        this.editor.getEventBus().syncPublish(new CaretAddedEvent(this));
     }
 
 
@@ -150,9 +153,9 @@ export class CaretModel {
     editor: Editor;
     carets: Caret[] = [];
 
-    constructor(editor: Editor) {
+    constructor(editor: Editor, initialPos: LogicalPosition) {
         this.editor = editor;
-        this.carets.push(new Caret(this, true));
+        this.carets.push(new Caret(this, initialPos, true));
     }
 
     getPrimary(): Caret {
@@ -160,9 +163,7 @@ export class CaretModel {
     }
 
     addCaret(position: LogicalPosition) {
-        const caret = new Caret(this, this.getPrimary() === null);
-        // TODO set caret position
-
+        const caret = new Caret(this, position, this.carets.length == 0);
         this.carets.push(caret);
         return caret;
     }
@@ -185,5 +186,9 @@ export class CaretModel {
                 i--;
             }
         }
+    }
+
+    clearAllCarets() {
+        this.carets = [];
     }
 }

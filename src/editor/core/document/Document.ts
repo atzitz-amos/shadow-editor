@@ -7,33 +7,66 @@ import {DocumentInsertEvent} from "./events/DocumentInsertEvent";
 import {DocumentModificationEvent} from "./events/DocumentModificationEvent";
 import {DocumentDeleteEvent} from "./events/DocumentDeleteEvent";
 import {WorkspaceFile} from "../../../core/workspace/filesystem/tree/WorkspaceFile";
-import {GlobalState} from "../../../core/global/GlobalState";
+import {TokenCache} from "../lang/TokenCache";
 
 /**
  * Represents an opened file in the editor
  * Store the language, the line-breaks, the components and the AST of a file */
 export class Document {
+    private editor: Editor | undefined = undefined;
+
     private data: EditorRawData;
+    private file: WorkspaceFile | null = null;
+
     private lines: LineData[];
-
     private lineBreaks: Offset[] = [];
-    private editor: Editor;
 
-    constructor(content: string, private language: LanguageBase | null = null) {
+    private tokenCache: TokenCache = new TokenCache();
+
+    constructor(private caretOffset: Offset, content: string, private language: LanguageBase | null = null) {
         this.data = new EditorRawData(content);
         this.parseLines();
     }
 
+    public getSavedCaretOffset(): Offset {
+        return this.caretOffset;
+    }
+
+    public saveCaretOffset(): void {
+        if (this.editor) {
+            this.caretOffset = this.editor.getPrimaryCaret().getOffset();
+        }
+    }
+
     public getEditor(): Editor {
+        if (!this.editor) {
+            throw new Error("Document is not attached to an editor.");
+        }
         return this.editor;
     }
 
-    public attachToEditor(editor: Editor): void {
+    public isLinkedToEditor(): boolean {
+        return this.editor !== undefined;
+    }
+
+    public linkEditor(editor: Editor | null): void {
         this.editor = editor;
     }
 
-    public getAssociatedFile(): WorkspaceFile {
-        return null as any; // TODO: implement
+    public getAssociatedFile(): WorkspaceFile | null {
+        return this.file;
+    }
+
+    public isAssociatedWithFile(): boolean {
+        return this.getAssociatedFile() !== null;
+    }
+
+    public linkFile(file: WorkspaceFile) {
+        this.file = file;
+    }
+
+    public getTokenCache(): TokenCache {
+        return this.tokenCache;
     }
 
     public getTextContent(): string {
@@ -148,8 +181,10 @@ export class Document {
 
         this.recomputeLines(offset, text, false);
 
-        GlobalState.getMainEventBus().syncPublish(new DocumentModificationEvent(this, new TextRange(offset, offset), text, null));
-        GlobalState.getMainEventBus().asyncPublish(new DocumentInsertEvent(this, offset, text));
+        if (this.isLinkedToEditor()) {
+            this.editor!.getEventBus().syncPublish(new DocumentModificationEvent(this, new TextRange(offset, offset), text, null));
+            this.editor!.getEventBus().asyncPublish(new DocumentInsertEvent(this, offset, text));
+        }
     }
 
     public deleteAt(at: Offset, n: number): string {
@@ -157,9 +192,11 @@ export class Document {
 
         this.recomputeLines(at, deleted, true);
 
-        let affectedRange = new TextRange(at, at + n);
-        GlobalState.getMainEventBus().syncPublish(new DocumentModificationEvent(this, affectedRange, null, deleted));
-        GlobalState.getMainEventBus().asyncPublish(new DocumentDeleteEvent(this, affectedRange));
+        if (this.isLinkedToEditor()) {
+            let affectedRange = new TextRange(at, at + n);
+            this.editor!.getEventBus().syncPublish(new DocumentModificationEvent(this, affectedRange, null, deleted));
+            this.editor!.getEventBus().asyncPublish(new DocumentDeleteEvent(this, affectedRange));
+        }
 
         return deleted;
     }
@@ -169,7 +206,7 @@ export class Document {
         this.insertText(range.start, text);
     }
 
-    substring(start: number, end?: number) {
+    public substring(start: number, end?: number) {
         return this.data.substring(start, end);
     }
 

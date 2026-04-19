@@ -17,11 +17,11 @@ export class DeleteAction extends AbstractAction {
     run(ctx: KeybindContext): void {
         const editor: Editor = ctx.requireEditor();
 
-        editor.caretModel.forEachCaret(caret => {
+        editor.getCaretModel().forEachCaret(caret => {
             if (caret.selectionModel.isSelectionActive) editor.deleteSelection(caret);
             else if (!caret.isBeforeInlay()) editor.deleteAt(caret.getOffset());
             else caret.shiftRight();
         });
-        editor.view.resetBlink();
+        editor.getView().resetBlink();
     }
 }

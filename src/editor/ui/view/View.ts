@@ -130,7 +130,7 @@ export class View {
     }
 
     getRootElement(): HTMLElement {
-        return this.editor.root;
+        return this.editor.getRootElement();
     }
 
     getViewElement(): HTMLDivElement {
@@ -235,11 +235,11 @@ export class View {
     }
 
     onBlur(event: FocusEvent): void {
-        this.editor.root.classList.remove('focused');
+        this.editor.getRootElement().classList.remove('focused');
     }
 
     onFocus(event: FocusEvent): void {
-        this.editor.root.classList.add('focused');
+        this.editor.getRootElement().classList.add('focused');
     }
 
     onMouseDown(event: MouseEvent) {
@@ -259,8 +259,8 @@ export class View {
 
     onScroll(event: WheelEvent) {
         event.preventDefault();
-        this.editor.view.scrollBy(event.deltaX, event.deltaY);
-        this.editor.view.resetBlink();
+        this.editor.getView().scrollBy(event.deltaX, event.deltaY);
+        this.editor.getView().resetBlink();
     }
 
     onInput(e: InputEvent) {

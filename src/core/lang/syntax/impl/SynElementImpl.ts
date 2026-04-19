@@ -131,7 +131,7 @@ export abstract class SynElementImpl implements SynElement {
         return this.range;
     }
 
-    isSynElement(): boolean {
+    isSynElement(): this is SynElement {
         return true;
     }
 

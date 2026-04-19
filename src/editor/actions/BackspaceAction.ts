@@ -18,7 +18,7 @@ export class BackspaceAction extends AbstractAction {
     run(ctx: KeybindContext) {
         const editor = ctx.requireEditor();
 
-        editor.caretModel.forEachCaret(caret => {
+        editor.getCaretModel().forEachCaret(caret => {
             if (caret.getSelectionModel().isSelectionActive) editor.deleteSelection(caret);
             else {
                 caret.shiftLeft();
@@ -26,7 +26,7 @@ export class BackspaceAction extends AbstractAction {
                     editor.deleteAt(caret.getOffset());
             }
         });
-        editor.view.resetBlink();
+        editor.getView().resetBlink();
     }
 }
 
@@ -50,7 +50,7 @@ export class CtrlBackspaceAction extends AbstractAction {
     run(ctx: KeybindContext) {
         const editor = ctx.requireEditor();
 
-        editor.caretModel.forEachCaret(caret => {
+        editor.getCaretModel().forEachCaret(caret => {
             if (caret.getSelectionModel().isSelectionActive) editor.deleteSelection(caret);
             else {
                 const offset = CtrlMoveHelper.getOffsetToPreviousWord(editor.getOpenedDocument(), caret.getOffset(), CtrlMoveHelper.DELIMITER);
@@ -58,8 +58,8 @@ export class CtrlBackspaceAction extends AbstractAction {
                 editor.deleteAt(caret.getOffset(), -offset);
             }
 
-            editor.view.triggerRepaint();
+            editor.getView().triggerRepaint();
         });
-        editor.view.resetBlink();
+        editor.getView().resetBlink();
     }
 }

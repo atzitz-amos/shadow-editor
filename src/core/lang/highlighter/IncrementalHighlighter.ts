@@ -15,8 +15,9 @@ export class IncrementalHighlighter {
     }
 
     highlight(stream: TokenStream, holder: HighlightHolder) {
+        let highlighter = this.service.getHighlighter()!;
         for (const token of stream.exhaust()) {
-            this.service.getHighlighter()?.performHighlighting(holder, token);
+            highlighter.performHighlighting(holder, token);
         }
     }
 }

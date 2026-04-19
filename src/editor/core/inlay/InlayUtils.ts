@@ -19,7 +19,7 @@ export class InlayUtils {
         return {
             offset: inlay.getOffset(),
             deltaOffset: inlay.getLogicalDelta(),
-            width: InlayUtils.getInlayWidth(editor.view, inlay)
+            width: InlayUtils.getInlayWidth(editor.getView(), inlay)
         };
     }
 }

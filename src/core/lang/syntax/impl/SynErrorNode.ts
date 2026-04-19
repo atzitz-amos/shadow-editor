@@ -37,7 +37,7 @@ export class SynErrorNode implements SynNode {
         return this.message;
     }
 
-    isSynElement(): boolean {
+    isSynElement(): this is SynElement {
         return false;
     }
 

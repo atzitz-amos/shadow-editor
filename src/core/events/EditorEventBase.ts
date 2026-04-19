@@ -17,6 +17,6 @@ export abstract class EditorEventBase implements EventBase {
     }
 
     public getBubbleDirection(): BubbleDirection {
-        return BubbleDirection.BUBBLE_BOTH;
+        return BubbleDirection.BUBBLE_DOWN;
     }
 }

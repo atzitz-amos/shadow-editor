@@ -18,7 +18,7 @@ export class SelectAllAction extends AbstractAction {
 
         editor.getCaretModel().removeAll();
         editor.getCaretModel().getPrimary().getSelectionModel().select(0, editor.getOpenedDocument().getTotalDocumentLength());
-        editor.view.resetBlink();
+        editor.getView().resetBlink();
     }
 }
 
@@ -38,7 +38,7 @@ export class SelectDoubleClickAction extends AbstractAction {
         const caret = editor.getPrimaryCaret();
         const wordRange = editor.getOpenedDocument().getWordAt(caret.getOffset(), SelectDoubleClickAction.DELIMITER);
         caret.getSelectionModel().select(wordRange.start, wordRange.end);
-        editor.view.resetBlink();
+        editor.getView().resetBlink();
     }
 }
 
@@ -58,6 +58,6 @@ export class SelectTripleClickAction extends AbstractAction {
         const line = editor.getOpenedDocument().getLineAt(caret.getOffset());
         const range = line.getAssociatedRange();
         caret.getSelectionModel().select(range.start, range.end);
-        editor.view.resetBlink();
+        editor.getView().resetBlink();
     }
 }

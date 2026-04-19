@@ -1,6 +1,8 @@
 import {View} from "./View";
 import {Caret} from "../../core/caret/Caret";
 import {HTMLUtils} from "../../utils/HTMLUtils";
+import {CaretRemovedEvent} from "../../core/caret/events/CaretRemovedEvent";
+import {CaretAddedEvent} from "../../core/caret/events/CaretAddedEvent";
 
 
 export class TextLayer {
@@ -125,7 +127,7 @@ export class CaretLayer {
     }
 
     update(): void {
-        this.view.editor.caretModel.forEachCaret(caret => {
+        this.view.getEditor().getCaretModel().forEachCaret(caret => {
             const caretEl = this.getCaretElement(caret);
             const xy = caret.getXY();
 
@@ -215,8 +217,16 @@ class SelectionLayer {
     }
 
     init() {
-        this.view.editor.caretModel.forEachCaret(caret => {
+        this.view.getEditor().getCaretModel().forEachCaret(caret => {
             this.selectionElements.set(caret.id, new CaretSelectionElement(this, caret));
+        });
+
+        this.view.getEditor().getEventBus().subscribe(this, CaretRemovedEvent.SUBSCRIBER, e => {
+            this.selectionElements.delete(e.getCaret().id);
+        });
+
+        this.view.getEditor().getEventBus().subscribe(this, CaretAddedEvent.SUBSCRIBER, e => {
+            this.selectionElements.set(e.getCaret().id, new CaretSelectionElement(this, e.getCaret()));
         });
     }
 

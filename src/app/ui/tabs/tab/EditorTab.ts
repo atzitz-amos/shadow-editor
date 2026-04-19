@@ -12,11 +12,14 @@ export class EditorTab implements ITab {
     private position = 0;
     private active = false;
 
+    private readonly id: string;
+
     constructor(private readonly title: string, private readonly document: Document) {
+        this.id = Registry.getTabId(this);
     }
 
     getId(): string {
-        return Registry.getTabId(this);
+        return this.id;
     }
 
     getTitle(): string {

@@ -98,7 +98,7 @@ export class ViewPropertiesManager {
     }
 
     private load(ev: EditorAttachedEvent) {
-        this.root = ev.getEditor().root;
+        this.root = ev.getEditor().getRootElement();
 
         this.lineHeight = SettingsManager.getValue(VisualSettings.LINE_HEIGHT);
         this.fontSize = SettingsManager.getValue(VisualSettings.FONT_SIZE);

@@ -18,10 +18,10 @@ export class TabAction extends AbstractAction {
         const editor = ctx.requireEditor();
 
         ctx.getEvent().preventDefault();
-        editor.caretModel.forEachCaret(caret => {
+        editor.getCaretModel().forEachCaret(caret => {
             editor.insertText(caret.getOffset(), '    ');
         });
-        editor.caretModel.shift(4);
-        editor.view.resetBlink();
+        editor.getCaretModel().shift(4);
+        editor.getView().resetBlink();
     }
 }

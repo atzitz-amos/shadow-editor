@@ -24,9 +24,18 @@ export class TabsManager {
     begin() {
     }
 
-    open(tab: ITab, setActive: boolean = true) {
-        tab.setPosition(this.tabs.size);
-        this.tabs.set(tab.getId(), tab);
+    open(tabId: string): void;
+    open(tab: ITab, setActive?: boolean): void;
+    open(tab: ITab | string, setActive: boolean = true) {
+        if (typeof tab === "string") {
+            if (!this.tabs.has(tab)) {
+                throw new Error(`Tab with id ${tab} does not exist`);
+            }
+            tab = this.tabs.get(tab)!;
+        } else if (!this.tabs.has(tab.getId())) {
+            tab.setPosition(this.tabs.size);
+            this.tabs.set(tab.getId(), tab);
+        }
 
         UIHooks.trigger(TabHooks.NEW_TAB, tab);
 

@@ -1,5 +1,4 @@
 import {View} from "./ui/view/View";
-import {EditorProperties} from "./Properties";
 import {TextRange} from "./core/coordinate/TextRange";
 import {Caret, CaretModel} from "./core/caret/Caret";
 import {Key, ModifierKeyHolder} from "../core/keybinds/Keybind";
@@ -14,7 +13,6 @@ import {EditorCoordinateMapper} from "./core/coordinate/EditorCoordinateMapper";
 import {InlayManager} from "./core/inlay/InlayManager";
 import {PluginManager} from "../core/plugins/PluginManager";
 import {LanguageBase} from "../core/lang/LanguageBase";
-import JsLang from "../plugins/jsLang/lang/JsLang";
 import {LangSupport} from "../core/lang/LangSupport";
 import {LangService} from "./core/lang/LangService";
 import {EventBus} from "../core/events/EventBus";
@@ -25,40 +23,42 @@ import {InlayWidget} from "./ui/inline/inlay/InlayWidget";
 import {KeybindContext} from "../core/keybinds/context/KeybindContext";
 import {GlobalState} from "../core/global/GlobalState";
 import {Scheduler} from "../core/scheduler/Scheduler";
-import {DocumentModificationEvent} from "./core/document/events/DocumentModificationEvent";
+import * as console from "node:console";
 
 export class Editor {
     private static ID_COUNTER = 0;
+    private id: number;
 
-    id: number;
-    properties: EditorProperties;
-    view: View;
-    root: HTMLElement;
-    document: Document;
-    langService: LangService;
-    widgetManager: WidgetManager;
-    inlayManager: InlayManager;
-    coordinateMapper: EditorCoordinateMapper;
-    caretModel: CaretModel;
-    eventBus: EventBus;
-    perfCheckRunning: boolean = false;
+    private readonly view: View;
+    private readonly coordinateMapper: EditorCoordinateMapper;
 
-    private renderingProcess: any;
-
+    private root: HTMLElement;
     private _attached: boolean = false;
 
-    constructor(options?: EditorProperties) {
+    private readonly widgetManager: WidgetManager;
+    private readonly inlayManager: InlayManager;
+    private readonly caretModel: CaretModel;
+    private readonly langService: LangService;
+
+    private readonly eventBus: EventBus;
+
+    private document: Document;
+
+    private renderingProcess: any;
+    private perfCheckRunning: boolean = false;
+
+    constructor(document: Document) {
         this.id = Editor.ID_COUNTER++;
 
         if (!GlobalState.isReady()) {
             throw new Error("No running shadow app instance found");
         }
 
-        this.properties = options || {};
+        this.eventBus = GlobalState.getMainEventBus().createSubBus(`editor-${this.id}.bus`);
 
-        this.eventBus = GlobalState.getMainEventBus().createSubBus('editor.bus');
+        this.document = document;
+        this.document.linkEditor(this);
 
-        this.document = new Document("", JsLang.class); // TODO
         this.langService = new LangService(this);
         this.widgetManager = new WidgetManager(this);
 
@@ -67,7 +67,7 @@ export class Editor {
         this.inlayManager = new InlayManager(this);
         this.coordinateMapper = new EditorCoordinateMapper(this.view);
 
-        this.caretModel = new CaretModel(this);
+        this.caretModel = new CaretModel(this, this.offsetToLogical(document.getSavedCaretOffset()));
     }
 
     isAttached() {
@@ -86,22 +86,31 @@ export class Editor {
         this._attached = true;
     }
 
-    attachDocument(document: Document) {
-        this.document = document;
-        this.langService.setCurrentLanguage(document.getLanguage());
-        this.caretModel.removeAll();
-        this.eventBus.syncPublish(new DocumentModificationEvent(this.document, this.document.getFullRange(), this.document.getTextContent(), null));
-        this.view.triggerRepaint();
-    }
+    changeDocument(document: Document) {
+        this.document.saveCaretOffset();
 
-    detachDocument() {
-        this.document = new Document("", JsLang.class); // TODO
+        this.document.linkEditor(null);
+        this.document = document;
+        this.document.linkEditor(this);
+
+        this.caretModel.clearAllCarets();
+        this.caretModel.addCaret(this.offsetToLogical(document.getSavedCaretOffset()));
+
+        this.repaintView();
     }
 
     /**
      +--------------------------+
      |           Data           |
      +--------------------------+    */
+    getView(): View {
+        return this.view;
+    }
+
+    getRootElement(): HTMLElement {
+        return this.root;
+    }
+
     getEventBus(): EventBus {
         return this.eventBus;
     }
@@ -357,7 +366,7 @@ export class Editor {
         }, 20);
     }
 
-    refreshView() {
+    repaintView() {
         this.view.triggerRepaint();
     }
 }

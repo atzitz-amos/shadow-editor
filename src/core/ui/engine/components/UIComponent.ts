@@ -1,21 +1,19 @@
 import {CommonKeyImpl, getCommonKeyValue, hasCommonKey} from "../../../utils/CommonKey";
+import {UIEnhancer} from "../enhancer/UIEnhancer";
 
-/**
- *
- * @author Atzitz Amos
- * @date 2/28/2026
- * @since 1.0.0
- */
+
 export abstract class UIComponent {
     private static readonly elementRegistry = new WeakMap<HTMLElement, UIComponent>();
 
     private root: HTMLElement | null = null;
 
     private readonly children: UIComponent[] = [];
+    private readonly enhancers: UIEnhancer[] = [];
+
     private parent: UIComponent | null = null;
     private disposed = false;
 
-    protected constructor(private readonly element: HTMLElement) {
+    public constructor(private readonly element: HTMLElement) {
         UIComponent.elementRegistry.set(element, this);
 
         if (element.parentElement !== null) {
@@ -25,6 +23,22 @@ export abstract class UIComponent {
 
     public static fromElement(element: HTMLElement): UIComponent | undefined {
         return this.elementRegistry.get(element);
+    }
+
+    public static with(...enhancers: Constructor<UIEnhancer>[]): AbstractConstructor<UIComponent> {
+        return class extends UIComponent {
+            constructor(element: HTMLElement) {
+                super(element);
+
+                for (const enhancer of enhancers) {
+                    this.addEnhancer(enhancer);
+                }
+            }
+
+            public draw(): void {
+                throw new Error("Method not implemented.");
+            }
+        };
     }
 
     public getParent(): UIComponent | null {
@@ -48,7 +62,9 @@ export abstract class UIComponent {
     }
 
     public getChild<T extends UIComponent>(type: Class<T>): T | null;
+
     public getChild<T extends UIComponent>(type: Class<T>, filter: (el: T) => boolean): T | null;
+
     public getChild<T extends UIComponent>(type: Class<T>, filter?: (el: T) => boolean): T | null {
         if (!filter) filter = () => true;
 
@@ -122,6 +138,10 @@ export abstract class UIComponent {
             return result;
         }
         return null;
+    }
+
+    protected addEnhancer(enhancer: Constructor<UIEnhancer>): void {
+        this.enhancers.push(new enhancer(this));
     }
 
     protected getUnderlyingElement(): HTMLElement {

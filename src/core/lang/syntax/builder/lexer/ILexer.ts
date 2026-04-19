@@ -20,6 +20,4 @@ export interface ILexer {
      * @returns the tokenized token and the new lexer state
      * */
     tokenize(input: Source): Token;
-
-    createTokenStream(): TokenStream;
 }

@@ -46,6 +46,10 @@ export class EditorURI {
         }
     }
 
+    static invalid() {
+        return new EditorURI("invalid", URITargetType.PROJECT);
+    }
+
     getURI(): string {
         return this.target + this.getLocator();
     }
@@ -86,7 +90,9 @@ export class EditorURI {
     }
 
     extend(other: EditorURI): EditorURI;
+
     extend(other: string, target?: URITargetType): EditorURI;
+
     extend(other: EditorURI | string, target?: URITargetType): EditorURI {
         if (typeof other === "string") {
             other = new EditorURI(other, target ?? this.target);

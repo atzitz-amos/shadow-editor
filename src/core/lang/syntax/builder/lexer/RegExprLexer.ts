@@ -38,10 +38,6 @@ export class RegExpLexer implements ILexer {
         throw new Error("Method not implemented.");
     }
 
-    createTokenStream(): TokenStream {
-        throw new Error("Method not implemented");
-    }
-
     public lexAll(input: string): Token[] {
         const source = new Source(input);
         const tokens: Token[] = [];

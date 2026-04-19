@@ -2,7 +2,6 @@ import {TextRange} from "../coordinate/TextRange";
 import {GutterComponent} from "../../ui/gutter/components/GutterComponent";
 import {GutterLine} from "../../ui/gutter/components/GutterLine";
 import {Editor} from "../../Editor";
-import {Document} from "../document/Document";
 import {WidgetRenderer} from "./WidgetRenderer";
 import {HighlightHolder} from "../../ui/highlighter/HighlightHolder";
 import {OverlayWidget} from "../../ui/inline/overlay/OverlayWidget";
@@ -12,19 +11,14 @@ import {InlayWidget} from "../../ui/inline/inlay/InlayWidget";
 /**
  * Store the ranges of the components*/
 export class WidgetManager {
-    editor: Editor;
-    document: Document;
+    private overlays: OverlayWidget[] = [];
+    private inlays: InlayWidget[] = [];
+    private gutterComponents: GutterComponent[] = [];
 
-    renderer: WidgetRenderer;
+    private readonly renderer: WidgetRenderer;
+    private readonly highlightsHolder: HighlightHolder;
 
-    highlightsHolder: HighlightHolder;
-    overlays: OverlayWidget[] = [];
-    inlays: InlayWidget[] = [];
-    gutterComponents: GutterComponent[] = [];
-
-    constructor(editor: Editor) {
-        this.editor = editor;
-        this.document = editor.getOpenedDocument();
+    constructor(private readonly editor: Editor) {
 
         this.renderer = new WidgetRenderer(this);
 
@@ -98,7 +92,7 @@ export class WidgetManager {
     }
 
     getDocument() {
-        return this.document;
+        return this.editor.getOpenedDocument();
     }
 
     getRenderer(): WidgetRenderer {

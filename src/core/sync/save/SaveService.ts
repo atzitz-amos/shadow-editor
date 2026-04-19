@@ -3,10 +3,6 @@ import {GlobalState} from "../../global/GlobalState";
 import {DocumentModificationEvent} from "../../../editor/core/document/events/DocumentModificationEvent";
 import {Scheduler} from "../../scheduler/Scheduler";
 import {EditorSaveRequestEvent} from "../../../editor/events/EditorSaveRequestEvent";
-import {PersistedObject} from "../../persistence/transaction/PersistedObject";
-import {SyncPersistedModel} from "../sync/state/SyncPersistedModel";
-import {PersistedData} from "../../persistence/transaction/PersistedData";
-import {Updater} from "../../persistence/transaction/Updater";
 import {Logger, UseLogger} from "../../logging/Logger";
 
 /**
@@ -17,12 +13,10 @@ import {Logger, UseLogger} from "../../logging/Logger";
  */
 @Service
 @UseLogger("SaveService")
-export class SaveService implements PersistedObject<SyncPersistedModel> {
+export class SaveService {
     private static instance: SaveService;
 
     declare private logger: Logger;
-
-    private workspaces: SyncPersistedModel = {};
 
     public constructor() {
     }
@@ -34,28 +28,13 @@ export class SaveService implements PersistedObject<SyncPersistedModel> {
         return SaveService.instance;
     }
 
-    getPersistedKey(): string {
-        return "shadow.sync.save";
-    }
-
-    getPersistedModel(): SyncPersistedModel {
-        return {};
-    }
-
-    persist(updater: Updater): void {
-        updater.set("workspaces", this.workspaces);
-    }
-
-    load(data: PersistedData<SyncPersistedModel>): void {
-        this.workspaces = data.get("workspaces") || {};
-    }
-
     begin(): void {
         const eventBus = GlobalState.getMainEventBus();
 
         eventBus.subscribe(this, DocumentModificationEvent.SUBSCRIBER, (event) => {
             Scheduler.debounce(() => {
-                eventBus.syncPublish(new EditorSaveRequestEvent(event.getEditor(), event.getDocument().getAssociatedFile(), Date.now()));
+                let associatedFile = event.getDocument().getAssociatedFile();
+                if (associatedFile) eventBus.syncPublish(new EditorSaveRequestEvent(event.getEditor(), associatedFile, Date.now()));
             }, 1000)
         });
 

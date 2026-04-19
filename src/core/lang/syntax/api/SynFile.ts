@@ -10,7 +10,7 @@ import {WorkspaceFile} from "../../../workspace/filesystem/tree/WorkspaceFile";
  * @since 1.0.0
  */
 export interface SynFile extends SynNode, URILocatedResource {
-    getWorkspaceFile(): WorkspaceFile;
+    getWorkspaceFile(): WorkspaceFile | null;
 
-    getPath(): RelativePath;
+    getPath(): RelativePath | null;
 }

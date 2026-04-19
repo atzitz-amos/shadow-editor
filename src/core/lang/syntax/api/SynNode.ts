@@ -22,5 +22,5 @@ export interface SynNode extends URILocatedResource {
 
     _setParent(parent: SynElement): void;
 
-    isSynElement<T extends SynNode>(this: T): boolean;
+    isSynElement<T extends SynNode>(this: T): this is SynElement;
 }

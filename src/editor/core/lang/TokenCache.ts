@@ -1,4 +1,5 @@
 import {Token} from "../../../core/lang/syntax/builder/tokens/Token";
+import {StaticTokenStream, TokenStream} from "../../../core/lang/syntax/builder/tokens/TokenStream";
 
 /**
  * A cache for the incremental parser that stores the current tokens and their states.
@@ -134,5 +135,9 @@ export class TokenCache {
             else lo = mid + 1;
         }
         return lo;
+    }
+
+    public createTokenStream(): TokenStream {
+        return new StaticTokenStream(this.getTokens());
     }
 }

@@ -5,6 +5,7 @@ import {SynNode} from "../api/SynNode";
 import {EditorURI} from "../../../uri/EditorURI";
 import {WorkspaceFile} from "../../../workspace/filesystem/tree/WorkspaceFile";
 import {RelativePath} from "../../../workspace/filesystem/path/RelativePath";
+import {Document} from "../../../../editor/core/document/Document";
 
 /**
  *
@@ -15,19 +16,19 @@ import {RelativePath} from "../../../workspace/filesystem/path/RelativePath";
 export class SynFileImpl implements SynFile {
     private readonly children: SynNode[] = [];
 
-    constructor(private file: WorkspaceFile) {
+    constructor(private document: Document) {
     }
 
     getURI(): EditorURI {
-        return this.file.getURI();
+        return this.document.isAssociatedWithFile() ? EditorURI.invalid() : this.document.getAssociatedFile()!.getURI();
     }
 
     getSynFile(): SynFile {
         return this;
     }
 
-    getWorkspaceFile(): WorkspaceFile {
-        return this.file;
+    getWorkspaceFile(): WorkspaceFile | null {
+        return this.document.getAssociatedFile();
     }
 
     getChildren(): SynNode[] {
@@ -35,11 +36,11 @@ export class SynFileImpl implements SynFile {
     }
 
     getTextRange(): TextRange {
-        return new TextRange(0, this.file.getLength());
+        return this.document.getFullRange();
     }
 
-    getPath(): RelativePath {
-        return this.file.getPath();
+    getPath(): RelativePath | null {
+        return this.document.isAssociatedWithFile() ? this.document.getAssociatedFile()!.getPath() : null;
     }
 
     getParent(): SynElement | null {
@@ -49,7 +50,7 @@ export class SynFileImpl implements SynFile {
     _setParent(parent: SynElement): void {
     }
 
-    isSynElement<T extends SynNode>(this: T): boolean {
+    isSynElement<T extends SynNode>(this: T): this is SynElement {
         return false;
     }
 

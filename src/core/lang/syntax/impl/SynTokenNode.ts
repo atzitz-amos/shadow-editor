@@ -36,7 +36,7 @@ export class SynTokenNode implements SynNode {
         return this.token.getRange();
     }
 
-    isSynElement(): boolean {
+    isSynElement(): this is SynElement {
         return false;
     }
 

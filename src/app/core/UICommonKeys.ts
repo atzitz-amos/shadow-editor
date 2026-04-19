@@ -1,5 +1,6 @@
 import {CommonKeyImpl} from "../../core/utils/CommonKey";
 import {Editor} from "../../editor/Editor";
+import {ITab} from "../ui/tabs/tab/ITab";
 
 /**
  *
@@ -12,4 +13,5 @@ export class UICommonKey<T> extends CommonKeyImpl<T> {
 
 export class UICommonKeys {
     public static MAIN_EDITOR = new UICommonKey<Editor>("ui.main-editor");
+    public static CURRENT_TAB = new UICommonKey<ITab>("ui.current-tab");
 }

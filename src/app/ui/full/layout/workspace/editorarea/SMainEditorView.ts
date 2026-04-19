@@ -27,10 +27,12 @@ export class SMainEditorView extends UIComponent {
     private readonly editorElement: HTMLElement;
 
     @CommonKey(UICommonKeys.MAIN_EDITOR)
-    private currentEditor: Editor = new Editor({});
-    private readonly noOpenedEditorsView: SNoOpenedEditorView;
+    private currentEditor: Editor | null = null;
 
-    private hasNoOpenedEditor: boolean = true;
+    @CommonKey(UICommonKeys.CURRENT_TAB)
+    private currentTab: ITab | null = null;
+
+    private readonly noOpenedEditorsView: SNoOpenedEditorView;
 
     private resizeEpoch: number = 0;
     private readonly editorResizeObserver: ResizeObserver | null;
@@ -53,7 +55,7 @@ export class SMainEditorView extends UIComponent {
     }
 
     draw(): void {
-        if (this.hasNoOpenedEditor) {
+        if (this.currentTab == null) {
             this.editorElement.style.display = "none";
             this.metaRowView.dispose();
             if (!this.getChildren().includes(this.noOpenedEditorsView)) {
@@ -62,6 +64,12 @@ export class SMainEditorView extends UIComponent {
         } else {
             this.editorElement.style.display = "flex";
             this.noOpenedEditorsView.dispose();
+
+            if (!this.currentEditor) {
+                this.currentEditor = new Editor(this.currentTab.getDocument());
+            } else {
+                this.currentEditor.changeDocument(this.currentTab.getDocument());
+            }
 
             if (!this.getChildren().includes(this.metaRowView)) {
                 this.addChildBefore(this.metaRowView, this.editorElement);
@@ -84,14 +92,13 @@ export class SMainEditorView extends UIComponent {
 
     @UIHooks.react(TabHooks.TAB_ACTIVE)
     public onTabActive(tab: ITab) {
-        this.hasNoOpenedEditor = false;
-        this.currentEditor.attachDocument(tab.getDocument());
+        this.currentTab = tab;
         this.draw();
     }
 
     @UIHooks.react(TabHooks.TAB_CLOSE)
     public onTabHide(tab: ITab) {
-        this.hasNoOpenedEditor = true;
+        this.currentTab = null;
         this.draw();
     }
 
@@ -104,10 +111,10 @@ export class SMainEditorView extends UIComponent {
     private resizeWhenStable(epoch: number, attempt: number) {
         Scheduler.after(attempt === 0 ? 0 : SMainEditorView.RESIZE_RETRY_DELAY_MS, () => {
             if (epoch !== this.resizeEpoch) return;
-            if (this.hasNoOpenedEditor || !this.currentEditor.isAttached()) return;
+            if (!this.currentEditor || !this.currentEditor.isAttached()) return;
 
             const bbox = this.editorElement.getBoundingClientRect();
-            const charSize = this.currentEditor.view.getCharSize();
+            const charSize = this.currentEditor.getView().getCharSize();
             const hasLayout = this.editorElement.getClientRects().length > 0;
 
             const isReady = hasLayout

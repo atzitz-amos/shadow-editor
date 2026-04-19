@@ -29,7 +29,7 @@ export class MoveCaretLeftAction extends AbstractAction {
     run(ctx: KeybindContext) {
         const editor = ctx.requireEditor();
 
-        editor.caretModel.forEachCaret(caret => {
+        editor.getCaretModel().forEachCaret(caret => {
             let selectionDirection = caret.selectionModel.getDirection();
             if (!ctx.getEvent().shiftKey && selectionDirection !== SelectionDirection.UNKNOWN) {
                 handleClearSelection(caret, selectionDirection === SelectionDirection.RIGHT);
@@ -38,7 +38,7 @@ export class MoveCaretLeftAction extends AbstractAction {
             }
         });
 
-        editor.view.resetBlink();
+        editor.getView().resetBlink();
     }
 
 }
@@ -57,7 +57,7 @@ export class MoveCaretRightAction extends AbstractAction {
     run(ctx: KeybindContext) {
         const editor = ctx.requireEditor();
 
-        editor.caretModel.forEachCaret(caret => {
+        editor.getCaretModel().forEachCaret(caret => {
             let selectionDirection = caret.selectionModel.getDirection();
             if (!ctx.getEvent().shiftKey && selectionDirection !== SelectionDirection.UNKNOWN) {
                 handleClearSelection(caret, selectionDirection === SelectionDirection.LEFT);
@@ -65,7 +65,7 @@ export class MoveCaretRightAction extends AbstractAction {
                 caret.shiftRight(!ModifierKeyHolder.isShiftPressed);
             }
         });
-        editor.view.resetBlink();
+        editor.getView().resetBlink();
     }
 
 }
@@ -84,8 +84,8 @@ export class MoveCaretUpAction extends AbstractAction {
     run(ctx: KeybindContext) {
         const editor = ctx.requireEditor();
 
-        editor.view.resetBlink();
-        editor.caretModel.forEachCaret(caret => {
+        editor.getView().resetBlink();
+        editor.getCaretModel().forEachCaret(caret => {
             if (!ctx.getEvent().shiftKey && caret.selectionModel.getDirection() !== SelectionDirection.UNKNOWN) {
                 handleClearSelection(caret, caret.selectionModel.getDirection() === SelectionDirection.RIGHT);
             }
@@ -118,8 +118,8 @@ export class MoveCaretDownAction extends AbstractAction {
     run(ctx: KeybindContext) {
         const editor = ctx.requireEditor();
 
-        editor.view.resetBlink();
-        editor.caretModel.forEachCaret(caret => {
+        editor.getView().resetBlink();
+        editor.getCaretModel().forEachCaret(caret => {
             if (!ctx.getEvent().shiftKey && caret.selectionModel.getDirection() !== SelectionDirection.UNKNOWN) {
                 handleClearSelection(caret, caret.selectionModel.getDirection() === SelectionDirection.LEFT);
             }
@@ -151,8 +151,8 @@ export class MoveCaretToStartAction extends AbstractAction {
     run(ctx: KeybindContext) {
         const editor = ctx.requireEditor();
 
-        editor.view.resetBlink();
-        editor.caretModel.forEachCaret(caret => {
+        editor.getView().resetBlink();
+        editor.getCaretModel().forEachCaret(caret => {
             caret.myVertMovementPos = 0;
             caret.moveToLogical(new LogicalPosition(0, caret.getLogical().row));
         });
@@ -172,8 +172,8 @@ export class MoveCaretToEndAction extends AbstractAction {
     run(ctx: KeybindContext) {
         const editor = ctx.requireEditor();
 
-        editor.view.resetBlink();
-        editor.caretModel.forEachCaret(caret => {
+        editor.getView().resetBlink();
+        editor.getCaretModel().forEachCaret(caret => {
             let lineLength = editor.getOpenedDocument().getLineLength(caret.getLogical().row);
             caret.myVertMovementPos = lineLength;
             caret.moveToLogical(new LogicalPosition(
@@ -197,8 +197,8 @@ export class CtrlMoveCaretLeftAction extends AbstractAction {
     run(ctx: KeybindContext) {
         const editor = ctx.requireEditor();
 
-        editor.view.resetBlink();
-        editor.caretModel.forEachCaret(caret => {
+        editor.getView().resetBlink();
+        editor.getCaretModel().forEachCaret(caret => {
             const offset = CtrlMoveHelper.getOffsetToPreviousWord(caret.editor.getOpenedDocument(), caret.getOffset(), CtrlMoveHelper.DELIMITER);
             caret.moveToOffset(caret.getOffset() + offset);
         });
@@ -218,8 +218,8 @@ export class CtrlMoveCaretRightAction extends AbstractAction {
     run(ctx: KeybindContext) {
         const editor = ctx.requireEditor();
 
-        editor.view.resetBlink();
-        editor.caretModel.forEachCaret(caret => {
+        editor.getView().resetBlink();
+        editor.getCaretModel().forEachCaret(caret => {
             const offset = CtrlMoveHelper.getOffsetToNextWord(caret.editor.getOpenedDocument(), caret.getOffset(), CtrlMoveHelper.DELIMITER);
             caret.moveToOffset(caret.getOffset() + offset);
         });
