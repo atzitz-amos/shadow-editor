@@ -3,7 +3,8 @@ import {HTMLUtils} from "../../../../editor/utils/HTMLUtils";
 import {IPane} from "../pane/IPane";
 import {PaneDockPosition} from "../pane/PaneDockPosition";
 import {UIHooks} from "../../../../core/ui/engine/hooks/UIHooks";
-import {PaneHooks} from "../hooks/PaneHooks";
+
+import {PaneHooks} from "../../../core/UICommonHooks";
 
 /**
  *

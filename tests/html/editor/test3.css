@@ -1053,3 +1053,129 @@ body {
     color: #e4d4b0;
 }
 
+
+/* Clean modern style pass */
+
+:root {
+    --bg: #0d111a;
+    --surface-0: #101726;
+    --surface-1: #131c2d;
+    --surface-2: #172235;
+    --border: #273249;
+    --text: #e5ebf7;
+    --text-soft: #96a3bd;
+    --accent: #4f6fa8;
+}
+
+body {
+    background: var(--bg);
+    color: var(--text);
+}
+
+.shell-topbar,
+.column-header,
+.shell-footer,
+.project-pane-header {
+    background: var(--surface-0);
+    border-color: var(--border);
+    backdrop-filter: none;
+}
+
+.rail,
+.focus-column-left,
+.focus-column-structure {
+    background: var(--surface-0);
+    border-color: var(--border);
+}
+
+.topbar-search,
+.topbar-pulse,
+.pill-button,
+.project-filter,
+.project-scope,
+.pill-reading,
+.tag-chip,
+.footer-pill,
+.badge,
+.badge-soft {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    color: var(--text-soft);
+}
+
+.brand-sub,
+.workspace-count,
+.workspace-card-sub,
+.project-pane-meta,
+.timeline-time,
+.timeline-sub,
+.metrics-sub,
+.metrics-label,
+.footer-pill.soft,
+.overline {
+    color: var(--text-soft);
+}
+
+.workspace-card,
+.metrics-card,
+.project-menu-list {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    box-shadow: none;
+}
+
+.workspace-card-active,
+.tree-item.active,
+.column-tab-active,
+.rail-item-active {
+    background: var(--surface-2);
+    border-color: #334262;
+}
+
+.project-menu-list {
+    background: var(--surface-1);
+}
+
+.icon-button,
+.rail-item,
+.project-menu-item,
+.column-tab,
+.tree-item,
+.pill-button {
+    transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+
+.icon-button:hover,
+.rail-item:hover,
+.project-menu-item:hover,
+.column-tab:hover,
+.tree-item:hover,
+.pill-button:hover {
+    background: var(--surface-2);
+    color: var(--text);
+}
+
+.icon-button:focus-visible,
+.rail-item:focus-visible,
+.project-menu-item:focus-visible,
+.column-tab:focus-visible,
+.tree-item:focus-visible,
+.pill-button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+}
+
+.project-menu[open] .project-pane-action,
+.project-menu .project-pane-action:hover {
+    background: var(--surface-2);
+    border-color: #334262;
+    color: var(--text);
+}
+
+.show-tooltip::after,
+.show-tooltip::before {
+    background: var(--surface-1);
+    border-color: var(--border);
+    color: #d8e0f2;
+}
+

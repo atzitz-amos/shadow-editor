@@ -20,6 +20,7 @@ import {DistantGlobalState} from "./DistantGlobalState";
 import {WCPService} from "../threaded/wcp/WCPMetricsService";
 import {PaneManager} from "../../app/ui/panes/PaneManager";
 import {TabsManager} from "../../app/ui/tabs/TabsManager";
+import {UIWatched} from "../ui/engine/hooks/UIHooksHelper";
 
 /**
  * Provides a single class that regroups all useful singletons and global services of the application
@@ -31,6 +32,9 @@ import {TabsManager} from "../../app/ui/tabs/TabsManager";
 export class GlobalState {
     private static _isReady: boolean = false;
     private static shadowApp: ShadowApp;
+
+    @UIWatched(null)
+    private static d: number = 0;
 
     public static init(app: ShadowApp): void {
         this.shadowApp = app;

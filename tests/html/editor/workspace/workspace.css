@@ -9,7 +9,7 @@ body {
     overflow: hidden;
     font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     background: radial-gradient(circle at 0 0, #1b202c 0, transparent 50%),
-                linear-gradient(160deg, #050609 0, #10131c 45%, #050609 100%);
+    linear-gradient(160deg, #050609 0, #10131c 45%, #050609 100%);
     color: #e3e6f0;
 }
 
@@ -423,14 +423,95 @@ body {
     color: #c0c5d7;
 }
 
+
+.add-workspace-dialog {
+    position: relative;
+    width: min(430px, calc(100vw - 28px));
+    border: 1px solid #94a2cd94;
+    border-radius: 4px;
+    background: #1f232f;
+    box-shadow: 18px 18px 36px rgba(0, 0, 0, 0.48);
+    overflow: hidden;
+}
+
+.add-workspace-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    position: relative;
+    z-index: 1;
+    padding: 14px 16px 12px;
+    border-bottom: 1px solid #ffffff38;
+    background: #1f232f;
+}
+
+.add-workspace-dialog .icon-button {
+    width: 28px;
+    height: 28px;
+    border: 1px solid #a2b3e338;
+    border-radius: 8px;
+    color: #b8c4df;
+    background: #1b1e24;
+    transition: border-color 120ms ease, background-color 120ms ease, color 120ms ease;
+}
+
+.form-field input, .form-field select {
+    width: 100%;
+    border: 1px solid #81a8ff33;
+    border-radius: 8px;
+    background: #263246;
+    color: #dde5f8;
+    padding: 9px 10px;
+    font-size: 12px;
+    line-height: 1.3;
+    outline: none;
+    box-shadow: 1px 1px 2px #00000052;
+    transition: border-color 120ms ease, box-shadow 120ms ease, background-color 120ms ease;
+}
+
+.add-workspace-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    position: relative;
+    z-index: 1;
+    padding: 12px 16px 14px;
+    border-top: 1px solid #ffffff38;
+    background: #1f232f;
+}
+
+.ghost-button {
+    border: 1px solid #a2b3e35e;
+    border-radius: 999px;
+    background: #1b1e24;
+    color: #d3ddef;
+    padding: 7px 13px;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1;
+    cursor: pointer;
+    transition: background-color 120ms ease, border-color 120ms ease, transform 120ms ease;
+}
+
+.add-workspace-dialog .pill-button {
+    padding: 7px 13px;
+    border-color: #a2b3e35e;
+    background: #1b1e24;
+    color: #edf2ff;
+    font-size: 12px;
+    box-shadow: none;
+    transition: transform 120ms ease, background-color 120ms ease, border-color 120ms ease;
+}
+
+
 .add-workspace-overlay {
     position: fixed;
     inset: 0;
     z-index: 40;
     display: none;
-    align-items: flex-start;
+    align-items: center;
     justify-content: center;
-    padding-top: 72px;
+    padding: 20px;
 }
 
 .add-workspace-overlay.is-open {
@@ -441,68 +522,55 @@ body {
     position: absolute;
     inset: 0;
     border: 0;
-    background: rgba(5, 8, 14, 0.56);
-}
-
-.add-workspace-dialog {
-    position: relative;
-    width: min(440px, calc(100vw - 36px));
-    border: 1px solid #2a3248;
-    border-radius: 10px;
-    background: linear-gradient(180deg, #121928 0%, #0f1521 100%);
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55);
-    overflow: hidden;
-}
-
-.add-workspace-header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    padding: 12px 14px 10px;
-    border-bottom: 1px solid #21283b;
+    background: rgba(8, 11, 18, 0.58);
+    backdrop-filter: blur(3px);
 }
 
 .add-workspace-header h2 {
-    margin: 2px 0 0;
+    margin: 3px 0 0;
     font-size: 18px;
     font-weight: 600;
-    color: #edf2ff;
+    letter-spacing: 0;
+    color: #e9eefb;
+}
+
+.add-workspace-dialog .overline {
+    color: #8e99b1;
+    letter-spacing: 0.16em;
+}
+
+.add-workspace-dialog .icon-button:hover {
+    border-color: #3a4767;
+    background: #132038;
+    color: #dce6fb;
 }
 
 .add-workspace-body {
-    padding: 12px 14px;
+    position: relative;
+    z-index: 1;
+    padding: 14px 16px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
 }
 
 .form-field {
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 7px;
 }
 
 .form-label {
     font-size: 11px;
-    color: #95a0ba;
-}
-
-.form-field input,
-.form-field select {
-    width: 100%;
-    border: 1px solid #2a3247;
-    border-radius: 6px;
-    background: #0b111b;
-    color: #dfe6fb;
-    padding: 7px 9px;
-    font-size: 12px;
-    outline: none;
+    font-weight: 500;
+    color: #9ca9c5;
 }
 
 .form-field input:focus,
 .form-field select:focus {
-    border-color: #3d5c9c;
-    box-shadow: 0 0 0 2px rgba(74, 105, 168, 0.25);
+    border-color: #4f6798;
+    box-shadow: 0 0 0 2px rgba(95, 125, 184, 0.24);
+    background: #0e1a30;
 }
 
 .input-with-action {
@@ -521,32 +589,50 @@ body {
 }
 
 .checkbox-field {
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 9px;
+    padding: 9px 10px;
+    border: 1px solid #28334a;
+    border-radius: 8px;
+    background: #0c1525;
     font-size: 12px;
-    color: #b5bfd7;
+    color: #d3dcf4;
 }
 
 .checkbox-field input {
+    width: 14px;
+    height: 14px;
     accent-color: #7ea1ff;
 }
 
-.add-workspace-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
-    padding: 10px 14px 12px;
-    border-top: 1px solid #21283b;
+.add-workspace-dialog .pill-button i {
+    font-size: 12px;
 }
 
-.ghost-button {
-    border: 1px solid #2a3146;
-    border-radius: 999px;
-    background: #111727;
-    color: #cfd8ee;
-    padding: 5px 10px;
-    font-size: 11px;
-    cursor: pointer;
+.add-workspace-dialog .pill-button:hover {
+    border-color: #4c6392;
+    background: #27416f;
+}
+
+.ghost-button:hover {
+    border-color: #3f547c;
+    background: #142138;
+}
+
+.add-workspace-dialog .icon-button:active,
+.add-workspace-dialog .pill-button:active,
+.ghost-button:active {
+    transform: translateY(0);
+}
+
+.add-workspace-dialog .icon-button:focus-visible,
+.add-workspace-dialog .pill-button:focus-visible,
+.ghost-button:focus-visible,
+.form-field input:focus-visible,
+.form-field select:focus-visible,
+.checkbox-field input:focus-visible {
+    outline: 2px solid #7997d4;
+    outline-offset: 2px;
 }
 

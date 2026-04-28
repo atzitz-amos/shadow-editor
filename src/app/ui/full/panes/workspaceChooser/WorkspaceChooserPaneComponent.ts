@@ -1,4 +1,5 @@
 import {UIPaneComponent} from "../../../panes/ui/UIPaneComponent";
+import {WorkspaceService} from "../../../../../core/workspace/WorkspaceService";
 
 /**
  *
@@ -8,6 +9,7 @@ import {UIPaneComponent} from "../../../panes/ui/UIPaneComponent";
  */
 export class WorkspaceChooserPaneComponent extends UIPaneComponent {
     public draw(): void {
+        this.clearChildren();
         this.setInnerHTML(`
             <header class="workspace-list-header">
               <div>

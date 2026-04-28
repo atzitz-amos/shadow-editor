@@ -3,6 +3,7 @@ import {PersistedData} from "../persistence/transaction/PersistedData";
 import {PersistedObject} from "../persistence/transaction/PersistedObject";
 import {Updater} from "../persistence/transaction/Updater";
 import {Workspace} from "./Workspace";
+import {UIWatched} from "../ui/engine/hooks/UIHooksHelper";
 
 export type WorkspacePersistedData = {
     name: string;

@@ -1,8 +1,8 @@
 import {HTMLUtils} from "../../../../../../editor/utils/HTMLUtils";
 import {UIComponent} from "../../../../../../core/ui/engine/components/UIComponent";
 import {UIHooks} from "../../../../../../core/ui/engine/hooks/UIHooks";
-import {TabHooks} from "../../../../tabs/hooks/TabHooks";
 import {ITab} from "../../../../tabs/tab/ITab";
+import {TabHooks} from "../../../../../core/UICommonHooks";
 
 /**
  *

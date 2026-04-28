@@ -6,11 +6,10 @@ import {Scheduler} from "../../../../../../core/scheduler/Scheduler";
 import {UIComponent} from "../../../../../../core/ui/engine/components/UIComponent";
 import {CommonKey} from "../../../../../../core/utils/CommonKey";
 import {UICommonKeys} from "../../../../../core/UICommonKeys";
-import {UICommonHooks} from "../../../../../core/UICommonHooks";
+import {TabHooks, UICommonHooks} from "../../../../../core/UICommonHooks";
 import {UIHooks} from "../../../../../../core/ui/engine/hooks/UIHooks";
 import {SNoOpenedEditorView} from "./SNoOpenedEditorView";
 import {SMetaRowView} from "./SMetaRowView";
-import {TabHooks} from "../../../../tabs/hooks/TabHooks";
 import {ITab} from "../../../../tabs/tab/ITab";
 
 /**

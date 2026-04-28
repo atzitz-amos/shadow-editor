@@ -41,11 +41,11 @@
             import {EditorTab} from "./src/app/ui/tabs/tab/EditorTab";
             import JsLang from "./src/plugins/jsLang/lang/JsLang";
             import {Document} from "./src/editor/core/document/Document";
+            import {UIWatched} from "./src/core/ui/engine/hooks/UIHooksHelper";
 
             // Main entry point - launch the app and wait for startup to complete
             const app = await ShadowApp.launch(true);
             window.app = app;
-
 
             window.GlobalState = GlobalState;
 
