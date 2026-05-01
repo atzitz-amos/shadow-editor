@@ -8,12 +8,15 @@ import {DocumentModificationEvent} from "./events/DocumentModificationEvent";
 import {DocumentDeleteEvent} from "./events/DocumentDeleteEvent";
 import {WorkspaceFile} from "../../../core/workspace/filesystem/tree/WorkspaceFile";
 import {TokenCache} from "../lang/TokenCache";
+import {Scheduler} from "../../../core/scheduler/Scheduler";
+import {GlobalState} from "../../../core/global/GlobalState";
+import {DocumentSaveRequestEvent} from "./events/DocumentSaveRequestEvent";
 
 /**
  * Represents an opened file in the editor
  * Store the language, the line-breaks, the components and the AST of a file */
 export class Document {
-    private editor: Editor | undefined = undefined;
+    private editor: Editor | null = null;
 
     private data: EditorRawData;
     private file: WorkspaceFile | null = null;
@@ -185,6 +188,8 @@ export class Document {
             this.editor!.getEventBus().syncPublish(new DocumentModificationEvent(this, new TextRange(offset, offset), text, null));
             this.editor!.getEventBus().asyncPublish(new DocumentInsertEvent(this, offset, text));
         }
+
+        this.maybeSave();
     }
 
     public deleteAt(at: Offset, n: number): string {
@@ -198,6 +203,7 @@ export class Document {
             this.editor!.getEventBus().asyncPublish(new DocumentDeleteEvent(this, affectedRange));
         }
 
+        this.maybeSave();
         return deleted;
     }
 
@@ -256,5 +262,12 @@ export class Document {
             let lineEnd = (i + 1 < this.lineBreaks.length) ? this.lineBreaks[i + 1] - 1 : this.getTotalDocumentLength();
             this.lines.push(new LineData(this, i, lineStart, lineEnd));
         }
+    }
+
+    private maybeSave(): void {
+        if (!this.isAssociatedWithFile()) return;
+        Scheduler.debounce(() => {
+            GlobalState.getMainEventBus().asyncPublish(new DocumentSaveRequestEvent(this, this.getAssociatedFile()!, Date.now()));
+        }, 1000)
     }
 }

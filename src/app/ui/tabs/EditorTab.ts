@@ -1,6 +1,6 @@
-import {Document} from "../../../../editor/core/document/Document";
+import {Document} from "../../../editor/core/document/Document";
 import {ITab} from "./ITab";
-import {Registry} from "../../../../editor/core/Registry";
+import {Registry} from "../../../editor/core/Registry";
 
 /**
  *

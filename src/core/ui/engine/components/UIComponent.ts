@@ -1,5 +1,6 @@
 import {CommonKeyImpl, getCommonKeyValue, hasCommonKey} from "../../../utils/CommonKey";
 import {UIEnhancer} from "../enhancer/UIEnhancer";
+import {UIHooks} from "../listeners/hooks/UIHooks";
 
 
 export abstract class UIComponent {
@@ -13,6 +14,8 @@ export abstract class UIComponent {
     private parent: UIComponent | null = null;
     private disposed = false;
 
+    protected wasDrawn = false;
+
     public constructor(private readonly element: HTMLElement) {
         UIComponent.elementRegistry.set(element, this);
 
@@ -23,22 +26,6 @@ export abstract class UIComponent {
 
     public static fromElement(element: HTMLElement): UIComponent | undefined {
         return this.elementRegistry.get(element);
-    }
-
-    public static with(...enhancers: Constructor<UIEnhancer>[]): AbstractConstructor<UIComponent> {
-        return class extends UIComponent {
-            constructor(element: HTMLElement) {
-                super(element);
-
-                for (const enhancer of enhancers) {
-                    this.addEnhancer(enhancer);
-                }
-            }
-
-            public draw(): void {
-                throw new Error("Method not implemented.");
-            }
-        };
     }
 
     public getParent(): UIComponent | null {
@@ -116,6 +103,8 @@ export abstract class UIComponent {
 
         this.parent = null;
         this.root = null;
+
+        UIHooks.clearOwner(this);
     }
 
     public clearChildren(): void {
@@ -164,10 +153,18 @@ export abstract class UIComponent {
     protected drawChildren(): void {
         for (const child of this.children) {
             child.draw();
+            child.wasDrawn = true;
+        }
+    }
+
+    protected redraw(): void {
+        if (this.wasDrawn) { // Only redraw if it was drawn at least once before
+            this.draw();
         }
     }
 
     protected setInnerHTML(html: string): void {
+        this.clearChildren();
         this.getUnderlyingElement().innerHTML = html;
     }
 

@@ -2,7 +2,7 @@ import {UIComponent} from "../../../../core/ui/engine/components/UIComponent";
 import {HTMLUtils} from "../../../../editor/utils/HTMLUtils";
 import {IPane} from "../pane/IPane";
 import {PaneDockPosition} from "../pane/PaneDockPosition";
-import {UIHooks} from "../../../../core/ui/engine/hooks/UIHooks";
+import {UIHooks} from "../../../../core/ui/engine/listeners/hooks/UIHooks";
 
 import {PaneHooks} from "../../../core/UICommonHooks";
 

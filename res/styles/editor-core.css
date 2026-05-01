@@ -10,7 +10,7 @@
     box-sizing: border-box;
 }
 
-.editor div {
+.editor div:not(.editor-selection) {
     display: flex;
 }
 

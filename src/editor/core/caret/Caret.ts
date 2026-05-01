@@ -189,6 +189,9 @@ export class CaretModel {
     }
 
     clearAllCarets() {
+        for (const caret of this.carets) {
+            caret.remove();
+        }
         this.carets = [];
     }
 }

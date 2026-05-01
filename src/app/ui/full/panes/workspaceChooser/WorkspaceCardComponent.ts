@@ -18,7 +18,7 @@ export class WorkspaceCardComponent extends UIComponent {
         this.setInnerHTML(`
                 <div class="workspace-card-main">
                   <div class="workspace-card-title">${this.workspace.getName()}</div>
-                  <div class="workspace-card-sub"></div>
+                  <div class="workspace-card-sub">Typescript</div>
                 </div>
                 <div class="workspace-card-meta">
                   <span class="badge">detached</span>

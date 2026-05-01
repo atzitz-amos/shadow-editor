@@ -1,7 +1,7 @@
-import {UIHook} from "../../core/ui/engine/hooks/UIHook";
+import {UIHook} from "../../core/ui/engine/listeners/hooks/UIHook";
 import {IPane} from "../ui/panes/pane/IPane";
 import {PaneDockPosition} from "../ui/panes/pane/PaneDockPosition";
-import {ITab} from "../ui/tabs/tab/ITab";
+import {ITab} from "../ui/tabs/ITab";
 
 /**
  *

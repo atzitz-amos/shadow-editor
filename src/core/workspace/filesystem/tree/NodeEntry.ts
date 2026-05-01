@@ -1,4 +1,6 @@
 import {WorkspaceDirectory} from "./WorkspaceDirectory";
+import {RelativePath} from "../path/RelativePath";
+import {WorkspaceFile} from "./WorkspaceFile";
 
 /**
  *
@@ -7,12 +9,15 @@ import {WorkspaceDirectory} from "./WorkspaceDirectory";
  * @since 1.0.0
  */
 export interface NodeEntry {
-
     getHandle(): FileSystemHandle;
 
     getParent(): WorkspaceDirectory | null;
 
     getName(): string;
 
-    getPath(): void;
+    getPath(): RelativePath;
+
+    isDirectory(): this is WorkspaceDirectory;
+
+    isFile(): this is WorkspaceFile;
 }

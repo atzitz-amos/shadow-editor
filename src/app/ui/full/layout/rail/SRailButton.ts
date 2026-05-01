@@ -12,9 +12,11 @@ import {PaneManager} from "../../../panes/PaneManager";
 export class SRailButton extends UIComponent {
 
     constructor(private readonly id: string, title: string, icon: Icon) {
-        super(HTMLUtils.createElement("button.rail-item"));
+        super(HTMLUtils.createElement("button.rail-item.show-tooltip"));
 
-        this.getUnderlyingElement().title = title;
+        this.getUnderlyingElement().setAttribute("data-tooltip", title);
+        this.getUnderlyingElement().setAttribute("data-tooltip-position", "right");
+
         this.addChild(icon);
 
         this.addEventListener("click", () => {

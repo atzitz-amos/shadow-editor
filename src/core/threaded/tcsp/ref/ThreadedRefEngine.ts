@@ -28,6 +28,8 @@ export class ThreadedRefEngine {
         new WCPEndpoint<{ callChain: string }, { value: any }>("get_prop", 1000);
     private static readonly INVOKE_ENDPOINT =
         new WCPEndpoint<{ callChain: string, forwardedArgs: any[] }, { uuid: string }>("invoke", 1000);
+    private static readonly IS_DEFINED_ENDPOINT =
+        new WCPEndpoint<{ uuid: string }, { defined: boolean }>("is_defined", 1000);
 
     private static workerConnection: WConnection | null = null;
 
@@ -72,6 +74,11 @@ export class ThreadedRefEngine {
         });
 
         return response.value;
+    }
+
+    public static async isDefined(uuid: string): Promise<boolean> {
+        const response = await this.getWorkerConnection().send(ThreadedRefEngine.IS_DEFINED_ENDPOINT, {uuid});
+        return response.defined;
     }
 
     public static async createRef(name: string): Promise<string> {
@@ -127,6 +134,10 @@ export class ThreadedRefEngine {
             port.addEndpoint(ThreadedRefEngine.INVOKE_ENDPOINT, request => {
                 const {callChain, forwardedArgs} = request.getPayload();
                 return this.handleInvocationRequest(callChain, forwardedArgs, remote.getWorker());
+            });
+
+            port.addEndpoint(ThreadedRefEngine.IS_DEFINED_ENDPOINT, request => {
+                return {defined: this.registry.isDefined(request.getArg("uuid"))};
             });
         });
     }

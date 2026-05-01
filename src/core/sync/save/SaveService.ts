@@ -1,8 +1,6 @@
 import {Service} from "../../threaded/service/Service";
 import {GlobalState} from "../../global/GlobalState";
-import {DocumentModificationEvent} from "../../../editor/core/document/events/DocumentModificationEvent";
-import {Scheduler} from "../../scheduler/Scheduler";
-import {EditorSaveRequestEvent} from "../../../editor/events/EditorSaveRequestEvent";
+import {DocumentSaveRequestEvent} from "../../../editor/core/document/events/DocumentSaveRequestEvent";
 import {Logger, UseLogger} from "../../logging/Logger";
 
 /**
@@ -18,6 +16,8 @@ export class SaveService {
 
     declare private logger: Logger;
 
+    private notSavedFlag: boolean;
+
     public constructor() {
     }
 
@@ -31,26 +31,33 @@ export class SaveService {
     begin(): void {
         const eventBus = GlobalState.getMainEventBus();
 
-        eventBus.subscribe(this, DocumentModificationEvent.SUBSCRIBER, (event) => {
-            Scheduler.debounce(() => {
-                let associatedFile = event.getDocument().getAssociatedFile();
-                if (associatedFile) eventBus.syncPublish(new EditorSaveRequestEvent(event.getEditor(), associatedFile, Date.now()));
-            }, 1000)
+        eventBus.subscribe(this, DocumentSaveRequestEvent.SUBSCRIBER, (event) => {
+            this.tryAndSave(event);
         });
 
-        eventBus.subscribe(this, EditorSaveRequestEvent.SUBSCRIBER, (event) => {
-            this.tryAndSave(event);
+        window.addEventListener("beforeunload", e => {
+            if (this.notSavedFlag) {
+                e.preventDefault();
+            }
         });
     }
 
-    private async tryAndSave(event: EditorSaveRequestEvent) {
+    private setNotSavedFlag() {
+        this.notSavedFlag = true;
+    }
+
+    private removeNotSavedFlag() {
+        this.notSavedFlag = false;
+    }
+
+    private async tryAndSave(event: DocumentSaveRequestEvent) {
         const file = event.getFile();
         if (!file) {
             return;
         }
 
         try {
-            await file.save();
+            await file.save(event.getDocument().getTextContent());
             this.logger.debug(`Auto-saved file ${file.getPath().toString()} after modification.`);
         } catch (error) {
             this.logger.error(`Failed to auto-save file ${file.getPath().toString()}:`, error);

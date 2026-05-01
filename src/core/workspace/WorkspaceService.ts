@@ -3,7 +3,8 @@ import {PersistedData} from "../persistence/transaction/PersistedData";
 import {PersistedObject} from "../persistence/transaction/PersistedObject";
 import {Updater} from "../persistence/transaction/Updater";
 import {Workspace} from "./Workspace";
-import {UIWatched} from "../ui/engine/hooks/UIHooksHelper";
+import {UICommonMutators} from "../../app/core/UICommonMutators";
+import {UIMutators} from "../ui/engine/listeners/mutators/UIMutators";
 
 export type WorkspacePersistedData = {
     name: string;
@@ -19,7 +20,8 @@ export type WorkspacePersistedData = {
 export class WorkspaceService implements PersistedObject<WorkspacePersistedData> {
     private static readonly instance: WorkspaceService = new WorkspaceService();
 
-    private readonly workspaces: Map<string, Workspace> = new Map();
+    @UIMutators.mutates(UICommonMutators.WORKSPACE_LIST)
+    private readonly workspaces: Map<string, Workspace> = new Map<string, Workspace>();
 
     public static getInstance(): WorkspaceService {
         return WorkspaceService.instance;
@@ -55,5 +57,12 @@ export class WorkspaceService implements PersistedObject<WorkspacePersistedData>
 
     getAllWorkspaces(): Workspace[] {
         return Array.from(this.workspaces.values());
+    }
+
+    addWorkspace(name: string): void {
+        if (this.workspaces.has(name)) {
+            throw new Error(`Workspace with name ${name} already exists`);
+        }
+        this.workspaces.set(name, new Workspace(name));
     }
 }

@@ -23,11 +23,10 @@ import {InlayWidget} from "./ui/inline/inlay/InlayWidget";
 import {KeybindContext} from "../core/keybinds/context/KeybindContext";
 import {GlobalState} from "../core/global/GlobalState";
 import {Scheduler} from "../core/scheduler/Scheduler";
-import * as console from "node:console";
 
 export class Editor {
     private static ID_COUNTER = 0;
-    private id: number;
+    private readonly id: number;
 
     private readonly view: View;
     private readonly coordinateMapper: EditorCoordinateMapper;
@@ -89,12 +88,17 @@ export class Editor {
     changeDocument(document: Document) {
         this.document.saveCaretOffset();
 
-        this.document.linkEditor(null);
-        this.document = document;
-        this.document.linkEditor(this);
+        console.log(`Changing document in editor ${this.id} to ${document.getAssociatedFile()?.getPath() || "untitled"}`);
 
         this.caretModel.clearAllCarets();
+
+        this.document.linkEditor(null);
+        this.document = document;
+
+        this.document.linkEditor(this);
         this.caretModel.addCaret(this.offsetToLogical(document.getSavedCaretOffset()));
+
+        this.view.ensureCaretVisible();
 
         this.repaintView();
     }

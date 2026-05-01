@@ -7,10 +7,10 @@ import {UIComponent} from "../../../../../../core/ui/engine/components/UICompone
 import {CommonKey} from "../../../../../../core/utils/CommonKey";
 import {UICommonKeys} from "../../../../../core/UICommonKeys";
 import {TabHooks, UICommonHooks} from "../../../../../core/UICommonHooks";
-import {UIHooks} from "../../../../../../core/ui/engine/hooks/UIHooks";
+import {UIHooks} from "../../../../../../core/ui/engine/listeners/hooks/UIHooks";
 import {SNoOpenedEditorView} from "./SNoOpenedEditorView";
 import {SMetaRowView} from "./SMetaRowView";
-import {ITab} from "../../../../tabs/tab/ITab";
+import {ITab} from "../../../../tabs/ITab";
 
 /**
  *

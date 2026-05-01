@@ -1,5 +1,9 @@
 import {UIPaneComponent} from "../../../panes/ui/UIPaneComponent";
-import {WorkspaceService} from "../../../../../core/workspace/WorkspaceService";
+import {GlobalState} from "../../../../../core/global/GlobalState";
+import {WorkspaceCardComponent} from "./WorkspaceCardComponent";
+import {UIMutators} from "../../../../../core/ui/engine/listeners/mutators/UIMutators";
+import {MutatationType} from "../../../../../core/ui/engine/listeners/mutators/UIMutator";
+import {UICommonMutators} from "../../../../core/UICommonMutators";
 
 /**
  *
@@ -9,12 +13,13 @@ import {WorkspaceService} from "../../../../../core/workspace/WorkspaceService";
  */
 export class WorkspaceChooserPaneComponent extends UIPaneComponent {
     public draw(): void {
-        this.clearChildren();
+        const workspaces = GlobalState.getWorkspaceService().getAllWorkspaces();
+
         this.setInnerHTML(`
             <header class="workspace-list-header">
               <div>
                 <div class="overline">WORKSPACES</div>
-                <div class="workspace-count">3 open · 1 detached</div>
+                <div class="workspace-count">${workspaces.length} available${GlobalState.getCurrentWorkspace() == null ? "" : " · 1 open"}</div>
               </div>
               <button class="pill-button">
                 <i class="fa-solid fa-plus"></i>
@@ -22,34 +27,6 @@ export class WorkspaceChooserPaneComponent extends UIPaneComponent {
               </button>
             </header>
             <div class="workspace-cards">
-              <article class="workspace-card workspace-card-active">
-                <div class="workspace-card-main">
-                  <div class="workspace-card-title">shadow-editor</div>
-                  <div class="workspace-card-sub">TypeScript · UX sandbox</div>
-                </div>
-                <div class="workspace-card-meta">
-                  <span class="badge">main</span>
-                  <span class="badge badge-soft">+2 ~1</span>
-                </div>
-              </article>
-              <article class="workspace-card">
-                <div class="workspace-card-main">
-                  <div class="workspace-card-title">shadow-runtime</div>
-                  <div class="workspace-card-sub">Runtime harness</div>
-                </div>
-                <div class="workspace-card-meta">
-                  <span class="badge">release/1.2</span>
-                </div>
-              </article>
-              <article class="workspace-card">
-                <div class="workspace-card-main">
-                  <div class="workspace-card-title">shadow-lab</div>
-                  <div class="workspace-card-sub">Experiments · detached</div>
-                </div>
-                <div class="workspace-card-meta">
-                  <span class="badge badge-soft">detached</span>
-                </div>
-              </article>
             </div>
 
             <div class="workspace-footer">
@@ -65,5 +42,17 @@ export class WorkspaceChooserPaneComponent extends UIPaneComponent {
                 </span>
               </div>
             </div>`);
+
+        const workspaceCardsContainer = this.getUnderlyingElement().querySelector(".workspace-cards") as HTMLElement;
+        for (let workspace of workspaces) {
+            this.addChild(new WorkspaceCardComponent(workspaceCardsContainer, workspace));
+        }
+
+        this.drawChildren();
+    }
+
+    @UIMutators.on(UICommonMutators.WORKSPACE_LIST, MutatationType.MUTATED)
+    private onWorkspaceListMutated() {
+        this.draw();
     }
 }

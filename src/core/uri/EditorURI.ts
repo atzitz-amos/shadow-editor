@@ -47,7 +47,7 @@ export class EditorURI {
     }
 
     static invalid() {
-        return new EditorURI("invalid", URITargetType.PROJECT);
+        return new EditorURI("invalid", URITargetType.FILE);
     }
 
     getURI(): string {

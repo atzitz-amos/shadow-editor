@@ -23,6 +23,20 @@ export class TRefRegistry {
         return this.registry.get(uuid) ?? window[uuid];
     }
 
+    isDefined(uuid: string): boolean {
+        if (this.registry.has(uuid)) {
+            const value = this.registry.get(uuid);
+            return value !== null && value !== undefined;
+        }
+
+        if (Object.prototype.hasOwnProperty.call(window, uuid)) {
+            const value = (window as any)[uuid];
+            return value !== null && value !== undefined;
+        }
+
+        return false;
+    }
+
     save(obj: any): string {
         const uuid = UUIDHelper.newUUID();
         this.registry.set(uuid, obj);

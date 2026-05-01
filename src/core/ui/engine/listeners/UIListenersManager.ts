@@ -1,4 +1,4 @@
-import {UIHook} from "./UIHook";
+import {UIHook} from "./hooks/UIHook";
 
 type HookHandler<Args extends unknown[]> = (...args: Args) => unknown;
 
@@ -19,15 +19,15 @@ type OwnerSubscription = {
  * @date 4/9/2026
  * @since 1.0.0
  */
-export class UIHookManager {
-    private static instance: UIHookManager;
+export class UIListenersManager {
+    private static instance: UIListenersManager;
 
     private readonly listeners = new Map<UIHook<any>, Set<RegisteredSubscription>>();
     private readonly ownerListeners = new WeakMap<object, Set<OwnerSubscription>>();
 
-    public static getInstance(): UIHookManager {
+    public static getInstance(): UIListenersManager {
         if (!this.instance) {
-            this.instance = new UIHookManager();
+            this.instance = new UIListenersManager();
         }
         return this.instance;
     }
@@ -106,8 +106,6 @@ export class UIHookManager {
         for (const subscription of Array.from(subscriptions)) {
             (subscription.handler as HookHandler<Args>)(...args);
         }
-
-        console.log(`Triggered hook ${hook.id}`);
     }
 
     private getOrCreateHookSubscriptions(hook: UIHook<any>): Set<RegisteredSubscription> {

@@ -12,7 +12,7 @@ export type Ref<T> = {
     [K in keyof T]: T[K] extends (...args: any[]) => any
         ? PromisifiedFunction<T[K]>
         : T[K];
-} & { __ref_id: string };
+} & { __ref_id: string, isDefined(): Promise<boolean> };
 
 
 export class RefCallbackRegistry {
@@ -82,6 +82,9 @@ export class RefUtils {
                     throw new Error("Cannot query symbol of reference");
                 }
                 if (prop === "then") return undefined;
+                if (prop === "isDefined") {
+                    return async () => ThreadedRefEngine.isDefined(target.__ref_id);
+                }
 
                 const callable: any = async (...args: any[]) => {
                     const serializedArgs = args.map(arg => RefUtils.serializeInvocationArg(arg));

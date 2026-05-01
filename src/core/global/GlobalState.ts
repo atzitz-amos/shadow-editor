@@ -2,7 +2,7 @@
 
 import {ShadowApp} from "../../app/ShadowApp";
 import {Workspace} from "../workspace/Workspace";
-import {GlobalProject} from "./GlobalProject";
+import {CurrentWorkspaceHelper} from "./CurrentWorkspaceHelper";
 import {EventBus} from "../events/EventBus";
 import {PluginManager} from "../plugins/PluginManager";
 import {LangSupport} from "../lang/LangSupport";
@@ -16,11 +16,12 @@ import {ShadowUI} from "../../app/ui/ShadowUI";
 
 // Load DistantGlobalState service
 import {DistantGlobalState} from "./DistantGlobalState";
-// Load WCPService tracker
+
 import {WCPService} from "../threaded/wcp/WCPMetricsService";
 import {PaneManager} from "../../app/ui/panes/PaneManager";
 import {TabsManager} from "../../app/ui/tabs/TabsManager";
-import {UIWatched} from "../ui/engine/hooks/UIHooksHelper";
+import {WorkspaceService} from "../workspace/WorkspaceService";
+import {SaveService} from "../sync/save/SaveService";
 
 /**
  * Provides a single class that regroups all useful singletons and global services of the application
@@ -32,9 +33,6 @@ import {UIWatched} from "../ui/engine/hooks/UIHooksHelper";
 export class GlobalState {
     private static _isReady: boolean = false;
     private static shadowApp: ShadowApp;
-
-    @UIWatched(null)
-    private static d: number = 0;
 
     public static init(app: ShadowApp): void {
         this.shadowApp = app;
@@ -57,7 +55,7 @@ export class GlobalState {
     }
 
     public static getCurrentWorkspace(): Workspace {
-        return GlobalProject.getInstance()!;
+        return CurrentWorkspaceHelper.getInstance()!;
     }
 
     public static getMainEventBus(): EventBus {
@@ -84,7 +82,7 @@ export class GlobalState {
         return ActionManager.getInstance();
     }
 
-    public static getWCPService(): WCPService {
+    public static getWCPMetricsService(): WCPService {
         return WCPService.getInstance();
     }
 
@@ -102,6 +100,14 @@ export class GlobalState {
 
     public static getMainEditor(): Editor {
         return GlobalState.getUI().getMainEditor();
+    }
+
+    public static getWorkspaceService(): WorkspaceService {
+        return WorkspaceService.getInstance();
+    }
+
+    public static getSaveService(): SaveService {
+        return SaveService.getInstance();
     }
 
     public static setReady(flag: boolean) {

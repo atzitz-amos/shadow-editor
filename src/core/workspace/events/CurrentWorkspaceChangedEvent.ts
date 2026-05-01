@@ -8,7 +8,7 @@ import {EventSubscriber} from "../../events/EventSubscriber";
  * @date 11/14/2025
  * @since 1.0.0
  */
-export class GlobalProjectChangedEvent implements EventBase {
+export class CurrentWorkspaceChangedEvent implements EventBase {
     public static readonly SUBSCRIBER = EventSubscriber.create(this);
 
     getBubbleDirection(): BubbleDirection {

@@ -1,5 +1,5 @@
 import {UIHook} from "./UIHook";
-import {UIHookManager} from "./UIHookManager";
+import {UIListenersManager} from "../UIListenersManager";
 
 /**
  *
@@ -8,7 +8,7 @@ import {UIHookManager} from "./UIHookManager";
  * @since 1.0.0
  */
 export class UIHooks {
-    private static readonly manager = UIHookManager.getInstance();
+    private static readonly manager = UIListenersManager.getInstance();
 
     public static react<This extends object, Args extends unknown[]>(hook: UIHook<Args>);
     public static react<This extends object, Args extends unknown[]>(...hooks: UIHook<Args>[]);
@@ -20,7 +20,7 @@ export class UIHooks {
             if (context.private) {
                 throw new Error("@UIHooks.react cannot be used on private methods.");
             }
-
+    
             if (Array.isArray(hook)) {
                 for (const h of hook) {
                     doAddHook(h);
@@ -36,7 +36,6 @@ export class UIHooks {
                         context.name
                     );
                 });
-
             }
         };
     }
@@ -56,5 +55,4 @@ export class UIHooks {
     public static clearOwner(owner: object): void {
         this.manager.clearOwner(owner);
     }
-
 }

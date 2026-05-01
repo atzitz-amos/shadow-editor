@@ -3,6 +3,7 @@ import {WorkspaceDirectory} from "./WorkspaceDirectory";
 import {WorkspaceFS} from "../WorkspaceFS";
 import {RelativePath} from "../path/RelativePath";
 import {EditorURI} from "../../../uri/EditorURI";
+import {URITargetType} from "../../../uri/URITargetType";
 
 /**
  *
@@ -11,7 +12,6 @@ import {EditorURI} from "../../../uri/EditorURI";
  * @since 1.0.0
  */
 export class WorkspaceFile implements NodeEntry {
-
     public constructor(private fs: WorkspaceFS, private name: string, private parent: WorkspaceDirectory, private handle: FileSystemFileHandle) {
     }
 
@@ -41,17 +41,25 @@ export class WorkspaceFile implements NodeEntry {
         return await this.handle.getFile().then(file => file.text());
     }
 
-    async save() {
+    async save(content: string) {
         const writable = await this.handle.createWritable();
-        await writable.write(await this.getTextContent());
+        await writable.write(content);
         await writable.close();
     }
 
     getURI(): EditorURI {
-        return null as any; // TODO
+        return new EditorURI(this.getPath().toString(), URITargetType.FILE);
     }
 
     getLength() {
         return 0; // TODO
+    }
+
+    isDirectory(): this is WorkspaceDirectory {
+        return false;
+    }
+
+    isFile(): this is WorkspaceFile {
+        return true;
     }
 }

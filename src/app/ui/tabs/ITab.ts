@@ -1,4 +1,4 @@
-import {Document} from "../../../../editor/core/document/Document";
+import {Document} from "../../../editor/core/document/Document";
 
 /**
  *

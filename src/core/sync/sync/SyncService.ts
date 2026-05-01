@@ -38,6 +38,10 @@ export class SyncService implements DistantServiceImpl {
         this.logger.info("Starting sync...");
 
         const workspace = await DistantGlobalState.getCurrentWorkspace();
+        if (!await workspace.isDefined()) {
+            this.logger.info("Aborting sync: no workspace...");
+            return;
+        }
         const fs = await workspace.getFS();
 
         console.log(await fs.recursiveGetAllFiles());

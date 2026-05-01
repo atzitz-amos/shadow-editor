@@ -18,7 +18,7 @@
 .footer-pill {
     display: inline-flex;
     justify-content: center;
-    align-items: center;
+    align-items: baseline;
     gap: 5px;
     border-radius: 999px;
     padding: 2px 7px;

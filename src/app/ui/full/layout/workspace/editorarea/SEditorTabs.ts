@@ -1,8 +1,9 @@
 import {HTMLUtils} from "../../../../../../editor/utils/HTMLUtils";
 import {UIComponent} from "../../../../../../core/ui/engine/components/UIComponent";
-import {UIHooks} from "../../../../../../core/ui/engine/hooks/UIHooks";
-import {ITab} from "../../../../tabs/tab/ITab";
+import {UIHooks} from "../../../../../../core/ui/engine/listeners/hooks/UIHooks";
+import {ITab} from "../../../../tabs/ITab";
 import {TabHooks} from "../../../../../core/UICommonHooks";
+import {TabsManager} from "../../../../tabs/TabsManager";
 
 /**
  *
@@ -27,6 +28,11 @@ export class SEditorTabs extends UIComponent {
             if (tab.isActive()) {
                 tabElement.classList.add("column-tab-active");
             }
+
+            tabElement.addEventListener("click", () => {
+                TabsManager.getInstance().open(tab);
+            });
+
             this.addHtmlElement(tabElement);
             this.tabsElement.set(tab.getId(), tabElement);
         }

@@ -1,6 +1,7 @@
 import {NodeEntry} from "./NodeEntry";
 import {WorkspaceFS} from "../WorkspaceFS";
 import {RelativePath} from "../path/RelativePath";
+import {WorkspaceFile} from "./WorkspaceFile";
 
 /**
  *
@@ -15,6 +16,10 @@ export class WorkspaceDirectory implements NodeEntry {
 
     async createDir(name: string): Promise<WorkspaceDirectory> {
         return await this.fs.createDir(this, name);
+    }
+
+    async createFile(name: string) {
+        return await this.fs.createFile(this, name);
     }
 
     getName(): string {
@@ -36,7 +41,15 @@ export class WorkspaceDirectory implements NodeEntry {
         return this.parent;
     }
 
-    async createFile(name: string) {
-        return await this.fs.createFile(this, name);
+    isDirectory(): this is WorkspaceDirectory {
+        return true;
+    }
+
+    isFile(): this is WorkspaceFile {
+        return false;
+    }
+
+    async getChildren() {
+        return await this.fs.getChildren(this);
     }
 }

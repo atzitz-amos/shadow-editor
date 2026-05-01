@@ -1,6 +1,6 @@
 import {Service} from "../../../core/threaded/service/Service";
-import {ITab} from "./tab/ITab";
-import {UIHooks} from "../../../core/ui/engine/hooks/UIHooks";
+import {ITab} from "./ITab";
+import {UIHooks} from "../../../core/ui/engine/listeners/hooks/UIHooks";
 import {TabHooks} from "../../core/UICommonHooks";
 
 /**

@@ -1,4 +1,4 @@
-import {ITab} from "../../app/ui/tabs/tab/ITab";
+import {ITab} from "../../app/ui/tabs/ITab";
 
 export type HasId = { id: string };
 

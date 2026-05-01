@@ -20,7 +20,7 @@ export class WorkspaceFS {
 
     private linkedHandle: FileSystemDirectoryHandle | null = null;
 
-    private root: WorkspaceDirectory | undefined = undefined;
+    private root: WorkspaceDirectory;
 
     /**
      * Cache of already materialized entries by parent directory handle + child name.
@@ -42,10 +42,11 @@ export class WorkspaceFS {
     }
 
     public getRoot(): WorkspaceDirectory {
-        if (this.root === undefined) {
-            this.root = new WorkspaceDirectory(this, this.name, null, this.virtualHandle);
-        }
         return this.root;
+    }
+
+    async init() {
+        this.root = new WorkspaceDirectory(this, this.name, null, await this.virtualHandle.getDirectoryHandle(this.name, {create: true}));
     }
 
     public setLinkedHandle(handle: FileSystemDirectoryHandle) {
@@ -61,9 +62,7 @@ export class WorkspaceFS {
             arg = await this.getDir(arg);
         }
         const handle = await FSImpl.createSubDir(arg.getHandle(), name);
-        const dir = new WorkspaceDirectory(this, name, arg, handle);
-        this.cacheChild(arg.getHandle(), name, dir);
-        return dir;
+        return this.getOrCreateChild(arg, name, handle) as WorkspaceDirectory;
     }
 
     async createFile(parent: WorkspaceDirectory, name: string): Promise<WorkspaceFile>;
@@ -75,15 +74,18 @@ export class WorkspaceFS {
             arg = await this.getDir(arg);
         }
         const handle = await FSImpl.createFile(arg.getHandle(), name);
-        const file = new WorkspaceFile(this, name, arg, handle);
-        this.cacheChild(arg.getHandle(), name, file);
-        return file;
+        return this.getOrCreateChild(arg, name, handle) as WorkspaceFile;
     }
 
     async getEntry(path: RelativePathInput): Promise<NodeEntry> {
         const rp = RelativePath.of(path);
         if (rp.isEmpty()) {
             return this.getRoot();
+        }
+
+        if (rp.getSegments()[0] === this.name) {
+            // Special case for root: if the first segment matches the workspace name, skip it.
+            return this.getEntry(RelativePath.of(rp.getSegments().slice(1)));
         }
 
         // Walk directories until reaching the parent of the leaf name.
@@ -104,18 +106,14 @@ export class WorkspaceFS {
                 // Prefer directory first, then file.
                 try {
                     const dirHandle = await current.getHandle().getDirectoryHandle(seg, {create: false});
-                    const dir = new WorkspaceDirectory(this, seg, current, dirHandle);
-                    this.cacheChild(current.getHandle(), seg, dir);
-                    return dir;
+                    return this.getOrCreateChild(current, seg, dirHandle) as WorkspaceDirectory;
                 } catch (e) {
                     if (!WorkspaceFS.isNotFoundError(e)) throw e;
                 }
 
                 try {
                     const fileHandle = await current.getHandle().getFileHandle(seg, {create: false});
-                    const file = new WorkspaceFile(this, seg, current, fileHandle);
-                    this.cacheChild(current.getHandle(), seg, file);
-                    return file;
+                    return this.getOrCreateChild(current, seg, fileHandle) as WorkspaceFile;
                 } catch (e) {
                     if (WorkspaceFS.isNotFoundError(e)) {
                         throw new Error(`Entry does not exist at path: ${rp.toString()}`);
@@ -136,9 +134,7 @@ export class WorkspaceFS {
 
             try {
                 const dirHandle = await current.getHandle().getDirectoryHandle(seg, {create: false});
-                const dir = new WorkspaceDirectory(this, seg, current, dirHandle);
-                this.cacheChild(current.getHandle(), seg, dir);
-                current = dir;
+                current = this.getOrCreateChild(current, seg, dirHandle) as WorkspaceDirectory;
             } catch (e) {
                 if (WorkspaceFS.isNotFoundError(e)) {
                     throw new Error(`Directory does not exist at path: ${RelativePath.of(segments.slice(0, i + 1)).toString()}`);
@@ -297,14 +293,11 @@ export class WorkspaceFS {
         const files: WorkspaceFile[] = [];
 
         for await (const [name, handle] of dir.getHandle().entries()) {
-            if (handle.kind === "file") {
-                const file = new WorkspaceFile(this, name, dir, handle as FileSystemFileHandle);
-                this.cacheChild(dir.getHandle(), name, file);
-                files.push(file);
-            } else if (handle.kind === "directory") {
-                const subdir = new WorkspaceDirectory(this, name, dir, handle as FileSystemDirectoryHandle);
-                this.cacheChild(dir.getHandle(), name, subdir);
-                const subFiles = await this.recursiveGetAllFiles(subdir);
+            const entry = this.getOrCreateChild(dir, name, handle);
+            if (entry instanceof WorkspaceFile) {
+                files.push(entry);
+            } else if (entry instanceof WorkspaceDirectory) {
+                const subFiles = await this.recursiveGetAllFiles(entry);
                 files.push(...subFiles);
             }
         }
@@ -314,6 +307,7 @@ export class WorkspaceFS {
 
     async getMetadata(path: RelativePathInput): Promise<NodeMetadata>;
     async getMetadata(file: WorkspaceFile): Promise<NodeMetadata>;
+
     async getMetadata(arg: RelativePathInput | WorkspaceFile): Promise<NodeMetadata | null> {
         if (typeof arg === "string" || Array.isArray(arg) || arg instanceof RelativePath) {
             return this.metadataStore.getMetadata(RelativePath.of(arg));
@@ -321,6 +315,35 @@ export class WorkspaceFS {
         return this.metadataStore.getMetadata(arg.getPath());
     }
 
+    async getChildren(parent: WorkspaceDirectory): Promise<NodeEntry[]> {
+        const entries: NodeEntry[] = [];
+        const handle = parent.getHandle();
+        for await (const [name, childHandle] of handle.entries()) {
+            entries.push(this.getOrCreateChild(parent, name, childHandle));
+        }
+        return entries;
+    }
+
+    private getOrCreateChild(parent: WorkspaceDirectory, name: string, handle: FileSystemHandle): NodeEntry {
+        const parentHandle = parent.getHandle();
+        const cached = this.getCachedChild(parentHandle, name);
+        if (cached) {
+            const wantsDirectory = handle.kind === "directory";
+            const matchesKind = wantsDirectory ? cached instanceof WorkspaceDirectory : cached instanceof WorkspaceFile;
+            if (matchesKind) {
+                return cached;
+            }
+        }
+
+        let entry: NodeEntry;
+        if (handle.kind === "directory") {
+            entry = new WorkspaceDirectory(this, name, parent, handle as FileSystemDirectoryHandle);
+        } else {
+            entry = new WorkspaceFile(this, name, parent, handle as FileSystemFileHandle);
+        }
+        this.cacheChild(parentHandle, name, entry);
+        return entry;
+    }
 
     private getCachedChild(parentHandle: FileSystemDirectoryHandle, name: string): NodeEntry | undefined {
         return this.childrenCache.get(parentHandle)?.get(name);

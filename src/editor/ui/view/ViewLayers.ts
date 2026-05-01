@@ -162,6 +162,12 @@ class CaretSelectionElement {
         this.selectionEndEl = HTMLUtils.createElement('div.editor-selection.selection-end', layer.element) as HTMLDivElement;
     }
 
+    dispose() {
+        this.selectionStartEl.remove();
+        this.selectionBodyEl.remove();
+        this.selectionEndEl.remove();
+    }
+
     render() {
         this.selectionStartEl.style.display = 'none';
         this.selectionBodyEl.style.display = 'none';
@@ -222,11 +228,14 @@ class SelectionLayer {
         });
 
         this.view.getEditor().getEventBus().subscribe(this, CaretRemovedEvent.SUBSCRIBER, e => {
+            this.selectionElements.get(e.getCaret().id)?.dispose();
             this.selectionElements.delete(e.getCaret().id);
+            console.log("Removed", this.selectionElements);
         });
 
         this.view.getEditor().getEventBus().subscribe(this, CaretAddedEvent.SUBSCRIBER, e => {
             this.selectionElements.set(e.getCaret().id, new CaretSelectionElement(this, e.getCaret()));
+            console.log("Added", this.selectionElements);
         });
     }
 

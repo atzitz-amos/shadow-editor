@@ -1,7 +1,7 @@
 import {Service} from "../../../core/threaded/service/Service";
 import {IPane} from "./pane/IPane";
 import {PaneDockPosition} from "./pane/PaneDockPosition";
-import {UIHooks} from "../../../core/ui/engine/hooks/UIHooks";
+import {UIHooks} from "../../../core/ui/engine/listeners/hooks/UIHooks";
 
 import {PaneHooks} from "../../core/UICommonHooks";
 

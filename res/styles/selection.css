@@ -3,6 +3,8 @@
     background: var(--editor-selection-color);
     height: var(--editor-line-height);
     translate: 3px 0;
+
+    display: none;
 }
 
 .selection-body {

@@ -18,6 +18,11 @@ export interface RelativePathNormalizationOptions {
     forbidAboveRoot?: boolean;
     /** When true, allows empty segments from segments[] inputs (they will be ignored). Default: true. */
     ignoreEmptySegments?: boolean;
+
+    /**
+     * When set, if the first segment of the input matches this string, it will be ignored.
+     */
+    ignoreRootName?: string;
 }
 
 /**
@@ -90,6 +95,7 @@ export class RelativePath {
     private static normalizeSegments(raw: readonly string[], options: RelativePathNormalizationOptions): string[] {
         const forbidAboveRoot = options.forbidAboveRoot !== false;
         const ignoreEmpty = options.ignoreEmptySegments !== false;
+        const ignoreRootName = options.ignoreRootName;
 
         const out: string[] = [];
         for (const seg0 of raw) {
@@ -117,6 +123,11 @@ export class RelativePath {
             RelativePath.assertValidSegment(seg);
             out.push(seg);
         }
+
+        if (ignoreRootName && out.length > 0 && out[0] === ignoreRootName) {
+            out.shift();
+        }
+
         return out;
     }
 
