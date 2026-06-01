@@ -40,4 +40,30 @@ export class MetadataStore {
         }
         return null;
     }
+
+    public renamePath(oldPath: RelativePath, newPath: RelativePath): void {
+        const oldKey = oldPath.toString();
+        const newKey = newPath.toString();
+
+        if (oldKey === newKey) {
+            return;
+        }
+
+        const next = new Map<string, NodeMetadata>();
+        const subtreePrefix = oldKey.length === 0 ? "" : `${oldKey}/`;
+        for (const [key, value] of this.cache.entries()) {
+            if (key === oldKey) {
+                next.set(newKey, value);
+            } else if (subtreePrefix.length > 0 && key.startsWith(subtreePrefix)) {
+                next.set(newKey + key.slice(oldKey.length), value);
+            } else {
+                next.set(key, value);
+            }
+        }
+
+        this.cache.clear();
+        for (const [key, value] of next.entries()) {
+            this.cache.set(key, value);
+        }
+    }
 }

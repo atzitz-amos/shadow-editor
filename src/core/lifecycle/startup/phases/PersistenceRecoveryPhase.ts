@@ -1,7 +1,7 @@
 import {AbstractStartupPhase} from "../StartupPhase";
 import {PersistenceModel} from "../../../persistence/PersistenceModel";
 import {PersistenceStrategy} from "../../../persistence/PersistenceStrategy";
-import {PersistedObject} from "../../../persistence/transaction/PersistedObject";
+import {PersistedObject} from "../../../persistence/objects/PersistedObject";
 
 /**
  * Phase that recovers persisted data from the database.
@@ -16,7 +16,7 @@ export class PersistenceRecoveryPhase extends AbstractStartupPhase {
     readonly priority = 20;
     readonly critical = true;
 
-    constructor(private readonly persistedObjects: PersistedObject<any>[]) {
+    constructor(private readonly persistedObjects: PersistedObject[]) {
         super();
     }
 

@@ -6,7 +6,7 @@
 import {TextColor} from "../../../../editor/ui/highlighter/style/TextColor";
 
 export class JsColorScheme {
-    public static readonly DEFAULT_COLOR = TextColor.of("#d5dae6");
+    public static readonly DEFAULT_COLOR = TextColor.of("#aeb0b6");
     public static readonly PUNCTUATION_COLOR = TextColor.of("#d5dae6");
     public static readonly KEYWORD_COLOR = TextColor.of("#7ca7ec");
     public static readonly STRING_COLOR = TextColor.of("#e3bd82");

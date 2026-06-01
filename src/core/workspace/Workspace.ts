@@ -4,8 +4,9 @@ import {URITargetType} from "../uri/URITargetType";
 import {WorkspaceFS} from "./filesystem/WorkspaceFS";
 import {GlobalState} from "../global/GlobalState";
 import {WorkspaceFileSystemLoadedEvent} from "./events/WorkspaceFileSystemLoadedEvent";
+import {Serializable, SerializableType} from "../persistence/serializable/Serializable";
 
-export class Workspace implements URILocatedResource {
+export class Workspace implements URILocatedResource, Serializable {
     private readonly name: string;
 
     private fs: WorkspaceFS;
@@ -24,6 +25,10 @@ export class Workspace implements URILocatedResource {
         return new this(name);
     }
 
+    public static deserializer(data: { name: string }): Workspace {
+        return new Workspace(data.name);
+    }
+
     getName(): string {
         return this.name;
     }
@@ -34,5 +39,9 @@ export class Workspace implements URILocatedResource {
 
     getFS(): WorkspaceFS {
         return this.fs;
+    }
+
+    serialize(): SerializableType {
+        return {"name": this.name};
     }
 }

@@ -1,6 +1,6 @@
 import {Lifecycle} from "../../lifecycle/Lifecycle";
-import {PersistedObject} from "../../persistence/transaction/PersistedObject";
 import {ThreadedUtils} from "../ThreadedUtils";
+import {PersistedObject} from "../../persistence/objects/PersistedObject";
 
 /**
  * Represents a service. Must be a singleton, which will be registered to the Lifecycle of the app.
@@ -32,8 +32,26 @@ export function Service<T extends Constructor<ServiceImpl> & { getInstance(): In
             Lifecycle.getInstance().addService(ctor.getInstance());
 
             if (ctor.prototype.hasOwnProperty("getPersistedKey") && ctor.prototype.hasOwnProperty("persist") && ctor.prototype.hasOwnProperty("load")) {
-                Lifecycle.getInstance().addPersistedObject(<PersistedObject<any>>ctor.getInstance());
+                Lifecycle.getInstance().addPersistedObject(<PersistedObject>ctor.getInstance());
             }
+        }
+    });
+}
+
+/**
+ * A decorator to indicate that the class is a persisted object provider. It expects a singleton
+ * that implements PersistedObject<T> and will register only the persisted object with the Lifecycle.
+ * Uses queueMicrotask to defer registration until after module initialization to avoid circular dependency issues.
+ */
+export function PersistedClass<T extends Constructor<PersistedObject> & { getInstance(): InstanceType<T> }>(
+    ctor: T,
+    _context: ClassDecoratorContext<T>
+) {
+    // Defer registration to next microtask to avoid "Cannot access before initialization" errors
+
+    queueMicrotask(() => {
+        if (!ThreadedUtils.isWorkerThread()) {
+            Lifecycle.getInstance().addPersistedObject(<PersistedObject>ctor.getInstance());
         }
     });
 }

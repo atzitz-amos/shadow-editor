@@ -52,4 +52,14 @@ export class HTMLUtils {
         }
         return div;
     }
+
+    static measure(element: HTMLElement, parent: HTMLElement = document.body): DOMRect {
+        const clone = element.cloneNode(true) as HTMLElement;
+        clone.style.position = 'absolute';
+        clone.style.visibility = 'hidden';
+        parent.appendChild(clone);
+        const rect = clone.getBoundingClientRect();
+        parent.removeChild(clone);
+        return rect;
+    }
 }

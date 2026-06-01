@@ -1,7 +1,8 @@
-import {PersistedObject} from "../transaction/PersistedObject";
 import {Logger, UseLogger} from "../../logging/Logger";
-import {PersistedData} from "../transaction/PersistedData";
-import {Updater} from "../transaction/Updater";
+import {PersistedObject} from "../objects/PersistedObject";
+import {Deserializer} from "../serializable/Deserializer";
+import {Serialized} from "../serializable/Serializable";
+import {Serializer} from "../serializable/Serializer";
 
 /**
  *
@@ -14,6 +15,7 @@ export class Database {
     private declare readonly logger: Logger;
 
     private readonly db: string;
+    private static readonly STORE_ENTRY_ID = "root";
 
     constructor(db: string) {
         this.db = db;
@@ -28,7 +30,7 @@ export class Database {
         })
     }
 
-    async persist(obj: PersistedObject<any>): Promise<void> {
+    async persist(obj: PersistedObject): Promise<void> {
         const storeName = obj.getPersistedKey();
         this.logger.debug("Persisting object to store: " + storeName);
 
@@ -42,13 +44,13 @@ export class Database {
 
         const transaction = db.transaction([storeName], 'readwrite');
         const store = transaction.objectStore(storeName);
-        const updater = new Updater(store);
 
-        obj.persist(updater);
-        await updater.flush();
+        const serialized = obj.persist(new Serializer());
+        const data = JSON.stringify(serialized);
+        const req = store.put({id: Database.STORE_ENTRY_ID, value: data});
 
         return new Promise((resolve, reject) => {
-            transaction.oncomplete = () => {
+            req.onsuccess = () => {
                 this.logger.debug("Persist complete for store: " + storeName);
                 db.close();
                 resolve();
@@ -60,7 +62,7 @@ export class Database {
         });
     }
 
-    async upgrade(objects: PersistedObject<any>[]) {
+    async upgrade(objects: PersistedObject[]) {
         this.logger.debug("Starting database upgrade...");
 
         const desiredStores = new Set(objects.map(obj => obj.getPersistedKey()));
@@ -110,7 +112,7 @@ export class Database {
         });
     }
 
-    async recover(objects: PersistedObject<any>[]) {
+    async recover(objects: PersistedObject[]) {
         this.logger.debug("Starting data recovery for " + objects.length + " objects...");
 
         const db = await this.connect();
@@ -132,8 +134,8 @@ export class Database {
             }
 
             const data = await this.loadStoreData(transaction.objectStore(storeName));
-            obj.load(data);
-            this.logger.debug("Recovered " + data.size + " items from store: " + storeName);
+            obj.load(new Deserializer(), data);
+            this.logger.debug("Store " + storeName + " recovery done");
         }
 
         db.close();
@@ -170,184 +172,33 @@ export class Database {
         this.logger.debug("All data cleared");
     }
 
-    private loadStoreData<T>(store: IDBObjectStore): Promise<PersistedData<T>> {
+    private loadStoreData(store: IDBObjectStore): Promise<Serialized> {
         return new Promise((resolve, reject) => {
-            const req = store.getAll();
+            const req = store.get(Database.STORE_ENTRY_ID);
             req.onerror = () => reject(req.error);
             req.onsuccess = () => {
-                const data = new Map<string, T>();
-                for (const item of req.result) {
-                    if (item && item.id !== undefined) {
-                        // Unwrap value if it was stored via set() method
-                        const value = 'value' in item ? item.value : item;
-                        data.set(item.id, value);
-                    }
+                if (req.result?.value) {
+                    resolve(JSON.parse(req.result.value));
+                    return;
                 }
-                resolve(data);
+                const fallbackReq = store.getAll();
+                fallbackReq.onerror = () => reject(fallbackReq.error);
+                fallbackReq.onsuccess = () => {
+                    resolve(fallbackReq.result[0]?.value ? JSON.parse(fallbackReq.result[0].value) : null);
+                };
             };
         });
     }
 
-    private upgradeExistingStores(db: IDBDatabase, objects: PersistedObject<any>[], storeNames: DOMStringList): Promise<void> {
+    private upgradeExistingStores(db: IDBDatabase, objects: PersistedObject[], storeNames: DOMStringList): Promise<void> {
         return new Promise(async (resolve, reject) => {
             if (storeNames.length === 0) {
                 return resolve();
             }
             const transaction = db.transaction([...storeNames], 'readwrite');
 
-            for (const obj of objects) {
-                await this.tryUpgradeStore(transaction.objectStore(obj.getPersistedKey()), obj);
-            }
-
             transaction.onerror = () => reject(transaction.error);
             transaction.oncomplete = () => resolve();
         });
-    }
-
-    private tryUpgradeStore(store: IDBObjectStore, obj: PersistedObject<any>) {
-        return new Promise((resolve, reject) => {
-            this.logger.debug("Beginning store upgrade: " + obj.getPersistedKey());
-
-            let req = store.getAll();
-            req.onerror = () => reject(req.error);
-            req.onsuccess = (event) => {
-                const data = (event.target as IDBRequest).result;
-                const model = obj.getPersistedModel();
-
-                let pendingUpdates = 0;
-                let completed = 0;
-
-                const checkCompletion = () => {
-                    if (completed === pendingUpdates) {
-                        this.logger.debug("Store upgrade complete: " + obj.getPersistedKey() + " (" + pendingUpdates + " items updated)");
-                        resolve(undefined);
-                    }
-                };
-
-                for (const item of data) {
-                    const result = this.upgradeItem(item, model);
-                    if (result.changed) {
-                        pendingUpdates++;
-                        const putReq = store.put(result.value);
-                        putReq.onsuccess = () => {
-                            completed++;
-                            checkCompletion();
-                        };
-                        putReq.onerror = () => reject(putReq.error);
-                    }
-                }
-
-                if (pendingUpdates === 0) {
-                    this.logger.debug("Store upgrade complete: " + obj.getPersistedKey() + " (no changes needed)");
-                    resolve(undefined);
-                }
-            };
-        });
-    }
-
-    private upgradeItem(item: any, model: any): { changed: boolean, value: any } {
-        if (model === null || model === undefined) {
-            return {changed: false, value: item};
-        }
-
-        // Model is a primitive type (string, number, boolean, etc.)
-        if (typeof model !== 'object') {
-            if (item === null || item === undefined) {
-                return {changed: true, value: this.getDefaultForType(model)};
-            }
-            return {changed: false, value: item};
-        }
-
-        // Model is an array - model contains one element representing the schema of each list item
-        if (Array.isArray(model)) {
-            if (!Array.isArray(item)) {
-                return {changed: true, value: []};
-            }
-            if (model.length === 0) {
-                return {changed: false, value: item};
-            }
-            const elementModel = model[0];
-            let anyChanged = false;
-            const upgradedArray = item.map((el: any) => {
-                const result = this.upgradeItem(el, elementModel);
-                if (result.changed) anyChanged = true;
-                return result.value;
-            });
-            return {changed: anyChanged, value: anyChanged ? upgradedArray : item};
-        }
-
-        // Model is an object with key:value pairs
-        if (typeof item !== 'object' || item === null) {
-            return {changed: true, value: this.createDefaultFromModel(model)};
-        }
-
-        let anyChanged = false;
-        const upgraded = {...item};
-        const addedFields: string[] = [];
-        for (const key of Object.keys(model)) {
-            if (!(key in upgraded)) {
-                // Missing field - initialize with default
-                upgraded[key] = this.createDefaultFromModel(model[key]);
-                addedFields.push(key);
-                anyChanged = true;
-            } else {
-                // Recursively upgrade nested objects/arrays
-                const result = this.upgradeItem(upgraded[key], model[key]);
-                if (result.changed) {
-                    upgraded[key] = result.value;
-                    anyChanged = true;
-                }
-            }
-        }
-        if (addedFields.length > 0) {
-            this.logger.debug("Added missing fields: [" + addedFields.join(", ") + "]");
-        }
-        return {changed: anyChanged, value: anyChanged ? upgraded : item};
-    }
-
-    private createDefaultFromModel(model: any): any {
-        if (model === null || model === undefined) {
-            return null;
-        }
-
-        // Primitive type indicators
-        if (typeof model === 'string') {
-            return '';
-        }
-        if (typeof model === 'number') {
-            return 0;
-        }
-        if (typeof model === 'boolean') {
-            return false;
-        }
-
-        // Array - return empty array
-        if (Array.isArray(model)) {
-            return [];
-        }
-
-        // Object - create with default values for each key
-        if (typeof model === 'object') {
-            const result: any = {};
-            for (const key of Object.keys(model)) {
-                result[key] = this.createDefaultFromModel(model[key]);
-            }
-            return result;
-        }
-
-        return null;
-    }
-
-    private getDefaultForType(model: any): any {
-        if (typeof model === 'string') {
-            return '';
-        }
-        if (typeof model === 'number') {
-            return 0;
-        }
-        if (typeof model === 'boolean') {
-            return false;
-        }
-        return null;
     }
 }

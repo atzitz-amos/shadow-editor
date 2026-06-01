@@ -10,7 +10,7 @@ import {TabHooks, UICommonHooks} from "../../../../../core/UICommonHooks";
 import {UIHooks} from "../../../../../../core/ui/engine/listeners/hooks/UIHooks";
 import {SNoOpenedEditorView} from "./SNoOpenedEditorView";
 import {SMetaRowView} from "./SMetaRowView";
-import {ITab} from "../../../../tabs/ITab";
+import {ITab} from "../../../../../core/tabs/ITab";
 
 /**
  *

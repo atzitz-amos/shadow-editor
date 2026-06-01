@@ -1,4 +1,3 @@
-import {PersistedObject} from "../persistence/transaction/PersistedObject";
 import {ServiceImpl} from "../threaded/service/Service";
 import {Logger, UseLogger} from "../logging/Logger";
 import {StartupPhase} from "./startup/StartupPhase";
@@ -9,6 +8,8 @@ import {ShadowApp} from "../../app/ShadowApp";
 import {LifecycleStartedEvent} from "./events/LifecycleStartedEvent";
 import {ProcessManager} from "../threaded/process/manager/ProcessManager";
 import {DistantServiceImpl} from "../threaded/service/DistantService";
+import {PersistedObject} from "../persistence/objects/PersistedObject";
+import {PersistenceModel} from "../persistence/PersistenceModel";
 
 /**
  * The lifecycle of the application, manages the persistence of PersistedObject,
@@ -29,7 +30,7 @@ export class Lifecycle {
 
     private readonly services: ServiceImpl[] = [];
     private readonly distantServices: DistantServiceImpl[] = [];
-    private readonly persistedObjects: PersistedObject<any>[] = [];
+    private readonly persistedObjects: PersistedObject[] = [];
 
     private readonly phases: StartupPhase[] = [];
     private started: boolean = false;
@@ -70,7 +71,7 @@ export class Lifecycle {
     /**
      * Register a persisted object to be recovered during the PersistenceRecoveryPhase.
      */
-    addPersistedObject(obj: PersistedObject<any>) {
+    addPersistedObject(obj: PersistedObject) {
         this.persistedObjects.push(obj);
     }
 
@@ -205,8 +206,12 @@ export class Lifecycle {
     /**
      * Get all registered persisted objects.
      */
-    getPersistedObjects(): readonly PersistedObject<any>[] {
+    getPersistedObjects(): readonly PersistedObject[] {
         return this.persistedObjects;
+    }
+
+    triggerPersist() {
+        PersistenceModel.getInstance().persist(this.persistedObjects);
     }
 
     private async registerBuiltInPhases(app: ShadowApp) {

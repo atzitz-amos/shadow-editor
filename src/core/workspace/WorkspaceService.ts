@@ -1,14 +1,14 @@
 import {Service} from "../threaded/service/Service";
-import {PersistedData} from "../persistence/transaction/PersistedData";
-import {PersistedObject} from "../persistence/transaction/PersistedObject";
-import {Updater} from "../persistence/transaction/Updater";
 import {Workspace} from "./Workspace";
 import {UICommonMutators} from "../../app/core/UICommonMutators";
 import {UIMutators} from "../ui/engine/listeners/mutators/UIMutators";
+import {PersistedObject} from "../persistence/objects/PersistedObject";
+import {Serializer} from "../persistence/serializable/Serializer";
+import {Serialized} from "../persistence/serializable/Serializable";
+import {Deserializer} from "../persistence/serializable/Deserializer";
+import {UnsafeFlagsService} from "../sync/flags/UnsafeFlagsService";
+import {UnsafeFlags} from "../sync/flags/UnsafeFlags";
 
-export type WorkspacePersistedData = {
-    name: string;
-};
 
 /**
  *
@@ -17,7 +17,7 @@ export type WorkspacePersistedData = {
  * @since 1.0.0
  */
 @Service
-export class WorkspaceService implements PersistedObject<WorkspacePersistedData> {
+export class WorkspaceService implements PersistedObject {
     private static readonly instance: WorkspaceService = new WorkspaceService();
 
     @UIMutators.mutates(UICommonMutators.WORKSPACE_LIST)
@@ -35,23 +35,17 @@ export class WorkspaceService implements PersistedObject<WorkspacePersistedData>
         return "shadow.workspace.list";
     }
 
-    getPersistedModel(): WorkspacePersistedData {
-        return {
-            name: ""
-        };
+    persist(serializer: Serializer): Serialized {
+        return serializer.serializeArray(this.workspaces.values().toArray());
     }
 
-    persist(updater: Updater): void {
-        for (let workspace of this.workspaces.values()) {
-            updater.set(workspace.getName(), {
-                name: workspace.getName()
-            });
-        }
-    }
+    load(deserializer: Deserializer, data: Serialized): void {
+        if (!data) return;
+        deserializer.use(Workspace, Workspace.deserializer)
 
-    load(data: PersistedData<WorkspacePersistedData>): void {
-        for (let value of data.values()) {
-            this.workspaces.set(value.name, new Workspace(value.name));
+        const workspaces: Workspace[] = deserializer.deserializeList(data);
+        for (const workspace of workspaces) {
+            this.workspaces.set(workspace.getName(), workspace);
         }
     }
 
@@ -64,5 +58,7 @@ export class WorkspaceService implements PersistedObject<WorkspacePersistedData>
             throw new Error(`Workspace with name ${name} already exists`);
         }
         this.workspaces.set(name, new Workspace(name));
+
+        UnsafeFlagsService.flag(UnsafeFlags.PERSISTENCE);
     }
 }

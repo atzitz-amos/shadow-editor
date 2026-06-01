@@ -5,7 +5,7 @@ import {Gutter} from "../gutter/Gutter";
 import {ViewLayers} from "./ViewLayers";
 import {EditorScrollBar} from "../scrollbar/ScrollBar";
 import {HTMLUtils} from "../../utils/HTMLUtils";
-import {OverlayWidget} from "../inline/overlay/OverlayWidget";
+import {OverlayWidget} from "../inline/widget/overlay/OverlayWidget";
 
 /**
  * Responsible for painting the view of the editor when content is changed or updated.
@@ -81,7 +81,7 @@ export class ViewPainter {
             const spans: HTMLSpanElement[] = [];
 
 
-            if (range.end >= document.getTotalDocumentLength()) {
+            if (range.end > document.getTotalDocumentLength()) {
                 console.warn("Warning: Skipping invalid overlay (" + overlay.getName() + ") because it has " +
                     "an invalid range: " + overlay.getRange().toString())
                 continue;
@@ -90,12 +90,12 @@ export class ViewPainter {
             let start = document.getLineStart(range.start);
             let elementStart = range.start - start;
 
-            while (start <= range.end) {
+            while (start < range.end) {
                 let end = document.getLineEnd(start);
 
                 const line = document.getLineAt(start).getLineNumber();
                 if (line >= this.view.getScroll().scrollYLines - 1 && line < this.view.getScroll().scrollYLines + 1 + this.view.getVisualLineCount()) {
-                    let element = this.paintOverlay(overlay, elementStart, Math.min(range.end, end) - start);
+                    let element = this.paintOverlay(overlay, start, elementStart, Math.min(range.end, end) - start);
                     spans.push(element);
 
                     const lineNo = line - this.view.getScroll().scrollYLines + 1;
@@ -137,7 +137,7 @@ export class ViewPainter {
         return this.scrollBar;
     }
 
-    private paintOverlay(overlay: OverlayWidget, start: number, end: number): HTMLSpanElement {
+    private paintOverlay(overlay: OverlayWidget, offset: number, start: number, end: number): HTMLSpanElement {
         const span = HTMLUtils.createElement<HTMLSpanElement>("span.overlay-widget");
         span.classList.add(...overlay.getClassList());
         span.style.zIndex = overlay.getDrawPriority().toString();
@@ -145,6 +145,9 @@ export class ViewPainter {
         let width = end - start;
         span.style.left = HTMLUtils.px(this.view.getCharSize() * start);
         span.style.width = HTMLUtils.px(width * this.view.getCharSize());
+
+        span.dataset["start"] = (offset + start).toString();
+        span.dataset["end"] = (end + offset).toString();
 
         return span;
     }

@@ -1,8 +1,8 @@
-import {AbstractPane} from "../../../panes/pane/AbstractPane";
-import {PaneDockPosition} from "../../../panes/pane/PaneDockPosition";
+import {AbstractPane} from "../../../../core/panes/pane/AbstractPane";
+import {PaneDockPosition} from "../../../../core/panes/pane/PaneDockPosition";
 import {Icon} from "../../../../../core/ui/icons/Icon";
 import {FaIcon} from "../../../../../core/ui/icons/FaIcon";
-import {UIPaneComponent} from "../../../panes/ui/UIPaneComponent";
+import {UIPaneComponent} from "../../../../core/panes/ui/UIPaneComponent";
 import {ProjectFilesPaneComponent} from "./ProjectFilesPaneComponent";
 
 /**

@@ -149,4 +149,15 @@ export class EditorCoordinateMapper {
     xyToLogical(point: XYPoint): LogicalPosition {
         return this.visualToLogical(this.xyToNearestVisual(point));
     }
+
+    yToLine(y: number) {
+        const lineHeight = this.view.getLineHeight();
+        const scrollYLines = this.view.scroll.scrollYOffset === 0 ? this.view.scroll.scrollYLines : this.view.scroll.scrollYLines - 1;
+
+        let line = Math.floor((y + this.view.scroll.scrollYOffset) / lineHeight) + scrollYLines;
+        if (line < 0) line = 0;
+        else if (line >= this.editor.getOpenedDocument().getLineCount()) line = this.editor.getOpenedDocument().getLineCount() - 1;
+
+        return line;
+    }
 }

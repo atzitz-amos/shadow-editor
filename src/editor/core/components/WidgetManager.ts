@@ -4,8 +4,8 @@ import {GutterLine} from "../../ui/gutter/components/GutterLine";
 import {Editor} from "../../Editor";
 import {WidgetRenderer} from "./WidgetRenderer";
 import {HighlightHolder} from "../../ui/highlighter/HighlightHolder";
-import {OverlayWidget} from "../../ui/inline/overlay/OverlayWidget";
-import {InlayWidget} from "../../ui/inline/inlay/InlayWidget";
+import {OverlayWidget} from "../../ui/inline/widget/overlay/OverlayWidget";
+import {InlayWidget} from "../../ui/inline/widget/inlay/InlayWidget";
 
 
 /**

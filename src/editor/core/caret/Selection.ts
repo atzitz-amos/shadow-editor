@@ -50,7 +50,7 @@ export class SelectionModel {
 
     onCaretMove(): void {
         // TODO: introduce parameter `shouldEnableSelection` to indicate whether shift is pressed
-        if (!ModifierKeyHolder.isShiftPressed && !ModifierKeyHolder.isDragging) {
+        if (!ModifierKeyHolder.isShiftPressed() && !ModifierKeyHolder.isDragging()) {
             this.setStart(this.caret.getLogical())
             return this.clear();
         }

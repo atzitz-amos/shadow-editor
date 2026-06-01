@@ -75,9 +75,20 @@ export class TokenCache {
         return this.tokens;
     }
 
+    setTokens(tokens: Token[]) {
+        this.tokens.length = tokens.length;
+        for (let i = 0; i < tokens.length; i++) {
+            this.tokens[i] = tokens[i];
+        }
+    }
+
     // --------------------
     // Binary-search helpers
     // --------------------
+
+    public createTokenStream(): TokenStream {
+        return new StaticTokenStream(this.getTokens());
+    }
 
     /** index of token containing pos, or nearest token to the left (insertion point - 1) */
     private findIndexContainingOrBefore(pos: Offset): number {
@@ -135,9 +146,5 @@ export class TokenCache {
             else lo = mid + 1;
         }
         return lo;
-    }
-
-    public createTokenStream(): TokenStream {
-        return new StaticTokenStream(this.getTokens());
     }
 }

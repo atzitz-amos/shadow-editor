@@ -21,7 +21,7 @@ export abstract class LanguageBase implements ExtensionPointSupplier {
         return this._instance;
     }
 
-    public abstract getName(): string;
+    public abstract getDisplayName(): string;
 
     // Not yet supported
     public getIcon(): string {

@@ -43,4 +43,8 @@ export interface HTMLView {
     removeClass(cls: string): void;
 
     addEventListener(event: string, listener: (e: any) => void): unknown;
+
+    getElementsAt(x: int, y: int): HTMLElement[];
+
+    getBBox(): DOMRect;
 }

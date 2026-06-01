@@ -1,8 +1,8 @@
 import {ServiceImpl} from "./Service";
 import {Lifecycle} from "../../lifecycle/Lifecycle";
-import {PersistedObject} from "../../persistence/transaction/PersistedObject";
 import {ThreadedUtils} from "../ThreadedUtils";
 import {Launchable} from "../Launchable";
+import {PersistedObject} from "../../persistence/objects/PersistedObject";
 
 export interface DistantServiceImpl extends ServiceImpl, Launchable {
     /**
@@ -24,7 +24,7 @@ export function DistantService<T extends Constructor<DistantServiceImpl> & {
             Lifecycle.getInstance().addDistantService(ctor.getInstance());
 
             if (ctor.prototype.hasOwnProperty("getPersistedKey") && ctor.prototype.hasOwnProperty("persist") && ctor.prototype.hasOwnProperty("load")) {
-                Lifecycle.getInstance().addPersistedObject(<PersistedObject<any>>ctor.getInstance());
+                Lifecycle.getInstance().addPersistedObject(<PersistedObject>ctor.getInstance());
             }
         } else {
             ctor.getInstance().begin();

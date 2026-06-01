@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="UTF-8">
@@ -14,7 +15,6 @@
         <div class="editor-c2"></div>
         <script type="module">
             import {TextRange} from "./src/editor/core/coordinate/TextRange";
-            import {SerializationUtils} from "./src/editor/core/serializable/SerializationUtils";
             import {JsLexicalGrammar} from "./src/plugins/jsLang/lang/lexer/JsLexicalGrammar";
             import {RegExpLexer} from "./src/core/lang/syntax/builder/lexer/RegExprLexer";
             import {JsGrammar} from "./src/plugins/jsLang/lang/parser/JsGrammar";
@@ -38,10 +38,17 @@
             import {CommonKeyImpl} from "./src/core/utils/CommonKey";
             import {WorkspaceChooserPane} from "./src/app/ui/full/panes/workspaceChooser/WorkspaceChooserPane";
             import {BlankPane} from "./src/app/ui/full/panes/blank/BlankPane";
-            import {EditorTab} from "./src/app/ui/tabs/EditorTab";
+            import {EditorTab} from "./src/app/core/tabs/EditorTab";
             import JsLang from "./src/plugins/jsLang/lang/JsLang";
             import {Document} from "./src/editor/core/document/Document";
             import {ProjectFilesPane} from "./src/app/ui/full/panes/projectFiles/ProjectFilesPane";
+            import {SerializationUtils} from "./src/core/persistence/serializable/SerializationUtils";
+            import {SimpleTooltipPopup} from "./src/editor/ui/popups/tooltip/SimpleTooltipPopup";
+            import {IntSetting} from "./src/core/settings/base/IntSetting";
+            import {SettingBase} from "./src/core/settings/base/SettingBase";
+
+            window.SimpleTooltipPopup = SimpleTooltipPopup;
+            console.log(SerializationUtils.getSerializableClassName(SettingBase))
 
             // Main entry point - launch the app and wait for startup to complete
             const app = await ShadowApp.launch(true);
@@ -87,8 +94,6 @@
                 window.JsLang = JsLang;
 
                 window.JsGr = JsLexicalGrammar;
-                window.RegLex = RegExpLexer;
-                window.JsLex = new RegLex(JsGr);
                 window.JsIncrLex = JsIncrLexer;
                 window.DocumentModificationEvent = DocumentModificationEvent;
 

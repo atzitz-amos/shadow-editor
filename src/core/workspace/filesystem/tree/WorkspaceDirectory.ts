@@ -22,6 +22,10 @@ export class WorkspaceDirectory implements NodeEntry {
         return await this.fs.createFile(this, name);
     }
 
+    async rename(name: string): Promise<WorkspaceDirectory> {
+        return await this.fs.renameEntry(this, name) as WorkspaceDirectory;
+    }
+
     getName(): string {
         return this.name;
     }

@@ -2,6 +2,8 @@ import {Service} from "../../threaded/service/Service";
 import {GlobalState} from "../../global/GlobalState";
 import {DocumentSaveRequestEvent} from "../../../editor/core/document/events/DocumentSaveRequestEvent";
 import {Logger, UseLogger} from "../../logging/Logger";
+import {UnsafeFlagsService} from "../flags/UnsafeFlagsService";
+import {UnsafeFlags} from "../flags/UnsafeFlags";
 
 /**
  *
@@ -15,8 +17,6 @@ export class SaveService {
     private static instance: SaveService;
 
     declare private logger: Logger;
-
-    private notSavedFlag: boolean;
 
     public constructor() {
     }
@@ -34,23 +34,11 @@ export class SaveService {
         eventBus.subscribe(this, DocumentSaveRequestEvent.SUBSCRIBER, (event) => {
             this.tryAndSave(event);
         });
-
-        window.addEventListener("beforeunload", e => {
-            if (this.notSavedFlag) {
-                e.preventDefault();
-            }
-        });
-    }
-
-    private setNotSavedFlag() {
-        this.notSavedFlag = true;
-    }
-
-    private removeNotSavedFlag() {
-        this.notSavedFlag = false;
     }
 
     private async tryAndSave(event: DocumentSaveRequestEvent) {
+        UnsafeFlagsService.clear(UnsafeFlags.FILE_SAVE);
+
         const file = event.getFile();
         if (!file) {
             return;

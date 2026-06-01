@@ -58,8 +58,11 @@ export class VScrollBar implements Component {
 
         if (maxHeight - height <= 3) { // No need to show scrollbar
             this.handle.style.height = "0";
+            this.scrollbar.style.pointerEvents = "none";
             return;
         }
+
+        this.scrollbar.style.pointerEvents = "auto";
 
         const handleHeight = Math.max((height / maxHeight) * height, 20);
         const handleY = (scroll / maxHeight) * height;

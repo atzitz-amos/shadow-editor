@@ -1,10 +1,10 @@
 import {HTMLUtils} from "../../../../../editor/utils/HTMLUtils";
 import {UIComponent} from "../../../../../core/ui/engine/components/UIComponent";
 import {UIHooks} from "../../../../../core/ui/engine/listeners/hooks/UIHooks";
-import {PaneManager} from "../../../panes/PaneManager";
-import {PaneDockPosition} from "../../../panes/pane/PaneDockPosition";
+import {PaneManager} from "../../../../core/panes/PaneManager";
+import {PaneDockPosition} from "../../../../core/panes/pane/PaneDockPosition";
 import {SRailButton} from "./SRailButton";
-import {IPane} from "../../../panes/pane/IPane";
+import {IPane} from "../../../../core/panes/pane/IPane";
 import {PaneHooks} from "../../../../core/UICommonHooks";
 
 /**

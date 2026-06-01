@@ -3,6 +3,7 @@ import {Caret} from "../../core/caret/Caret";
 import {HTMLUtils} from "../../utils/HTMLUtils";
 import {CaretRemovedEvent} from "../../core/caret/events/CaretRemovedEvent";
 import {CaretAddedEvent} from "../../core/caret/events/CaretAddedEvent";
+import {UIComponent} from "../../../core/ui/engine/components/UIComponent";
 
 
 export class TextLayer {
@@ -22,6 +23,8 @@ export class TextLayer {
     init() {
         this.visualLineCount = this.view.getVisualLineCount();
         this.lines = [];
+
+        console.log("Iniializing " + this + " with " + this.visualLineCount + " visual lines");
 
         let firstEdgeline = HTMLUtils.createElement('div.editor-line.editor-line-edge', this.element) as HTMLDivElement;
         for (let i = 0; i < this.visualLineCount; i++) {
@@ -65,7 +68,7 @@ export class TextLayer {
 export class CaretLayer {
     private _caret: HTMLDivElement;
     private _input: HTMLInputElement;
-    private _blink: NodeJS.Timeout;
+    private _blink: number;
     private readonly view: View;
     private readonly element: HTMLDivElement;
 
@@ -99,7 +102,7 @@ export class CaretLayer {
 
     setupEventListeners() {
         this._input.addEventListener('input', (e: any) => {
-            this.view.onInput(e);
+            this.view.onType(e);
             this.blinkReset();
         });
 
@@ -153,6 +156,9 @@ class CaretSelectionElement {
     selectionBodyEl: HTMLDivElement;
     selectionEndEl: HTMLDivElement;
 
+
+    private readonly OFFSET = 3;
+
     constructor(layer: SelectionLayer, caret: Caret) {
         this.view = layer.view;
         this.caret = caret;
@@ -173,7 +179,6 @@ class CaretSelectionElement {
         this.selectionBodyEl.style.display = 'none';
         this.selectionEndEl.style.display = 'none';
 
-
         let selection = this.caret.selectionModel;
         if (selection.isSelectionActive) {
             let start = this.view.editor.logicalToXY(selection.getStart());
@@ -191,9 +196,9 @@ class CaretSelectionElement {
 
             if (sy === ey) {
                 this.selectionStartEl.style.display = 'block';
-                this.selectionStartEl.style.left = HTMLUtils.px(sx);
+                this.selectionStartEl.style.left = HTMLUtils.px(sx + (sx == 0 ? 0 : this.OFFSET));
                 this.selectionStartEl.style.top = HTMLUtils.px(sy);
-                this.selectionStartEl.style.width = HTMLUtils.px(ex - sx);
+                this.selectionStartEl.style.width = HTMLUtils.px(ex - sx + (sx == 0 ? this.OFFSET : 0));
             } else {
                 this.selectionStartEl.style.display = 'block';
                 this.selectionStartEl.style.left = HTMLUtils.px(sx);
@@ -230,12 +235,10 @@ class SelectionLayer {
         this.view.getEditor().getEventBus().subscribe(this, CaretRemovedEvent.SUBSCRIBER, e => {
             this.selectionElements.get(e.getCaret().id)?.dispose();
             this.selectionElements.delete(e.getCaret().id);
-            console.log("Removed", this.selectionElements);
         });
 
         this.view.getEditor().getEventBus().subscribe(this, CaretAddedEvent.SUBSCRIBER, e => {
             this.selectionElements.set(e.getCaret().id, new CaretSelectionElement(this, e.getCaret()));
-            console.log("Added", this.selectionElements);
         });
     }
 
@@ -288,6 +291,15 @@ export class OverlayLayer extends TextLayer {
         }
     }
 
+    notifyResize() {
+        super.notifyResize();
+
+        this.overlayPerLine = [];
+        for (let i = 0; i < this.lines.length + 2; i++) {
+            this.overlayPerLine.push([]);
+        }
+    }
+
     addOverlayOnLine(n: number, element: HTMLSpanElement) {
         this.overlayPerLine[n].push(element);
     }
@@ -305,6 +317,27 @@ export class OverlayLayer extends TextLayer {
     }
 }
 
+class PopupOverlayLayer extends UIComponent {
+    private readonly view: View;
+
+    constructor(view: View, root: HTMLElement) {
+        super(HTMLUtils.createElement('div.editor-layer.layer-popup-overlay', root));
+
+        this.view = view;
+    }
+
+    init() {
+    }
+
+    render() {
+        this.draw();
+    }
+
+    draw() {
+        this.drawChildren();
+    }
+}
+
 export class ViewLayers {
     public layers_el: HTMLDivElement;
 
@@ -313,6 +346,7 @@ export class ViewLayers {
     private readonly selection: SelectionLayer;
     private readonly activeLine: ActiveLineLayer;
     private readonly overlayLayer: OverlayLayer;
+    private readonly popupLayer: PopupOverlayLayer;
 
     constructor(private view: View) {
         this.layers_el = HTMLUtils.createElement('div.editor-layers') as HTMLDivElement;
@@ -322,6 +356,7 @@ export class ViewLayers {
         this.selection = new SelectionLayer(view, this.layers_el);
         this.activeLine = new ActiveLineLayer(view, this.layers_el);
         this.overlayLayer = new OverlayLayer(view, this.layers_el);
+        this.popupLayer = new PopupOverlayLayer(view, this.layers_el);
     }
 
     init() {
@@ -330,6 +365,7 @@ export class ViewLayers {
         this.selection.init();
         this.activeLine.init();
         this.overlayLayer.init();
+        this.popupLayer.init();
 
         this.view.getViewElement().appendChild(this.layers_el);
     }
@@ -346,6 +382,7 @@ export class ViewLayers {
         this.caret.render();
         this.selection.render();
         this.activeLine.render();
+        this.popupLayer.render();
     }
 
     update(): void {
@@ -372,6 +409,18 @@ export class ViewLayers {
 
     getOverlayLayer(): OverlayLayer {
         return this.overlayLayer;
+    }
+
+    getPopupLayer(): PopupOverlayLayer {
+        return this.popupLayer;
+    }
+
+    setNoCursor(b: boolean) {
+        if (b) {
+            this.layers_el.classList.add("no-cursor");
+        } else {
+            this.layers_el.classList.remove("no-cursor");
+        }
     }
 }
 

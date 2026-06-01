@@ -8,6 +8,8 @@ import {CaretMovedEvent} from "../../core/caret/events/CaretMovedEvent";
 import {ViewPainter} from "./ViewPainter";
 import {ViewPropertiesManager} from "./properties/ViewPropertiesManager";
 import {Critical} from "../../../core/critical/Critical";
+import {XYPoint} from "../../core/coordinate/XYPoint";
+import {EditorKeyContextManager} from "../../core/keycontext/EditorKeyContextManager";
 
 
 export class View {
@@ -236,10 +238,12 @@ export class View {
 
     onBlur(event: FocusEvent): void {
         this.editor.getRootElement().classList.remove('focused');
+        if (EditorKeyContextManager.isCurrent(this.editor)) EditorKeyContextManager.getInstance().unfocus();
     }
 
     onFocus(event: FocusEvent): void {
         this.editor.getRootElement().classList.add('focused');
+        EditorKeyContextManager.getInstance().bindCurrentEditor(this.editor);
     }
 
     onMouseDown(event: MouseEvent) {
@@ -255,6 +259,7 @@ export class View {
 
     onMouseMove(event: MouseEvent) {
         this.editor.onMouseMove(event);
+        this.getLayers().setNoCursor(false);
     }
 
     onScroll(event: WheelEvent) {
@@ -263,8 +268,9 @@ export class View {
         this.editor.getView().resetBlink();
     }
 
-    onInput(e: InputEvent) {
-        this.editor.onInput(e);
+    onType(e: InputEvent) {
+        this.editor.onType(e);
+        this.getLayers().setNoCursor(true);
     }
 
     onKeyDown(e: KeyboardEvent) {
@@ -273,6 +279,23 @@ export class View {
 
     onKeyUp(e: KeyboardEvent) {
         this.editor.onKeyUp(e);
+    }
+
+    getLineBoundingBox(line: number): DOMRect {
+        // Calculate the bounding box of the line in the view
+        // The result might be off screen (negative coordinates or coordinates larger than the view size)
+        let x = -this.scroll.scrollX;
+        let y = (line - this.scroll.scrollYLines) * this.getLineHeight();
+
+        let xy = this.relativeToViewportCoordinates(x, y);
+
+        return new DOMRect(xy.x, xy.y, this.getViewWidth(), this.getLineHeight());
+    }
+
+    relativeToViewportCoordinates(x: number, y: number): XYPoint {
+        // Convert a point relative to the view element coordinates to viewport coordinates
+        let rect = this.view.getBoundingClientRect();
+        return new XYPoint(x + rect.left, y + rect.top);
     }
 
     private scrollIntoViewAlongX(position: number, scrollStart: number, scrollEnd: number): number | null {
@@ -306,10 +329,10 @@ export class View {
     /**
      * Setups the event listeners */
     private setupEventListeners() {
-        this.view.addEventListener('mousedown', this.onMouseDown.bind(this));
-        this.view.addEventListener('mouseup', this.onMouseUp.bind(this));
-        this.view.addEventListener('mousemove', this.onMouseMove.bind(this));
-        this.view.addEventListener('wheel', this.onScroll.bind(this));
+        this.view.addEventListener('mousedown', this.onMouseDown.bind(this), false);
+        this.view.addEventListener('mouseup', this.onMouseUp.bind(this), false);
+        this.view.addEventListener('mousemove', this.onMouseMove.bind(this), false);
+        this.view.addEventListener('wheel', this.onScroll.bind(this), false);
 
         // Prevent default context menu on right click
         this.view.addEventListener('contextmenu', e => e.preventDefault());
@@ -318,7 +341,7 @@ export class View {
     }
 
     /**
-     * Initialise the styling of the editor according to the `editor.properties`*/
+     * Initialize the styling of the editor according to the `editor.properties`*/
     private initCSS() {
         this.setCSSProperties(this.view, {
             '--editor-scroll-offsetY': HTMLUtils.px(this.getLineHeight()),

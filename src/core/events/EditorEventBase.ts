@@ -1,4 +1,4 @@
-import {EventBase} from "./EventBase";
+import {CancellableEvent, EventBase} from "./EventBase";
 import {Editor} from "../../editor/Editor";
 import {BubbleDirection} from "./BubbleDirection";
 
@@ -17,6 +17,20 @@ export abstract class EditorEventBase implements EventBase {
     }
 
     public getBubbleDirection(): BubbleDirection {
-        return BubbleDirection.BUBBLE_DOWN;
+        return BubbleDirection.BUBBLE_BOTH;
     }
+}
+
+
+export abstract class EditorCancellableEventBase extends EditorEventBase implements CancellableEvent {
+    private cancelled: boolean = false;
+
+    cancel(): void {
+        this.cancelled = true;
+    }
+
+    isCancelled(): boolean {
+        return this.cancelled;
+    }
+
 }

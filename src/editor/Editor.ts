@@ -18,8 +18,14 @@ import {LangService} from "./core/lang/LangService";
 import {EventBus} from "../core/events/EventBus";
 import {KeybindManager} from "../core/keybinds/KeybindManager";
 import {EditorAttachedEvent} from "./events/EditorAttachedEvent";
-import {KeyPressedEvent, KeyReleasedEvent, MousePressedEvent, MouseReleasedEvent} from "./events/PhysicalEvents";
-import {InlayWidget} from "./ui/inline/inlay/InlayWidget";
+import {
+    KeyPressedEvent,
+    KeyReleasedEvent,
+    KeyTypedEvent,
+    MousePressedEvent,
+    MouseReleasedEvent
+} from "./events/PhysicalEvents";
+import {InlayWidget} from "./ui/inline/widget/inlay/InlayWidget";
 import {KeybindContext} from "../core/keybinds/context/KeybindContext";
 import {GlobalState} from "../core/global/GlobalState";
 import {Scheduler} from "../core/scheduler/Scheduler";
@@ -55,11 +61,11 @@ export class Editor {
 
         this.eventBus = GlobalState.getMainEventBus().createSubBus(`editor-${this.id}.bus`);
 
-        this.document = document;
-        this.document.linkEditor(this);
-
         this.langService = new LangService(this);
         this.widgetManager = new WidgetManager(this);
+
+        this.document = document;
+        this.document.linkEditor(this);
 
         this.view = new View(this);
 
@@ -88,8 +94,6 @@ export class Editor {
     changeDocument(document: Document) {
         this.document.saveCaretOffset();
 
-        console.log(`Changing document in editor ${this.id} to ${document.getAssociatedFile()?.getPath() || "untitled"}`);
-
         this.caretModel.clearAllCarets();
 
         this.document.linkEditor(null);
@@ -103,12 +107,21 @@ export class Editor {
         this.repaintView();
     }
 
+    overrideLanguage(language: LanguageBase | null) {
+        this.langService.setCurrentLanguage(language);
+        this.langService.forceUpdate(this.document);
+    }
+
     /**
      +--------------------------+
      |           Data           |
      +--------------------------+    */
     getView(): View {
         return this.view;
+    }
+
+    getCoordinateMapper(): EditorCoordinateMapper {
+        return this.coordinateMapper;
     }
 
     getRootElement(): HTMLElement {
@@ -209,6 +222,14 @@ export class Editor {
         return this.coordinateMapper.xyToNearestVisual(new XYPoint(x, y));
     }
 
+    public xyToNearestLogical(x: number, y: number): LogicalPosition {
+        return this.coordinateMapper.xyToLogical(new XYPoint(x, y));
+    }
+
+    public yToLine(y: number): number {
+        return this.coordinateMapper.yToLine(y);
+    }
+
     getFullRange() {
         return new TextRange(0, this.document.getTotalDocumentLength());
     }
@@ -233,6 +254,10 @@ export class Editor {
 
     type(char: string) {
         this.caretModel.forEachCaret(caret => {
+            if (!this.eventBus.publishCancellable(new KeyTypedEvent(this, char, caret))) {
+                return;
+            }
+
             if (caret.getSelectionModel().isSelectionActive) {
                 this.deleteSelection(caret);
             }
@@ -327,15 +352,17 @@ export class Editor {
     }
 
     onMouseMove(event: MouseEvent) {
-        if (ModifierKeyHolder.isMouseDown) {
+        if (ModifierKeyHolder.isMouseDown()) {
             ModifierKeyHolder.getInstance().setIsDragging(true);
             this.moveCursorToMouseEvent(event);
         }
     }
 
-    onInput(event: InputEvent) {
+    onType(event: InputEvent) {
         ModifierKeyHolder.getInstance().clear();
-        if (event.data) this.type(event.data);
+        if (event.data) {
+            this.type(event.data);
+        }
     }
 
     /**

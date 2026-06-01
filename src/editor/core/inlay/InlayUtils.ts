@@ -1,5 +1,5 @@
 import {View} from "../../ui/view/View";
-import {InlayWidget} from "../../ui/inline/inlay/InlayWidget";
+import {InlayWidget} from "../../ui/inline/widget/inlay/InlayWidget";
 import {Editor} from "../../Editor";
 import {InlayRecord} from "./InlayManager";
 

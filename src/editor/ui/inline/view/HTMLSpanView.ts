@@ -25,6 +25,10 @@ export class HTMLSpanView implements HTMLView {
         return this.elements.some(e => HTMLUtils.isInBound(e, x, y, delta));
     }
 
+    getElementsAt(x: int, y: int): HTMLElement[] {
+        return this.elements.filter(e => HTMLUtils.isInBound(e, x, y, 5));
+    }
+
     getCombinedChildren(): Element[] {
         return this.elements.map(x => x.children).reduce((a, b) => {
             let array = Array.from(a);
@@ -52,6 +56,15 @@ export class HTMLSpanView implements HTMLView {
 
     getClientLeft(): number {
         return Math.min(...this.elements.map(x => x.clientLeft))
+    }
+
+    getBBox(): DOMRect {
+        let rects = this.elements.map(e => e.getBoundingClientRect());
+        let left = Math.min(...rects.map(r => r.left));
+        let top = Math.min(...rects.map(r => r.top));
+        let right = Math.max(...rects.map(r => r.right));
+        let bottom = Math.max(...rects.map(r => r.bottom));
+        return new DOMRect(left, top, right - left, bottom - top);
     }
 
     getInnerHTML(): string {

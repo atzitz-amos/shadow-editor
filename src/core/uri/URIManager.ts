@@ -3,7 +3,7 @@ import {URITargetType} from "./URITargetType";
 import {CurrentWorkspaceHelper} from "../global/CurrentWorkspaceHelper";
 import {UseLogger} from "../logging/logger/LoggerDecorators";
 import {Logger} from "../logging/logger/LoggerCore";
-import {EditorTabsHelper} from "../../app/ui/tabs/EditorTabsHelper";
+import {EditorTabsHelper} from "../../app/core/tabs/EditorTabsHelper";
 
 /**
  *

@@ -10,3 +10,10 @@ import {BubbleDirection} from "./BubbleDirection";
 export interface EventBase {
     getBubbleDirection(): BubbleDirection;
 }
+
+
+export interface CancellableEvent extends EventBase {
+    cancel(): void;
+
+    isCancelled(): boolean;
+}

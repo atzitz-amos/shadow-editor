@@ -1,20 +1,16 @@
 import {CommonKeyImpl, getCommonKeyValue, hasCommonKey} from "../../../utils/CommonKey";
-import {UIEnhancer} from "../enhancer/UIEnhancer";
 import {UIHooks} from "../listeners/hooks/UIHooks";
+import {Drawable} from "../../api/Drawable";
+import {Disposable} from "../../api/Disposable";
 
 
-export abstract class UIComponent {
+export abstract class UIComponent implements Drawable, Disposable {
     private static readonly elementRegistry = new WeakMap<HTMLElement, UIComponent>();
-
+    protected wasDrawn = false;
     private root: HTMLElement | null = null;
-
     private readonly children: UIComponent[] = [];
-    private readonly enhancers: UIEnhancer[] = [];
-
     private parent: UIComponent | null = null;
     private disposed = false;
-
-    protected wasDrawn = false;
 
     public constructor(private readonly element: HTMLElement) {
         UIComponent.elementRegistry.set(element, this);
@@ -73,12 +69,24 @@ export abstract class UIComponent {
         child.mount(this);
     }
 
-    addChildBefore(child: UIComponent, before: HTMLElement): void {
+    public removeChild(child: UIComponent): void {
+        const index = this.children.indexOf(child);
+        if (index !== -1) {
+            this.children.splice(index, 1);
+            child.dispose();
+        }
+    }
+
+    public addChildBefore(child: UIComponent, before: HTMLElement): void {
         this.children.push(child);
 
         child.root = this.element;
         this.element.insertBefore(child.getUnderlyingElement(), before);
         child.mount(this);
+    }
+
+    public getBBox(): DOMRect {
+        return this.getUnderlyingElement().getBoundingClientRect();
     }
 
     public dispose(): void {
@@ -129,11 +137,7 @@ export abstract class UIComponent {
         return null;
     }
 
-    protected addEnhancer(enhancer: Constructor<UIEnhancer>): void {
-        this.enhancers.push(new enhancer(this));
-    }
-
-    protected getUnderlyingElement(): HTMLElement {
+    public getUnderlyingElement(): HTMLElement {
         return this.element;
     }
 

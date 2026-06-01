@@ -1,4 +1,4 @@
-import {UIPaneComponent} from "../../../panes/ui/UIPaneComponent";
+import {UIPaneComponent} from "../../../../core/panes/ui/UIPaneComponent";
 import {GlobalState} from "../../../../../core/global/GlobalState";
 import {WorkspaceCardComponent} from "./WorkspaceCardComponent";
 import {UIMutators} from "../../../../../core/ui/engine/listeners/mutators/UIMutators";

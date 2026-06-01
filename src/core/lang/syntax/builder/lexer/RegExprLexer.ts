@@ -1,9 +1,8 @@
-import {Source, TokenStream} from "../tokens/TokenStream";
+import {Source} from "../tokens/TokenStream";
 import {Token} from "../tokens/Token";
 import {TokenType} from "../tokens/TokenType";
 import {LexicalGrammar} from "./LexicalGrammar";
 import {TextRange} from "../../../../../editor/core/coordinate/TextRange";
-import {ILexer} from "./ILexer";
 import {DocumentModificationEvent} from "../../../../../editor/core/document/events/DocumentModificationEvent";
 
 /**
@@ -11,7 +10,7 @@ import {DocumentModificationEvent} from "../../../../../editor/core/document/eve
  *
  * @deprecated Prefer using handwritten lexers for better performance and flexibility.
  * **/
-export class RegExpLexer implements ILexer {
+export class RegExpLexer {
     private readonly tokenTypes: TokenType[] = [];
 
     public constructor(grammar: Class<LexicalGrammar>) {

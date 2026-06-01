@@ -19,6 +19,10 @@ export class WorkspaceFile implements NodeEntry {
         return this.name;
     }
 
+    async rename(name: string): Promise<WorkspaceFile> {
+        return await this.fs.renameEntry(this, name) as WorkspaceFile;
+    }
+
     getHandle(): FileSystemFileHandle {
         return this.handle;
     }

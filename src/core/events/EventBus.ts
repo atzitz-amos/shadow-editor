@@ -1,4 +1,4 @@
-import {EventBase} from "./EventBase";
+import {CancellableEvent, EventBase} from "./EventBase";
 import {EventSubscriber} from "./EventSubscriber";
 import {BubbleDirection} from "./BubbleDirection";
 
@@ -113,6 +113,11 @@ export class EventBus {
                 }
             }
         }
+    }
+
+    publishCancellable<T extends CancellableEvent>(event: T): boolean {
+        this.syncPublish(event);
+        return !event.isCancelled();
     }
 
     /**

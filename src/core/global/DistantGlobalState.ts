@@ -9,8 +9,8 @@ import {PersistenceModel} from "../persistence/PersistenceModel";
 import {Editor} from "../../editor/Editor";
 import {Ref, RefUtils} from "../threaded/tcsp/ref/RefUtils";
 import {EventBus} from "../events/EventBus";
-import {PaneManager} from "../../app/ui/panes/PaneManager";
-import {TabsManager} from "../../app/ui/tabs/TabsManager";
+import {PaneManager} from "../../app/core/panes/PaneManager";
+import {TabsManager} from "../../app/core/tabs/TabsManager";
 
 /**
  *

@@ -1,6 +1,6 @@
 import {CommonKeyImpl} from "../../core/utils/CommonKey";
 import {Editor} from "../../editor/Editor";
-import {ITab} from "../ui/tabs/ITab";
+import {ITab} from "./tabs/ITab";
 
 /**
  *

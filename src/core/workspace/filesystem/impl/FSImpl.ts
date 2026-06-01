@@ -22,4 +22,8 @@ export class FSImpl {
     public static async deleteEntry(parent: FileSystemDirectoryHandle, name: string): Promise<void> {
         await parent.removeEntry(name);
     }
+
+    public static async deleteEntryRecursive(parent: FileSystemDirectoryHandle, name: string): Promise<void> {
+        await parent.removeEntry(name, {recursive: true});
+    }
 }

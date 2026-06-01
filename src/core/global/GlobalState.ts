@@ -18,10 +18,12 @@ import {ShadowUI} from "../../app/ui/ShadowUI";
 import {DistantGlobalState} from "./DistantGlobalState";
 
 import {WCPService} from "../threaded/wcp/WCPMetricsService";
-import {PaneManager} from "../../app/ui/panes/PaneManager";
-import {TabsManager} from "../../app/ui/tabs/TabsManager";
+import {PaneManager} from "../../app/core/panes/PaneManager";
+import {TabsManager} from "../../app/core/tabs/TabsManager";
 import {WorkspaceService} from "../workspace/WorkspaceService";
 import {SaveService} from "../sync/save/SaveService";
+import {EditorKeyContextManager} from "../../editor/core/keycontext/EditorKeyContextManager";
+import {PersistenceService} from "../persistence/service/PersistenceService";
 
 /**
  * Provides a single class that regroups all useful singletons and global services of the application
@@ -86,8 +88,8 @@ export class GlobalState {
         return WCPService.getInstance();
     }
 
-    public static getPersistenceModel() {
-        return PersistenceModel.getInstance();
+    public static getPersistenceService() {
+        return PersistenceService.getInstance();
     }
 
     public static getPaneManager(): PaneManager {
@@ -108,6 +110,10 @@ export class GlobalState {
 
     public static getSaveService(): SaveService {
         return SaveService.getInstance();
+    }
+
+    public static getEditorKeyContextManager() {
+        return EditorKeyContextManager.getInstance();
     }
 
     public static setReady(flag: boolean) {

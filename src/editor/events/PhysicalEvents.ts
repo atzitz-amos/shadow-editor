@@ -1,6 +1,7 @@
 import {EventSubscriber} from "../../core/events/EventSubscriber";
-import {EditorEventBase} from "../../core/events/EditorEventBase";
+import {EditorCancellableEventBase, EditorEventBase} from "../../core/events/EditorEventBase";
 import {Editor} from "../Editor";
+import {Caret} from "../core/caret/Caret";
 
 /**
  * Fired when a key is pressed
@@ -79,5 +80,29 @@ export class MouseReleasedEvent extends EditorEventBase {
 
     getEvent(): MouseEvent {
         return this.event;
+    }
+}
+
+/**
+ * Fired when the user types a key in the editor
+ *
+ * @author Atzitz Amos
+ * @date 10/22/2025
+ * @since 1.0.0
+ */
+export class KeyTypedEvent extends EditorCancellableEventBase {
+
+    public static readonly SUBSCRIBER = EventSubscriber.create(this);
+
+    constructor(editor: Editor, private char: string, private caret: Caret) {
+        super(editor);
+    }
+
+    getChar(): string {
+        return this.char;
+    }
+
+    getCaret(): Caret {
+        return this.caret;
     }
 }

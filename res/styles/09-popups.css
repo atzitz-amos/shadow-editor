@@ -1,0 +1,33 @@
+
+.editor-popup {
+    position: absolute;
+    z-index: 1000;
+    background: #383b3f;
+    translate: 0 -2px;
+    padding: 5px;
+    border-radius: 6px;
+    color: #bfbfbf;
+    font-size: 0.8em;
+    border: 1px solid #696666;
+}
+
+.editor-popup, .editor-popup * {
+    user-select: auto;
+    pointer-events: auto;
+}
+
+.simple-tooltip-popup {
+    background: #2f3236;
+    color: #e2e2e2;
+    border: 1px solid #4f545a;
+    border-radius: 4px;
+    padding: 4px 6px;
+    font-size: 0.78em;
+    line-height: 1.35;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.24);
+}
+
+.simple-tooltip-popup * {
+    color: inherit;
+}
+

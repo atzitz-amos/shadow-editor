@@ -1,5 +1,5 @@
 import {Fragment} from "./Fragment";
-import {InlayWidget} from "../../../ui/inline/inlay/InlayWidget";
+import {InlayWidget} from "../../../ui/inline/widget/inlay/InlayWidget";
 
 export class FragmentEvent {
     constructor(public type: FragmentType, private fragment: Fragment | null, public pos: Offset) {

@@ -4,12 +4,9 @@ import {IncrementalLexer} from "../../../core/lang/syntax/builder/lexer/Incremen
 import {IncrementalHighlighter} from "../../../core/lang/highlighter/IncrementalHighlighter";
 import {DocumentModificationEvent} from "../document/events/DocumentModificationEvent";
 import {HighlighterBase} from "../../../core/lang/highlighter/HighlighterBase";
-import {IParser} from "../../../core/lang/syntax/builder/parser/IParser";
-import {ASTBuilder} from "../../../core/lang/syntax/builder/parser/builder/ASTBuilder";
-import {SynNode} from "../../../core/lang/syntax/api/SynNode";
-import {SynFileImpl} from "../../../core/lang/syntax/impl/SynFileImpl";
-import {Scheduler} from "../../../core/scheduler/Scheduler";
 import {Document} from "../document/Document";
+import {TokenCache} from "./TokenCache";
+import {EditorLanguageChanged} from "./events/EditorLanguageChanged";
 
 /**
  * Class associated with an editor that holds the current language, lexer, parser, highlighter as
@@ -26,8 +23,6 @@ export class LangService {
 
     private myHighlighter: HighlighterBase | null = null;
     private myIncrementalHighlighter: IncrementalHighlighter | null = null;
-    private myParser: IParser | null = null;  // TODO: support incremental parsing
-    private debugProduction: SynNode[];
 
     constructor(private editor: Editor) {
         editor.getEventBus().subscribe(this, DocumentModificationEvent.SUBSCRIBER, this.onDocumentChange);
@@ -41,6 +36,13 @@ export class LangService {
         this.currentLanguage = language;
 
         this.setupLanguageComponents();
+
+        this.editor.getEventBus().syncPublish(new EditorLanguageChanged(this.editor, language));
+    }
+
+    public forceUpdate(document: Document) {
+        this.myLexer?.lexAll(document)
+        this.rehighlight(document.getTokenCache());
     }
 
     public getLexer(): IncrementalLexer | null {
@@ -53,13 +55,6 @@ export class LangService {
 
     public getIncrementalHighlighter(): IncrementalHighlighter | null {
         return this.myIncrementalHighlighter;
-    }
-
-    public makeParser(builder: ASTBuilder): IParser | null {
-        if (this.currentLanguage) {
-            return this.currentLanguage.createParser(builder);
-        }
-        return null;
     }
 
     private setupLanguageComponents() {
@@ -77,25 +72,27 @@ export class LangService {
         if (!this.currentLanguage) return;
         this.myLexer!.relex(event);
 
+        this.rehighlight(event.getDocument().getTokenCache());
+    }
+
+    private rehighlight(tokenCache: TokenCache) {
         const highlightsHolder = this.editor.getWidgetManager().getHighlightsHolder();
         highlightsHolder.clear();
-        this.myIncrementalHighlighter?.highlight(event.getDocument().getTokenCache().createTokenStream(), highlightsHolder);
-
-        this.scheduleParsing(event.getDocument());
+        this.myIncrementalHighlighter?.highlight(tokenCache.createTokenStream(), highlightsHolder);
     }
 
-    private scheduleParsing(document: Document) {
-        Scheduler.debounce(() => {
-            const start = performance.now();
-            const builder = new ASTBuilder(document.getTokenCache().createTokenStream(), new SynFileImpl(document));
-            this.makeParser(builder)?.parse().then(() => {
-                console.log("Successfully parsed "
-                    + this.editor.getOpenedDocument().getLineCount()
-                    + " lines (" + this.editor.getOpenedDocument().getTotalDocumentLength()
-                    + " chars) in "
-                    + (performance.now() - start) + "ms");
-                this.debugProduction = builder.getProduction(); // TODO
-            });
-        }, 10 * Math.log(this.editor.getOpenedDocument().getTotalDocumentLength()));
-    }
+// private scheduleParsing(document: Document) {
+    //     Scheduler.debounce(() => {
+    //         const start = performance.now();
+    //         const builder = new ASTBuilder(document.getTokenCache().createTokenStream(), new SynFileImpl(document));
+    //         this.makeParser(builder)?.parse().then(() => {
+    //             console.log("Successfully parsed "
+    //                 + this.editor.getOpenedDocument().getLineCount()
+    //                 + " lines (" + this.editor.getOpenedDocument().getTotalDocumentLength()
+    //                 + " chars) in "
+    //                 + (performance.now() - start) + "ms");
+    //             this.debugProduction = builder.getProduction(); // TODO
+    //         });
+    //     }, 10 * Math.log(this.editor.getOpenedDocument().getTotalDocumentLength()));
+    // }
 }

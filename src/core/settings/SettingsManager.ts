@@ -1,8 +1,10 @@
 import {Service} from "../threaded/service/Service";
+import {Logger, UseLogger} from "../logging/Logger";
 import {SettingBase} from "./base/SettingBase";
-import {PersistedObject} from "../persistence/transaction/PersistedObject";
-import {PersistedData} from "../persistence/transaction/PersistedData";
-import {Updater} from "../persistence/transaction/Updater";
+import {PersistedObject} from "../persistence/objects/PersistedObject";
+import {SerializableType, Serialized} from "../persistence/serializable/Serializable";
+import {Serializer} from "../persistence/serializable/Serializer";
+import {Deserializer} from "../persistence/serializable/Deserializer";
 
 /**
  *
@@ -11,10 +13,12 @@ import {Updater} from "../persistence/transaction/Updater";
  * @since 1.0.0
  */
 @Service
-export class SettingsManager implements PersistedObject<any> {
+@UseLogger("SettingsManager")
+export class SettingsManager implements PersistedObject {
     private static _INSTANCE = new SettingsManager();
     private readonly mySettings: Map<string, SettingBase<any>> = new Map();
     private isLoaded: boolean = false;
+    private declare readonly logger: Logger;
 
     public static getInstance(): SettingsManager {
         return this._INSTANCE;
@@ -30,9 +34,10 @@ export class SettingsManager implements PersistedObject<any> {
         this.getInstance().deferredLoad(setting);
     }
 
-    public static getValue<T>(setting: SettingBase<T>): T {
-        if (!this.getInstance().isLoaded) {
-            console.warn("[SettingsManager.ts] Settings have not been loaded yet. Accessing settings before they are loaded may lead to unexpected behavior.");
+    public static getValue<T extends SerializableType>(setting: SettingBase<T>): T {
+        const instance = this.getInstance();
+        if (!instance.isLoaded) {
+            instance.logger.warn("[SettingsManager.ts] Settings have not been loaded yet. Accessing settings before they are loaded may lead to unexpected behavior.");
         }
         return setting.getCurrentValue();
     }
@@ -41,28 +46,29 @@ export class SettingsManager implements PersistedObject<any> {
         return "shadow.settings";
     }
 
-    getPersistedModel() {
-        return null;
-    }
+    load(deserializer: Deserializer, data: Serialized): void {
+        if (!data) return;
 
-    persist(updater: Updater): void {
-        for (const setting of this.mySettings.values()) {
-            updater.set(setting.getKey(), setting.getCurrentValue());
-        }
-    }
+        deserializer.use(SettingBase, e => e);
 
-    load(data: PersistedData<any>): void {
+        const settings: { key: string, currentValue: any }[] = deserializer.deserializeList(data);
         for (const setting of this.mySettings.values()) {
-            if (data.has(setting.getKey())) {
-                setting.setCurrentValue(data.get(setting.getKey()));
-            } else
+            const savedSetting = settings.find(s => s.key === setting.getKey());
+            if (savedSetting) {
+                setting.setCurrentValue(savedSetting.currentValue);
+            } else {
                 setting.reset();
+            }
         }
         this.isLoaded = true;
     }
 
+    persist(serializer: Serializer): Serialized {
+        return serializer.serializeArray(this.getAllSettings());
+    }
 
-    public forKey<T>(key: string): SettingBase<T> | null {
+
+    public forKey<T extends SerializableType>(key: string): SettingBase<T> | null {
         return this.mySettings.get(key) as SettingBase<T> || null;
     }
 
@@ -74,7 +80,7 @@ export class SettingsManager implements PersistedObject<any> {
      * */
     public deferredLoad(setting: SettingBase<any>): void {
         if (this.isLoaded) {
-            console.warn("[SettingsManager.ts] Settings have already been loaded. Deferred loading a setting now may lead to unexpected behavior.");
+            this.logger.warn("[SettingsManager.ts] Settings have already been loaded. Deferred loading a setting now may lead to unexpected behavior.");
         }
         this.mySettings.set(setting.getKey(), setting);
     }

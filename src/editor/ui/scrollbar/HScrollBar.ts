@@ -58,8 +58,10 @@ export class HScrollBar implements Component {
 
         if (maxWidth - width <= 3) { // No need to show scrollbar
             this.handle.style.width = "0";
+            this.scrollbar.style.pointerEvents = "none";
             return;
         }
+        this.scrollbar.style.pointerEvents = "auto";
 
         const handleWidth = Math.max((width / maxWidth) * width, 20);
         const handleX = (scroll / maxWidth) * width;

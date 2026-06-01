@@ -77,4 +77,12 @@ export class Scheduler {
 
         return true;
     }
+
+    static idleTask(func: () => void) {
+        if (typeof requestIdleCallback === "function") {
+            requestIdleCallback(func);
+        } else {
+            setTimeout(func, 1);
+        }
+    }
 }

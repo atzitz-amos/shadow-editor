@@ -1,8 +1,9 @@
 import {TextRange} from "../../../core/coordinate/TextRange";
-import {OverlayWidget} from "../overlay/OverlayWidget";
-import {Overlay} from "../overlay/Overlay";
+import {OverlayWidget} from "../widget/overlay/OverlayWidget";
+import {Overlay} from "../widget/overlay/Overlay";
 import {Editor} from "../../../Editor";
-import {PopupFactory} from "../../popups/PopupFactory";
+import {HoverPopup} from "../../popups/builder/HoverPopup";
+import {SimpleTooltipBuilder} from "../../popups/tooltip/SimpleTooltipBuilder";
 
 /**
  *
@@ -12,6 +13,7 @@ import {PopupFactory} from "../../popups/PopupFactory";
  */
 export class InlineError extends OverlayWidget {
     private overlay: Overlay | null = null;
+    private hoverPopup: HoverPopup;
 
     constructor(private range: TextRange, private message: string) {
         super();
@@ -33,13 +35,18 @@ export class InlineError extends OverlayWidget {
         if (this.overlay) {
             this.overlay.dispose();
         }
+        if (this.hoverPopup) {
+            console.log("disposing hover popup");
+            this.hoverPopup.dispose(editor);
+        }
     }
 
     init(overlay: Overlay): void {
         this.overlay = overlay;
 
-        overlay.whenHoveredWithDelay(600, (event) => {
-            PopupFactory.createTooltipPopup(event.getEditor(), this.message, event.getXY(), event.getBounds());
-        }, true);
+        this.hoverPopup = new HoverPopup(new SimpleTooltipBuilder(this.message))
+            .delayed(500)
+            .setFocusCapture()
+            .attachToOverlay(overlay);
     }
 }

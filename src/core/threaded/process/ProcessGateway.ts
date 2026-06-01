@@ -1,6 +1,5 @@
 import {Process} from "./Process";
 import {ProcessGatewayMessage, ProcessGatewayMessageData, ProcessGatewayWorkerCommand} from "./ProcessGatewayMessage";
-import {SerializationUtils} from "../../../editor/core/serializable/SerializationUtils";
 import {ThreadedUtils} from "../ThreadedUtils";
 
 export class ProcessGateway {
@@ -46,6 +45,6 @@ export class ProcessGateway {
     }
 
     private serialize(result: any) {
-        return SerializationUtils.serializeAny(result);
+        return result; // TODO
     }
 }

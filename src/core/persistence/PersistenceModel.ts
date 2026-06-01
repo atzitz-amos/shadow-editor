@@ -1,7 +1,7 @@
 import {PersistenceStrategy} from "./PersistenceStrategy";
-import {PersistedObject} from "./transaction/PersistedObject";
 import {Database} from "./db/Database";
 import {Logger, UseLogger} from "../logging/Logger";
+import {PersistedObject} from "./objects/PersistedObject";
 
 /**
  *
@@ -15,9 +15,7 @@ export class PersistenceModel {
     private declare readonly logger: Logger;
 
     private db: Database = new Database("app_db");
-
-    private toBeRecovered: PersistedObject<any>[] = [];
-
+    
     public static getInstance(): PersistenceModel {
         if (!this._instance) {
             this._instance = new PersistenceModel();
@@ -25,7 +23,7 @@ export class PersistenceModel {
         return this._instance;
     }
 
-    public async recover(strategy: PersistenceStrategy, objects: PersistedObject<any>[]): Promise<void> {
+    public async recover(strategy: PersistenceStrategy, objects: PersistedObject[]): Promise<void> {
         this.logger.info("Starting recovery with strategy: " + PersistenceStrategy[strategy]);
 
         await this.db.upgrade(objects);
@@ -40,7 +38,7 @@ export class PersistenceModel {
         }
     }
 
-    public async persist(objects: PersistedObject<any>[]): Promise<void> {
+    public async persist(objects: PersistedObject[]): Promise<void> {
         for (const obj of objects) await this.db.persist(obj);
     }
 }

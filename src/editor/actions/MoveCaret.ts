@@ -34,7 +34,7 @@ export class MoveCaretLeftAction extends AbstractAction {
             if (!ctx.getEvent().shiftKey && selectionDirection !== SelectionDirection.UNKNOWN) {
                 handleClearSelection(caret, selectionDirection === SelectionDirection.RIGHT);
             } else {
-                caret.shiftLeft(!ModifierKeyHolder.isShiftPressed);
+                caret.shiftLeft(!ModifierKeyHolder.isShiftPressed());
             }
         });
 
@@ -62,7 +62,7 @@ export class MoveCaretRightAction extends AbstractAction {
             if (!ctx.getEvent().shiftKey && selectionDirection !== SelectionDirection.UNKNOWN) {
                 handleClearSelection(caret, selectionDirection === SelectionDirection.LEFT);
             } else {
-                caret.shiftRight(!ModifierKeyHolder.isShiftPressed);
+                caret.shiftRight(!ModifierKeyHolder.isShiftPressed());
             }
         });
         editor.getView().resetBlink();

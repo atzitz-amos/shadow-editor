@@ -85,7 +85,7 @@ export type Keybind = {
     shift?: boolean | null;
     alt?: boolean | null;
     context?: KeybindContextDescriptor;
-}
+};
 
 export class ModifierKeyHolder {
     static INSTANCE: ModifierKeyHolder;
@@ -95,23 +95,23 @@ export class ModifierKeyHolder {
     isMouseDown: boolean = false;
     isDragging: boolean = false;
 
-    static get isCtrlPressed(): boolean {
+    static isCtrlPressed(): boolean {
         return this.getInstance().isCtrlPressed;
     };
 
-    static get isAltPressed(): boolean {
+    static isAltPressed(): boolean {
         return this.getInstance().isAltPressed;
     }
 
-    static get isShiftPressed(): boolean {
+    static isShiftPressed(): boolean {
         return this.getInstance().isShiftPressed;
     };
 
-    static get isMouseDown(): boolean {
+    static isMouseDown(): boolean {
         return this.getInstance().isMouseDown;
     }
 
-    static get isDragging(): boolean {
+    static isDragging(): boolean {
         return this.getInstance().isDragging;
     }
 

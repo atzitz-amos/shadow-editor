@@ -286,6 +286,72 @@ export class WorkspaceFS {
         this.invalidateChild(parent.getHandle(), arg.getHandle().name);
     }
 
+    async renameEntry(entry: NodeEntry, newName: string): Promise<NodeEntry>;
+
+    async renameEntry(path: RelativePathInput, newName: string): Promise<NodeEntry>;
+
+    async renameEntry(arg: NodeEntry | RelativePathInput, newName: string): Promise<NodeEntry> {
+        if (typeof arg === "string" || Array.isArray(arg) || arg instanceof RelativePath) {
+            arg = await this.getEntry(arg);
+        }
+
+        const parent = arg.getParent();
+        if (!parent) throw new Error("Cannot rename root directory");
+
+        const oldName = arg.getHandle().name;
+        if (oldName === newName) {
+            return arg;
+        }
+
+        const targetPath = parent.getPath().join(newName);
+        if (await this.exists(targetPath)) {
+            throw new Error(`Entry already exists at path: ${targetPath.toString()}`);
+        }
+
+        const oldPath = arg.getPath();
+        const isDirectory = arg instanceof WorkspaceDirectory;
+
+        try {
+            if (isDirectory) {
+                const directory = arg as WorkspaceDirectory;
+                const newHandle = await FSImpl.createSubDir(parent.getHandle(), newName);
+                await this.copyDirectoryContents(directory.getHandle(), newHandle);
+                const renamed = this.getOrCreateChild(parent, newName, newHandle) as WorkspaceDirectory;
+                await this.clearCacheSubtree(directory.getHandle());
+                await FSImpl.deleteEntryRecursive(parent.getHandle(), oldName);
+                this.invalidateChild(parent.getHandle(), oldName);
+                this.metadataStore.renamePath(oldPath, targetPath);
+                return renamed;
+            }
+
+            const file = arg as WorkspaceFile;
+            const newHandle = await FSImpl.createFile(parent.getHandle(), newName);
+            await this.copyFileContent(file.getHandle(), newHandle);
+            const renamed = this.getOrCreateChild(parent, newName, newHandle) as WorkspaceFile;
+            await FSImpl.deleteEntry(parent.getHandle(), oldName);
+            this.invalidateChild(parent.getHandle(), oldName);
+            this.metadataStore.renamePath(oldPath, targetPath);
+            return renamed;
+        } catch (e) {
+            try {
+                if (isDirectory) {
+                    await FSImpl.deleteEntryRecursive(parent.getHandle(), newName);
+                    const cached = this.getCachedChild(parent.getHandle(), newName);
+                    if (cached instanceof WorkspaceDirectory) {
+                        await this.clearCacheSubtree(cached.getHandle());
+                    }
+                } else {
+                    await FSImpl.deleteEntry(parent.getHandle(), newName);
+                }
+            } catch {
+                // Best-effort cleanup; original error is the important one.
+            }
+
+            this.invalidateChild(parent.getHandle(), newName);
+            throw e;
+        }
+    }
+
     async recursiveGetAllFiles(dir?: WorkspaceDirectory): Promise<WorkspaceFile[]> {
         if (!dir) {
             dir = this.getRoot();
@@ -360,5 +426,41 @@ export class WorkspaceFS {
 
     private invalidateChild(parentHandle: FileSystemDirectoryHandle, name: string): void {
         this.childrenCache.get(parentHandle)?.delete(name);
+    }
+
+    private async copyFileContent(source: FileSystemFileHandle, target: FileSystemFileHandle): Promise<void> {
+        const writable = await target.createWritable();
+        try {
+            const file = await source.getFile();
+            await writable.write(await file.text());
+        } finally {
+            try {
+                await writable.close();
+            } catch {
+                // Ignore close errors during best-effort copy cleanup.
+            }
+        }
+    }
+
+    private async copyDirectoryContents(source: FileSystemDirectoryHandle, target: FileSystemDirectoryHandle): Promise<void> {
+        for await (const [name, handle] of source.entries()) {
+            if (handle.kind === "directory") {
+                const childTarget = await FSImpl.createSubDir(target, name);
+                await this.copyDirectoryContents(handle as FileSystemDirectoryHandle, childTarget);
+            } else {
+                const childTarget = await FSImpl.createFile(target, name);
+                await this.copyFileContent(handle as FileSystemFileHandle, childTarget);
+            }
+        }
+    }
+
+    private async clearCacheSubtree(handle: FileSystemDirectoryHandle): Promise<void> {
+        this.childrenCache.delete(handle);
+
+        for await (const [, childHandle] of handle.entries()) {
+            if (childHandle.kind === "directory") {
+                await this.clearCacheSubtree(childHandle as FileSystemDirectoryHandle);
+            }
+        }
     }
 }

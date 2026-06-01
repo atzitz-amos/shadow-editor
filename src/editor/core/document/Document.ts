@@ -11,6 +11,9 @@ import {TokenCache} from "../lang/TokenCache";
 import {Scheduler} from "../../../core/scheduler/Scheduler";
 import {GlobalState} from "../../../core/global/GlobalState";
 import {DocumentSaveRequestEvent} from "./events/DocumentSaveRequestEvent";
+import {EditorOpenedDocumentEvent} from "./events/EditorOpenedDocumentEvent";
+import {UnsafeFlagsService} from "../../../core/sync/flags/UnsafeFlagsService";
+import {UnsafeFlags} from "../../../core/sync/flags/UnsafeFlags";
 
 /**
  * Represents an opened file in the editor
@@ -49,11 +52,16 @@ export class Document {
     }
 
     public isLinkedToEditor(): boolean {
-        return this.editor !== undefined;
+        return this.editor !== null;
     }
 
     public linkEditor(editor: Editor | null): void {
         this.editor = editor;
+
+        if (this.editor != null) {
+            this.editor.overrideLanguage(this.language);
+            this.editor.getEventBus().syncPublish(new EditorOpenedDocumentEvent(this.editor, this));
+        }
     }
 
     public getAssociatedFile(): WorkspaceFile | null {
@@ -266,6 +274,8 @@ export class Document {
 
     private maybeSave(): void {
         if (!this.isAssociatedWithFile()) return;
+        UnsafeFlagsService.flag(UnsafeFlags.FILE_SAVE);
+
         Scheduler.debounce(() => {
             GlobalState.getMainEventBus().asyncPublish(new DocumentSaveRequestEvent(this, this.getAssociatedFile()!, Date.now()));
         }, 1000)

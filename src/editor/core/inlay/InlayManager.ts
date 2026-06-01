@@ -1,5 +1,5 @@
 import {Editor} from "../../Editor";
-import {InlayWidget} from "../../ui/inline/inlay/InlayWidget";
+import {InlayWidget} from "../../ui/inline/widget/inlay/InlayWidget";
 import {InlayUtils} from "./InlayUtils";
 
 export type InlayRecord = {

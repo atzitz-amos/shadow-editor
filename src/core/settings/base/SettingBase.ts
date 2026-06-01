@@ -3,6 +3,9 @@ import {SettingsManager} from "../SettingsManager";
 import {SettingCreateEvent} from "../events/SettingCreateEvent";
 import {SettingChangedEvent} from "../events/SettingChangedEvent";
 import {GlobalState} from "../../global/GlobalState";
+import {Serializable, SerializableType} from "../../persistence/serializable/Serializable";
+import {UnsafeFlagsService} from "../../sync/flags/UnsafeFlagsService";
+import {UnsafeFlags} from "../../sync/flags/UnsafeFlags";
 
 /**
  * Represents a setting of type T
@@ -11,7 +14,7 @@ import {GlobalState} from "../../global/GlobalState";
  * @date 11/2/2025
  * @since 1.0.0
  */
-export abstract class SettingBase<T> {
+export abstract class SettingBase<T extends SerializableType> implements Serializable {
     protected currentValue: T;
     private defaultValue: T;
 
@@ -20,9 +23,13 @@ export abstract class SettingBase<T> {
     private cssPropertyName: string | null = null;
     private unit?: string;
 
-    protected constructor(private key: string) {
+    constructor(private key: string) {
         SettingsManager.deferLoad(this);
         GlobalState.getMainEventBus().syncPublish(new SettingCreateEvent(this));
+    }
+
+    public serialize(): SerializableType {
+        return {"currentValue": this.currentValue, key: this.key};
     }
 
     public validate(value: T): boolean {
@@ -85,6 +92,7 @@ export abstract class SettingBase<T> {
         const oldValue = this.currentValue;
         this.currentValue = value;
         GlobalState.getMainEventBus().asyncPublish(new SettingChangedEvent(this, oldValue, value));
+        UnsafeFlagsService.flag(UnsafeFlags.PERSISTENCE);
         return true;
     }
 

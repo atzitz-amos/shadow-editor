@@ -1,7 +1,9 @@
-import {Source, TokenStream} from "../tokens/TokenStream";
+import {Source} from "../tokens/TokenStream";
 import {ILexer} from "./ILexer";
 import {Token} from "../tokens/Token";
 import {DocumentModificationEvent} from "../../../../../editor/core/document/events/DocumentModificationEvent";
+import {TokenCache} from "../../../../../editor/core/lang/TokenCache";
+import {Document} from "../../../../../editor/core/document/Document";
 
 /**
  * An abstract class for incremental lexers that support re-lexing of modified text ranges.
@@ -11,8 +13,6 @@ import {DocumentModificationEvent} from "../../../../../editor/core/document/eve
  * @since 1.0.0
  */
 export abstract class IncrementalLexer implements ILexer {
-    protected tokenStreams: TokenStream[] = [];
-
     public relex(event: DocumentModificationEvent): void {
         let cache = event.getDocument().getTokenCache();
 
@@ -37,8 +37,15 @@ export abstract class IncrementalLexer implements ILexer {
         cache.update(startOffset, endOffset - changedOffset, tokens, changedOffset);
     }
 
-    public lexAll(text: string): void {
-        // TODO
+    public lexAll(document: Document): void {
+        const source = new Source(document.getTextContent(), 0);
+        const tokens: Token[] = [];
+
+        while (!source.isEmpty()) {
+            tokens.push(this.tokenize(source));
+        }
+
+        document.getTokenCache().setTokens(tokens);
     }
 
     abstract tokenize(input: Source): Token;

@@ -1,7 +1,7 @@
 import {UIComponent} from "../../../../../core/ui/engine/components/UIComponent";
 import {Icon} from "../../../../../core/ui/icons/Icon";
 import {HTMLUtils} from "../../../../../editor/utils/HTMLUtils";
-import {PaneManager} from "../../../panes/PaneManager";
+import {PaneManager} from "../../../../core/panes/PaneManager";
 
 /**
  *

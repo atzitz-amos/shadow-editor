@@ -1,6 +1,7 @@
 import {Source, TokenStream} from "../tokens/TokenStream";
 import {Token} from "../tokens/Token";
 import {DocumentModificationEvent} from "../../../../../editor/core/document/events/DocumentModificationEvent";
+import {Document} from "../../../../../editor/core/document/Document";
 
 /**
  * Represents a lexer interface for tokenizing source code.
@@ -12,7 +13,7 @@ import {DocumentModificationEvent} from "../../../../../editor/core/document/eve
 export interface ILexer {
     relex(event: DocumentModificationEvent): void;
 
-    lexAll(text: string): void;
+    lexAll(document: Document): void;
 
     /**
      * Tokenize one character from the source given the LexerState
