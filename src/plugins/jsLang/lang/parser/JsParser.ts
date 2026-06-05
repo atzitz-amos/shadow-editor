@@ -124,9 +124,7 @@ export class JsParser implements IParser {
             this.parseExpression();
         }
 
-        if (!this.insertSemicolonIfNeeded()) {
-            this.builder.error("Expected semicolon or newline");
-        }
+        this.insertSemicolonIfNeeded();
     }
 
     parseStatement() {
@@ -286,15 +284,12 @@ export class JsParser implements IParser {
         const marker = this.builder.mark();
 
         this.builder.advance(); // consume 'switch'
-
-        let isValid = this.builder.expect(JsLexicalGrammar.LPAREN).failWith("Expected '('")
+        this.builder.expect(JsLexicalGrammar.LPAREN).failWith("Expected '('")
             .then(() => this.parseExpression())
             .then(JsLexicalGrammar.RPAREN).failWith("Expected ')'")
-            .then(JsLexicalGrammar.LBRACE).failWith("Expected '{'").isValid();
-        if (!isValid) {
-            marker.done(JsGrammar.SwitchStatement);
-            return;
-        }
+
+        const body = this.builder.mark();
+        this.builder.expect(JsLexicalGrammar.LBRACE).failWith("Expected '{'");
 
         while (!this.builder.done() && !this.builder.isNext(JsLexicalGrammar.RBRACE)) {
             if (this.builder.isNext(JsLexicalGrammar.KEYWORD, "case")) {
@@ -302,11 +297,13 @@ export class JsParser implements IParser {
             } else if (this.builder.isNext(JsLexicalGrammar.KEYWORD, "default")) {
                 this.parseSwitchDefaultClause();
             } else {
-                this.parseStatement();
+                this.parseStatementOrExpr();
             }
         }
 
         this.builder.expect(JsLexicalGrammar.RBRACE).orError("Expected '}'");
+
+        body.done(JsGrammar.CodeBlock);
 
         marker.done(JsGrammar.SwitchStatement);
     }
@@ -347,7 +344,7 @@ export class JsParser implements IParser {
             parsedClause = true;
         }
         if (!parsedClause) {
-            this.builder.error("Expected 'catch' or 'finally' after 'try' block");
+            this.builder.errorVirtual("Expected 'catch' or 'finally' after 'try' block");
         }
 
         marker.done(JsGrammar.TryCatchStatement);
@@ -479,7 +476,7 @@ export class JsParser implements IParser {
 
         const next = this.builder.seek()!;
         if (next.isType(JsLexicalGrammar.IDENTIFIER)) {
-            if (this.builder.lookAhead(2)?.isType(JsLexicalGrammar.LPAREN)) {
+            if (this.builder.lookAhead(1)?.isType(JsLexicalGrammar.LPAREN)) {
                 this.parseClassMethodDefinition(start, isAsync);
             } else {
                 if (isAsync) {
@@ -540,7 +537,7 @@ export class JsParser implements IParser {
 
     parseVariableDeclarationList() {
         if (this.builder.done()) {
-            this.builder.error("Expected variable declaration");
+            this.builder.errorVirtual("Expected variable declaration");
             return;
         }
         do {

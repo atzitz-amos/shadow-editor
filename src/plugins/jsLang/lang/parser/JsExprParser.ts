@@ -13,9 +13,7 @@ export class JsExprParser {
     }
 
     parseParameterDeclaration(): void {
-        if (this.tryParseDestructuringPattern()) {
-            // done in tryParseDestructuringPattern
-        } else {
+        if (!this.tryParseDestructuringPattern()) {
             this.builder.consumeIf(JsLexicalGrammar.ELLIPSIS);
             let isValid = this.builder.expect(JsLexicalGrammar.IDENTIFIER).orError("Expected parameter name") !== null;
             if (!isValid) {
@@ -34,7 +32,7 @@ export class JsExprParser {
         const isError = this.myPrattParser.parseExpression(allowComma ? 0 : OperatorPrecedence.NO_COMMA);
         if (isError === ErrorHandlingMode.ROLLBACK) {
             this.builder.advance(false); // Ensure the parser does not get stuck
-            this.builder.error("Unexpected token");
+            this.builder.errorVirtual("Unexpected token");
         }
     }
 
@@ -81,7 +79,7 @@ export class JsExprParser {
             } else if (this.builder.consumeIf(JsLexicalGrammar.IDENTIFIER)) {
                 isIdentifierKey = true;
             } else {
-                this.builder.error("Expected property name");
+                this.builder.errorVirtual("Expected property name");
                 this.builder.advance(false);
             }
 
@@ -98,7 +96,7 @@ export class JsExprParser {
                     this.parseExpression(false);
                 }
             } else {
-                this.builder.error("Expected ':' after property name");
+                this.builder.errorVirtual("Expected ':' after property name");
             }
             propValueStart.done(JsGrammar.ObjectPropertyValue);
             if (!this.builder.consumeIf(JsLexicalGrammar.COMMA)) {

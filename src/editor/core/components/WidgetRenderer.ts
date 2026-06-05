@@ -1,5 +1,5 @@
 import {WidgetManager} from "./WidgetManager";
-import {TextRange} from "../coordinate/TextRange";
+import {TextRange} from "../coordinate/range/TextRange";
 import {FragmentEvent, FragmentType} from "./fragments/FragmentEvent";
 import {FragmentsBuilder} from "./fragments/FragmentsBuilder";
 import {HTMLUtils} from "../../utils/HTMLUtils";

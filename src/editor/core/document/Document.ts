@@ -1,7 +1,7 @@
 import {Editor} from "../../Editor";
 import {EditorRawData} from "./RawData";
 import {LineData} from "./LineData";
-import {TextRange} from "../coordinate/TextRange";
+import {TextRange} from "../coordinate/range/TextRange";
 import {LanguageBase} from "../../../core/lang/LanguageBase";
 import {DocumentInsertEvent} from "./events/DocumentInsertEvent";
 import {DocumentModificationEvent} from "./events/DocumentModificationEvent";
@@ -14,6 +14,8 @@ import {DocumentSaveRequestEvent} from "./events/DocumentSaveRequestEvent";
 import {EditorOpenedDocumentEvent} from "./events/EditorOpenedDocumentEvent";
 import {UnsafeFlagsService} from "../../../core/sync/flags/UnsafeFlagsService";
 import {UnsafeFlags} from "../../../core/sync/flags/UnsafeFlags";
+import {TrackedRange} from "../coordinate/range/TrackedRange";
+import {UndoRedoActionStack} from "../undo/UndoRedoActionStack";
 
 /**
  * Represents an opened file in the editor
@@ -27,7 +29,10 @@ export class Document {
     private lines: LineData[];
     private lineBreaks: Offset[] = [];
 
-    private tokenCache: TokenCache = new TokenCache();
+    private readonly tokenCache: TokenCache = new TokenCache();
+    private readonly myUndoRedoStack: UndoRedoActionStack = new UndoRedoActionStack();
+
+    private trackedRanges: TrackedRange[] = [];
 
     constructor(private caretOffset: Offset, content: string, private language: LanguageBase | null = null) {
         this.data = new EditorRawData(content);
@@ -78,6 +83,10 @@ export class Document {
 
     public getTokenCache(): TokenCache {
         return this.tokenCache;
+    }
+
+    public getUndoRedoStack(): UndoRedoActionStack {
+        return this.myUndoRedoStack;
     }
 
     public getTextContent(): string {
@@ -141,7 +150,7 @@ export class Document {
     }
 
     public getLineStart(at: Offset): Offset {
-        for (let i = 0; i < this.lineBreaks.length; i++) {
+        for (let i = 1; i < this.lineBreaks.length; i++) {
             if (this.lineBreaks[i] > at) {
                 return this.lineBreaks[i - 1];
             }
@@ -190,6 +199,7 @@ export class Document {
     public insertText(offset: Offset, text: string): void {
         this.data.insert(offset, text);
 
+        this.updateTrackedRanges(offset, text.length);
         this.recomputeLines(offset, text, false);
 
         if (this.isLinkedToEditor()) {
@@ -203,6 +213,7 @@ export class Document {
     public deleteAt(at: Offset, n: number): string {
         let deleted = this.data.delete(at, n);
 
+        this.updateTrackedRanges(at, -n);
         this.recomputeLines(at, deleted, true);
 
         if (this.isLinkedToEditor()) {
@@ -222,6 +233,10 @@ export class Document {
 
     public substring(start: number, end?: number) {
         return this.data.substring(start, end);
+    }
+
+    public addTrackedRange(range: TrackedRange) {
+        this.trackedRanges.push(range);
     }
 
     private parseLines(): void {
@@ -279,5 +294,30 @@ export class Document {
         Scheduler.debounce(() => {
             GlobalState.getMainEventBus().asyncPublish(new DocumentSaveRequestEvent(this, this.getAssociatedFile()!, Date.now()));
         }, 1000)
+    }
+
+    private updateTrackedRanges(offset: Offset, delta: number) {
+        for (let i = 0; i < this.trackedRanges.length; i++) {
+            const range = this.trackedRanges[i];
+            if (!range.isValid()) {
+                this.trackedRanges.splice(i, 1);
+                i--;
+                continue;
+            }
+
+            if (offset < range.getStart()) {
+                range.moveBy(delta);
+            } else if (offset === range.getStart()) {
+                if (delta > 0 && range.isGreedyLeft())
+                    range.setEnd(range.getEnd() + delta);
+                else
+                    range.moveBy(delta);
+            } else if (offset < range.getEnd()) {
+                range.setEnd(range.getEnd() + delta);
+            } else if (offset === range.getEnd()) {
+                if (delta > 0 && range.isGreedyRight())
+                    range.setEnd(range.getEnd() + delta);
+            }
+        }
     }
 }

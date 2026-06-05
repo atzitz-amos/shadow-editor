@@ -27,8 +27,8 @@ export enum OperatorPrecedence {
     PREFIX = 140,
     POSTFIX = 150,
     NEW = 160,
-    CALL = 170,
-    ACCESS_CALL = 170,
+    CALL = 160,
+    ACCESS_CALL = 160,
     MEMBER = 170,
     GROUPING = 180,
 
@@ -45,7 +45,6 @@ export enum ErrorHandlingMode {
 export class JsPrattParser {
     private static readonly NUD_LITERALS: [TokenType, string | null, ASTType][] = [
         [JsLexicalGrammar.NUMBER_LITERAL, null, JsGrammar.NumberLiteral],
-        [JsLexicalGrammar.STRING_LITERAL, null, JsGrammar.StringLiteral],
         [JsLexicalGrammar.TEMPLATE_STRING, null, JsGrammar.TemplateLiteral],
         [JsLexicalGrammar.KEYWORD, "true", JsGrammar.BooleanLiteral],
         [JsLexicalGrammar.KEYWORD, "false", JsGrammar.BooleanLiteral],
@@ -63,7 +62,7 @@ export class JsPrattParser {
 
         let currentErrorMode = this.nud();
         if (currentErrorMode !== ErrorHandlingMode.NONE) {
-            if (currentErrorMode === ErrorHandlingMode.ROLLBACK) this.builder.error("Expected expression");
+            if (currentErrorMode === ErrorHandlingMode.ROLLBACK) this.builder.errorVirtual("Expected expression");
             return currentErrorMode;
         }
         while (rbp < this.bindingPower(this.builder.seek())) {
@@ -135,7 +134,7 @@ export class JsPrattParser {
         const start = this.builder.mark();
         const token = this.builder.advance();
         if (!token) {
-            this.builder.error("Unexpected end of input");
+            this.builder.errorVirtual("Unexpected end of input");
             return ErrorHandlingMode.ERROR_NODE;
         }
 
@@ -147,6 +146,15 @@ export class JsPrattParser {
                 start.done(astType);
                 return ErrorHandlingMode.NONE;
             }
+        }
+
+        if (type === JsLexicalGrammar.STRING_LITERAL) {
+            start.done(JsGrammar.StringLiteral);
+            if (value.length < 2 || !value.charAt(value.length - 1).match(/['"`]/)) {
+                this.builder.errorVirtual("Unterminated string literal");
+                return ErrorHandlingMode.ERROR_NODE;
+            }
+            return ErrorHandlingMode.NONE;
         }
 
         if (this.isPrefix(type, value)) {
@@ -193,7 +201,14 @@ export class JsPrattParser {
                 this.myExprParser.parseClassExpression(start);
                 break;
             case "new":
-                this.parseExpression(OperatorPrecedence.NEW);
+                this.parseExpression(OperatorPrecedence.CALL);
+
+                if (this.builder.isNext(JsLexicalGrammar.LPAREN)) {
+                    this.builder.advance();
+                    this.parseFunctionArguments();
+                    this.builder.expect(JsLexicalGrammar.RPAREN).orError("Expected ')'");
+                }
+
                 start.done(JsGrammar.NewExpr);
                 break;
             case "import":
@@ -220,7 +235,7 @@ export class JsPrattParser {
     private led(marker: Marker) {
         const token = this.builder.advance();
         if (!token) {
-            this.builder.error("Unexpected end of input");
+            this.builder.errorVirtual("Unexpected end of input");
             return;
         }
 
@@ -332,9 +347,6 @@ export class JsPrattParser {
         } else if (type === JsLexicalGrammar.KEYWORD) {
             if (token.getValue() === "instanceof" || token.getValue() === "in") {
                 return OperatorPrecedence.INSTANCEOF_IN;
-            }
-            if (token.getValue() === "new") {
-                return OperatorPrecedence.NEW;
             }
             return 0;
         } else if (type === JsLexicalGrammar.LPAREN || type === JsLexicalGrammar.LBRACKET) {

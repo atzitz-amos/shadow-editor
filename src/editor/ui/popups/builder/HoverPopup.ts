@@ -37,6 +37,7 @@ export class HoverPopup {
                 if (this.shownPopup && this.shownPopup.isDisposed()) {
                     this.shownPopup = null
                 }
+
                 this.focusAcquired = false;
 
 

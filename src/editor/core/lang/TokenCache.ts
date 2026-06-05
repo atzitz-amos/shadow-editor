@@ -66,7 +66,7 @@ export class TokenCache {
         // Shift ranges of tokens after the inserted tokens by deltaOffset (in-place)
         const shiftFrom = startIdx + newTokens.length;
         for (let i = shiftFrom; i < this.tokens.length; i++) {
-            this.tokens[i].getRange().delta(deltaOffset);
+            this.tokens[i].getRange().moveBy(deltaOffset);
         }
     }
 

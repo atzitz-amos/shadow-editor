@@ -69,6 +69,14 @@ export abstract class UIComponent implements Drawable, Disposable {
         child.mount(this);
     }
 
+    public addChildTo(child: UIComponent, parent: HTMLElement): void {
+        this.children.push(child);
+
+        child.root = parent;
+        parent.appendChild(child.getUnderlyingElement());
+        child.mount(this);
+    }
+
     public removeChild(child: UIComponent): void {
         const index = this.children.indexOf(child);
         if (index !== -1) {
@@ -174,6 +182,10 @@ export abstract class UIComponent implements Drawable, Disposable {
 
     protected addHtmlElement(element: HTMLElement): void {
         this.getUnderlyingElement().appendChild(element);
+    }
+
+    protected insertHTML(html: string): void {
+        this.getUnderlyingElement().innerHTML += html;
     }
 
     private detachChild(child: UIComponent): void {

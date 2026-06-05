@@ -28,7 +28,7 @@ export class TokenExpectation {
             return this.token;
         }
         if (!this.token)
-            this.builder.error(message || "Unexpected token");
+            this.builder.errorVirtual(message || "Unexpected token");
         else
             this.builder.errorOn(this.token, message || "Unexpected token");
         return null;
@@ -43,7 +43,7 @@ export class TokenExpectation {
             return this;
         }
         if (!this.token)
-            this.builder.error(message || "Unexpected end of input");
+            this.builder.errorVirtual(message || "Unexpected end of input");
         else
             this.builder.errorOn(this.token, message || "Unexpected token");
         return this;

@@ -18,6 +18,7 @@ export class PaneHooks {
     public static readonly PANE_HIDE = new UIHook<[IPane]>(this, "PANE_HIDE");
     public static readonly PANE_MOVE = new UIHook<[IPane, PaneDockPosition, PaneDockPosition]>(this, "PANE_MOVE");
     public static readonly PANE_ADD = new UIHook<[IPane]>(this, "PANE_ADD");
+    public static readonly PANE_REMOVE = new UIHook<[IPane]>(this, "PANE_REMOVE");
 }
 
 export class TabHooks {

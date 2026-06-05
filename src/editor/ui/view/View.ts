@@ -206,11 +206,16 @@ export class View {
 
     setResizeDirty() {
         this.dirtyFlags.isResizeDirty = true;
-        this.triggerRepaint();
+        this.dirtyFlags.isDirty = true;
+        this.dirtyFlags.areOverlaysDirty = true;
     }
 
     triggerRepaint() {
         this.dirtyFlags.isDirty = true;
+        this.dirtyFlags.areOverlaysDirty = true;
+    }
+
+    triggerOverlaysRepaint() {
         this.dirtyFlags.areOverlaysDirty = true;
     }
 

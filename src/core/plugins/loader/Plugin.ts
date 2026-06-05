@@ -8,6 +8,8 @@ export abstract class EditorPlugin {
         return this;
     }
 
+    public abstract getId(): string;
+
     /**
      * Called when the plugin is enabled.
      */

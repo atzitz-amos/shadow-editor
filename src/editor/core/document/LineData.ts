@@ -1,5 +1,5 @@
 import {Document} from "./Document";
-import {TextRange} from "../coordinate/TextRange";
+import {TextRange} from "../coordinate/range/TextRange";
 
 export class LineData {
 

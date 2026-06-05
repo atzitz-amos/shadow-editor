@@ -24,8 +24,6 @@ export class TextLayer {
         this.visualLineCount = this.view.getVisualLineCount();
         this.lines = [];
 
-        console.log("Iniializing " + this + " with " + this.visualLineCount + " visual lines");
-
         let firstEdgeline = HTMLUtils.createElement('div.editor-line.editor-line-edge', this.element) as HTMLDivElement;
         for (let i = 0; i < this.visualLineCount; i++) {
             this.lines.push(HTMLUtils.createElement("div.editor-line.line-" + i, this.element) as HTMLDivElement);

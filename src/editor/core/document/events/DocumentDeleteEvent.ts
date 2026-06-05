@@ -1,7 +1,7 @@
 import {EventSubscriber} from "../../../../core/events/EventSubscriber";
 import {EditorEventBase} from "../../../../core/events/EditorEventBase";
 import {Document} from "../Document";
-import {TextRange} from "../../coordinate/TextRange";
+import {TextRange} from "../../coordinate/range/TextRange";
 
 /**
  * Fired whenever text is deleted from the document

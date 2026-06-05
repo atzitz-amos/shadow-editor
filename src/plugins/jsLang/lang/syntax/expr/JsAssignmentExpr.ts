@@ -1,5 +1,10 @@
-import {SynElementImpl} from "../../../../../core/lang/syntax/impl/SynElementImpl";
 import {ASTNode} from "../../../../../core/lang/syntax/builder/parser/nodes/ASTNode";
+import {SynNodeVisitor} from "../../../../../core/lang/syntax/visitors/SynNodeVisitor";
+import {JsSynVisitor} from "../visitors/JsSynVisitor";
+import {JsExpr} from "./JsExpr";
+import {SynTokenNode} from "../../../../../core/lang/syntax/impl/SynTokenNode";
+import {JsArrayLiteral} from "../literal/JsArrayLiteral";
+import {JsIdentifier} from "../literal/JsIdentifier";
 
 /**
  *
@@ -7,10 +12,53 @@ import {ASTNode} from "../../../../../core/lang/syntax/builder/parser/nodes/ASTN
  * @date 11/27/2025
  * @since 1.0.0
  */
-export class JsAssignmentExpr extends SynElementImpl {
+export class JsAssignmentExpr extends JsExpr {
+    private readonly operator: SynTokenNode;
+    private readonly left: JsExpr;
+    private readonly right: JsExpr;
+
     constructor(node: ASTNode) {
         super(node);
-        // obj op value
+
+        this.left = this.findNthChild(0) as JsExpr;
+        this.operator = this.findNthChild(1) as SynTokenNode;
+        this.right = this.findNthChild(2) as JsExpr;
+    }
+
+    getOperator(): SynTokenNode {
+        return this.operator;
+    }
+
+    getLeft(): JsExpr {
+        return this.left;
+    }
+
+    getRight(): JsExpr {
+        return this.right;
+    }
+
+    public toDebugString(): string {
+        return `(${this.left.toDebugString()} ${this.operator.getValue()} ${this.right.toDebugString()})`;
+    }
+
+    getAllModifiedIdentifiers(): JsIdentifier[] {
+        let result: JsIdentifier[] = []
+        if (this.left instanceof JsArrayLiteral) {
+            for (let element of this.left.childrenIterator(e => e instanceof JsIdentifier)) {
+                result.push(element as JsIdentifier);
+            }
+        } else if (this.left instanceof JsIdentifier) {
+            return [this.left];
+        }
+        return result;
+    }
+
+    accept(visitor: SynNodeVisitor) {
+        if (visitor instanceof JsSynVisitor) {
+            visitor.visitAssignmentExpr(this);
+        } else {
+            super.accept(visitor);
+        }
     }
 }
 

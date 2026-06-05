@@ -38,6 +38,12 @@ export class PaneManager {
     }
 
     open(pane: IPane, dockPosition?: PaneDockPosition): void {
+        this.add(pane, dockPosition);
+
+        this.setActive(pane);
+    }
+
+    add(pane: IPane, dockPosition?: PaneDockPosition): void {
         if (dockPosition) {
             pane.setDockPosition(dockPosition);
         }
@@ -45,9 +51,16 @@ export class PaneManager {
         if (!this.panes.has(pane.getId())) {
             this.panes.set(pane.getId(), pane);
             UIHooks.trigger(PaneHooks.PANE_ADD, pane);
+            pane.onAdd();
         }
+    }
 
-        this.setActive(pane);
+    remove(pane: IPane) {
+        if (this.panes.has(pane.getId())) {
+            this.panes.delete(pane.getId());
+            UIHooks.trigger(PaneHooks.PANE_REMOVE, pane);
+            pane.onRemove();
+        }
     }
 
     getActivePane(dockPosition: PaneDockPosition): IPane | null {

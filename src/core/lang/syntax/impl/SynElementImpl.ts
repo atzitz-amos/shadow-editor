@@ -1,10 +1,14 @@
 import {SynElement} from "../api/SynElement";
 import {SynNode} from "../api/SynNode";
-import {TextRange} from "../../../../editor/core/coordinate/TextRange";
+import {TextRange} from "../../../../editor/core/coordinate/range/TextRange";
 import {ASTNode} from "../builder/parser/nodes/ASTNode";
 import {SynScope} from "../builder/parser/scopes/SynScope";
 import {SynFile} from "../api/SynFile";
 import {EditorURI} from "../../../uri/EditorURI";
+import {SynNodeVisitor} from "../visitors/SynNodeVisitor";
+import {ASTType} from "../builder/parser/nodes/ASTGrammar";
+import {SynTokenNode} from "./SynTokenNode";
+import {TokenType} from "../builder/tokens/TokenType";
 
 /**
  * Provides a lot of standard functionality for syntax elements.
@@ -15,6 +19,7 @@ import {EditorURI} from "../../../uri/EditorURI";
  */
 export abstract class SynElementImpl implements SynElement {
     protected readonly scope: SynScope;
+    protected readonly node: ASTNode;
     private readonly elementChildren: SynElement[];
     private readonly range: TextRange;
     private readonly children: SynNode[];
@@ -22,6 +27,7 @@ export abstract class SynElementImpl implements SynElement {
     private readonly file: SynFile;
 
     protected constructor(node: ASTNode) {
+        this.node = node;
         this.range = node.range;
         this.children = node.children;
         this.scope = node.scope;
@@ -47,7 +53,28 @@ export abstract class SynElementImpl implements SynElement {
             if (child.isSynElement() && filter(child as SynElement)) {
                 yield child as SynElement;
             }
+            if (child.isSynElement()) yield* (child as SynElement).childrenIterator(filter);
         }
+    }
+
+    nextSibling(): SynNode | null {
+        if (!this.parent) return null;
+
+        const siblings = this.parent.getChildren();
+        const index = siblings.indexOf(this);
+        if (index === -1 || index === siblings.length - 1) return null;
+
+        return siblings[index + 1];
+    }
+
+    previousSibling(): SynNode | null {
+        if (!this.parent) return null;
+
+        const siblings = this.parent.getChildren();
+        const index = siblings.indexOf(this);
+        if (index <= 0) return null;
+
+        return siblings[index - 1];
     }
 
     findChildrenAt(offset: number): SynNode | null {
@@ -73,6 +100,18 @@ export abstract class SynElementImpl implements SynElement {
         return null;
     }
 
+    findDeepestChildAt(offset: number): SynNode | null {
+        let child = this.findChildrenAt(offset);
+        while (child && child.isSynElement()) {
+            const nextChild = (child as SynElement).findChildrenAt(offset);
+            if (!nextChild) {
+                break;
+            }
+            child = nextChild;  // assign regardless of whether it's a SynElement
+        }
+        return child;
+    }
+
     findEnclosingOfType<T extends SynElement>(type: Class<T>): T | null {
         for (let parent = this.getParent(); parent !== null; parent = parent.getParent()) {
             if (parent.isSynElement() && parent instanceof type) {
@@ -82,7 +121,7 @@ export abstract class SynElementImpl implements SynElement {
         return null;
     }
 
-    findFirstChildOfType<T extends SynElement>(type: Class<T>, offset: Offset): T | null {
+    findFirstChildOfTypeAt<T extends SynElement>(type: Class<T>, offset: Offset): T | null {
         let childAtOffset = this.findChildrenAt(offset);
         if (childAtOffset && childAtOffset.isSynElement()) {
             while (childAtOffset && childAtOffset.isSynElement() && !(childAtOffset instanceof type)) {
@@ -95,16 +134,72 @@ export abstract class SynElementImpl implements SynElement {
         return null;
     }
 
-    findAllChildrenOfType<T extends SynElement>(type: Class<T>): T[] {
+    findAllChildrenOfType<T extends SynNode>(type: Class<T>, nested: boolean = false): T[] {
         let result: T[] = [];
         for (let child of this.children) {
             if (child instanceof type) {
                 result.push(child);
             }
-            if (child instanceof SynElementImpl)
-                result = result.concat(child.findAllChildrenOfType(type));
+            if (child instanceof SynElementImpl && nested)
+                result = result.concat(child.findAllChildrenOfType(type, true));
         }
         return result;
+    }
+
+    getAllToken(nested: boolean = false): SynTokenNode[] {
+        let result: SynTokenNode[] = [];
+        for (let child of this.children) {
+            if (child instanceof SynTokenNode && !child.token.isCommentToken() && !child.token.shouldSkip()) {
+                result.push(child);
+            }
+            if (child instanceof SynElementImpl && nested)
+                result = result.concat(child.getAllToken(true));
+        }
+
+        return result;
+    }
+
+    findNthChild(n: number): SynNode | null {
+        let count = 0;
+        for (const child of this.children) {
+            if (child instanceof SynTokenNode && (child.token.isCommentToken() || child.token.shouldSkip())) continue;
+            if (count === n) {
+                return child;
+            }
+            count++;
+        }
+
+        return null;
+    }
+
+    findAllTokensOfType(type: TokenType, nested: boolean = false): SynTokenNode[] {
+        let result: SynTokenNode[] = [];
+        for (let child of this.children) {
+            if (child instanceof SynTokenNode && child.token.isType(type)) {
+                result.push(child);
+            }
+            if (child instanceof SynElementImpl && nested)
+                result = result.concat(child.findAllTokensOfType(type, true));
+        }
+        return result;
+    }
+
+    findNthChildOfType<T extends SynNode>(type: Class<T>, n: number): T | undefined {
+        return this.findAllChildrenOfType(type)[n];
+    }
+
+    findNthElementOfASTType(type: ASTType, n: number): SynElement | null {
+        let count = 0;
+        for (const child of this.elementChildren) {
+            if (child instanceof SynElementImpl && child.node.type === type) {
+                if (count === n) {
+                    return child;
+                }
+                count++;
+            }
+        }
+
+        return null;
     }
 
     getSynFile(): SynFile {
@@ -119,8 +214,11 @@ export abstract class SynElementImpl implements SynElement {
         return this.elementChildren;
     }
 
-    getChildren(): SynNode[] {
-        return this.children;
+    getChildren(withComments: boolean = true): SynNode[] {
+        if (withComments) {
+            return this.children;
+        }
+        return this.children.filter(child => !(child instanceof SynTokenNode) || (!child.token.isCommentToken() && !child.token.shouldSkip()));
     }
 
     getParent(): SynElement | null {
@@ -131,6 +229,16 @@ export abstract class SynElementImpl implements SynElement {
         return this.range;
     }
 
+    toDebugString(): string {
+        const children = this.elementChildren.map(child => child.toDebugString()).join(" ");
+        const typeName = this.node.type.debugName;
+        return children.length > 0 ? `(${typeName} ${children})` : `(${typeName})`;
+    }
+
+    toTreeRepr(): string {
+        return this.constructor.name + " {\n" + this.children.map(child => child.toTreeRepr()).join(",\n").split("\n").map(line => "  " + line).join("\n") + "\n}";
+    }
+
     isSynElement(): this is SynElement {
         return true;
     }
@@ -139,6 +247,9 @@ export abstract class SynElementImpl implements SynElement {
         this.parent = parent;
     }
 
+    accept(visitor: SynNodeVisitor): void {
+        visitor.visitElement(this);
+    }
 }
 
 

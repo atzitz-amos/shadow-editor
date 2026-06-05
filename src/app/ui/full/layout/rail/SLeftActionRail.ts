@@ -42,6 +42,11 @@ export class SLeftActionRail extends UIComponent {
         this.draw();
     }
 
+    @UIHooks.react(PaneHooks.PANE_REMOVE)
+    private _onPaneRemove(): void {
+        this.draw();
+    }
+
     @UIHooks.react(PaneHooks.PANE_MOVE)
     private _onPaneMove(pane: IPane, old: PaneDockPosition, current: PaneDockPosition): void {
         if (old === PaneDockPosition.LEFT || current === PaneDockPosition.LEFT) {

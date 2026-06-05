@@ -11,12 +11,14 @@
   "author": "Amos Atzitz",
   "license": "ISC",
   "devDependencies": {
+    "@swc/core": "^1.15.40",
     "ts-node": "^10.9.2",
     "tsx": "^4.20.3",
     "typedoc": "^0.28.18",
     "typedoc-material-theme": "^1.4.1",
-    "typescript": "^5.8.3",
-    "vite": "^7.3.0"
+    "typescript": "^5.9.3",
+    "unplugin-swc": "^1.5.9",
+    "vite": "8.0.5"
   },
   "directories": {
     "test": "tests"

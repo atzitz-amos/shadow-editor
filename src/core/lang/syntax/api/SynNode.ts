@@ -1,7 +1,8 @@
 import {SynElement} from "./SynElement";
-import {TextRange} from "../../../../editor/core/coordinate/TextRange";
+import {TextRange} from "../../../../editor/core/coordinate/range/TextRange";
 import {SynFile} from "./SynFile";
 import {URILocatedResource} from "../../../uri/URILocatedResource";
+import {SynNodeVisitor} from "../visitors/SynNodeVisitor";
 
 /**
  * Most basic syntax node in the syntax tree.
@@ -20,7 +21,17 @@ export interface SynNode extends URILocatedResource {
 
     getParent(): SynElement | null;
 
+    nextSibling(): SynNode | null;
+
+    previousSibling(): SynNode | null;
+
     _setParent(parent: SynElement): void;
 
     isSynElement<T extends SynNode>(this: T): this is SynElement;
+
+    toDebugString(): string;
+
+    toTreeRepr(): string;
+
+    accept(visitor: SynNodeVisitor): void;
 }

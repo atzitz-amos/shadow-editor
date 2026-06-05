@@ -2,6 +2,7 @@ import {Caret} from "./Caret";
 import {ModifierKeyHolder} from "../../../core/keybinds/Keybind";
 import {Editor} from "../../Editor";
 import {LogicalPosition} from "../coordinate/LogicalPosition";
+import {TextRange} from "../coordinate/range/TextRange";
 
 
 export enum SelectionDirection {
@@ -90,6 +91,14 @@ export class SelectionModel {
             return this.caret.getLogical();
         }
         return this.editor.offsetToLogical(end);
+    }
+
+    getRange(): TextRange | null {
+        if (!this.isSelectionActive || this.startOffset === null || this.endOffset === null) {
+            return null;
+        }
+
+        return new TextRange(Math.min(this.startOffset, this.endOffset), Math.max(this.startOffset, this.endOffset));
     }
 
     getSelectionLength(): number {

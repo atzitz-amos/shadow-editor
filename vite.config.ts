@@ -1,22 +1,22 @@
-// vite.config.ts
-import {defineConfig} from "vite";
+import { defineConfig } from "vite";
+import swc from "unplugin-swc";
 
 export default defineConfig({
-    root: ".", // your project root
-    esbuild: {
-        target: "es2022",
-        supported: {
-            decorators: false
-        }
-    },
-    optimizeDeps: {
-        esbuildOptions: {
-            target: "es2022",
-            supported: {
-                decorators: false
-            }
-        }
-    },
+    root: ".",
+    plugins: [
+        swc.vite({
+            jsc: {
+                parser: {
+                    syntax: "typescript",
+                    decorators: true,
+                },
+                transform: {
+                    decoratorVersion: "2022-03",
+                },
+                target: "es2022",
+            },
+        }),
+    ],
     build: {
         target: "es2022"
     }

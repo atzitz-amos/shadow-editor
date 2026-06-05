@@ -1,5 +1,5 @@
 import {URITargetFromString, URITargetType} from "./URITargetType";
-import {TextRange} from "../../editor/core/coordinate/TextRange";
+import {TextRange} from "../../editor/core/coordinate/range/TextRange";
 
 
 /**

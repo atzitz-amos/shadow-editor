@@ -8,7 +8,7 @@ import {Token} from "../../../../core/lang/syntax/builder/tokens/Token";
 import {Source} from "../../../../core/lang/syntax/builder/tokens/TokenStream";
 import {JsLexicalGrammar} from "./JsLexicalGrammar";
 import {TokenType} from "../../../../core/lang/syntax/builder/tokens/TokenType";
-import {TextRange} from "../../../../editor/core/coordinate/TextRange";
+import {TextRange} from "../../../../editor/core/coordinate/range/TextRange";
 
 export default class JsIncrLexer extends IncrementalLexer {
     tokenize(input: Source): Token {
@@ -72,16 +72,19 @@ export default class JsIncrLexer extends IncrementalLexer {
             const quote = input.consume()!;
             let value = quote;
             while (!input.isEmpty()) {
-                const c = input.consume()!;
-                value += c;
+                const c = input.seek()!;
                 if (c === '\\') {
                     // escape next character
+                    value += input.consume();
                     value += input.consume() || "";  // should fail if escape char at end of input
                 } else if (c === quote) {
+                    value += input.consume();
                     break;
                 } else if (c === "\n" || c === "\r") {
                     if (quote !== '`') break;
                 }
+
+                value += input.consume();
             }
             const type =
                 quote === '`'
@@ -109,7 +112,7 @@ export default class JsIncrLexer extends IncrementalLexer {
                 value += input.consume();
             }
 
-            const isKeyword = JsLexicalGrammar.KEYWORD_LIST.includes(value);
+            const isKeyword = JsLexicalGrammar.KEYWORD_LIST.has(value);
             const type = isKeyword
                 ? JsLexicalGrammar.KEYWORD
                 : JsLexicalGrammar.IDENTIFIER;

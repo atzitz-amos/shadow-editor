@@ -1,5 +1,5 @@
 import {ASTType} from "./ASTGrammar";
-import {TextRange} from "../../../../../../editor/core/coordinate/TextRange";
+import {TextRange} from "../../../../../../editor/core/coordinate/range/TextRange";
 import {SynNode} from "../../../api/SynNode";
 import {SynScope} from "../scopes/SynScope";
 import {SynFile} from "../../../api/SynFile";

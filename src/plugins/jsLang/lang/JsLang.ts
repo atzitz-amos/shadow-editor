@@ -9,6 +9,10 @@ import {IParser} from "../../../core/lang/syntax/builder/parser/IParser";
 
 
 export default class JsLang extends LanguageBase {
+    public getKey(): string {
+        return "javascript";
+    }
+
     public getDisplayName(): string {
         return "JavaScript";
     }

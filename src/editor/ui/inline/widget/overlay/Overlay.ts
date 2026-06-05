@@ -1,5 +1,5 @@
 import {OverlayEvent} from "./OverlayEvent";
-import {TextRange} from "../../../../core/coordinate/TextRange";
+import {TextRange} from "../../../../core/coordinate/range/TextRange";
 import {HTMLView} from "../../view/HTMLView";
 import {Editor} from "../../../../Editor";
 

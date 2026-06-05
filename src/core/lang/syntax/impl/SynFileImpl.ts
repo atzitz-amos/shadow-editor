@@ -1,11 +1,12 @@
 import {SynFile} from "../api/SynFile";
 import {SynElement} from "../api/SynElement";
-import {TextRange} from "../../../../editor/core/coordinate/TextRange";
+import {TextRange} from "../../../../editor/core/coordinate/range/TextRange";
 import {SynNode} from "../api/SynNode";
 import {EditorURI} from "../../../uri/EditorURI";
 import {WorkspaceFile} from "../../../workspace/filesystem/tree/WorkspaceFile";
 import {RelativePath} from "../../../workspace/filesystem/path/RelativePath";
 import {Document} from "../../../../editor/core/document/Document";
+import {SynNodeVisitor} from "../visitors/SynNodeVisitor";
 
 /**
  *
@@ -35,12 +36,28 @@ export class SynFileImpl implements SynFile {
         return this.children;
     }
 
+    nextSibling(): null {
+        return null;
+    }
+
+    previousSibling(): null {
+        return null;
+    }
+
     getTextRange(): TextRange {
         return this.document.getFullRange();
     }
 
     getPath(): RelativePath | null {
         return this.document.isAssociatedWithFile() ? this.document.getAssociatedFile()!.getPath() : null;
+    }
+
+    toDebugString(): string {
+        return `(FILE ${this.children.map(child => child.toDebugString()).join(" ")})`;
+    }
+
+    toTreeRepr(): string {
+        return this.constructor.name + " {\n" + this.children.map(child => child.toTreeRepr()).join(",\n").split("\n").map(line => "  " + line).join("\n") + "\n}";
     }
 
     getParent(): SynElement | null {
@@ -56,5 +73,9 @@ export class SynFileImpl implements SynFile {
 
     addChild(node: SynNode): void {
         this.children.push(node);
+    }
+
+    accept(visitor: SynNodeVisitor): void {
+        visitor.visitFile(this);
     }
 }

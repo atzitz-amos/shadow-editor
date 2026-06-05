@@ -87,6 +87,36 @@ export type Keybind = {
     context?: KeybindContextDescriptor;
 };
 
+export class Shortcut {
+    public static ctrl(key: Key, context?: KeybindContextDescriptor): Keybind {
+        return {key, ctrl: true, context};
+    }
+
+    public static ctrlAlt(key: Key, context?: KeybindContextDescriptor): Keybind {
+        return {key, ctrl: true, alt: true, context};
+    }
+
+    public static ctrlShift(key: Key, context?: KeybindContextDescriptor): Keybind {
+        return {key, ctrl: true, shift: true, context};
+    }
+
+    public static altShift(key: Key, context?: KeybindContextDescriptor): Keybind {
+        return {key, alt: true, shift: true, context};
+    }
+
+    public static ctrlShiftAlt(key: Key, context?: KeybindContextDescriptor): Keybind {
+        return {key, ctrl: true, shift: true, alt: true, context};
+    }
+
+    public static shift(key: Key, context?: KeybindContextDescriptor): Keybind {
+        return {key, shift: true, context};
+    }
+
+    public static alt(key: Key, context?: KeybindContextDescriptor): Keybind {
+        return {key, alt: true, context};
+    }
+}
+
 export class ModifierKeyHolder {
     static INSTANCE: ModifierKeyHolder;
     isCtrlPressed: boolean = false;

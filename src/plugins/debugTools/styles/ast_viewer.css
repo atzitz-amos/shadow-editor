@@ -1,0 +1,121 @@
+.ast-viewer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2px 12px 8px;
+    border-bottom: 1px solid #2d3139; /* Sleeker, less harsh border */
+    margin-bottom: 10px;
+}
+
+.ast-viewer-filename {
+    font-size: 11px;
+    color: #abb2bf; /* Brighter, more readable gray for the filename */
+    font-family: system-ui, sans-serif;
+}
+
+/* Ensure the main container explicitly allows horizontal scrolling */
+.ast-viewer-body {
+    padding: 0 12px 10px 0;
+    flex: 1;
+    overflow: auto; /* Triggers scrollbars when contents spill out */
+    display: flex;
+    flex-direction: column;
+}
+
+/* Add a wrapper or ensure the top-level tree nodes can stretch */
+.syn-tree-node {
+    display: flex;
+    flex-direction: column;
+    padding-left: 20px;
+    overflow: visible;
+    position: relative;
+
+    /* Crucial fix for horizontal scrolling in flex children */
+    min-width: min-content;
+    width: 100%;
+}
+
+/* Subtle vertical guide line */
+.syn-tree-node::before {
+    content: "";
+    position: absolute;
+    left: 4px;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.syn-tree-node * {
+    font-family: 'JetBrains Mono', JetBrains, monospace;
+    font-variant-ligatures: none;
+}
+
+.syn-tree-node-title,
+.syn-tree-node-closing {
+    white-space: nowrap;
+    color: #61afef;
+    font-weight: 500;
+
+    /* Ensures inline elements align gracefully along the same baseline */
+    display: inline-flex;
+    align-items: center;
+}
+
+/* Perfect full-width error highlighting without breaking scroll */
+.syn-error-node {
+    color: #f44747;
+    background-color: rgba(244, 71, 71, 0.15);
+    border-radius: 3px;
+    padding: 2px 6px;
+
+    width: max-content;
+    box-sizing: border-box;
+}
+
+.syn-token-node {
+    color: #98c379;
+    width: max-content;
+}
+
+
+.ast-viewer-overlay-highlight {
+    background: rgb(200 96 232 / 0.25); /* Soft purple overlay */
+}
+
+.ast-viewer-tag {
+    color: #e5c07b; /* Warm amber font */
+    background-color: rgba(229, 192, 123, 0.12); /* Subtle pill background */
+
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1; /* Prevents text from pushing the badge height */
+
+    padding: 2px 6px; /* Balanced padding around the text */
+    margin-left: 8px; /* Breathing room from the brace/title */
+    border-radius: 4px;
+
+    /* Perfect inline centering block */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    /* Fine-tune alignment relative to the surrounding text code */
+    vertical-align: middle;
+
+    visibility: hidden;
+}
+
+.ast-viewer-tag.visible {
+    visibility: visible;
+}
+
+.ast-viewer-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #5c6370; /* Soft muted gray for empty states */
+    font-size: 14px;
+}

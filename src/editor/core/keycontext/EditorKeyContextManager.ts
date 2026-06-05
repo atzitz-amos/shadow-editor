@@ -60,7 +60,6 @@ export class EditorKeyContextManager {
 
     unfocus() {
         this.isFocused = false;
-        console.log("Unfocus")
         EditorKeysHelper.notify(CloseOn.BLUR);
     }
 }

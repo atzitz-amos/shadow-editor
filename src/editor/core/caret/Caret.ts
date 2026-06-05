@@ -146,6 +146,11 @@ export class Caret {
             }
         }
     }
+
+    getSelectedText() {
+        const selection = this.getSelectionModel().getRange();
+        return selection == null ? null : this.editor.getOpenedDocument().substring(selection.start, selection.end);
+    }
 }
 
 
@@ -188,7 +193,7 @@ export class CaretModel {
         }
     }
 
-    clearAllCarets() {
+    removeAllIncludingPrimary() {
         for (const caret of this.carets) {
             caret.remove();
         }

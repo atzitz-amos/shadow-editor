@@ -156,7 +156,7 @@ export class JsLexicalGrammar implements LexicalGrammar {
     /**
      * List of JS Keywords
      * */
-    public static readonly KEYWORD_LIST: string[] = ["break", "case", "catch", "class", "const", "continue", "debugger", "default", "delete", "do", "else", "export", "extends", "finally", "for", "function", "if", "import", "in", "instanceof", "let", "new", "null", "return", "super", "switch", "this", "throw", "true", "false", "try", "typeof", "var", "void", "while", "with", "yield", "async", "await", "undefined", "constructor"];
+    public static readonly KEYWORD_LIST: Set<string> = new Set(["break", "case", "catch", "class", "const", "continue", "debugger", "default", "delete", "do", "else", "export", "extends", "finally", "for", "function", "if", "import", "in", "instanceof", "let", "new", "null", "return", "super", "switch", "this", "throw", "true", "false", "try", "typeof", "var", "void", "while", "with", "yield", "async", "await", "undefined", "constructor", "static"]);
 
     /**
      * Regex to match JS numbers

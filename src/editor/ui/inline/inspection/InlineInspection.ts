@@ -1,42 +1,46 @@
-import {TextRange} from "../../../core/coordinate/TextRange";
-import {OverlayWidget} from "../widget/overlay/OverlayWidget";
 import {Overlay} from "../widget/overlay/Overlay";
-import {Editor} from "../../../Editor";
 import {HoverPopup} from "../../popups/builder/HoverPopup";
+import {TextRange} from "../../../core/coordinate/range/TextRange";
+import {Editor} from "../../../Editor";
 import {SimpleTooltipBuilder} from "../../popups/tooltip/SimpleTooltipBuilder";
+import {OverlayWidget} from "../widget/overlay/OverlayWidget";
+import {InspectionSeverity} from "../../../../core/lang/inspections/InspectionSeverity";
+import {TrackedRange} from "../../../core/coordinate/range/TrackedRange";
 
 /**
  *
  * @author Atzitz Amos
- * @date 10/24/2025
+ * @date 6/2/2026
  * @since 1.0.0
  */
-export class InlineError extends OverlayWidget {
+export class InlineInspection extends OverlayWidget {
     private overlay: Overlay | null = null;
     private hoverPopup: HoverPopup;
+    private readonly range: TrackedRange;
 
-    constructor(private range: TextRange, private message: string) {
+    constructor(range: TextRange, private severity: InspectionSeverity, private message: string) {
         super();
+        this.range = TrackedRange.of(range)
     }
 
-    getRange(): TextRange {
+    getRange(): TrackedRange {
         return this.range;
     }
 
     getClassList(): string[] {
-        return ["error-marker"];
+        return ["inline-inspection", "inspection-severity-" + this.severity];
     }
 
     getName(): string {
-        return "default.inline.error";
+        return "inline-inspection";
     }
 
     destroy(editor: Editor): void {
+        this.range.invalidate();
         if (this.overlay) {
             this.overlay.dispose();
         }
         if (this.hoverPopup) {
-            console.log("disposing hover popup");
             this.hoverPopup.dispose(editor);
         }
     }

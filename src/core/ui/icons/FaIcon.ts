@@ -461,6 +461,10 @@ export class FaIcon extends Icon {
         return FaIcon.solid('trophy');
     }
 
+    static faMenu(): FaIcon {
+        return FaIcon.solid('ellipsis-vertical');
+    }
+
     static faMedal(): FaIcon {
         return FaIcon.solid('medal');
     }

@@ -1,4 +1,4 @@
-import {TextRange} from "../coordinate/TextRange";
+import {TextRange} from "../coordinate/range/TextRange";
 
 class RopeNode {
     weight: number;

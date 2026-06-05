@@ -10,12 +10,11 @@ import {TextAttributeKey} from "../../../../editor/ui/highlighter/style/TextAttr
 import {JsColorScheme} from "./JsColorScheme";
 import {JsLexicalGrammar} from "../lexer/JsLexicalGrammar";
 import {TextFontStyleKeys} from "../../../../editor/ui/highlighter/style/TextFontStyle";
-import {TextBorderKeys} from "../../../../editor/ui/highlighter/style/TextBorder";
 
 export class JsHighlighter extends HighlighterBase {
     public static readonly TEXT_DEFAULT_KEY = TextAttributeKey.of(JsColorScheme.DEFAULT_COLOR);
     public static readonly TEXT_KEYWORD_KEY = TextAttributeKey.of(JsColorScheme.KEYWORD_COLOR);
-    public static readonly TEXT_STRING_KEY = TextAttributeKey.of(JsColorScheme.STRING_COLOR, TextBorderKeys.SOLID(1));
+    public static readonly TEXT_STRING_KEY = TextAttributeKey.of(JsColorScheme.STRING_COLOR);
     public static readonly TEXT_COMMENT_KEY = TextAttributeKey.of(JsColorScheme.COMMENT_COLOR, TextFontStyleKeys.ITALIC);
     public static readonly TEXT_NUMBER_KEY = TextAttributeKey.of(JsColorScheme.NUMBER_COLOR);
     public static readonly TEXT_PUNCTUATION_KEY = TextAttributeKey.of(JsColorScheme.PUNCTUATION_COLOR);

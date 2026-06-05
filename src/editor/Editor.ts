@@ -1,7 +1,7 @@
 import {View} from "./ui/view/View";
-import {TextRange} from "./core/coordinate/TextRange";
+import {TextRange} from "./core/coordinate/range/TextRange";
 import {Caret, CaretModel} from "./core/caret/Caret";
-import {Key, ModifierKeyHolder} from "../core/keybinds/Keybind";
+import {ModifierKeyHolder} from "../core/keybinds/Keybind";
 
 import {HTMLUtils} from "./utils/HTMLUtils";
 import {Document} from "./core/document/Document";
@@ -29,6 +29,7 @@ import {InlayWidget} from "./ui/inline/widget/inlay/InlayWidget";
 import {KeybindContext} from "../core/keybinds/context/KeybindContext";
 import {GlobalState} from "../core/global/GlobalState";
 import {Scheduler} from "../core/scheduler/Scheduler";
+import {UndoRedoManager} from "./core/undo/UndoRedoManager";
 
 export class Editor {
     private static ID_COUNTER = 0;
@@ -44,6 +45,7 @@ export class Editor {
     private readonly inlayManager: InlayManager;
     private readonly caretModel: CaretModel;
     private readonly langService: LangService;
+    private readonly undoRedo: UndoRedoManager;
 
     private readonly eventBus: EventBus;
 
@@ -63,6 +65,7 @@ export class Editor {
 
         this.langService = new LangService(this);
         this.widgetManager = new WidgetManager(this);
+        this.undoRedo = new UndoRedoManager(this);
 
         this.document = document;
         this.document.linkEditor(this);
@@ -81,6 +84,7 @@ export class Editor {
 
     attach(element: HTMLElement) {
         this.root = HTMLUtils.createElement('div.editor', element) as HTMLDivElement;
+
         Scheduler.defer(() => {
             this.view.onAttached(this.root);
         });
@@ -94,7 +98,7 @@ export class Editor {
     changeDocument(document: Document) {
         this.document.saveCaretOffset();
 
-        this.caretModel.clearAllCarets();
+        this.caretModel.removeAllIncludingPrimary();
 
         this.document.linkEditor(null);
         this.document = document;
@@ -146,6 +150,10 @@ export class Editor {
 
     getLangSupport() {
         return LangSupport.getInstance();
+    }
+
+    getUndoRedo() {
+        return this.undoRedo;
     }
 
     getLangService(): LangService {
@@ -243,30 +251,40 @@ export class Editor {
      |           Logic           |
      +---------------------------+    */
 
-    moveCursorToMouseEvent(event: MouseEvent) {
+    moveCaretToMouseEvent(event: MouseEvent) {
         let [x, y] = this.view.getRelativePos(event);
         let visual = this.xyToNearestVisual(x, y);
 
+        if (!visual.is(this.getPrimaryCaret().getVisual()))
+            this.getUndoRedo().commitPartialEdits();
         this.getPrimaryCaret().moveToVisual(visual);
 
         this.view.resetBlink();
     }
 
-    type(char: string) {
+    type(content: string) {
         this.caretModel.forEachCaret(caret => {
-            if (!this.eventBus.publishCancellable(new KeyTypedEvent(this, char, caret))) {
-                return;
-            }
-
-            if (caret.getSelectionModel().isSelectionActive) {
-                this.deleteSelection(caret);
-            }
-
-            this.insertText(caret.getOffset(), char)
-            caret.shiftRight(false);
-            caret.refresh();
-            this.view.resetBlink();
+            this.typeForCaret(caret, content);
         });
+    }
+
+    typeForCaret(caret: Caret, content: string, moveCaret: boolean = true) {
+        if (!this.eventBus.publishCancellable(new KeyTypedEvent(this, content, caret))) {
+            return;
+        }
+
+        if (caret.getSelectionModel().isSelectionActive) {
+            this.deleteSelection(caret);
+        }
+
+        let offset = caret.getOffset();
+        this.insertText(offset, content)
+        this.document.getUndoRedoStack().onTyped(caret, offset, content);
+        if (moveCaret) {
+            caret.moveToOffset(offset + content.length);
+            caret.refresh();
+        }
+        this.view.resetBlink();
     }
 
     insertText(offset: Offset, text: string) {
@@ -275,13 +293,23 @@ export class Editor {
         this.view.triggerRepaint();
     }
 
+    deleteWholeLine(caret: Caret) {
+        let lineNum = this.document.getLineAt(caret.getOffset()).getLineNumber();
+        let start = this.document.getLineStart(caret.getOffset());
+        let end = this.document.getLineEnd(caret.getOffset());
+
+        this.deleteAt(lineNum === 0 ? start : start - 1, end - start + 1);
+        this.view.resetBlink();
+    }
+
     deleteAt(offset: Offset, n: number = 1) {
         if (offset < 0 || offset >= this.document.getTotalDocumentLength()) {
             return;
         }
 
         // Delete the character at the specified offset
-        this.document.deleteAt(offset, n);
+        const deleted = this.document.deleteAt(offset, n);
+        this.document.getUndoRedoStack().onDeleted(this.getPrimaryCaret(), offset, deleted);
 
         this.view.triggerRepaint();
     }
@@ -293,7 +321,6 @@ export class Editor {
         let start = selection.getActualStart();
 
         this.deleteAt(this.logicalToOffset(start), selection.getSelectionLength());
-
         caret.moveToLogical(start);
     }
 
@@ -323,10 +350,6 @@ export class Editor {
     }
 
     onKeyDown(event: KeyboardEvent) {
-        if (event.key === Key.ENTER) {
-            ModifierKeyHolder.getInstance().clear();
-            return this.type('\n');
-        }
         ModifierKeyHolder.getInstance().set(event);
 
         KeybindManager.getInstance().onKeydown(KeybindContext.fromEditor(this, event));
@@ -337,7 +360,7 @@ export class Editor {
         ModifierKeyHolder.getInstance().set(event);
 
         this.caretModel.removeAll();
-        this.moveCursorToMouseEvent(event);
+        this.moveCaretToMouseEvent(event);
 
         KeybindManager.getInstance().onMousedown(KeybindContext.fromEditor(this, event));
         this.eventBus.syncPublish(new MousePressedEvent(this, event));
@@ -354,7 +377,7 @@ export class Editor {
     onMouseMove(event: MouseEvent) {
         if (ModifierKeyHolder.isMouseDown()) {
             ModifierKeyHolder.getInstance().setIsDragging(true);
-            this.moveCursorToMouseEvent(event);
+            this.moveCaretToMouseEvent(event);
         }
     }
 

@@ -2,7 +2,7 @@ import {Source} from "../tokens/TokenStream";
 import {Token} from "../tokens/Token";
 import {TokenType} from "../tokens/TokenType";
 import {LexicalGrammar} from "./LexicalGrammar";
-import {TextRange} from "../../../../../editor/core/coordinate/TextRange";
+import {TextRange} from "../../../../../editor/core/coordinate/range/TextRange";
 import {DocumentModificationEvent} from "../../../../../editor/core/document/events/DocumentModificationEvent";
 
 /**

@@ -19,20 +19,17 @@ export class PersistenceService {
     }
 
     begin() {
+        this.requirePersistence();
+    }
+
+    requirePersistence() {
         UnsafeFlagsService.flag(UnsafeFlags.PERSISTENCE);
+        Scheduler.idleTask(() => {
+            if (!UnsafeFlagsService.clear(UnsafeFlags.PERSISTENCE)) {
+                return;
+            }
 
-        const invoke = () => {
-            Scheduler.idleTask(() => {
-                if (!UnsafeFlagsService.clear(UnsafeFlags.PERSISTENCE)) {
-                    return;
-                }
-
-                console.log("Triggering persist...");
-                GlobalState.getLifecycle().triggerPersist();
-            })
-        }
-
-        Scheduler.every(10_000, () => invoke);
-        invoke();
+            GlobalState.getLifecycle().triggerPersist();
+        })
     }
 }

@@ -1,7 +1,7 @@
 import {InlineWidget} from "../InlineWidget";
 import {Inlay} from "./Inlay";
 import {Editor} from "../../../../Editor";
-import {TextRange} from "../../../../core/coordinate/TextRange";
+import {TextRange} from "../../../../core/coordinate/range/TextRange";
 
 /**
  * Represents an inlay widget that is displayed inline within the text editor.

@@ -3,7 +3,7 @@ import {Token} from "../../tokens/Token";
 import {Marker, TokenStreamMarker} from "./Marker";
 import {SynTokenNode} from "../../../impl/SynTokenNode";
 import {TokenType} from "../../tokens/TokenType";
-import {TextRange} from "../../../../../../editor/core/coordinate/TextRange";
+import {TextRange} from "../../../../../../editor/core/coordinate/range/TextRange";
 import {SynErrorNode} from "../../../impl/SynErrorNode";
 import {ASTGrammar, ASTGrammarRole, ASTType} from "../nodes/ASTGrammar";
 import {TokenExpectation} from "./TokenExpectation";
@@ -15,6 +15,8 @@ import {SynScopeType} from "../scopes/SynScopeType";
 import {SynCodeBlock} from "../../../api/SynCodeBlock";
 import {SynFileImpl} from "../../../impl/SynFileImpl";
 import {SynDeclaration} from "../../../impl/SynDeclaration";
+import {SynFile} from "../../../api/SynFile";
+import {KillSignal} from "./KillSignal";
 
 export class ASTBuilder {
     private readonly production: SynNode[] = [];
@@ -22,11 +24,12 @@ export class ASTBuilder {
     private readonly scopeTree: SynScopeTree;
 
     private currentOffset: number = 0;
+    private lastTokenOffset: number = 0;
 
     private isErrorState: boolean = false;
     private wasInErrorState: boolean = false;
 
-    constructor(private stream: TokenStream, private file: SynFileImpl) {
+    constructor(private stream: TokenStream, private signal: KillSignal, private file: SynFileImpl) {
         this.scopeTree = new SynScopeTree();
     }
 
@@ -44,16 +47,28 @@ export class ASTBuilder {
     }
 
     lookAhead(n: number): Token | null {
-        let token: Token | null = this.stream.seekN(n);
-        while (token && (token.isCommentToken() || token.shouldSkip())) {
-            token = this.stream.seekN(++n);
+        this.signal.check();
+
+        let index = 0;
+        let seen = 0;
+        let token: Token | null = null;
+
+        while (seen <= n) {
+            token = this.stream.seekN(index++);
+            if (!token) return null;
+            if (!token.isCommentToken() && !token.shouldSkip()) {
+                seen++;
+            }
         }
+
         if (token?.isType(TokenType.EOF))
             return null;
         return token;
     }
 
     lookBehind(): Token | null {
+        this.signal.check();
+
         let token: Token | null = this.stream.seekN(-1);
         let n = -1;
         while (token && (token.isCommentToken() || token.shouldSkip())) {
@@ -67,11 +82,12 @@ export class ASTBuilder {
         if (scopeType) {
             this.scopeTree.enterScope(scopeType);
         }
-        return new TokenStreamMarker(this, this.currentOffset, this.stream.getIndex(), this.production.length, this.isErrorState)
+        return new TokenStreamMarker(this, this.currentOffset, this.lastTokenOffset, this.stream.getIndex(), this.production.length, this.isErrorState)
     }
 
     rollbackTo(marker: Marker): void {
         this.currentOffset = marker.getOffset();
+        this.lastTokenOffset = marker.getLastTokenOffset();
         this.stream.rollbackTo(marker.getTokenIndex());
 
         for (let i = 0; i < this.production.length;) {
@@ -87,6 +103,8 @@ export class ASTBuilder {
     }
 
     advance(shouldAppend = true): Token | null {
+        this.signal.check();
+
         const token = this.stream.consume();
         if (!token) {
             return null;
@@ -97,6 +115,7 @@ export class ASTBuilder {
         if (token.isCommentToken() || token.shouldSkip()) {
             return this.advance(shouldAppend);
         }
+        this.lastTokenOffset = token.getRange().end;
         return token;
     }
 
@@ -122,6 +141,7 @@ export class ASTBuilder {
 
     expect(type: TokenType, value: string | null = null, shouldConsumeOnError: boolean = false): TokenExpectation {
         if (this.isNext(type, value)) {
+            this.isErrorState = false;
             return new TokenExpectation(this, this.advance(), true);
         }
 
@@ -133,19 +153,24 @@ export class ASTBuilder {
         return new TokenExpectation(this, null, false);
     }
 
-    error(msg: string) {
+    errorVirtual(msg: string) {
         this.isErrorState = true;
-        this.production.push(new SynErrorNode(new TextRange(this.currentOffset, this.currentOffset), msg, this.file));
+        this.production.push(new SynErrorNode(new TextRange(this.lastTokenOffset, this.lastTokenOffset), msg, this.file));
     }
 
     errorBefore(token: Token, msg: string) {
         this.isErrorState = true;
-        this.production.push(new SynErrorNode(new TextRange(token.getRange().start, token.getRange().start), msg, this.file));
+        this.production.push(new SynErrorNode(new TextRange(token.getRange().start, token.getRange().start + 1), msg, this.file));
     }
 
     errorOn(token: Token, msg: string) {
         this.isErrorState = true;
         this.production.push(new SynErrorNode(token.getRange(), msg, this.file));
+    }
+
+    errorAt(at: Offset, msg: string) {
+        this.isErrorState = true;
+        this.production.push(new SynErrorNode(new TextRange(at, at), msg, this.file));
     }
 
     markErrorAndRemove(token: Token, msg: string) {
@@ -163,11 +188,6 @@ export class ASTBuilder {
     popAndError(msg: string) {
         this.isErrorState = true;
         this.production.push(new SynErrorNode(this.production.pop()!.getTextRange(), msg, this.file));
-    }
-
-    errorAt(range: TextRange, msg: string) {
-        this.isErrorState = true;
-        this.production.push(new SynErrorNode(range, msg, this.file));
     }
 
     build(marker: Marker, type: ASTType) {
@@ -215,6 +235,18 @@ export class ASTBuilder {
 
     getProduction() {
         return this.production;
+    }
+
+    close(): SynFile {
+        if (this.scopeTree.getCurrentScope()?.getType() !== SynScopeType.Global) {
+            console.warn("Unclosed scopes detected at end of file: " + this.scopeTree.getCurrentScope());
+        }
+
+        for (const node of this.production) {
+            this.file.addChild(node);
+        }
+
+        return this.file;
     }
 
     beforeNewLine() {

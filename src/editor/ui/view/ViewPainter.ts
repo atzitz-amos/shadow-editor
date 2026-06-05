@@ -77,36 +77,53 @@ export class ViewPainter {
 
         for (const overlay of overlays) {
             const range = overlay.getRange();
+            if (!range.isValid()) continue;
 
             const spans: HTMLSpanElement[] = [];
-
-
-            if (range.end > document.getTotalDocumentLength()) {
-                console.warn("Warning: Skipping invalid overlay (" + overlay.getName() + ") because it has " +
-                    "an invalid range: " + overlay.getRange().toString())
-                continue;
-            }
 
             let start = document.getLineStart(range.start);
             let elementStart = range.start - start;
 
-            while (start < range.end) {
-                let end = document.getLineEnd(start);
+            const initialStart = start;
 
-                const line = document.getLineAt(start).getLineNumber();
-                if (line >= this.view.getScroll().scrollYLines - 1 && line < this.view.getScroll().scrollYLines + 1 + this.view.getVisualLineCount()) {
-                    let element = this.paintOverlay(overlay, start, elementStart, Math.min(range.end, end) - start);
-                    spans.push(element);
+            if (range.start == range.end) {
+                // virtual overlay, render it as a single char wide element
+                let element = this.painVirtualOverlay(overlay, range.start, elementStart);
+                overlay.internalInit(this.view.getEditor(), [element]);
 
-                    const lineNo = line - this.view.getScroll().scrollYLines + 1;
-                    this.layers.getOverlayLayer().addOverlayOnLine(lineNo, element);
+                const lineNo = document.getLineAt(range.start).getLineNumber();
+
+                if (lineNo >= this.view.getScroll().scrollYLines - 1 && lineNo < this.view.getScroll().scrollYLines + 1 + this.view.getVisualLineCount()) {
+                    this.layers.getOverlayLayer().addOverlayOnLine(lineNo - this.view.getScroll().scrollYLines + 1, element);
                 }
-                start = end + 1;
-                elementStart = 0;
-            }
+            } else if (range.end <= document.getTotalDocumentLength()) {
+                while (start < range.end) {
+                    let end = document.getLineEnd(start);
 
-            if (spans.length > 0) {
-                overlay.internalInit(this.view.getEditor(), spans);
+                    const line = document.getLineAt(start).getLineNumber();
+                    if (line >= this.view.getScroll().scrollYLines - 1 && line < this.view.getScroll().scrollYLines + 1 + this.view.getVisualLineCount()) {
+                        const isFirstLine = (start === initialStart);
+                        const isLastLine = (range.end <= end);
+                        const isFullLine = overlay.fullLineInBetween() && !isFirstLine && !isLastLine;
+
+                        let element = this.paintOverlay(
+                            overlay,
+                            start,
+                            elementStart,
+                            Math.min(range.end, end) - start,
+                            isFullLine);
+                        spans.push(element);
+
+                        const lineNo = line - this.view.getScroll().scrollYLines + 1;
+                        this.layers.getOverlayLayer().addOverlayOnLine(lineNo, element);
+                    }
+                    start = end + 1;
+                    elementStart = 0;
+                }
+
+                if (spans.length > 0) {
+                    overlay.internalInit(this.view.getEditor(), spans);
+                }
             }
         }
 
@@ -137,18 +154,43 @@ export class ViewPainter {
         return this.scrollBar;
     }
 
-    private paintOverlay(overlay: OverlayWidget, offset: number, start: number, end: number): HTMLSpanElement {
+    private paintOverlay(overlay: OverlayWidget, offset: number, start: number, end: number, isFullLine: boolean): HTMLSpanElement {
         const span = HTMLUtils.createElement<HTMLSpanElement>("span.overlay-widget");
         span.classList.add(...overlay.getClassList());
         span.style.zIndex = overlay.getDrawPriority().toString();
 
-        let width = end - start;
-        span.style.left = HTMLUtils.px(this.view.getCharSize() * start);
-        span.style.width = HTMLUtils.px(width * this.view.getCharSize());
+        if (isFullLine) {
+            span.style.left = HTMLUtils.px(0);
+            span.style.width = HTMLUtils.px(this.view.getViewWidth());
+        } else {
+            let width = end - start;
+            if (start == 0) {
+                span.style.left = HTMLUtils.px(0);
+                span.style.width = HTMLUtils.px(width * this.view.getCharSize() + 2);
+            } else {
+                span.style.left = HTMLUtils.px(this.view.getCharSize() * start + 2);
+                span.style.width = HTMLUtils.px(width * this.view.getCharSize());
+            }
+        }
 
         span.dataset["start"] = (offset + start).toString();
-        span.dataset["end"] = (end + offset).toString();
+        span.dataset["end"] = (offset + end).toString();
 
         return span;
+    }
+
+    private painVirtualOverlay(overlay: OverlayWidget, offset: number, start: number): HTMLSpanElement {
+        const span = HTMLUtils.createElement<HTMLSpanElement>("span.overlay-widget");
+        span.classList.add(...overlay.getClassList());
+        span.style.zIndex = overlay.getDrawPriority().toString();
+
+        span.style.left = HTMLUtils.px(this.view.getCharSize() * start);
+        span.style.width = HTMLUtils.px(this.view.getCharSize());
+
+        span.dataset["start"] = (offset).toString();
+        span.dataset["end"] = (offset).toString();
+
+        return span;
+
     }
 }

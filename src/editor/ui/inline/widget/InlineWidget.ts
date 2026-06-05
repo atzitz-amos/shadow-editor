@@ -1,4 +1,4 @@
-import {TextRange} from "../../../core/coordinate/TextRange";
+import {TextRange} from "../../../core/coordinate/range/TextRange";
 import {Editor} from "../../../Editor";
 
 /**

@@ -1,8 +1,8 @@
 import {InlineWidget} from "../InlineWidget";
-import {TextRange} from "../../../../core/coordinate/TextRange";
 import {Editor} from "../../../../Editor";
 import {Overlay} from "./Overlay";
 import {HTMLSpanView} from "../../view/HTMLSpanView";
+import {TrackedRange} from "../../../../core/coordinate/range/TrackedRange";
 
 /**
  * Represents an overlay UI component in the editor. Overlays are displayed above the text content
@@ -18,7 +18,7 @@ import {HTMLSpanView} from "../../view/HTMLSpanView";
 export abstract class OverlayWidget implements InlineWidget {
     abstract getName(): string;
 
-    abstract getRange(): TextRange;
+    abstract getRange(): TrackedRange;
 
     abstract destroy(editor: Editor): void;
 
@@ -30,6 +30,10 @@ export abstract class OverlayWidget implements InlineWidget {
 
     getClassList(): string[] {
         return [];
+    }
+
+    fullLineInBetween(): boolean {
+        return false;
     }
 
     /**

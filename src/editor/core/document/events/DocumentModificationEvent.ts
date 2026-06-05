@@ -1,7 +1,7 @@
 import {EditorEventBase} from "../../../../core/events/EditorEventBase";
 import {EventSubscriber} from "../../../../core/events/EventSubscriber";
 import {Document} from "../Document";
-import {TextRange} from "../../coordinate/TextRange";
+import {TextRange} from "../../coordinate/range/TextRange";
 
 /**
  * Fired whenever the document is modified

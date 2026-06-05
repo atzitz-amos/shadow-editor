@@ -19,6 +19,7 @@ export class TabAction extends AbstractAction {
 
         ctx.getEvent().preventDefault();
         editor.getCaretModel().forEachCaret(caret => {
+            editor.getOpenedDocument().getUndoRedoStack().onTyped(caret, caret.getOffset(), '    ');
             editor.insertText(caret.getOffset(), '    ');
         });
         editor.getCaretModel().shift(4);

@@ -29,5 +29,9 @@ export interface IPane {
 
     isActive(): boolean;
 
+    onAdd(): void;
+
+    onRemove(): void;
+
     getComponent(): UIPaneComponent;
 }

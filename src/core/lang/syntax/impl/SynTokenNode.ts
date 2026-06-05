@@ -1,10 +1,11 @@
-import {TextRange} from "../../../../editor/core/coordinate/TextRange";
+import {TextRange} from "../../../../editor/core/coordinate/range/TextRange";
 import {Token} from "../builder/tokens/Token";
 import {ASTGrammar, ASTType} from "../builder/parser/nodes/ASTGrammar";
 import {SynNode} from "../api/SynNode";
 import {SynElement} from "../api/SynElement";
 import {SynFile} from "../api/SynFile";
 import {EditorURI} from "../../../uri/EditorURI";
+import {SynNodeVisitor} from "../visitors/SynNodeVisitor";
 
 export class SynTokenNode implements SynNode {
     private parent: SynElement | null = null;
@@ -28,8 +29,36 @@ export class SynTokenNode implements SynNode {
         return this.token.getValue();
     }
 
+    toDebugString(): string {
+        return `(${this.token.getValue()})`;
+    }
+
+    toTreeRepr(): string {
+        return `Token('${this.token.getValue()}')`;
+    }
+
     getChildren(): SynNode[] {
         return [];
+    }
+
+    nextSibling(): SynNode | null {
+        if (!this.parent) return null;
+
+        const siblings = this.parent.getChildren();
+        const index = siblings.indexOf(this);
+        if (index === -1 || index === siblings.length - 1) return null;
+
+        return siblings[index + 1];
+    }
+
+    previousSibling(): SynNode | null {
+        if (!this.parent) return null;
+
+        const siblings = this.parent.getChildren();
+        const index = siblings.indexOf(this);
+        if (index <= 0) return null;
+
+        return siblings[index - 1];
     }
 
     getTextRange(): TextRange {
@@ -46,5 +75,9 @@ export class SynTokenNode implements SynNode {
 
     getParent(): SynElement | null {
         return this.parent;
+    }
+
+    accept(visitor: SynNodeVisitor): void {
+        visitor.visitToken(this);
     }
 }

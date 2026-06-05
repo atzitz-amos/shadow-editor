@@ -26,7 +26,12 @@ export class HTMLSpanView implements HTMLView {
     }
 
     getElementsAt(x: int, y: int): HTMLElement[] {
-        return this.elements.filter(e => HTMLUtils.isInBound(e, x, y, 5));
+        switch(1) {
+            case 1:
+                console.log(2);
+        }
+
+        return this.elements.filter(e => HTMLUtils.isInBound(e, x, y, 15));
     }
 
     getCombinedChildren(): Element[] {

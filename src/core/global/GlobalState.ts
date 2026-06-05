@@ -24,6 +24,10 @@ import {WorkspaceService} from "../workspace/WorkspaceService";
 import {SaveService} from "../sync/save/SaveService";
 import {EditorKeyContextManager} from "../../editor/core/keycontext/EditorKeyContextManager";
 import {PersistenceService} from "../persistence/service/PersistenceService";
+import {AnnotatorService} from "../lang/AnnotatorService";
+import {InspectionBase} from "../lang/inspections/Inspection";
+import {SynSuitePersister} from "../lang/suite/SynSuitePersister";
+import {SynSuiteEngine} from "../lang/suite/SynSuiteEngine";
 
 /**
  * Provides a single class that regroups all useful singletons and global services of the application
@@ -72,6 +76,10 @@ export class GlobalState {
         return LangSupport.getInstance();
     }
 
+    public static getAnnotatorService(): AnnotatorService {
+        return AnnotatorService.getInstance();
+    }
+
     public static getSettingsManager() {
         return SettingsManager.getInstance();
     }
@@ -114,6 +122,10 @@ export class GlobalState {
 
     public static getEditorKeyContextManager() {
         return EditorKeyContextManager.getInstance();
+    }
+
+    public static getSynSuiteEngine(): SynSuiteEngine {
+        return SynSuiteEngine.getInstance();
     }
 
     public static setReady(flag: boolean) {

@@ -19,6 +19,11 @@ export abstract class AbstractPane implements IPane {
 
     setActive(active: boolean): void {
         this._isActive = active;
+        if (active) {
+            this.onShow();
+        } else {
+            this.onHide();
+        }
     }
 
     isActive(): boolean {
@@ -50,6 +55,22 @@ export abstract class AbstractPane implements IPane {
     abstract getTitle(): string;
 
     abstract getIcon(): Icon;
+
+    public onAdd(): void {
+
+    }
+
+    public onRemove(): void {
+
+    }
+
+    protected onHide(): void {
+
+    }
+
+    protected onShow(): void {
+
+    }
 
     protected getPreferredGroupId(): number {
         return 0;

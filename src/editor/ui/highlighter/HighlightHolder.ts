@@ -4,7 +4,7 @@
  */
 
 import {TextAttributeKey} from "./style/TextAttributeKey";
-import {TextRange} from "../../core/coordinate/TextRange";
+import {TextRange} from "../../core/coordinate/range/TextRange";
 import {Editor} from "../../Editor";
 import {Fragment} from "../../core/components/fragments/Fragment";
 

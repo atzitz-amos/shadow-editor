@@ -1,4 +1,4 @@
-import {TextRange} from "../../coordinate/TextRange";
+import {TextRange} from "../../coordinate/range/TextRange";
 import {FragmentEvent, FragmentType} from "./FragmentEvent";
 import {TextAttributeKey} from "../../../ui/highlighter/style/TextAttributeKey";
 

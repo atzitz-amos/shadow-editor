@@ -4,10 +4,13 @@ import {DeleteAction} from "../../editor/actions/DeleteAction";
 import {BackspaceAction, CtrlBackspaceAction} from "../../editor/actions/BackspaceAction";
 import * as MoveCaret from "../../editor/actions/MoveCaret";
 import {TabAction} from "../../editor/actions/TabAction";
-import {SelectAllAction, SelectDoubleClickAction} from "../../editor/actions/SelectActions";
+import {SelectAllAction, SelectDoubleClickAction, SelectTripleClickAction} from "../../editor/actions/SelectActions";
 import {KeybindManager} from "../keybinds/KeybindManager";
 import {Service} from "../threaded/service/Service";
 import {Logger, UseLogger} from "../logging/Logger";
+import {CopyAction, CutAction, PasteAction} from "../../editor/actions/ClipboardActions";
+import {EnterAction} from "../../editor/actions/EnterAction";
+import {RedoAction, UndoAction} from "../../editor/actions/UndoRedoActions";
 
 
 @Service
@@ -53,10 +56,17 @@ export class ActionManager {
         this.addAction(new MoveCaret.CtrlMoveCaretRightAction());
         this.addAction(new DeleteAction());
         this.addAction(new TabAction());
+        this.addAction(new EnterAction());
         this.addAction(new BackspaceAction());
         this.addAction(new CtrlBackspaceAction());
         this.addAction(new SelectAllAction());
         this.addAction(new SelectDoubleClickAction());
+        this.addAction(new SelectTripleClickAction());
+        this.addAction(new CopyAction());
+        this.addAction(new CutAction());
+        this.addAction(new PasteAction());
+        this.addAction(new UndoAction());
+        this.addAction(new RedoAction());
 
         this.logger.info("Successfully registered default actions.");
     }

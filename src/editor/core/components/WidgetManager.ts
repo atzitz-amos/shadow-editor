@@ -1,4 +1,4 @@
-import {TextRange} from "../coordinate/TextRange";
+import {TextRange} from "../coordinate/range/TextRange";
 import {GutterComponent} from "../../ui/gutter/components/GutterComponent";
 import {GutterLine} from "../../ui/gutter/components/GutterLine";
 import {Editor} from "../../Editor";
@@ -39,6 +39,7 @@ export class WidgetManager {
 
     addOverlayWidget(widget: OverlayWidget) {
         this.overlays.push(widget);
+        this.editor.getOpenedDocument().addTrackedRange(widget.getRange());
     }
 
     getInlays() {
@@ -99,11 +100,26 @@ export class WidgetManager {
         return this.renderer;
     }
 
-    removeByName(name: string) {
-        this.overlays = this.overlays.filter(c => c.getName() !== name);
-    }
-
     getHighlightsHolder() {
         return this.highlightsHolder;
+    }
+
+    clearAllOverlays() {
+        for (let overlay of this.overlays) {
+            overlay.destroy(this.editor);
+        }
+        this.overlays = [];
+    }
+
+    removeByName(name: string) {
+        let newOverlays: OverlayWidget[] = [];
+        for (let overlay of this.overlays) {
+            if (overlay.getName() === name) {
+                overlay.destroy(this.editor);
+            } else {
+                newOverlays.push(overlay);
+            }
+        }
+        this.overlays = newOverlays;
     }
 }

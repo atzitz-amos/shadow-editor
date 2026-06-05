@@ -13,9 +13,8 @@ import {PersistedObject} from "./objects/PersistedObject";
 export class PersistenceModel {
     private static _instance: PersistenceModel;
     private declare readonly logger: Logger;
-
     private db: Database = new Database("app_db");
-    
+
     public static getInstance(): PersistenceModel {
         if (!this._instance) {
             this._instance = new PersistenceModel();
