@@ -72,7 +72,7 @@ export class JsParser implements IParser {
 
     }
 
-    async parse(): Promise<void> {
+    parse(): void {
         this.parseBlock(false, false, false, false, SynScopeType.Global);
     }
 
@@ -250,7 +250,79 @@ export class JsParser implements IParser {
     parseForStatement() {
         const marker = this.builder.mark();
         this.builder.advance(); // consume 'for'
-        marker.done(JsGrammar.ForIStatement); // TODO
+        this.builder.consumeIf(JsLexicalGrammar.KEYWORD, "await");
+
+        if (!this.builder.expect(JsLexicalGrammar.LPAREN).failWith("Expected '('").isValid()) {
+            return marker.done(JsGrammar.ForIStatement);
+        }
+
+        // for (;  — empty init, definitely a classic for loop
+        if (this.builder.isNext(JsLexicalGrammar.SEMICOLON)) {
+            this.builder.advance(); // consume ';'
+            this.parseForClassicTestUpdate(marker);
+            return;
+        }
+
+        // for (var/let/const ...
+        if (this.builder.isNext(JsLexicalGrammar.KEYWORD, "var") ||
+            this.builder.isNext(JsLexicalGrammar.KEYWORD, "let") ||
+            this.builder.isNext(JsLexicalGrammar.KEYWORD, "const")) {
+
+            const declMarker = this.builder.mark();
+            this.builder.advance(); // consume var/let/const
+            this.myExprParser.parseVariableDeclarator(); // parse exactly one binding
+
+            // Done BEFORE consuming in/of — so those keywords stay outside the decl node
+            if (this.builder.isNext(JsLexicalGrammar.KEYWORD, "in")) {
+                declMarker.done(JsGrammar.VariableDeclaration);
+                this.builder.advance(); // consume 'in'
+                this.parseExpression(false);
+                this.builder.expect(JsLexicalGrammar.RPAREN).orError("Expected ')'");
+                this.parseBlockStatement();
+                return marker.done(JsGrammar.ForInStatement);
+            }
+
+            if (this.isNextOf()) {
+                declMarker.done(JsGrammar.VariableDeclaration);
+                this.builder.advance(); // consume 'of'
+                this.parseExpression(false);
+                this.builder.expect(JsLexicalGrammar.RPAREN).orError("Expected ')'");
+                this.parseBlockStatement();
+                return marker.done(JsGrammar.ForOfStatement);
+            }
+
+            // Classic for loop — may have multiple declarators: for (let i = 0, j = 1; ...)
+            while (this.builder.consumeIf(JsLexicalGrammar.COMMA)) {
+                this.myExprParser.parseVariableDeclarator();
+            }
+            declMarker.done(JsGrammar.VariableDeclaration);
+            this.builder.expect(JsLexicalGrammar.SEMICOLON).orError("Expected ';'");
+            this.parseForClassicTestUpdate(marker);
+            return;
+        }
+
+        this.myExprParser.setPotentiallyInLoop(true);
+        this.parseExpression(false);
+        this.myExprParser.setPotentiallyInLoop(false);
+
+        if (this.builder.isNext(JsLexicalGrammar.KEYWORD, "in")) {
+            this.builder.advance(); // consume 'in'
+            this.parseExpression(false);
+            this.builder.expect(JsLexicalGrammar.RPAREN).orError("Expected ')'");
+            this.parseBlockStatement();
+            return marker.done(JsGrammar.ForInStatement);
+        }
+
+        if (this.isNextOf()) {
+            this.builder.advance(); // consume 'of'
+            this.parseExpression(false);
+            this.builder.expect(JsLexicalGrammar.RPAREN).orError("Expected ')'");
+            this.parseBlockStatement();
+            return marker.done(JsGrammar.ForOfStatement);
+        }
+
+        this.builder.expect(JsLexicalGrammar.SEMICOLON).orError("Expected ';'");
+        this.parseForClassicTestUpdate(marker);
     }
 
     parseWhileStatement() {
@@ -593,6 +665,27 @@ export class JsParser implements IParser {
             .then(JsLexicalGrammar.RPAREN).failWith("Expected ')'")
             .then(() => this.parseBlock(true, false, false, false, SynScopeType.Function));
         start.done(JsGrammar.ClassMethodDeclaration);
+    }
+
+    private isNextOf(): boolean {
+        return this.builder.isNext(JsLexicalGrammar.KEYWORD, "of") ||
+            this.builder.isNext(JsLexicalGrammar.IDENTIFIER, "of");
+    }
+
+    private parseForClassicTestUpdate(marker: Marker): void {
+        // Optional test expression
+        if (!this.builder.isNext(JsLexicalGrammar.SEMICOLON)) {
+            this.parseExpression();
+        }
+        this.builder.expect(JsLexicalGrammar.SEMICOLON).orError("Expected ';'");
+
+        // Optional update expression
+        if (!this.builder.isNext(JsLexicalGrammar.RPAREN)) {
+            this.parseExpression();
+        }
+        this.builder.expect(JsLexicalGrammar.RPAREN).orError("Expected ')'");
+        this.parseBlockStatement();
+        marker.done(JsGrammar.ForIStatement);
     }
 
     private parseExpression(allowComma: boolean = true): void {

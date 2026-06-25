@@ -1,7 +1,7 @@
 import {UIComponent} from "../../../../../core/ui/engine/components/UIComponent";
 import {HTMLUtils} from "../../../../../editor/utils/HTMLUtils";
 import {Workspace} from "../../../../../core/workspace/Workspace";
-import {CurrentWorkspaceHelper} from "../../../../../core/global/CurrentWorkspaceHelper";
+import {ActiveWorkspaceHelper} from "../../../../../core/global/ActiveWorkspaceHelper";
 import {ProjectFilesTreeDirectory} from "./ProjectFilesTreeDirectory";
 
 /**
@@ -16,9 +16,9 @@ export class ProjectFilesTree extends UIComponent {
     constructor(root: HTMLElement) {
         super(HTMLUtils.createDiv("project-tree", root));
 
-        this.setWorkspace(CurrentWorkspaceHelper.getInstance());
-        CurrentWorkspaceHelper.onFilesystemReady(this, e => {
-            this.setWorkspace(CurrentWorkspaceHelper.getInstance());
+        this.setWorkspace(ActiveWorkspaceHelper.getInstance());
+        ActiveWorkspaceHelper.onFilesystemReady(this, e => {
+            this.setWorkspace(ActiveWorkspaceHelper.getInstance());
         });
     }
 

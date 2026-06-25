@@ -1,8 +1,8 @@
-import {SynElementImpl} from "../../../../../core/lang/syntax/impl/SynElementImpl";
 import {ASTNode} from "../../../../../core/lang/syntax/builder/parser/nodes/ASTNode";
 import {JsFunctionParameters} from "./JsFunctionParameters";
 import {SynTokenNode} from "../../../../../core/lang/syntax/impl/SynTokenNode";
 import {JsCodeBlock} from "../JsCodeBlock";
+import {JsStatement} from "./JsStatement";
 
 /**
  *
@@ -10,7 +10,7 @@ import {JsCodeBlock} from "../JsCodeBlock";
  * @date 12/25/2025
  * @since 1.0.0
  */
-export class JsFunction extends SynElementImpl {
+export class JsFunction extends JsStatement {
     private readonly name: SynTokenNode;
     private readonly parameters: JsFunctionParameters;
     private readonly body: JsCodeBlock;

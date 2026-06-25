@@ -8,14 +8,20 @@ import {FileTypeHandler} from "./FileTypeHandler";
 import {WorkspaceFile} from "../workspace/filesystem/tree/WorkspaceFile";
 import {InspectionBase} from "./inspections/Inspection";
 import {InspectionEngine} from "./inspections/InspectionEngine";
+import {ExtensionPoint} from "../plugins/extensionPoints/ExtensionPoint";
+import {SmartInlineInsertAction} from "./smart/SmartInlineInsertAction";
+import {SmartInlineDeleteAction} from "./smart/SmartInlineDeleteAction";
+import {ActionManager} from "../actions/ActionManager";
 
 export class LangSupport {
     private static instance: LangSupport;
 
-    private languages: LanguageBase[] = [];
-    private fileTypeHandlers: FileTypeHandler[] = [];
+    private static readonly languageEP: ExtensionPoint<LanguageBase> = new ExtensionPoint("lang", LanguageBase);
+    private static readonly fileTypeEP: ExtensionPoint<FileTypeHandler> = new ExtensionPoint("lang", FileTypeHandler);
+    private static readonly inspectionEP: ExtensionPoint<InspectionBase> = new ExtensionPoint("inspections", InspectionBase);
 
-    private inspections: Map<string, InspectionBase[]> = new Map();
+    private static readonly smartInsertEP: ExtensionPoint<SmartInlineInsertAction> = new ExtensionPoint("smart", SmartInlineInsertAction);
+    private static readonly smartDeleteEP: ExtensionPoint<SmartInlineDeleteAction> = new ExtensionPoint("smart", SmartInlineDeleteAction);
 
     constructor() {
     }
@@ -27,38 +33,18 @@ export class LangSupport {
         return this.instance;
     }
 
-    registerLanguage(language: LanguageBase) {
-        this.languages.push(language);
-    }
-
-    registerFileTypeHandler(handler: FileTypeHandler) {
-        this.fileTypeHandlers.push(handler);
-    }
-
-    registerInspection(inspection: InspectionBase) {
-        const languages = inspection.getApplicableLanguages();
-        for (const language of languages) {
-            if (!this.inspections.has(language.getKey())) {
-                this.inspections.set(language.getKey(), []);
-            }
-            this.inspections.get(language.getKey())!.push(inspection);
-        }
-    }
-
-    suppressInspection(inspection: InspectionBase) {
-        for (const [languageKey, inspections] of this.inspections.entries()) {
-            const index = inspections.indexOf(inspection);
-            if (index !== -1) {
-                inspections.splice(index, 1);
-                if (inspections.length === 0) {
-                    this.inspections.delete(languageKey);
-                }
-            }
+    static definingPlugin(cls: LanguageBase | FileTypeHandler | InspectionBase): string | undefined {
+        if (cls instanceof LanguageBase) {
+            return this.languageEP.definingPlugin(cls)?.getId();
+        } else if (cls instanceof FileTypeHandler) {
+            return this.fileTypeEP.definingPlugin(cls)?.getId();
+        } else if (cls instanceof InspectionBase) {
+            return this.inspectionEP.definingPlugin(cls)?.getId();
         }
     }
 
     getAllInspectionsForLanguage(language: LanguageBase): InspectionBase[] {
-        return this.inspections.get(language.getKey()) || [];
+        return LangSupport.inspectionEP.getAll().filter(inspection => inspection.getApplicableLanguages().includes(language));
     }
 
     getInspectionEngineForLanguage(language: LanguageBase) {
@@ -66,17 +52,25 @@ export class LangSupport {
     }
 
     getSupportedLanguages(): LanguageBase[] {
-        return this.languages;
+        return LangSupport.languageEP.getAll();
     }
 
     getAllFileTypeHandlers(): FileTypeHandler[] {
-        return this.fileTypeHandlers;
+        return LangSupport.fileTypeEP.getAll();
+    }
+
+    getAllSmartInsertActions(language: LanguageBase): SmartInlineInsertAction[] {
+        return LangSupport.smartInsertEP.getAll().filter(action => action.getApplicableLanguages().includes(language));
+    }
+
+    getAllSmartDeleteActions(language: LanguageBase): SmartInlineDeleteAction[] {
+        return LangSupport.smartDeleteEP.getAll().filter(action => action.getApplicableLanguages().includes(language));
     }
 
     getFileTypeHandler(file: WorkspaceFile): FileTypeHandler | null {
         let bestHandler: FileTypeHandler | null = null;
         let bestSupportLevel = 0;
-        for (const handler of this.fileTypeHandlers) {
+        for (const handler of this.getAllFileTypeHandlers()) {
             let supportLevel = handler.getSupportLevel(file);
 
             if (bestSupportLevel < supportLevel) {
@@ -88,19 +82,12 @@ export class LangSupport {
         return bestHandler;
     }
 
-    suppressFileTypeHandler(handler: FileTypeHandler) {
-        const index = this.fileTypeHandlers.indexOf(handler);
-        if (index !== -1) {
-            this.fileTypeHandlers.splice(index, 1);
-        }
-    }
-
     getAssociatedLanguage(file: WorkspaceFile) {
         let handler = this.getFileTypeHandler(file);
         return handler ? handler.getLanguageForFile(file) : null;
     }
 
     getLanguageByKey(language: string) {
-        return this.languages.find(lang => lang.getKey() === language) ?? null;
+        return this.getSupportedLanguages().find(lang => lang.getKey() === language) ?? null;
     }
 }

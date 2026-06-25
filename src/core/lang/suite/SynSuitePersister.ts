@@ -68,6 +68,7 @@ export class SynSuitePersister implements PersistedObject {
         if (patch) {
             const existingTest = pluginTests[testIndex];
             pluginTests[testIndex] = {
+                pluginId,
                 key: patch.key ?? existingTest.key,
                 description: patch.description ?? existingTest.description,
                 language: patch.language ?? existingTest.language,

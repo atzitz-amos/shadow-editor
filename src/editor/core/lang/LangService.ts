@@ -103,16 +103,15 @@ export class LangService {
                 new SynFileImpl(document)
             );
 
-            this.currentLanguage?.createParser(builder).parse().then(() => {
-                // console.log("Successfully parsed "
-                //     + this.editor.getOpenedDocument().getLineCount()
-                //     + " lines (" + this.editor.getOpenedDocument().getTotalDocumentLength()
-                //     + " chars) in "
-                //     + (performance.now() - start) + "ms");
-                this.synFile = builder.close();
+            this.currentLanguage?.createParser(builder).parse();
+            // console.log("Successfully parsed "
+            //     + this.editor.getOpenedDocument().getLineCount()
+            //     + " lines (" + this.editor.getOpenedDocument().getTotalDocumentLength()
+            //     + " chars) in "
+            //     + (performance.now() - start) + "ms");
+            this.synFile = builder.close();
 
-                this.editor.getEventBus().syncPublish(new SynTreeChangedEvent(this.editor, this.synFile, this.currentLanguage!));
-            });
+            this.editor.getEventBus().syncPublish(new SynTreeChangedEvent(this.editor, this.synFile, this.currentLanguage!));
         }, 10 * Math.log(this.editor.getOpenedDocument().getTotalDocumentLength()));
     }
 }

@@ -7,7 +7,6 @@ import JsLang from "../lang/JsLang";
 import {JsSynVisitor} from "../lang/syntax/visitors/JsSynVisitor";
 import {JsReturnStatement} from "../lang/syntax/statements/JsReturnStatement";
 import {SynScopeType} from "../../../core/lang/syntax/builder/parser/scopes/SynScopeType";
-import {SynErrorNode} from "../../../core/lang/syntax/impl/SynErrorNode";
 
 /**
  *

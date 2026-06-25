@@ -6,6 +6,7 @@ import {FaIcon} from "../../../core/ui/icons/FaIcon";
 import {GlobalState} from "../../../core/global/GlobalState";
 import {SynTreeChangedEvent} from "../../../editor/core/lang/events/SynTreeChangedEvent";
 import {DebugToolsPaneComponent} from "./DebugToolsPaneComponent";
+import {CaretMovedEvent} from "../../../editor/core/caret/events/CaretMovedEvent";
 
 /**
  *
@@ -26,16 +27,27 @@ export default class DebugToolsPane extends AbstractPane {
         return FaIcon.solid("code");
     }
 
-    onAdd() {
-        console.log("Add");
-        GlobalState.getMainEventBus().subscribe(this, SynTreeChangedEvent.SUBSCRIBER, e => {
-            (this.getComponent() as DebugToolsPaneComponent).onSynTreeChanged(e);
-        });
-    }
-
-    onRemove() {
+    onHide() {
         console.log("Remove");
         GlobalState.getMainEventBus().unsubscribe(this, SynTreeChangedEvent.SUBSCRIBER);
+        GlobalState.getMainEventBus().unsubscribe(this, CaretMovedEvent.SUBSCRIBER);
+    }
+
+    protected onShow() {
+        console.log("Show")
+        if (GlobalState.getMainEditor() !== null) {
+            (this.getComponent() as DebugToolsPaneComponent).onSynTreeChanged(
+                GlobalState.getMainEditor(),
+                GlobalState.getMainEditor().getLangService().getSynFile());
+        }
+
+        GlobalState.getMainEventBus().subscribe(this, SynTreeChangedEvent.SUBSCRIBER, e => {
+            (this.getComponent() as DebugToolsPaneComponent).onSynTreeChanged(e.getEditor(), e.getFile());
+        });
+
+        GlobalState.getMainEventBus().subscribe(this, CaretMovedEvent.SUBSCRIBER, e => {
+            (this.getComponent() as DebugToolsPaneComponent).onCaretMoved(e.getCaret().getOffset());
+        });
     }
 
     protected createComponent(): UIPaneComponent {

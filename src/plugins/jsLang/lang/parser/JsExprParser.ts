@@ -8,8 +8,18 @@ import {Marker} from "../../../../core/lang/syntax/builder/parser/builder/Marker
 export class JsExprParser {
     private myPrattParser: JsPrattParser;
 
+    private potentiallyInLoop = false;
+
     constructor(private parser: JsParser, private builder: ASTBuilder) {
         this.myPrattParser = new JsPrattParser(parser, this, builder);
+    }
+
+    public setPotentiallyInLoop(value: boolean) {
+        this.potentiallyInLoop = value;
+    }
+
+    public isPotentiallyInLoop(): boolean {
+        return this.potentiallyInLoop;
     }
 
     parseParameterDeclaration(): void {
@@ -151,9 +161,11 @@ export class JsExprParser {
     parseVariableDeclarator() {
         const marker = this.builder.mark();
 
-        let isValid = this.builder.expect(JsLexicalGrammar.IDENTIFIER).failWith("Expected variable name").isValid();
-        if (isValid && this.builder.consumeIf(JsLexicalGrammar.ASSIGNMENT_OPERATOR, "=")) {
-            this.parseExpression(false);
+        if (!this.tryParseDestructuringPattern()) {
+            let isValid = this.builder.expect(JsLexicalGrammar.IDENTIFIER).failWith("Expected variable name").isValid();
+            if (isValid && this.builder.consumeIf(JsLexicalGrammar.ASSIGNMENT_OPERATOR, "=")) {
+                this.parseExpression(false);
+            }
         }
         marker.done(JsGrammar.VariableDeclarator);
     }

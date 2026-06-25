@@ -1,0 +1,13 @@
+
+:root {
+    --ide-btn-primary-bg: #4a76bc;
+    --ide-btn-primary-hover: #335195;
+
+    --ide-btn-secondary-bg: #242936;    
+    --ide-btn-secondary-hover: #2f3647;
+    --ide-btn-secondary-border: #3f475c;
+
+    --ide-text-primary: #c0c2c8;
+    --ide-text-disabled: #64748b;
+    --ide-bg-disabled: #181c25;
+}

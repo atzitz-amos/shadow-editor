@@ -5,6 +5,8 @@ import {ProblemsHolder} from "../../../core/lang/inspections/problems/ProblemsHo
 import {SynNodeVisitor} from "../../../core/lang/syntax/visitors/SynNodeVisitor";
 import {JsSynVisitor} from "../lang/syntax/visitors/JsSynVisitor";
 import {JsEmptyStatement} from "../lang/syntax/statements/JsEmptyStatement";
+import {QuickFix} from "../../../core/lang/inspections/quickfix/QuickFix";
+import {SynModificationTree} from "../../../core/lang/syntax/tree/SynModificationTree";
 
 /**
  *
@@ -30,8 +32,13 @@ export default class EmptyStatementInspection {
 
         return new class extends JsSynVisitor {
             visitEmptyStatement(element: JsEmptyStatement) {
-                holder.registerProblem(inspection, "Empty statement", element);
+                holder.registerProblem(inspection, "Empty statement", element, [new class extends QuickFix {
+                    applyFix(node: JsEmptyStatement, synModTree: SynModificationTree): void {
+                        synModTree.removeNode(node);
+                    }
+                }]);
             }
         };
     }
 }
+

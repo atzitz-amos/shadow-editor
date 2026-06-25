@@ -78,6 +78,10 @@ export class SynErrorNode implements SynNode {
         return this.parent;
     }
 
+    isSynthetic(): boolean {
+        return false;
+    }
+
     accept(visitor: SynNodeVisitor): void {
         visitor.visitError(this);
     }

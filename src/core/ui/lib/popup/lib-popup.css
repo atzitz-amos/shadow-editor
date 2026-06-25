@@ -1,0 +1,113 @@
+
+.ide-popup {
+    position: absolute;
+    z-index: 1000;
+    background: #202429;
+    padding: 8px 10px 6px;
+    border-radius: 6px;
+    color: #bfbfbf;
+    font-size: 0.8em;
+    border: 1px solid #91919180;
+    box-shadow: 3px 3px 12px 5px rgba(0, 0, 0, 0.5);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    cursor: default;
+    user-select: none;
+}
+
+.simple-tooltip-popup {
+    border: 1px solid #ffffff1c;
+    border-radius: 4px;
+    padding: 4px 6px;
+    font-size: 0.78em;
+    line-height: 1.35;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.24);
+}
+
+.simple-tooltip-popup * {
+    color: inherit;
+}
+
+.simple-text-input-popup input {
+    font-family: "Inter", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+
+    outline: none;
+    border: none;
+    border-radius: 0;
+    height: 25px;
+
+    padding-left: 4px;
+    background: none;
+    color: #9a9a9a;
+}
+
+.simple-text-input-popup input:focus-visible {
+    outline: none;
+}
+
+.simple-text-input-popup {
+    color: #e7e7e7;
+}
+
+.simple-text-input-popup .popup-title {
+    display: flex;
+    justify-content: center;
+
+    font-size: 1em;
+    font-family: "Inter", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.simple-text-input-popup .popup-body {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+    gap: 7px;
+}
+
+
+.simple-confirm-popup {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    min-width: 250px;
+
+    padding: 15px 10px 8px;
+}
+
+.simple-confirm-popup .popup-body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1;
+}
+
+.simple-confirm-popup .popup-title {
+    font-size: 1.2em;
+    font-family: "Inter", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    color: #e7e7e7;
+
+    display: flex;
+    align-items: flex-start;
+}
+
+.simple-confirm-popup i {
+    font-size: 1.4em;
+    color: #f44747;
+}
+
+.simple-confirm-popup .popup-message {
+    font-family: "Inter", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    color: #b5b5b5;
+    font-size: 1.1em;
+}
+
+.simple-confirm-popup .popup-buttons {
+    display: flex;
+    gap: 15px;
+    width: 100%;
+    justify-content: flex-end;
+
+    margin-right: 200px;
+    margin-top: 5px;
+}

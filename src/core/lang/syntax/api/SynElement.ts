@@ -30,4 +30,6 @@ export interface SynElement extends SynNode {
     findNthElementOfASTType(type: ASTType, n: number): SynElement | null;
 
     getAllToken(nested: boolean): SynTokenNode[];
+
+    setSynthetic(): void;
 }

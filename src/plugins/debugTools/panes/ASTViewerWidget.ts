@@ -1,4 +1,3 @@
-import {SynTreeChangedEvent} from "../../../editor/core/lang/events/SynTreeChangedEvent";
 import {UIComponent} from "../../../core/ui/engine/components/UIComponent";
 import {HTMLUtils} from "../../../editor/utils/HTMLUtils";
 import {SynNode} from "../../../core/lang/syntax/api/SynNode";
@@ -26,8 +25,45 @@ export class ASTViewerWidget extends UIComponent {
 
     private collapsedNodes: Set<string> = new Set();
 
+    private isFollowing: boolean = false;
+
     constructor() {
         super(HTMLUtils.createDiv("ast-viewer-widget"));
+    }
+
+    public onCaretMoved(offset: Offset) {
+        if (!this.editor || !this.synFile) return;
+        if (!this.isFollowing) return;
+        const root = this.getChildren()[0] as SynTreeNode;
+
+        let node = root.getNode();
+        let tree = root;
+        while (true) {
+            if (node instanceof SynElementImpl || node instanceof SynFileImpl) {
+                let foundChild = false;
+                for (const child of tree.getChildren()) {
+                    const childNode = (child as SynTreeNode).getNode();
+                    const range = childNode.getTextRange();
+                    if (range.start <= offset && offset <= range.end) {
+                        node = childNode;
+                        tree = child as SynTreeNode;
+                        foundChild = true;
+                        break;
+                    }
+                }
+                if (!foundChild) {
+                    break;
+                }
+            } else {
+                break;
+            }
+        }
+
+        // Scroll to the corresponding node in the AST viewer
+        const element = tree.getUnderlyingElement();
+        if (element) {
+            element.scrollIntoView({behavior: "smooth", block: "center"});
+        }
     }
 
     public draw(): void {
@@ -38,11 +74,24 @@ export class ASTViewerWidget extends UIComponent {
         }
         const header = HTMLUtils.createElement("header.ast-viewer-header");
         header.innerHTML = `
-            <div>
+           <div class="ast-viewer-header-left">
                 <div class="overline"> AST VIEWER</div>
                 <div class="ast-viewer-filename">${this.synFile.getWorkspaceFile()?.getName() ?? "unknown file"}</div>
-            </div>
+           </div>
+           
+           <div class="ast-viewer-header-right">
+                <div class="ast-viewer-toggle-follow"><i class="fa-solid fa-location-crosshairs"></i></div>
+           </div>
         `;
+
+        header.querySelector(".ast-viewer-toggle-follow")?.addEventListener("click", () => {
+            this.isFollowing = !this.isFollowing;
+            if (this.isFollowing) {
+                header.querySelector(".ast-viewer-toggle-follow")?.classList.add("is-active");
+            } else {
+                header.querySelector(".ast-viewer-toggle-follow")?.classList.remove("is-active");
+            }
+        });
 
         const body = HTMLUtils.createDiv("ast-viewer-body");
 
@@ -58,7 +107,7 @@ export class ASTViewerWidget extends UIComponent {
 
     }
 
-    onSynTreeChanged(e: SynTreeChangedEvent) {
+    onSynTreeChanged(editor: Editor, synFile: SynFile) {
         // Save scroll position before redraw
         const body = this.getUnderlyingElement()?.querySelector(".ast-viewer-body");
         if (body) {
@@ -66,8 +115,8 @@ export class ASTViewerWidget extends UIComponent {
             this.scrollLeft = body.scrollLeft;
         }
 
-        this.synFile = e.getFile();
-        this.editor = e.getEditor();
+        this.synFile = synFile;
+        this.editor = editor;
         if (this.synFile) {
             let newCollapsedNodes = new Set<string>();
             for (const node of new SynRecursiveIterator(this.synFile)) {

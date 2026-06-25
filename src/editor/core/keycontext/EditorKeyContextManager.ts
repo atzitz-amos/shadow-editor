@@ -1,7 +1,7 @@
 import {Service} from "../../../core/threaded/service/Service";
 import {Editor} from "../../Editor";
 import {GlobalState} from "../../../core/global/GlobalState";
-import {KeyPressedEvent, KeyTypedEvent, MousePressedEvent} from "../../events/PhysicalEvents";
+import {KeyPressedEvent, KeyTypedEvent, MousePressedEvent} from "../../impl/events/PhysicalEvents";
 import {EditorKeysHelper} from "./EditorKeysHelper";
 import {CloseOn} from "../../../core/ui/api/Closeable";
 

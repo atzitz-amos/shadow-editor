@@ -3,6 +3,7 @@ import {SynFile} from "../../syntax/api/SynFile";
 import {InspectionBase} from "../Inspection";
 import {SynNode} from "../../syntax/api/SynNode";
 import {TextRange} from "../../../../editor/core/coordinate/range/TextRange";
+import {QuickFix} from "../quickfix/QuickFix";
 
 /**
  *
@@ -16,11 +17,16 @@ export class ProblemsHolder {
     public constructor(private readonly file: SynFile) {
     }
 
-    public registerProblem(inspection: InspectionBase, description: string, node: SynNode, range?: TextRange) {
+    public registerProblem(inspection: InspectionBase, description: string, node: SynNode, fixes: QuickFix[] = [], range?: TextRange) {
         if (!range) {
             range = node.getTextRange();
         }
-        this.problems.push(new CodeProblem(inspection, description, node, range));
+        let problem = new CodeProblem(inspection, description, node, range);
+        this.problems.push(problem);
+
+        for (const fix of fixes) {
+            problem.addQuickFix(fix);
+        }
     }
 
     getProblems() {

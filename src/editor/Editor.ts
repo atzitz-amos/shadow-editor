@@ -17,19 +17,22 @@ import {LangSupport} from "../core/lang/LangSupport";
 import {LangService} from "./core/lang/LangService";
 import {EventBus} from "../core/events/EventBus";
 import {KeybindManager} from "../core/keybinds/KeybindManager";
-import {EditorAttachedEvent} from "./events/EditorAttachedEvent";
+import {EditorAttachedEvent} from "./impl/events/EditorAttachedEvent";
 import {
     KeyPressedEvent,
     KeyReleasedEvent,
     KeyTypedEvent,
     MousePressedEvent,
     MouseReleasedEvent
-} from "./events/PhysicalEvents";
+} from "./impl/events/PhysicalEvents";
 import {InlayWidget} from "./ui/inline/widget/inlay/InlayWidget";
 import {KeybindContext} from "../core/keybinds/context/KeybindContext";
 import {GlobalState} from "../core/global/GlobalState";
 import {Scheduler} from "../core/scheduler/Scheduler";
 import {UndoRedoManager} from "./core/undo/UndoRedoManager";
+import {BehaviorManager} from "./core/behaviors/manager/BehaviorManager";
+import {StandardBehaviorManagerProvider} from "./impl/behaviors/StandardBehaviorManagerProvider";
+import {EditorCharTypedContext} from "./core/behaviors/context/EditorCharTypedContext";
 
 export class Editor {
     private static ID_COUNTER = 0;
@@ -40,6 +43,8 @@ export class Editor {
 
     private root: HTMLElement;
     private _attached: boolean = false;
+
+    private readonly behaviorManager: BehaviorManager;
 
     private readonly widgetManager: WidgetManager;
     private readonly inlayManager: InlayManager;
@@ -62,6 +67,8 @@ export class Editor {
         }
 
         this.eventBus = GlobalState.getMainEventBus().createSubBus(`editor-${this.id}.bus`);
+
+        this.behaviorManager = StandardBehaviorManagerProvider.createDefault();
 
         this.langService = new LangService(this);
         this.widgetManager = new WidgetManager(this);
@@ -112,6 +119,8 @@ export class Editor {
     }
 
     overrideLanguage(language: LanguageBase | null) {
+        this.behaviorManager.setLanguage(language);
+
         this.langService.setCurrentLanguage(language);
         this.langService.forceUpdate(this.document);
     }
@@ -122,6 +131,10 @@ export class Editor {
      +--------------------------+    */
     getView(): View {
         return this.view;
+    }
+
+    getBehaviorManager(): BehaviorManager {
+        return this.behaviorManager;
     }
 
     getCoordinateMapper(): EditorCoordinateMapper {
@@ -273,23 +286,31 @@ export class Editor {
             return;
         }
 
-        if (caret.getSelectionModel().isSelectionActive) {
-            this.deleteSelection(caret);
-        }
-
-        let offset = caret.getOffset();
-        this.insertText(offset, content)
-        this.document.getUndoRedoStack().onTyped(caret, offset, content);
-        if (moveCaret) {
-            caret.moveToOffset(offset + content.length);
-            caret.refresh();
-        }
-        this.view.resetBlink();
+        this.behaviorManager.invokeCharTyped(new EditorCharTypedContext(this, caret, content, moveCaret));
     }
 
+    /**
+     * Insert text at the specified offset
+     * @see type
+     */
     insertText(offset: Offset, text: string) {
         // Insert the text at the specified offset
         this.document.insertText(offset, text);
+        this.view.triggerRepaint();
+    }
+
+    replaceRange(range: TextRange, text: string) {
+        const deleted = this.document.replaceRange(range, text);
+
+        this.caretModel.forEachCaret(caret => {
+            const old = caret.getOffset();
+            if (caret.getOffset() > this.document.getTotalDocumentLength()) {
+                caret.moveToOffset(this.document.getTotalDocumentLength());
+            }
+            this.document.getUndoRedoStack().onReplaced(this.getPrimaryCaret(), old, range, deleted, text);
+        });
+
+
         this.view.triggerRepaint();
     }
 
@@ -320,8 +341,8 @@ export class Editor {
 
         let start = selection.getActualStart();
 
-        this.deleteAt(this.logicalToOffset(start), selection.getSelectionLength());
-        caret.moveToLogical(start);
+        this.deleteAt(start, selection.getSelectionLength());
+        caret.moveToOffset(start);
     }
 
     getLineCount() {

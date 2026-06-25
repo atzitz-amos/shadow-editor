@@ -26,6 +26,8 @@ export abstract class SynElementImpl implements SynElement {
     private parent: SynElement | null = null;
     private readonly file: SynFile;
 
+    private synthetic: boolean = false;
+
     protected constructor(node: ASTNode) {
         this.node = node;
         this.range = node.range;
@@ -245,6 +247,14 @@ export abstract class SynElementImpl implements SynElement {
 
     _setParent(parent: SynElement): void {
         this.parent = parent;
+    }
+
+    setSynthetic() {
+        this.synthetic = true;
+    }
+
+    isSynthetic(): boolean {
+        return this.synthetic;
     }
 
     accept(visitor: SynNodeVisitor): void {

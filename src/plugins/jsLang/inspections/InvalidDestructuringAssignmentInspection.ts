@@ -12,6 +12,35 @@ import {JsLiteral} from "../lang/syntax/literal/JsLiteral";
 import {JsStringLiteral} from "../lang/syntax/literal/JsStringLiteral";
 import {JsSpreadExpr} from "../lang/syntax/expr/JsSpreadExpr";
 
+class DestructuringIterator {
+    private readonly elements: JsExpr[];
+    private index: number = 0;
+
+    constructor(arr: JsArrayLiteral) {
+        this.elements = arr.getElements();
+    }
+
+    hasNext(): boolean {
+        return this.index < this.elements.length;
+    }
+
+    next(): JsExpr {
+        if (this.hasNext()) {
+            return this.elements[this.index++];
+        } else {
+            throw new Error("No more elements");
+        }
+    }
+
+    seek(): JsExpr | null {
+        if (this.hasNext()) {
+            return this.elements[this.index];
+        } else {
+            return null;
+        }
+    }
+}
+
 /**
  *
  * @author Atzitz Amos
@@ -84,31 +113,3 @@ export default class InvalidDestructuringAssignmentInspection extends Inspection
     }
 }
 
-class DestructuringIterator {
-    private readonly elements: JsExpr[];
-    private index: number = 0;
-
-    constructor(arr: JsArrayLiteral) {
-        this.elements = arr.getElements();
-    }
-
-    hasNext(): boolean {
-        return this.index < this.elements.length;
-    }
-
-    next(): JsExpr {
-        if (this.hasNext()) {
-            return this.elements[this.index++];
-        } else {
-            throw new Error("No more elements");
-        }
-    }
-
-    seek(): JsExpr | null {
-        if (this.hasNext()) {
-            return this.elements[this.index];
-        } else {
-            return null;
-        }
-    }
-}

@@ -1,4 +1,4 @@
-import {IPopup} from "./IPopup";
+import {InlinePopup} from "./InlinePopup";
 import {Editor} from "../../Editor";
 import {HTMLUtils} from "../../utils/HTMLUtils";
 import {EditorKeysHelper} from "../../core/keycontext/EditorKeysHelper";
@@ -11,7 +11,7 @@ import {MeasurableUIComponent} from "../../../core/ui/engine/components/Measurab
  * @date 6/1/2026
  * @since 1.0.0
  */
-export abstract class EditorPopup extends MeasurableUIComponent implements IPopup {
+export abstract class EditorPopup extends MeasurableUIComponent implements InlinePopup {
     protected isOpen = false;
 
     protected constructor(protected editor: Editor, className: string, private closeOn: CloseOn) {

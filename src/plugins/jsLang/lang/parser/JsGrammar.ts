@@ -25,18 +25,27 @@ import {JsSpreadExpr} from "../syntax/expr/JsSpreadExpr";
 import {JsFunctionParameters} from "../syntax/statements/JsFunctionParameters";
 import {JsVariableDeclaration} from "../syntax/statements/JsVariableDeclaration";
 import {JsEmptyStatement} from "../syntax/statements/JsEmptyStatement";
+import {JsPrefixOp} from "../syntax/expr/JsPrefixOp";
+import {JsPostfixOp} from "../syntax/expr/JsPostfixOp";
+import {JsGroupExpr} from "../syntax/expr/JsGroupExpr";
+import {JsDoWhileStatement} from "../syntax/statements/JsDoWhileStatement";
+import {JsForInStatement} from "../syntax/statements/JsForInStatement";
+import {JsForIStatement} from "../syntax/statements/JsForIStatement";
+import {JsWhileStatement} from "../syntax/statements/JsWhileStatement";
+import {JsForOfStatement} from "../syntax/statements/JsForOfStatement";
+import {JsIfStatement} from "../syntax/statements/JsIfStatement";
 
 export class JsGrammar {
     public static readonly CodeBlock = ASTGrammar.createCodeBlock("CodeBlock", JsCodeBlock.builder());
     public static readonly EmptyStatement = ASTGrammar.create("EmptyStatement", JsEmptyStatement.builder());
-    public static readonly IfStatement = ASTGrammar.create("IfStatement");
+    public static readonly IfStatement = ASTGrammar.create("IfStatement", JsIfStatement.builder());
     public static readonly IfClause = ASTGrammar.create("IfClause");
     public static readonly ElseClause = ASTGrammar.create("ElseIfClause");
-    public static readonly ForInStatement = ASTGrammar.create("ForInStatement");
-    public static readonly ForOfStatement = ASTGrammar.create("ForOfStatement");
-    public static readonly ForIStatement = ASTGrammar.create("ForStatement");
-    public static readonly WhileStatement = ASTGrammar.create("WhileStatement");
-    public static readonly DoWhileStatement = ASTGrammar.create("DoWhileStatement");
+    public static readonly ForInStatement = ASTGrammar.create("ForInStatement", JsForInStatement.builder());
+    public static readonly ForOfStatement = ASTGrammar.create("ForOfStatement", JsForOfStatement.builder());
+    public static readonly ForIStatement = ASTGrammar.create("ForIStatement", JsForIStatement.builder());
+    public static readonly WhileStatement = ASTGrammar.create("WhileStatement", JsWhileStatement.builder());
+    public static readonly DoWhileStatement = ASTGrammar.create("DoWhileStatement", JsDoWhileStatement.builder());
     public static readonly SwitchStatement = ASTGrammar.create("SwitchStatement", JsSwitchStatement.builder());
     public static readonly SwitchCaseClause = ASTGrammar.create("SwitchCaseClause", JsSwitchCase.builder());
     public static readonly SwitchDefaultClause = ASTGrammar.create("SwitchDefaultClause", JsSwitchCase.builder());
@@ -77,8 +86,8 @@ export class JsGrammar {
     public static readonly TemplateLiteral = ASTGrammar.create("TemplateLiteral", JsLiteral.builder());
     public static readonly RegexLiteral = ASTGrammar.create("RegexLiteral", JsLiteral.builder());
 
-    public static readonly PrefixOperator = ASTGrammar.create("PrefixOp", JsExpr.builder());
-    public static readonly PostfixOperator = ASTGrammar.create("PostfixOp", JsExpr.builder());
+    public static readonly PrefixOperator = ASTGrammar.create("PrefixOp", JsPrefixOp.builder());
+    public static readonly PostfixOperator = ASTGrammar.create("PostfixOp", JsPostfixOp.builder());
     public static readonly BinaryExpr = ASTGrammar.create("BinaryOp", JsBinaryExpr.builder());
     public static readonly TernaryExpr = ASTGrammar.create("TernaryOp", JsTernaryExpr.builder());
     public static readonly AssignmentExpr = ASTGrammar.create("AssignmentOp", JsAssignmentExpr.builder());
@@ -88,7 +97,7 @@ export class JsGrammar {
     public static readonly CallExpr = ASTGrammar.create("CallExpr", JsCallExpr.builder());
     public static readonly NewExpr = ASTGrammar.create("NewExpr", JsNewExpr.builder());
     public static readonly SpreadExpr = ASTGrammar.create("SpreadExpr", JsSpreadExpr.builder());
-    public static readonly GroupExpr = ASTGrammar.create("GroupExpr", JsExpr.builder());
+    public static readonly GroupExpr = ASTGrammar.create("GroupExpr", JsGroupExpr.builder());
 
     public static readonly ClassExpression = ASTGrammar.create("ClassExpression", JsExpr.builder());
     public static readonly FunctionExpression = ASTGrammar.create("FunctionExpression", JsExpr.builder());

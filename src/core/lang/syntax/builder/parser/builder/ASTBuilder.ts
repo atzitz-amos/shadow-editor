@@ -13,10 +13,10 @@ import {DefaultSynElement} from "../../../impl/DefaultSynElement";
 import {SynScopeTree} from "../scopes/SynScopeTree";
 import {SynScopeType} from "../scopes/SynScopeType";
 import {SynCodeBlock} from "../../../api/SynCodeBlock";
-import {SynFileImpl} from "../../../impl/SynFileImpl";
 import {SynDeclaration} from "../../../impl/SynDeclaration";
 import {SynFile} from "../../../api/SynFile";
 import {KillSignal} from "./KillSignal";
+import {SynModifiableFile} from "../../../api/SynModifiableFile";
 
 export class ASTBuilder {
     private readonly production: SynNode[] = [];
@@ -29,7 +29,7 @@ export class ASTBuilder {
     private isErrorState: boolean = false;
     private wasInErrorState: boolean = false;
 
-    constructor(private stream: TokenStream, private signal: KillSignal, private file: SynFileImpl) {
+    constructor(private stream: TokenStream, private signal: KillSignal, private file: SynModifiableFile) {
         this.scopeTree = new SynScopeTree();
     }
 
@@ -193,7 +193,7 @@ export class ASTBuilder {
     build(marker: Marker, type: ASTType) {
         const range = new TextRange(marker.getOffset(), this.currentOffset);
         const children = this.production.splice(marker.getBuilderOffset(), this.production.length - marker.getBuilderOffset());
-        if (children.length === 1 && type === ASTGrammar.Expression)
+        if (children.length === 1 && type === ASTGrammar.EXPRESSION)
             this.production.push(children[0]);
         else
             this.addToProduction(type, children, range);

@@ -66,37 +66,37 @@ export class Caret {
         this.selectionModel.onCaretMove();
     }
 
-    moveToOffset(offset: Offset): void {
+    moveToOffset(offset: Offset, updateSelection: boolean = true): void {
         const document = this.editor.getOpenedDocument();
 
         if (offset < 0) offset = 0;
         else if (offset > document.getTotalDocumentLength()) offset = document.getTotalDocumentLength();
 
-        this.moveToLogical(this.editor.offsetToLogical(offset));
+        this.moveToLogical(this.editor.offsetToLogical(offset), updateSelection);
     }
 
     moveToInlayAwareOffset(offset: Offset): void {
     }
 
-    moveToLogical(logical: LogicalPosition): void {
+    moveToLogical(logical: LogicalPosition, updateSelection: boolean = true): void {
         let old = this.myLogical;
 
         this.myLogical = logical;
         this.myVisual = this.editor.logicalToVisual(logical);
 
-        this.onCaretMove(old);
+        if (updateSelection) this.onCaretMove(old);
     }
 
 
-    moveToVisual(visual: VisualPosition) {
+    moveToVisual(visual: VisualPosition, updateSelection: boolean = true) {
         this.myVisual = visual;
         let old = this.myLogical;
         this.myLogical = this.editor.visualToLogical(visual);
 
-        this.onCaretMove(old);
+        if (updateSelection) this.onCaretMove(old);
     }
 
-    shiftRight(withInlays: boolean = true): void {
+    shiftRight(withInlays: boolean = true, updateSelection: boolean = true): void {
         this.myVertMovementPos = 0;
 
         let currentOffset = this.getOffset();
@@ -106,14 +106,14 @@ export class Caret {
             const inlay = this.editor.getInlayManager().getInlayAt(currentOffset)
             if (currentOffset !== document.getLineEnd(currentOffset) || inlay) {
                 this.myVisual.col++;
-                this.moveToVisual(this.myVisual);
+                this.moveToVisual(this.myVisual, updateSelection);
                 return;
             }
         }
-        this.moveToOffset(currentOffset + 1);
+        this.moveToOffset(currentOffset + 1, updateSelection);
     }
 
-    shiftLeft(withInlays: boolean = true): void {
+    shiftLeft(withInlays: boolean = true, updateSelection: boolean = true): void {
         this.myVertMovementPos = 0;
 
         let currentOffset = this.getOffset();
@@ -122,12 +122,12 @@ export class Caret {
             const inlay = this.editor.getInlayManager().getInlayAt(currentOffset - 1)
             if (currentOffset !== this.editor.getOpenedDocument().getLineStart(currentOffset) || inlay) {
                 this.myVisual.col--;
-                this.moveToVisual(this.myVisual);
+                this.moveToVisual(this.myVisual, updateSelection);
                 return;
             }
         }
 
-        this.moveToOffset(currentOffset - 1);
+        this.moveToOffset(currentOffset - 1, updateSelection);
     }
 
     remove() {
@@ -145,6 +145,7 @@ export class Caret {
                 return true;
             }
         }
+        return false;
     }
 
     getSelectedText() {

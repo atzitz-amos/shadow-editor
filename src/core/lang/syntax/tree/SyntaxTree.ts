@@ -1,5 +1,7 @@
 import {SynCodeBlock} from "../api/SynCodeBlock";
 import {SynScope} from "../builder/parser/scopes/SynScope";
+import {SynNodeVisitor} from "../visitors/SynNodeVisitor";
+import {SynRecursiveVisitorImpl} from "../visitors/SynRecursiveVisitorImpl";
 
 /**
  * Holds the base node of a SyntaxTree for a file and provides convenient access to its structure as well
@@ -22,5 +24,9 @@ export class SyntaxTree {
 
     public getRootScope(): SynScope {
         return this.root.getAssociatedScope();
+    }
+
+    public accept(visitor: SynNodeVisitor): void {
+        new SynRecursiveVisitorImpl(visitor).visitNode(this.root);
     }
 }

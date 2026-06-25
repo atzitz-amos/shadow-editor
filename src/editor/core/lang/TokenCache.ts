@@ -1,5 +1,6 @@
 import {Token} from "../../../core/lang/syntax/builder/tokens/Token";
 import {StaticTokenStream, TokenStream} from "../../../core/lang/syntax/builder/tokens/TokenStream";
+import {TokenType} from "../../../core/lang/syntax/builder/tokens/TokenType";
 
 /**
  * A cache for the incremental parser that stores the current tokens and their states.
@@ -28,7 +29,7 @@ export class TokenCache {
     findNextWhitespaceToken(pos: Offset): Offset {
         const idx = this.findIndexContainingOrAfter(pos);
         for (let i = idx; i < this.tokens.length; i++) {
-            if (this.tokens[i].getType().shouldSkip) return this.tokens[i].getRange().end;
+            if (this.tokens[i].getType().shouldSkip && this.tokens[i].getType() !== TokenType.UNEXPECTED) return this.tokens[i].getRange().end;
         }
         if (!this.tokens.length) return 0;
         return this.tokens[this.tokens.length - 1].getRange().end;

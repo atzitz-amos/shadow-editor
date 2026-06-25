@@ -1,5 +1,6 @@
 import {StackTraceParser} from "../StackTraceParser";
 import {StartupPhase} from "../../lifecycle/startup/StartupPhase";
+import {GlobalState} from "../../global/GlobalState";
 
 /**
  * Renders critical error information into a DOM container or as a standalone overlay.
@@ -20,6 +21,9 @@ export class CriticalErrorRenderer {
      * @param error The error that was thrown
      */
     static showOverlay(source: string, error: Error): void {
+        if (GlobalState.getMainEditor()) {
+            GlobalState.getMainEditor().pauseRender();
+        }
         const overlay = document.createElement('div');
         overlay.className = 'shadow-splash-overlay';
         overlay.innerHTML = `

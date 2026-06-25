@@ -1,6 +1,5 @@
 import {SynNodeVisitor} from "../../../../../core/lang/syntax/visitors/SynNodeVisitor";
 import {JsNewExpr} from "../expr/JsNewExpr";
-import {SynElement} from "../../../../../core/lang/syntax/api/SynElement";
 import {JsArrayAccessExpr} from "../expr/JsArrayAccessExpr";
 import {JsAssignmentExpr} from "../expr/JsAssignmentExpr";
 import {JsBinaryExpr} from "../expr/JsBinaryExpr";
@@ -22,6 +21,18 @@ import {JsBreakStatement} from "../statements/JsBreakStatement";
 import {JsExpr} from "../expr/JsExpr";
 import {JsSpreadExpr} from "../expr/JsSpreadExpr";
 import {JsEmptyStatement} from "../statements/JsEmptyStatement";
+import {JsPostfixOp} from "../expr/JsPostfixOp";
+import {JsPrefixOp} from "../expr/JsPrefixOp";
+import {JsGroupExpr} from "../expr/JsGroupExpr";
+import {JsVariableDeclaration} from "../statements/JsVariableDeclaration";
+import {JsCodeBlock} from "../JsCodeBlock";
+import {JsStatement} from "../statements/JsStatement";
+import {JsForInStatement} from "../statements/JsForInStatement";
+import {JsForIStatement} from "../statements/JsForIStatement";
+import {JsForOfStatement} from "../statements/JsForOfStatement";
+import {JsWhileStatement} from "../statements/JsWhileStatement";
+import {JsDoWhileStatement} from "../statements/JsDoWhileStatement";
+import {JsIfStatement} from "../statements/JsIfStatement";
 
 /**
  *
@@ -32,6 +43,10 @@ import {JsEmptyStatement} from "../statements/JsEmptyStatement";
 export class JsSynVisitor extends SynNodeVisitor {
     visitExpr(element: JsExpr): void {
         this.visitElement(element);
+    }
+
+    visitGroupExpr(element: JsGroupExpr): void {
+        this.visitExpr(element);
     }
 
     visitArrayAccessExpr(element: JsArrayAccessExpr): void {
@@ -63,6 +78,14 @@ export class JsSynVisitor extends SynNodeVisitor {
     }
 
     visitSpreadExpr(element: JsSpreadExpr): void {
+        this.visitExpr(element);
+    }
+
+    visitPostfixOp(element: JsPostfixOp) {
+        this.visitExpr(element);
+    }
+
+    visitPrefixOp(element: JsPrefixOp) {
         this.visitExpr(element);
     }
 
@@ -98,7 +121,7 @@ export class JsSynVisitor extends SynNodeVisitor {
         this.visitExpr(element);
     }
 
-    visitStatement(element: SynElement): void {
+    visitStatement(element: JsStatement): void {
         this.visitElement(element);
     }
 
@@ -122,7 +145,39 @@ export class JsSynVisitor extends SynNodeVisitor {
         this.visitNode(element);
     }
 
+    visitVariableDeclaration(element: JsVariableDeclaration) {
+        this.visitStatement(element);
+    }
+
+    visitForInStatement(element: JsForInStatement) {
+        this.visitStatement(element);
+    }
+
+    visitForIStatement(element: JsForIStatement) {
+        this.visitStatement(element);
+    }
+
+    visitForOfStatement(element: JsForOfStatement) {
+        this.visitStatement(element);
+    }
+
+    visitWhileStatement(element: JsWhileStatement) {
+        this.visitStatement(element);
+    }
+
+    visitDoWhileStatement(element: JsDoWhileStatement) {
+        this.visitStatement(element);
+    }
+
+    visitIfStatement(element: JsIfStatement) {
+        this.visitStatement(element);
+    }
+
     visitEmptyStatement(element: JsEmptyStatement) {
         this.visitStatement(element);
+    }
+
+    visitCodeBlock(element: JsCodeBlock) {
+
     }
 }

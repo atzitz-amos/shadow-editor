@@ -6,6 +6,8 @@ import {InspectionSeverity} from "../../../core/lang/inspections/InspectionSever
 import {JsSynVisitor} from "../lang/syntax/visitors/JsSynVisitor";
 import JsLang from "../lang/JsLang";
 import {SynErrorNode} from "../../../core/lang/syntax/impl/SynErrorNode";
+import {JsForInStatement} from "../lang/syntax/statements/JsForInStatement";
+import {JsForIStatement} from "../lang/syntax/statements/JsForIStatement";
 
 /**
  *
@@ -32,6 +34,18 @@ export default class SemanticAnalysisInspection extends InspectionBase {
         return new class extends JsSynVisitor {
             visitError(error: SynErrorNode) {
                 holder.registerProblem(inspection, "Syntax error: " + error.getErrorMessage(), error);
+            }
+
+            visitForInStatement(element: JsForInStatement) {
+                if (element.getAllToken()[1]?.getValue() === "await") {
+                    holder.registerProblem(inspection, "Syntax error: 'await' is not allowed in for-in statement", element.getAllToken()[1]);
+                }
+            }
+
+            visitForIStatement(element: JsForIStatement) {
+                if (element.getAllToken()[1]?.getValue() === "await") {
+                    holder.registerProblem(inspection, "Syntax error: 'await' is not allowed in regular for statement", element.getAllToken()[1]);
+                }
             }
         };
     }

@@ -10,6 +10,7 @@ import {TextAttributeKey} from "../../../../editor/ui/highlighter/style/TextAttr
 import {JsColorScheme} from "./JsColorScheme";
 import {JsLexicalGrammar} from "../lexer/JsLexicalGrammar";
 import {TextFontStyleKeys} from "../../../../editor/ui/highlighter/style/TextFontStyle";
+import {TokenType} from "../../../../core/lang/syntax/builder/tokens/TokenType";
 
 export class JsHighlighter extends HighlighterBase {
     public static readonly TEXT_DEFAULT_KEY = TextAttributeKey.of(JsColorScheme.DEFAULT_COLOR);
@@ -18,6 +19,7 @@ export class JsHighlighter extends HighlighterBase {
     public static readonly TEXT_COMMENT_KEY = TextAttributeKey.of(JsColorScheme.COMMENT_COLOR, TextFontStyleKeys.ITALIC);
     public static readonly TEXT_NUMBER_KEY = TextAttributeKey.of(JsColorScheme.NUMBER_COLOR);
     public static readonly TEXT_PUNCTUATION_KEY = TextAttributeKey.of(JsColorScheme.PUNCTUATION_COLOR);
+    public static readonly TEXT_UNEXPECTED_KEY = TextAttributeKey.of(JsColorScheme.UNEXPECTED_COLOR, TextFontStyleKeys.BOLD);
 
     performHighlighting(holder: HighlightHolder, token: Token): void {
         const type = token.getType();
@@ -35,6 +37,8 @@ export class JsHighlighter extends HighlighterBase {
             holder.highlightRange(token.getRange(), JsHighlighter.TEXT_PUNCTUATION_KEY, [type.debugName, "punctuation"]);
         } else if (token.isCommentToken()) {
             holder.highlightRange(token.getRange(), JsHighlighter.TEXT_COMMENT_KEY);
+        } else if (token.getType() == TokenType.UNEXPECTED) {
+            holder.highlightRange(token.getRange(), JsHighlighter.TEXT_UNEXPECTED_KEY);
         } else {
             holder.highlightRange(token.getRange(), JsHighlighter.TEXT_DEFAULT_KEY, [type.debugName]);
         }

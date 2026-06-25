@@ -1,9 +1,10 @@
 import {UIPaneComponent} from "../../../app/core/panes/ui/UIPaneComponent";
 import {IPane} from "../../../app/core/panes/pane/IPane";
-import {SynTreeChangedEvent} from "../../../editor/core/lang/events/SynTreeChangedEvent";
 import {ASTViewerWidget} from "./ASTViewerWidget";
 import {TabPane} from "../../../core/ui/lib/tabs/TabPane";
 import {SynSuiteWidget} from "./SynSuiteWidget";
+import {SynFile} from "../../../core/lang/syntax/api/SynFile";
+import {Editor} from "../../../editor/Editor";
 
 /**
  *
@@ -30,8 +31,13 @@ export class DebugToolsPaneComponent extends UIPaneComponent {
         this.drawChildren();
     }
 
-    onSynTreeChanged(e: SynTreeChangedEvent): void {
-        this.astViewerWidget.onSynTreeChanged(e);
+    onSynTreeChanged(editor: Editor, synFile: SynFile): void {
+        this.astViewerWidget.onSynTreeChanged(editor, synFile);
+        this.synSuiteWidget.onSynTreeChanged(synFile);
+    }
+
+    onCaretMoved(offset: Offset): void {
+        this.astViewerWidget.onCaretMoved(offset);
     }
 
     private init() {

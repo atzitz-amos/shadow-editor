@@ -28,6 +28,10 @@ export class JsMemberAccessExpr extends JsExpr {
         return this.property;
     }
 
+    isOptionalChaining(): boolean {
+        return this.getAllToken()[0].getValue() === "?.";
+    }
+
     public toDebugString(): string {
         return `(${this.object.toDebugString()}.${this.property.getValue()})`;
     }

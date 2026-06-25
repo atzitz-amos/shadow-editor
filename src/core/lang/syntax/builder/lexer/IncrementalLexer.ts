@@ -1,8 +1,7 @@
-import {Source} from "../tokens/TokenStream";
+import {Source, StaticTokenStream, TokenStream} from "../tokens/TokenStream";
 import {ILexer} from "./ILexer";
 import {Token} from "../tokens/Token";
 import {DocumentModificationEvent} from "../../../../../editor/core/document/events/DocumentModificationEvent";
-import {TokenCache} from "../../../../../editor/core/lang/TokenCache";
 import {Document} from "../../../../../editor/core/document/Document";
 
 /**
@@ -49,4 +48,15 @@ export abstract class IncrementalLexer implements ILexer {
     }
 
     abstract tokenize(input: Source): Token;
+
+    createTokenStream(src: string): TokenStream {
+        const source = new Source(src, 0);
+        const tokens: Token[] = [];
+
+        while (!source.isEmpty()) {
+            tokens.push(this.tokenize(source));
+        }
+
+        return new StaticTokenStream(tokens);
+    }
 }

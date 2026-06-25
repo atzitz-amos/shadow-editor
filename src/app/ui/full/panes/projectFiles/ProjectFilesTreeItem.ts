@@ -2,7 +2,7 @@ import {UIComponent} from "../../../../../core/ui/engine/components/UIComponent"
 import {HTMLUtils} from "../../../../../editor/utils/HTMLUtils";
 import {RelativePath} from "../../../../../core/workspace/filesystem/path/RelativePath";
 import {EditorURI} from "../../../../../core/uri/EditorURI";
-import {URIManager} from "../../../../../core/uri/URIManager";
+import {URINavigationManager} from "../../../../../core/uri/URINavigationManager";
 
 /**
  *
@@ -22,11 +22,11 @@ export class ProjectFilesTreeItem extends UIComponent {
         this.uri = uri;
     }
 
-    public setActive() {
+    public open() {
         document.querySelector(".tree-item.active")?.classList.remove("active");
         this.getUnderlyingElement().classList.add("active");
 
-        URIManager.openAsync(this.uri);
+        URINavigationManager.navigateAsync(this.uri);
     }
 
     public setSelected() {
@@ -48,7 +48,7 @@ export class ProjectFilesTreeItem extends UIComponent {
         });
 
         header.addEventListener("dblclick", () => {
-            this.setActive();
+            this.open();
         });
     }
 }

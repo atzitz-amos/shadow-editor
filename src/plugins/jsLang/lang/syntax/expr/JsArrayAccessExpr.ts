@@ -15,11 +15,11 @@ export class JsArrayAccessExpr extends JsExpr {
 
     constructor(node: ASTNode) {
         super(node);
-        this.array = this.findNthChild(0) as JsExpr;
-        this.index = this.findNthChild(2) as JsExpr;
+        this.array = this.findNthChildOfType(JsExpr, 0)!;
+        this.index = this.findNthChildOfType(JsExpr, 1)!;
     }
 
-    getArray(): JsExpr {
+    getArrayName(): JsExpr {
         return this.array;
     }
 

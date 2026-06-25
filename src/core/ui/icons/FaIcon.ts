@@ -508,4 +508,8 @@ export class FaIcon extends Icon {
     brands(): FaIcon {
         return new FaIcon(this.name, "fa-brands");
     }
+
+    toHTML() {
+        return HTMLUtils.createElement(`i.${this.type}.${this.name}`);
+    }
 }

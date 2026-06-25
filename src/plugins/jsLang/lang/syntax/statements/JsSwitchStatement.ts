@@ -5,6 +5,7 @@ import {SynNode} from "../../../../../core/lang/syntax/api/SynNode";
 import {JsCodeBlock} from "../JsCodeBlock";
 import {SynNodeVisitor} from "../../../../../core/lang/syntax/visitors/SynNodeVisitor";
 import {JsSynVisitor} from "../visitors/JsSynVisitor";
+import {JsStatement} from "./JsStatement";
 
 /**
  *
@@ -12,7 +13,7 @@ import {JsSynVisitor} from "../visitors/JsSynVisitor";
  * @date 6/2/2026
  * @since 1.0.0
  */
-export class JsSwitchCase extends SynElementImpl {
+export class JsSwitchCase extends JsStatement {
     private readonly expr: SynNode | null;
 
     constructor(public node: ASTNode) {
@@ -29,7 +30,7 @@ export class JsSwitchCase extends SynElementImpl {
         return this.expr === null;
     }
 
-    getExpression(): SynNode | null {
+    getCaseExpr(): SynNode | null {
         return this.expr;
     }
 
@@ -57,7 +58,7 @@ export class JsSwitchStatement extends SynElementImpl {
         this.cases = this.body.findAllChildrenOfType(JsSwitchCase);
     }
 
-    getExpression(): SynNode {
+    getExpr(): SynNode {
         return this.expr;
     }
 

@@ -5,7 +5,7 @@ import {GlobalState} from "../global/GlobalState";
 import {SynTreeChangedEvent} from "../../editor/core/lang/events/SynTreeChangedEvent";
 import {ProblemsHolder} from "./inspections/problems/ProblemsHolder";
 import {InlineInspection} from "../../editor/ui/inline/inspection/InlineInspection";
-import {KeyTypedEvent} from "../../editor/events/PhysicalEvents";
+import {CodeProblem} from "./inspections/problems/CodeProblem";
 
 /**
  *
@@ -19,6 +19,8 @@ export class AnnotatorService {
     private static instance: AnnotatorService;
 
     private readonly declare logger: Logger;
+
+    private problems: CodeProblem[] = [];
 
     constructor() {
 
@@ -35,9 +37,16 @@ export class AnnotatorService {
         GlobalState.getMainEventBus().subscribe(this, SynTreeChangedEvent.SUBSCRIBER, this.onSynTreeChanged);
     }
 
+    getProblems(): CodeProblem[] {
+        return this.problems;
+    }
+
     private onSynTreeChanged(event: SynTreeChangedEvent) {
         event.getEditor().getWidgetManager().removeByName("inline-inspection");
 
+        if (event.getLanguage() === null) return;
+
+        this.problems = [];
         const holder = new ProblemsHolder(event.getFile());
 
         event.getEditor().getLangSupport().getInspectionEngineForLanguage(event.getLanguage())
@@ -50,6 +59,8 @@ export class AnnotatorService {
                 .getWidgetManager()
                 .addOverlayWidget(new InlineInspection(problem.getRange(), problem.getInspection().getSeverity(), problem.getDescription()));
         }
+
+        this.problems = holder.getProblems();
 
         event.getEditor().getView().triggerOverlaysRepaint();
     }

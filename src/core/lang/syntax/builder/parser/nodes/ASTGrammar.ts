@@ -18,7 +18,7 @@ export class ASTType {
 export class ASTGrammar {
     public static readonly TOKEN = new ASTType("TOKEN", ASTGrammarRole.TOKEN);
     public static readonly SYNTAX_ERROR = new ASTType("SYNTAX_ERROR", ASTGrammarRole.ERROR);
-    public static readonly Expression = new ASTType("EXPR", ASTGrammarRole.EXPR);
+    public static readonly EXPRESSION = new ASTType("EXPR", ASTGrammarRole.EXPR);
 
     public static create(debugName: string, treeBuilder?: (node: ASTNode) => SynNode): ASTType {
         return new ASTType(debugName, ASTGrammarRole.DEFAULT, treeBuilder);

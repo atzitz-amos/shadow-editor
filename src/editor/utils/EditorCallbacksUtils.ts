@@ -1,5 +1,5 @@
 import {Editor} from "../Editor";
-import {KeyPressedEvent} from "../events/PhysicalEvents";
+import {KeyPressedEvent} from "../impl/events/PhysicalEvents";
 
 /**
  *

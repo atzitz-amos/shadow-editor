@@ -32,7 +32,7 @@ export class Document {
     private readonly tokenCache: TokenCache = new TokenCache();
     private readonly myUndoRedoStack: UndoRedoActionStack = new UndoRedoActionStack();
 
-    private trackedRanges: TrackedRange[] = [];
+    private trackedRanges: WeakRef<TrackedRange>[] = []
 
     constructor(private caretOffset: Offset, content: string, private language: LanguageBase | null = null) {
         this.data = new EditorRawData(content);
@@ -226,9 +226,19 @@ export class Document {
         return deleted;
     }
 
-    public replaceRange(range: TextRange, text: string): void {
-        this.deleteAt(range.start, range.getLength());
+    public replaceRange(range: TextRange, text: string): string {
+        let deleted = this.data.delete(range.start, range.getLength());
+        this.recomputeLines(range.start, deleted, true);
+
+        if (this.isLinkedToEditor()) {
+            let affectedRange = new TextRange(range.start, range.end);
+            this.editor!.getEventBus().syncPublish(new DocumentModificationEvent(this, affectedRange, null, deleted));
+            this.editor!.getEventBus().asyncPublish(new DocumentDeleteEvent(this, affectedRange));
+        }
+
         this.insertText(range.start, text);
+
+        return deleted;
     }
 
     public substring(start: number, end?: number) {
@@ -236,7 +246,13 @@ export class Document {
     }
 
     public addTrackedRange(range: TrackedRange) {
-        this.trackedRanges.push(range);
+        this.trackedRanges.push(new WeakRef(range));
+    }
+
+    createTracked(start: Offset, end: Offset, isGreedyLeft: boolean = false, isGreedyRight: boolean = false) {
+        const range = new TrackedRange(start, end, isGreedyLeft, isGreedyRight);
+        this.addTrackedRange(range);
+        return range;
     }
 
     private parseLines(): void {
@@ -262,27 +278,35 @@ export class Document {
         let firstIndex = this.getLineAt(at).getLineNumber() + 1;
         if (firstIndex > this.getLineCount()) firstIndex = this.lineBreaks.length;
 
-        let addedLines = 0;
-
-        for (const match of text.matchAll(/\n/g)) {
-            if (deletion) {
-                this.lines.splice(this.lineBreaks.indexOf(at + match.index! + 1), 1);
-                this.lineBreaks.splice(this.lineBreaks.indexOf(at + match.index! + 1), 1);
-            } else {
-                let lineBreakOffset = at + match.index! + 1;
-                this.lineBreaks.splice(firstIndex + addedLines, 0, lineBreakOffset);
-                addedLines++;
+        if (deletion) {
+            let newlineCount = 0;
+            for (let i = 0; i < text.length; i++) {
+                if (text[i] === '\n') newlineCount++;
             }
-        }
 
-        for (let i = firstIndex + addedLines; i < this.lineBreaks.length; i++) {
-            this.lineBreaks[i] += (deletion ? -text.length : text.length);
+            this.lineBreaks.splice(firstIndex, newlineCount);
+
+            for (let i = firstIndex; i < this.lineBreaks.length; i++) {
+                this.lineBreaks[i] -= text.length;
+            }
+        } else {
+            const newBreaks: number[] = [];
+            for (const match of text.matchAll(/\n/g)) {
+                newBreaks.push(at + match.index! + 1);
+            }
+            this.lineBreaks.splice(firstIndex, 0, ...newBreaks);
+
+            for (let i = firstIndex + newBreaks.length; i < this.lineBreaks.length; i++) {
+                this.lineBreaks[i] += text.length;
+            }
         }
 
         this.lines = this.lines.slice(0, firstIndex - 1);
         for (let i = firstIndex - 1; i < this.lineBreaks.length; i++) {
-            let lineStart = this.lineBreaks[i];
-            let lineEnd = (i + 1 < this.lineBreaks.length) ? this.lineBreaks[i + 1] - 1 : this.getTotalDocumentLength();
+            const lineStart = this.lineBreaks[i];
+            const lineEnd = i + 1 < this.lineBreaks.length
+                ? this.lineBreaks[i + 1] - 1
+                : this.getTotalDocumentLength();
             this.lines.push(new LineData(this, i, lineStart, lineEnd));
         }
     }
@@ -298,8 +322,9 @@ export class Document {
 
     private updateTrackedRanges(offset: Offset, delta: number) {
         for (let i = 0; i < this.trackedRanges.length; i++) {
-            const range = this.trackedRanges[i];
-            if (!range.isValid()) {
+            const range = this.trackedRanges[i].deref();
+            if (!range || !range.isValid()) {
+                console.log("Removing invalid range:", range)
                 this.trackedRanges.splice(i, 1);
                 i--;
                 continue;

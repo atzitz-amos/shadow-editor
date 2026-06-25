@@ -91,7 +91,9 @@ export class ViewPainter {
                 let element = this.painVirtualOverlay(overlay, range.start, elementStart);
                 overlay.internalInit(this.view.getEditor(), [element]);
 
-                const lineNo = document.getLineAt(range.start).getLineNumber();
+                let line = document.getLineAt(range.start);
+                if (!line) continue;
+                const lineNo = line.getLineNumber();
 
                 if (lineNo >= this.view.getScroll().scrollYLines - 1 && lineNo < this.view.getScroll().scrollYLines + 1 + this.view.getVisualLineCount()) {
                     this.layers.getOverlayLayer().addOverlayOnLine(lineNo - this.view.getScroll().scrollYLines + 1, element);
@@ -100,8 +102,10 @@ export class ViewPainter {
                 while (start < range.end) {
                     let end = document.getLineEnd(start);
 
-                    const line = document.getLineAt(start).getLineNumber();
-                    if (line >= this.view.getScroll().scrollYLines - 1 && line < this.view.getScroll().scrollYLines + 1 + this.view.getVisualLineCount()) {
+                    let line = document.getLineAt(start);
+                    if (!line) break;
+                    const lineNo = line.getLineNumber();
+                    if (lineNo >= this.view.getScroll().scrollYLines - 1 && lineNo < this.view.getScroll().scrollYLines + 1 + this.view.getVisualLineCount()) {
                         const isFirstLine = (start === initialStart);
                         const isLastLine = (range.end <= end);
                         const isFullLine = overlay.fullLineInBetween() && !isFirstLine && !isLastLine;
@@ -114,8 +118,7 @@ export class ViewPainter {
                             isFullLine);
                         spans.push(element);
 
-                        const lineNo = line - this.view.getScroll().scrollYLines + 1;
-                        this.layers.getOverlayLayer().addOverlayOnLine(lineNo, element);
+                        this.layers.getOverlayLayer().addOverlayOnLine(lineNo - this.view.getScroll().scrollYLines + 1, element);
                     }
                     start = end + 1;
                     elementStart = 0;

@@ -1,6 +1,7 @@
 import {InspectionBase} from "../Inspection";
 import {SynNode} from "../../syntax/api/SynNode";
 import {TextRange} from "../../../../editor/core/coordinate/range/TextRange";
+import {QuickFix} from "../quickfix/QuickFix";
 
 /**
  *
@@ -9,7 +10,12 @@ import {TextRange} from "../../../../editor/core/coordinate/range/TextRange";
  * @since 1.0.0
  */
 export class CodeProblem {
-    constructor(private readonly inspection: InspectionBase, private readonly description: string, private readonly node: SynNode, private readonly range: TextRange) {
+    private readonly quickFixes: QuickFix[] = [];
+
+    constructor(private readonly inspection: InspectionBase,
+                private readonly description: string,
+                private readonly node: SynNode,
+                private readonly range: TextRange) {
 
     }
 
@@ -27,5 +33,13 @@ export class CodeProblem {
 
     public getRange(): TextRange {
         return this.range;
+    }
+
+    public addQuickFix(quickFix: QuickFix) {
+        this.quickFixes.push(quickFix);
+    }
+
+    getQuickFixes() {
+        return this.quickFixes;
     }
 }

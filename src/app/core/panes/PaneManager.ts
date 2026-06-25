@@ -4,6 +4,8 @@ import {PaneDockPosition} from "./pane/PaneDockPosition";
 import {UIHooks} from "../../../core/ui/engine/listeners/hooks/UIHooks";
 
 import {PaneHooks} from "../UICommonHooks";
+import {AbstractPane} from "./pane/AbstractPane";
+import {ExtensionPoint, ExtensionPointUtils} from "../../../core/plugins/extensionPoints/ExtensionPoint";
 
 /**
  *
@@ -13,6 +15,10 @@ import {PaneHooks} from "../UICommonHooks";
  */
 @Service
 export class PaneManager {
+    private static readonly paneEP = new ExtensionPoint("panes", AbstractPane)
+        .onContribute((plugin, pane) => PaneManager.getInstance().add(pane))
+        .onWithdraw(plugin => ExtensionPointUtils.removeByPlugin(PaneManager.paneEP, plugin, p => PaneManager.getInstance().remove(p)));
+
     private static instance: PaneManager;
 
     private panes: Map<string, IPane> = new Map<string, IPane>();

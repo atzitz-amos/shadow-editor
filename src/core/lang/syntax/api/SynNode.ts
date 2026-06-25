@@ -34,4 +34,6 @@ export interface SynNode extends URILocatedResource {
     toTreeRepr(): string;
 
     accept(visitor: SynNodeVisitor): void;
+
+    isSynthetic(): boolean;
 }

@@ -5,6 +5,7 @@
  * @since 1.0.0
  */
 export type SynSuiteParserTest = {
+    pluginId: string,
     key: string,
     description: string,
     code: string,

@@ -89,14 +89,14 @@ export class HoverPopup {
                 }
             }
         };
-        overlay.getEditor().getView().view.addEventListener("mousemove", this.onMouseMoveEvent, false);
+        // overlay.getEditor().getView().view.addEventListener("mousemove", this.onMouseMoveEvent, false);
         return this;
     }
 
     dispose(editor: Editor) {
         if (this.shownPopup) {
             this.shownPopup.dispose();
-            editor.getView().view.removeEventListener("mousemove", this.onMouseMoveEvent);
+            // editor.getView().view.removeEventListener("mousemove", this.onMouseMoveEvent);
         }
     }
 }

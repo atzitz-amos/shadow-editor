@@ -56,6 +56,13 @@ export class TextRange implements Serializable {
         return this.start <= value.getStart() && this.end >= value.getEnd();
     }
 
+    union(other: TextRange) {
+        // Returns a new TextRange that encloses both this and the other range
+        const newStart = Math.min(this.start, other.getStart());
+        const newEnd = Math.max(this.end, other.getEnd());
+        return new TextRange(newStart, newEnd);
+    }
+
     clone() {
         return new TextRange(this.start, this.end);
     }

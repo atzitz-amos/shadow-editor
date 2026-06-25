@@ -15,4 +15,5 @@ export class JsColorScheme {
 
     public static readonly FUNCTION_COLOR = TextColor.of("#b0a3e2");
     public static readonly VARIABLE_COLOR = TextColor.of("#dfefff");
+    public static readonly UNEXPECTED_COLOR = TextColor.of("#ff0000");
 }

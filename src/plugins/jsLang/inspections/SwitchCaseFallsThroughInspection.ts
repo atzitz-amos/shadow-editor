@@ -8,6 +8,10 @@ import {JsSynVisitor} from "../lang/syntax/visitors/JsSynVisitor";
 import {JsSwitchStatement} from "../lang/syntax/statements/JsSwitchStatement";
 import {JsReturnStatement} from "../lang/syntax/statements/JsReturnStatement";
 import {JsBreakStatement} from "../lang/syntax/statements/JsBreakStatement";
+import {QuickFix} from "../../../core/lang/inspections/quickfix/QuickFix";
+import {SynModificationTree} from "../../../core/lang/syntax/tree/SynModificationTree";
+import {SynElement} from "../../../core/lang/syntax/api/SynElement";
+import {JsSynTemplate} from "../lang/template/JsSynTemplate";
 
 /**
  *
@@ -37,11 +41,17 @@ export default class SwitchCaseFallsThroughInspection extends InspectionBase {
                 for (let i = 1; i < body.length - 1; i++) {
                     if (body[i].length > 0) {
                         if (!body[i].some(n => n instanceof JsReturnStatement || n instanceof JsBreakStatement)) {
-                            holder.registerProblem(inspection, "Switch case falls through", element.getCases()[i]);
+                            holder.registerProblem(inspection, "Switch case falls through", element.getCases()[i], [new SwitchCaseFallsThroughQuickFix()]);
                         }
                     }
                 }
             }
         }
+    }
+}
+
+class SwitchCaseFallsThroughQuickFix extends QuickFix {
+    applyFix(element: SynElement, synModTree: SynModificationTree): void {
+        synModTree.insertBefore(element, new JsSynTemplate("break"));
     }
 }

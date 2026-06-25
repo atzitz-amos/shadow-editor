@@ -1,7 +1,9 @@
-import {SynElementImpl} from "../../../../../core/lang/syntax/impl/SynElementImpl";
 import {ASTNode} from "../../../../../core/lang/syntax/builder/parser/nodes/ASTNode";
 import {SynTokenNode} from "../../../../../core/lang/syntax/impl/SynTokenNode";
 import {JsDeclarator} from "./JsDeclarator";
+import {SynNodeVisitor} from "../../../../../core/lang/syntax/visitors/SynNodeVisitor";
+import {JsSynVisitor} from "../visitors/JsSynVisitor";
+import {JsStatement} from "./JsStatement";
 
 /**
  *
@@ -9,7 +11,7 @@ import {JsDeclarator} from "./JsDeclarator";
  * @date 6/3/2026
  * @since 1.0.0
  */
-export class JsVariableDeclaration extends SynElementImpl {
+export class JsVariableDeclaration extends JsStatement {
     private readonly token: SynTokenNode;
     private readonly declarations: JsDeclarator[];
 
@@ -20,7 +22,7 @@ export class JsVariableDeclaration extends SynElementImpl {
         this.declarations = this.findAllChildrenOfType(JsDeclarator);
     }
 
-    getToken(): SynTokenNode {
+    getKindToken(): SynTokenNode {
         return this.token;
     }
 
@@ -38,5 +40,13 @@ export class JsVariableDeclaration extends SynElementImpl {
 
     isLet(): boolean {
         return this.token.getValue() === "let";
+    }
+
+    accept(visitor: SynNodeVisitor) {
+        if (visitor instanceof JsSynVisitor) {
+            visitor.visitVariableDeclaration(this);
+        } else {
+            super.accept(visitor);
+        }
     }
 }

@@ -20,4 +20,9 @@ export abstract class SynCodeBlock extends SynElementImpl {
     getAssociatedScope(): SynScope {
         return this.scope;
     }
+
+    setSynthetic() {
+        super.setSynthetic();
+        this.getParent()?.setSynthetic();
+    }
 }

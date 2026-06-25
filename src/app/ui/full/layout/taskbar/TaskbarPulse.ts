@@ -11,8 +11,8 @@ export class TaskbarPulse extends UIComponent {
     private readonly pulseDot: HTMLElement;
     private readonly pulseText: HTMLElement;
 
-    private time: number = 0;
-    private timeout: NodeJS.Timeout;
+    private readonly startTime: number;
+    private readonly timeout: NodeJS.Timeout;
 
     constructor(root: HTMLElement) {
         super(HTMLUtils.createDiv("topbar-pulse", root));
@@ -21,11 +21,22 @@ export class TaskbarPulse extends UIComponent {
         this.pulseText = HTMLUtils.createDiv("pulse-text", this.getUnderlyingElement());
         this.pulseText.innerHTML = "Focused · 0s";
 
+        // Store the exact unix timestamp when the component initialized
+        this.startTime = Date.now();
+
         this.timeout = setInterval(() => {
-            this.time += 1;
-            if (this.time < 60) this.pulseText.innerHTML = `Focused · ${this.time}s`;
-            else if (this.time < 3600) this.pulseText.innerHTML = `Focused · ${Math.floor(this.time / 60)}m`;
-            else this.pulseText.innerHTML = `Focused · ${Math.floor(this.time / 3600)}h${Math.floor((this.time % 3600) / 60)}m`;
+            // Calculate elapsed time in seconds
+            const elapsedSeconds = Math.floor((Date.now() - this.startTime) / 1000);
+
+            if (elapsedSeconds < 60) {
+                this.pulseText.innerHTML = `Focused · ${elapsedSeconds}s`;
+            } else if (elapsedSeconds < 3600) {
+                this.pulseText.innerHTML = `Focused · ${Math.floor(elapsedSeconds / 60)}m`;
+            } else {
+                const hours = Math.floor(elapsedSeconds / 3600);
+                const minutes = Math.floor((elapsedSeconds % 3600) / 60);
+                this.pulseText.innerHTML = `Focused · ${hours}h${minutes}m`;
+            }
 
         }, 1000);
     }
@@ -39,5 +50,4 @@ export class TaskbarPulse extends UIComponent {
     draw(): void {
 
     }
-
 }

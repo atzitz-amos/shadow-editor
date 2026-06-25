@@ -1,32 +1,75 @@
-import {PluginManager} from "../PluginManager";
 import {EditorPlugin} from "../loader/Plugin";
-import {LangExtensionPoint} from "./LangExtensionPoint";
-import {ActionsExtensionPoint} from "./ActionsExtensionPoint";
-import {StartupPhaseExtensionPoint} from "./StartupPhaseExtensionPoint";
-import {InspectionsExtensionPoint} from "./InspectionsExtensionPoint";
-import {PanesExtensionPoint} from "./PanesExtensionPoint";
 
-export interface ExtensionPoint {
-    getName(): string;
+export class ExtensionPoint<T> {
+    private static readonly registry = new Map<string, ExtensionPoint<any>[]>();
+    private readonly contributions = new Map<EditorPlugin, T[]>();
 
-    register(manager: PluginManager, owner: EditorPlugin, instance: any): void;
+    private contributeHandler: (p: EditorPlugin, i: T) => void;
+    private withdrawHandler: (p: EditorPlugin) => void;
 
-    unregister(manager: PluginManager, owner: EditorPlugin): void;
+    constructor(public readonly name: string, private readonly ctor: Class<T>) {
+        ExtensionPoint.define(name, this);
+    }
+
+    static forName(name: string): ExtensionPoint<any>[] {
+        return ExtensionPoint.registry.get(name) ?? [];
+    }
+
+    private static define(name: string, extPoint: ExtensionPoint<any>): void {
+        if (!this.registry.has(name)) {
+            this.registry.set(name, [extPoint]);
+        } else {
+            this.registry.get(name)?.push(extPoint);
+        }
+    }
+
+    onContribute(handler: (p: EditorPlugin, i: T) => void): ExtensionPoint<T> {
+        this.contributeHandler = handler;
+        return this;
+    }
+
+    onWithdraw(handler: (p: EditorPlugin) => void): ExtensionPoint<T> {
+        this.withdrawHandler = handler;
+        return this;
+    }
+
+    contribute(owner: EditorPlugin, instance: unknown): void {
+        if (!this.accepts(instance))
+            return;
+        (this.contributions.get(owner) ?? this.contributions.set(owner, []).get(owner)!).push(instance);
+
+        if (this.contributeHandler) this.contributeHandler(owner, instance);
+    }
+
+    withdraw(owner: EditorPlugin): void {
+        this.contributions.delete(owner);
+
+        if (this.withdrawHandler) this.withdrawHandler(owner);
+    }
+
+    getAll(): T[] {
+        return [...this.contributions.values()].flat();
+    }
+
+    forAll(plugin: EditorPlugin, callback: (obj: T) => void) {
+        this.contributions.get(plugin)?.forEach(callback);
+    }
+
+    definingPlugin(cls: T): EditorPlugin | undefined {
+        for (const [plugin, inspections] of this.contributions.entries()) {
+            for (const inspection of inspections) {
+                if (inspection === cls) return plugin;
+            }
+        }
+    }
+
+    private accepts(instance: unknown): instance is T {
+        return instance instanceof this.ctor;
+    }
 }
 
-export class ExtensionPointsLoader {
-    public static readonly EXTENSION_POINTS = {
-        "lang": LangExtensionPoint.class,
-        "actions": ActionsExtensionPoint.class,
-        "startupPhase": StartupPhaseExtensionPoint.class,
-        "inspections": InspectionsExtensionPoint.class,
-        "panes": PanesExtensionPoint.class
-    };
-
-    public static forName(name: string) {
-        if (this.EXTENSION_POINTS[name]) {
-            return this.EXTENSION_POINTS[name];
-        }
-        return null;
+export class ExtensionPointUtils {
+    public static removeByPlugin<T>(extPoint: ExtensionPoint<T>, plugin: EditorPlugin, cb: (t: T) => void) {
+        extPoint.forAll(plugin, cb);
     }
 }

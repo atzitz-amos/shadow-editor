@@ -6,6 +6,7 @@ import {JsHighlighter} from "./highlighter/JsHighlighter";
 import JsIncrLexer from "./lexer/JsIncrLexer";
 import {ASTBuilder} from "../../../core/lang/syntax/builder/parser/builder/ASTBuilder";
 import {IParser} from "../../../core/lang/syntax/builder/parser/IParser";
+import {JsPrinter} from "./template/JsPrinter";
 
 
 export default class JsLang extends LanguageBase {
@@ -27,5 +28,9 @@ export default class JsLang extends LanguageBase {
 
     public createParser(builder: ASTBuilder): IParser {
         return new JsParser(builder);
+    }
+
+    public getPrinter(): JsPrinter {
+        return new JsPrinter();
     }
 }

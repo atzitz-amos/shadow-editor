@@ -1,6 +1,6 @@
 import {ServiceImpl} from "../threaded/service/Service";
 import {Logger, UseLogger} from "../logging/Logger";
-import {StartupPhase} from "./startup/StartupPhase";
+import {AbstractStartupPhase, StartupPhase} from "./startup/StartupPhase";
 import {StartupProgressEvent} from "./events/StartupProgressEvent";
 import {StartupFailedEvent} from "./events/StartupFailedEvent";
 import {EventBus} from "../events/EventBus";
@@ -10,6 +10,7 @@ import {ProcessManager} from "../threaded/process/manager/ProcessManager";
 import {DistantServiceImpl} from "../threaded/service/DistantService";
 import {PersistedObject} from "../persistence/objects/PersistedObject";
 import {PersistenceModel} from "../persistence/PersistenceModel";
+import {ExtensionPoint} from "../plugins/extensionPoints/ExtensionPoint";
 
 /**
  * The lifecycle of the application, manages the persistence of PersistedObject,
@@ -21,8 +22,11 @@ import {PersistenceModel} from "../persistence/PersistenceModel";
  */
 @UseLogger("Lifecycle")
 export class Lifecycle {
+    private static readonly startupEP = new ExtensionPoint("startupPhase", AbstractStartupPhase)
+        .onContribute((plugin, phase) => Lifecycle.getInstance().registerPhase(phase));
+
     private static _instance: Lifecycle;
-    declare private logger: Logger;
+    declare private readonly logger: Logger;
 
     /**
      * Our process manager*/

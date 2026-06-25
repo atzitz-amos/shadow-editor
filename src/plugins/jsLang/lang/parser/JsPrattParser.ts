@@ -68,7 +68,7 @@ export class JsPrattParser {
         while (rbp < this.bindingPower(this.builder.seek())) {
             this.led(exprStart);
         }
-        exprStart.done(ASTGrammar.Expression);
+        exprStart.done(ASTGrammar.EXPRESSION);
 
         return ErrorHandlingMode.NONE;
     }
@@ -285,7 +285,7 @@ export class JsPrattParser {
             this.parseExpression(OperatorPrecedence.COMMA);
             marker.done(JsGrammar.CommaExpr);
             return;
-        } else if ((type === JsLexicalGrammar.KEYWORD && token.getValue() === "instanceof") || token.getValue() === "in") {
+        } else if ((type === JsLexicalGrammar.KEYWORD && token.getValue() === "instanceof") || token.getValue() === "in" && !this.myExprParser.isPotentiallyInLoop()) {
             this.parseExpression(OperatorPrecedence.INSTANCEOF_IN);
             marker.done(JsGrammar.BinaryExpr);
             return;
@@ -345,7 +345,9 @@ export class JsPrattParser {
         } else if (type === JsLexicalGrammar.POSTFIX_OPERATOR) {
             return OperatorPrecedence.POSTFIX;
         } else if (type === JsLexicalGrammar.KEYWORD) {
-            if (token.getValue() === "instanceof" || token.getValue() === "in") {
+            if (token.getValue() === "instanceof") {
+                return OperatorPrecedence.INSTANCEOF_IN;
+            } else if (token.getValue() === "in" && !this.myExprParser.isPotentiallyInLoop()) {
                 return OperatorPrecedence.INSTANCEOF_IN;
             }
             return 0;

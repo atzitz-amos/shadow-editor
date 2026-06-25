@@ -2,27 +2,47 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 2px 12px 8px;
-    border-bottom: 1px solid #2d3139; /* Sleeker, less harsh border */
+    padding: 2px 0 8px 8px;
+    border-bottom: 1px solid #2d3139;
     margin-bottom: 10px;
+}
+
+div.ast-viewer-toggle-follow {
+    font-size: 14px;
+    color: #716e6e;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+/* Hover State */
+div.ast-viewer-toggle-follow:hover {
+    color: #a09e9e;
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Toggled State (Active / Follow Mode On) */
+div.ast-viewer-toggle-follow.is-active {
+    color: #528bff; /* A crisp, IDE-style blue to match your UI accents */
+    /* Alternative: use #ffffff if you want to keep it purely monochromatic */
+    background-color: rgba(82, 139, 255, 0.15); /* Subtle blue tint background */
 }
 
 .ast-viewer-filename {
     font-size: 11px;
-    color: #abb2bf; /* Brighter, more readable gray for the filename */
+    color: #abb2bf;
     font-family: system-ui, sans-serif;
 }
 
-/* Ensure the main container explicitly allows horizontal scrolling */
 .ast-viewer-body {
     padding: 0 12px 10px 0;
     flex: 1;
-    overflow: auto; /* Triggers scrollbars when contents spill out */
+    overflow: auto;
     display: flex;
     flex-direction: column;
 }
 
-/* Add a wrapper or ensure the top-level tree nodes can stretch */
 .syn-tree-node {
     display: flex;
     flex-direction: column;
@@ -30,12 +50,10 @@
     overflow: visible;
     position: relative;
 
-    /* Crucial fix for horizontal scrolling in flex children */
     min-width: min-content;
     width: 100%;
 }
 
-/* Subtle vertical guide line */
 .syn-tree-node::before {
     content: "";
     position: absolute;
@@ -57,12 +75,10 @@
     color: #61afef;
     font-weight: 500;
 
-    /* Ensures inline elements align gracefully along the same baseline */
     display: inline-flex;
     align-items: center;
 }
 
-/* Perfect full-width error highlighting without breaking scroll */
 .syn-error-node {
     color: #f44747;
     background-color: rgba(244, 71, 71, 0.15);
@@ -80,27 +96,25 @@
 
 
 .ast-viewer-overlay-highlight {
-    background: rgb(200 96 232 / 0.25); /* Soft purple overlay */
+    background: rgb(200 96 232 / 0.25);
 }
 
 .ast-viewer-tag {
-    color: #e5c07b; /* Warm amber font */
-    background-color: rgba(229, 192, 123, 0.12); /* Subtle pill background */
+    color: #e5c07b;
+    background-color: rgba(229, 192, 123, 0.12);
 
     font-size: 11px;
     font-weight: 500;
-    line-height: 1; /* Prevents text from pushing the badge height */
+    line-height: 1;
 
-    padding: 2px 6px; /* Balanced padding around the text */
-    margin-left: 8px; /* Breathing room from the brace/title */
+    padding: 2px 6px;
+    margin-left: 8px;
     border-radius: 4px;
 
-    /* Perfect inline centering block */
     display: inline-flex;
     align-items: center;
     justify-content: center;
 
-    /* Fine-tune alignment relative to the surrounding text code */
     vertical-align: middle;
 
     visibility: hidden;
@@ -116,6 +130,136 @@
     align-items: center;
     justify-content: center;
     height: 100%;
-    color: #5c6370; /* Soft muted gray for empty states */
+    color: #5c6370;
     font-size: 14px;
+}
+
+
+
+
+/* --- SYN SUITE CORE --- */
+.syn-suite-widget-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    background-color: #181c25;
+}
+
+.syn-suite-main-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+/* --- PLUGIN ROW ITEM --- */
+.syn-plugin-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.syn-plugin-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background-color: #242936;
+    border: 1px solid #2f3647;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: border-color 0.12s ease, background-color 0.12s ease;
+}
+
+.syn-plugin-row:hover {
+    border-color: #3f475c;
+    background-color: #2f3647;
+}
+
+.syn-plugin-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.syn-plugin-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ide-text-primary, #c0c2c8);
+}
+
+.syn-plugin-status-sub {
+    font-size: 11px;
+    color: #64748b;
+}
+
+/* --- METRICS & STATUS BADGES --- */
+.syn-status-badge {
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 600;
+}
+.syn-status-badge.passed { background-color: rgba(34, 197, 94, 0.15); color: #4ade80; }
+.syn-status-badge.failed { background-color: rgba(239, 68, 68, 0.15); color: #f87171; }
+
+/* --- DETAILED VIEW PANEL --- */
+.syn-detail-view {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    height: 100%;
+    overflow-y: auto;
+    box-sizing: border-box;
+}
+
+.syn-test-card {
+    background-color: #1e2430;
+    border: 1px solid #2f3647;
+    border-radius: 4px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.syn-test-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.syn-test-name {
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace, monospace;
+    color: #e2e8f0;
+}
+
+.syn-metric-row {
+    display: flex;
+    gap: 12px;
+    font-size: 11px;
+    color: #94a3b8;
+    background: #141820;
+    padding: 4px 8px;
+    border-radius: 3px;
+}
+
+.syn-metric-value {
+    color: #4a76bc;
+    font-weight: 600;
+}
+
+.subtle-gray {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: #94a3b8;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.syn-snap-box ide-button {
+    width: 100%;
 }

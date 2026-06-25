@@ -1,4 +1,5 @@
 import {SynSuiteInspection, SynSuiteParserTest} from "./SynSuiteParserTest";
+import {GlobalState} from "../../global/GlobalState";
 
 /**
  *
@@ -24,11 +25,24 @@ export class SynAutomatedTestResult {
                 return this.actualInspections.some(actual => {
                     return expected.inspectionKey === actual.inspectionKey &&
                         expected.message === actual.message &&
-                        expected.range.getStart() === actual.range.getStart() &&
+                        expected.range.start === actual.range.start &&
                         expected.range.end === actual.range.end;
                 });
             });
 
         return treeMatches && inspectionsMatch;
+    }
+
+    getTotalTime() {
+        return this.lexerTime + this.parserTime + this.inspectionTime;
+    }
+
+    markAccepted() {
+        // Modify the test in SynSuiteEngine to set the expected tree and inspections to the actual results
+
+        GlobalState.getSynSuiteEngine().patchTest(this.test.pluginId, this.test.key, {
+            expectedTree: this.actualTree,
+            expectedInspections: this.actualInspections
+        })
     }
 }

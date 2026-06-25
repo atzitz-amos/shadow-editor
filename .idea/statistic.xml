@@ -2,5 +2,15 @@
 <project version="4">
   <component name="Statistic">
     <option name="fileTypes" value="class;svn-base;svn-work;Extra;gif;png;jpg;jpeg;bmp;tga;tiff;ear;war;zip;jar;iml;iws;ipr;bz2;gz;pyc;ttf;mjs;nojekyll" />
+    <option name="excludedDirectories">
+      <list>
+        <option value="$PROJECT_DIR$/dist" />
+        <option value="$PROJECT_DIR$/dist/app" />
+        <option value="$PROJECT_DIR$/dist/assets" />
+        <option value="$PROJECT_DIR$/dist/core" />
+        <option value="$PROJECT_DIR$/dist/editor" />
+        <option value="$PROJECT_DIR$/dist/plugins" />
+      </list>
+    </option>
   </component>
 </project>

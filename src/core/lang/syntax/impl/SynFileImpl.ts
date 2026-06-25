@@ -7,6 +7,7 @@ import {WorkspaceFile} from "../../../workspace/filesystem/tree/WorkspaceFile";
 import {RelativePath} from "../../../workspace/filesystem/path/RelativePath";
 import {Document} from "../../../../editor/core/document/Document";
 import {SynNodeVisitor} from "../visitors/SynNodeVisitor";
+import {SynModifiableFile} from "../api/SynModifiableFile";
 
 /**
  *
@@ -14,7 +15,7 @@ import {SynNodeVisitor} from "../visitors/SynNodeVisitor";
  * @date 12/4/2025
  * @since 1.0.0
  */
-export class SynFileImpl implements SynFile {
+export class SynFileImpl implements SynModifiableFile {
     private readonly children: SynNode[] = [];
 
     constructor(private document: Document) {
@@ -73,6 +74,10 @@ export class SynFileImpl implements SynFile {
 
     addChild(node: SynNode): void {
         this.children.push(node);
+    }
+
+    isSynthetic(): boolean {
+        return false;
     }
 
     accept(visitor: SynNodeVisitor): void {

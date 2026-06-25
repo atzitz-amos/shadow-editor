@@ -77,6 +77,7 @@ export class KeybindManager {
 
             if (this.matchesKeyboardEvent(event, keybind)) {
                 event.preventDefault();
+
                 if (context.isEditorEvent()) context.requireEditor().getUndoRedo().commitPartialEdits();
                 action.run(context);
                 if (context.isEditorEvent()) context.requireEditor().getUndoRedo().commitPartialEdits();

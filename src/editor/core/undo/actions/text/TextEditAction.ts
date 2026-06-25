@@ -16,7 +16,7 @@ export abstract class TextEditAction {
         return this.offset;
     }
 
-    abstract getNewOffset();
+    abstract getNewOffset(): Offset;
 
     getAffectedDelta(): number {
         return this.affectedDelta;

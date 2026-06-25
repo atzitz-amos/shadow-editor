@@ -1,26 +1,26 @@
 import {PluginManager} from "../PluginManager";
 import {EditorPlugin} from "./Plugin";
 import {ExtensionPointSupplier} from "../extensionPoints/ExtensionPointSupplier";
-import {ExtensionPoint, ExtensionPointsLoader} from "../extensionPoints/ExtensionPoint";
+import {ExtensionPoint} from "../extensionPoints/ExtensionPoint";
 import {Logger, UseLogger} from "../../logging/Logger";
 
 export class LoadedExtensionPoint {
     owner: EditorPlugin;
-    extPoint: ExtensionPoint;
+    extPoints: ExtensionPoint<any>[];
     instance: ExtensionPointSupplier;
 
-    constructor(extPoint: ExtensionPoint, owner: EditorPlugin, instance: ExtensionPointSupplier) {
-        this.extPoint = extPoint;
+    constructor(extPoints: ExtensionPoint<any>[], owner: EditorPlugin, instance: ExtensionPointSupplier) {
+        this.extPoints = extPoints;
         this.owner = owner;
         this.instance = instance;
     }
 
     registerSelf(manager: PluginManager): void {
-        this.extPoint.register(manager, this.owner, this.instance);
+        for (const extPoint of this.extPoints) extPoint.contribute(this.owner, this.instance);
     }
 
     unregisterSelf(manager: PluginManager): void {
-        this.extPoint.unregister(manager, this.owner);
+        for (const extPoint of this.extPoints) extPoint.withdraw(this.owner);
     }
 }
 
@@ -45,9 +45,9 @@ export class PluginLoader {
                     if (!loadedExtensionPoints[extPoint]) {
                         loadedExtensionPoints[extPoint] = [];
                     }
-                    let extensionPoint = ExtensionPointsLoader.forName(extPoint);
-                    if (extensionPoint) {
-                        loadedExtensionPoints[extPoint].push(new LoadedExtensionPoint(extensionPoint, plugin, new extCls()));
+                    let extensionPoints = ExtensionPoint.forName(extPoint);
+                    if (extensionPoints.length) {
+                        loadedExtensionPoints[extPoint].push(new LoadedExtensionPoint(extensionPoints, plugin, new extCls()));
                     } else {
                         this.logger.debug("Skipping loading of extension point: " + extPoint + " for plugin: " + pluginName + " - extension point not found.");
                         delete loadedExtensionPoints[extPoint];
@@ -77,9 +77,9 @@ export class PluginLoader {
                     if (!loadedExtensionPoints[extPoint]) {
                         loadedExtensionPoints[extPoint] = [];
                     }
-                    let extensionPoint = ExtensionPointsLoader.forName(extPoint);
-                    if (extensionPoint) {
-                        loadedExtensionPoints[extPoint].push(new LoadedExtensionPoint(extensionPoint, plugin, new extCls()));
+                    let extensionPoints = ExtensionPoint.forName(extPoint);
+                    if (extensionPoints.length) {
+                        loadedExtensionPoints[extPoint].push(new LoadedExtensionPoint(extensionPoints, plugin, new extCls()));
                     } else {
                         this.logger.debug("Skipping loading of extension point: " + extPoint + " for plugin: " + pluginName + " - extension point not found.");
                         delete loadedExtensionPoints[extPoint];
@@ -128,26 +128,35 @@ export class PluginLoader {
         pluginName: string,
         extPoint: string
     }[] {
-
         this.logger.debug("Scanning for extension points...");
 
-        const imports = import.meta.glob("/src/plugins/*/*/*.ts", {eager: true});
+        // ** matches any depth, so a/b/ → extPoint "a.b", a/ → extPoint "a"
+        const imports = import.meta.glob("/src/plugins/*/**/*.ts", {eager: true});
         const extensionPoints: {
             extCls: Constructor<ExtensionPointSupplier>,
             pluginName: string,
             extPoint: string
         }[] = [];
+
         for (const path in imports) {
             const module = imports[path] as { default: Constructor<ExtensionPointSupplier> };
             if (module && module.default) {
+                // path = /src/plugins/{pluginName}/{seg…}/{file}.ts
                 const split = path.split('/');
-                extensionPoints.push({
-                    extCls: module.default,
-                    pluginName: split[split.length - 3],
-                    extPoint: split[split.length - 2]
-                });
+                const pluginName = split[3];
+                // Every segment between pluginName (idx 3) and the filename (last)
+                const extPointSegments = split.slice(4, split.length - 1);
 
-                this.logger.debug("Found extension point: " + split[split.length - 2] + " for plugin: " + split[split.length - 3]);
+                // Guard: skip plugin-root files (no subdir) and the styles directory
+                if (extPointSegments.length === 0 || extPointSegments[0] === 'styles') {
+                    continue;
+                }
+
+                // ['toolbar', 'items'] → "toolbar.items"
+                const extPoint = extPointSegments.join('.');
+
+                extensionPoints.push({ extCls: module.default, pluginName, extPoint });
+                this.logger.debug(`Found extension point: ${extPoint} for plugin: ${pluginName}`);
             }
         }
 

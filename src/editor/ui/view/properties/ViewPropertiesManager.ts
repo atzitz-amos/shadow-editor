@@ -1,12 +1,18 @@
-import {ViewProperties} from "../../../Properties";
 import {SettingsManager} from "../../../../core/settings/SettingsManager";
-import {VisualSettings} from "../../../setting/VisualSettings";
+import {VisualSettings} from "../../../impl/setting/VisualSettings";
 import {View} from "../View";
-import {EditorAttachedEvent} from "../../../events/EditorAttachedEvent";
+import {EditorAttachedEvent} from "../../../impl/events/EditorAttachedEvent";
 import {SettingChangedEvent} from "../../../../core/settings/events/SettingChangedEvent";
 import {ViewVisualPropertiesChangedEvent} from "./ViewVisualPropertiesChangedEvent";
 import {HTMLUtils} from "../../../utils/HTMLUtils";
 import {SettingBase} from "../../../../core/settings/base/SettingBase";
+
+
+export type ViewProperties = {
+    width?: int;
+    height?: int;
+    gutterWidth?: int;
+};
 
 /**
  * Represents the properties of a view in the editor UI and

@@ -7,5 +7,5 @@ import {UIComponent} from "../engine/components/UIComponent";
  * @since 1.0.0
  */
 export abstract class Icon extends UIComponent {
-
+    abstract toHTML(): HTMLElement;
 }

@@ -47,6 +47,10 @@ export class JsDeclarator extends SynDeclaration {
         }
     }
 
+    getNameNode(): JsExpr | SynTokenNode | SynErrorNode {
+        return this.name;
+    }
+
     getEQToken(): SynTokenNode | null {
         return this.equToken;
     }

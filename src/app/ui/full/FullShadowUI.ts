@@ -8,6 +8,7 @@ import {GlobalState} from "../../../core/global/GlobalState";
 import {UIResizeEvent} from "../../core/events/UIResizeEvent";
 import {Editor} from "../../../editor/Editor";
 import {UICommonKeys} from "../../core/UICommonKeys";
+import {IdePopup} from "../../../core/ui/lib/popup/IdePopup";
 
 
 /**
@@ -21,8 +22,10 @@ export class FullShadowUI implements ShadowUI {
     private readonly myLeftActionRail: SLeftActionRail;
     private readonly myWorkspace: SEditorWorkspace;
     private readonly myFooter: SFooter;
-
     private readonly root: HTMLElement;
+
+    private readonly myPopupLayer: HTMLElement;
+    private activePopup: IdePopup | null = null;
 
     constructor(root: HTMLElement) {
         this.root = root;
@@ -33,6 +36,18 @@ export class FullShadowUI implements ShadowUI {
         this.myLeftActionRail = new SLeftActionRail(mainContent);
         this.myWorkspace = new SEditorWorkspace(mainContent);
         this.myFooter = new SFooter(root);
+
+        this.myPopupLayer = HTMLUtils.createElement("div.ide-popup-layer.no-popup", root);
+
+        this.myPopupLayer.addEventListener("mousedown", (event) => {
+            if (this.activePopup && !this.activePopup.containsXY(event.x, event.y)) this.cancelPopup();
+        });
+
+        this.myPopupLayer.addEventListener("keydown", (event) => {
+            if (event.key === "Escape") {
+                this.cancelPopup();
+            }
+        });
     }
 
     getMainEditor(): Editor {
@@ -50,5 +65,25 @@ export class FullShadowUI implements ShadowUI {
         window.addEventListener("resize", () => {
             GlobalState.getMainEventBus().syncPublish(new UIResizeEvent());
         });
+    }
+
+    showPopup(popup: IdePopup) {
+        if (this.activePopup) {
+            this.activePopup.close(true);
+        }
+
+        this.activePopup = popup;
+        this.myPopupLayer.classList.remove("no-popup");
+
+        popup.open(this.myPopupLayer);
+    }
+
+    cancelPopup() {
+        if (this.activePopup) {
+            this.activePopup.close(true);
+            this.activePopup = null;
+        }
+
+        this.myPopupLayer.classList.add("no-popup");
     }
 }

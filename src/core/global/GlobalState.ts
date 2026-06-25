@@ -2,7 +2,7 @@
 
 import {ShadowApp} from "../../app/ShadowApp";
 import {Workspace} from "../workspace/Workspace";
-import {CurrentWorkspaceHelper} from "./CurrentWorkspaceHelper";
+import {ActiveWorkspaceHelper} from "./ActiveWorkspaceHelper";
 import {EventBus} from "../events/EventBus";
 import {PluginManager} from "../plugins/PluginManager";
 import {LangSupport} from "../lang/LangSupport";
@@ -28,6 +28,7 @@ import {AnnotatorService} from "../lang/AnnotatorService";
 import {InspectionBase} from "../lang/inspections/Inspection";
 import {SynSuitePersister} from "../lang/suite/SynSuitePersister";
 import {SynSuiteEngine} from "../lang/suite/SynSuiteEngine";
+import {ExtensionPoint} from "../plugins/extensionPoints/ExtensionPoint";
 
 /**
  * Provides a single class that regroups all useful singletons and global services of the application
@@ -61,7 +62,7 @@ export class GlobalState {
     }
 
     public static getCurrentWorkspace(): Workspace {
-        return CurrentWorkspaceHelper.getInstance()!;
+        return ActiveWorkspaceHelper.getInstance()!;
     }
 
     public static getMainEventBus(): EventBus {

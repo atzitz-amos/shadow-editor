@@ -51,16 +51,6 @@ export class SynTokenNode implements SynNode {
         return siblings[index + 1];
     }
 
-    previousSibling(): SynNode | null {
-        if (!this.parent) return null;
-
-        const siblings = this.parent.getChildren();
-        const index = siblings.indexOf(this);
-        if (index <= 0) return null;
-
-        return siblings[index - 1];
-    }
-
     getTextRange(): TextRange {
         return this.token.getRange();
     }
@@ -73,8 +63,22 @@ export class SynTokenNode implements SynNode {
         this.parent = parent;
     }
 
+    previousSibling(): SynNode | null {
+        if (!this.parent) return null;
+
+        const siblings = this.parent.getChildren();
+        const index = siblings.indexOf(this);
+        if (index <= 0) return null;
+
+        return siblings[index - 1];
+    }
+
     getParent(): SynElement | null {
         return this.parent;
+    }
+
+    isSynthetic(): boolean {
+        return false;
     }
 
     accept(visitor: SynNodeVisitor): void {

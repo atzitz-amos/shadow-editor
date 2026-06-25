@@ -1,5 +1,4 @@
 import {ProblemsHolder} from "../inspections/problems/ProblemsHolder";
-import {InspectionsExtensionPoint} from "../../plugins/extensionPoints/InspectionsExtensionPoint";
 import {SynSuitePersister} from "./SynSuitePersister";
 import {GlobalState} from "../../global/GlobalState";
 import {SynSuiteParserTest} from "./SynSuiteParserTest";
@@ -10,6 +9,9 @@ import {LanguageBase} from "../LanguageBase";
 import {ASTBuilder} from "../syntax/builder/parser/builder/ASTBuilder";
 import {EmptyKillSignal} from "../syntax/builder/parser/builder/KillSignal";
 import {SynFileImpl} from "../syntax/impl/SynFileImpl";
+import {Logger} from "vite";
+import {UseLogger} from "../../logging/logger/LoggerDecorators";
+import {SynSuiteWindowRenderer} from "./renderer/SynSuiteWindowRenderer";
 
 /**
  *
@@ -17,8 +19,11 @@ import {SynFileImpl} from "../syntax/impl/SynFileImpl";
  * @date 6/4/2026
  * @since 1.0.0
  */
+@UseLogger("SynSuiteEngine")
 export class SynSuiteEngine {
     private static readonly instance: SynSuiteEngine = new SynSuiteEngine();
+
+    private declare readonly logger: Logger;
 
     public static getInstance() {
         return this.instance;
@@ -37,7 +42,7 @@ export class SynSuiteEngine {
 
         const holder = new ProblemsHolder(file);
         editor.getLangSupport().getInspectionEngineForLanguage(editor.getCurrentLanguage()!)
-            .filter(inspection => InspectionsExtensionPoint.definingPlugin(inspection) === pluginId)
+            .filter(inspection => LangSupport.definingPlugin(inspection) === pluginId)
             .runInspections(holder, file);
 
         const problems = holder.getProblems().map(p => ({
@@ -47,6 +52,7 @@ export class SynSuiteEngine {
         }));
 
         SynSuitePersister.getInstance().addTest(pluginId, {
+            pluginId,
             key,
             description: description ?? "",
             language: editor.getCurrentLanguage()!.getKey(),
@@ -72,16 +78,24 @@ export class SynSuiteEngine {
         SynSuitePersister.getInstance().patchTest(pluginId, testKey, patch);
     }
 
-    public runTests(pluginId: string) {
+    public runTests(pluginId: string, openPopup: boolean = false, profile: boolean = false): Map<string, SynAutomatedTestResult> {
         const tests = SynSuitePersister.getInstance().getTests(pluginId);
-        const results = new Map<string, SynAutomatedTestResult>;
+        const results = new Map<string, SynAutomatedTestResult>();
 
-        console.profile("Running SynSuite tests for plugin " + pluginId);
+        if (profile) console.profile("Running SynSuite tests for plugin " + pluginId);
         for (const test of tests) {
-            results.set(test.key, this.runTest(pluginId, test, LangSupport.getInstance().getLanguageByKey(test.language)));
+            let result = this.runTest(pluginId, test, LangSupport.getInstance().getLanguageByKey(test.language));
+            results.set(test.key, result);
         }
 
+        if (profile) console.profileEnd("Running SynSuite tests for plugin " + pluginId);
+        if (openPopup) new SynSuiteWindowRenderer().render(results);
+
         return results;
+    }
+
+    getTestsForPlugin(name: string) {
+        return SynSuitePersister.getInstance().getTests(name);
     }
 
     private runTest(pluginId: string, test: SynSuiteParserTest, lang: LanguageBase | null): SynAutomatedTestResult {
@@ -112,7 +126,7 @@ export class SynSuiteEngine {
         const parseEnd = performance.now();
 
         LangSupport.getInstance().getInspectionEngineForLanguage(lang)
-            .filter(inspection => InspectionsExtensionPoint.definingPlugin(inspection) === pluginId)
+            .filter(inspection => LangSupport.definingPlugin(inspection) === pluginId)
             .runInspections(holder, synFile);
         const inspectEnd = performance.now();
 
@@ -123,8 +137,6 @@ export class SynSuiteEngine {
             range: {start: p.getRange().getStart(), end: p.getRange().getEnd()}
         }));
 
-        console.profileEnd("Running SynSuite tests for plugin " + pluginId);
-
         return new SynAutomatedTestResult(
             test,
             [],
@@ -134,6 +146,5 @@ export class SynSuiteEngine {
             parseEnd - lexEnd,
             inspectEnd - parseEnd
         )
-
     }
 }

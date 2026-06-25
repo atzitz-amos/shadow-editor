@@ -6,6 +6,11 @@
               content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0 minimum-scale=1.0">
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
         <title>Editor Test</title>
+
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
         <link rel="stylesheet" href="res/editor.css">
 
         <script src="https://kit.fontawesome.com/cb36336f7b.js" crossorigin="anonymous"></script>
@@ -47,8 +52,21 @@
             import {SynRecursiveVisitorImpl} from "./src/core/lang/syntax/visitors/SynRecursiveVisitorImpl";
             import {SynRecursiveLazyVisitorImpl} from "./src/core/lang/syntax/visitors/SynRecursiveLazyVisitorImpl";
             import DebugToolsPlugin from "./src/plugins/debugTools/DebugToolsPlugin";
+            import {SourceRewriter} from "./src/core/lang/syntax/writer/SourceRewriter";
+            import {AbstractSynTemplate} from "./src/core/lang/syntax/tree/AbstractSynTemplate";
+            import {SynModificationTree} from "./src/core/lang/syntax/tree/SynModificationTree";
+            import {JsSynTemplate} from "./src/plugins/jsLang/lang/template/JsSynTemplate";
+            import {SynSuiteWindowRenderer} from "./src/core/lang/suite/renderer/SynSuiteWindowRenderer";
+            import {PopupUtilsCore} from "./src/core/ui/lib/popup/PopupUtilsCore";
+            import {FaIcon} from "./src/core/ui/icons/FaIcon";
 
+            window.FaIcon = FaIcon;
             window.SimpleTooltipPopup = SimpleTooltipPopup;
+            window.PopupUtilsCore = PopupUtilsCore;
+            window.SourceRewriter = SourceRewriter;
+            window.AbstractSynTemplate = JsSynTemplate;
+            window.SynSuiteRender = SynSuiteWindowRenderer;
+            window.SynModTree = SynModificationTree;
             console.log(SerializationUtils.getSerializableClassName(SettingBase))
 
             // Main entry point - launch the app and wait for startup to complete
@@ -56,8 +74,6 @@
             window.app = app;
 
             window.GlobalState = GlobalState;
-
-            SyncService.getInstance();
 
             if (!app) {
                 console.error("ShadowApp startup failed!");
@@ -67,7 +83,6 @@
 
                 app.openProject(workspace);
 
-                // ShadowUIFactory.singleEditorUI(workspace, () => document.querySelector(".editor-c"));
                 window.ui = await ShadowUIFactory.fullAppUI();
 
                 app.enable(JSLangPlugin.class);
@@ -129,7 +144,7 @@
                     for (let i = 0; i < n; i++) {
                         s += "let x = " + i + ";\n";
                     }
-                    editor.insertText(0, s);
+                    GlobalState.getMainEditor().insertText(0, s);
                 }
             }
 

@@ -4,6 +4,8 @@ import {DeleteTextAction} from "./actions/text/DeleteTextAction";
 import {InsertTextAction} from "./actions/text/InsertTextAction";
 import {TextEditAction} from "./actions/text/TextEditAction";
 import {BulkTextEditAction} from "./actions/text/BulkTextEditAction";
+import {TextRange} from "../coordinate/range/TextRange";
+import {ReplaceTextAction} from "./actions/text/ReplaceTextAction";
 
 /**
  *
@@ -127,6 +129,11 @@ export class UndoRedoActionStack {
             node = node.prev;
         }
         console.log(actions.reverse());
+    }
+
+    onReplaced(caret: Caret, old: Offset, range: TextRange, oldText: string, newText: string) {
+        this.commitPartialEdits();
+        this.push(new BulkTextEditAction([new ReplaceTextAction(old, caret.getOffset(), range, oldText, newText)]));
     }
 }
 
