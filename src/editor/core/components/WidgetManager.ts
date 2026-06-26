@@ -34,6 +34,7 @@ export class WidgetManager {
     }
 
     getAllOverlays(): OverlayWidget[] {
+        this.cleanupStaleOverlays();
         return this.overlays;
     }
 
@@ -118,6 +119,22 @@ export class WidgetManager {
                 overlay.destroy(this.editor);
             } else {
                 newOverlays.push(overlay);
+            }
+        }
+        this.overlays = newOverlays;
+    }
+
+    removeOverlay(overlay: OverlayWidget) {
+
+    }
+
+    private cleanupStaleOverlays() {
+        let newOverlays: OverlayWidget[] = [];
+        for (let overlay of this.overlays) {
+            if (overlay.getRange().isValid()) {
+                newOverlays.push(overlay);
+            } else {
+                overlay.destroy(this.editor);
             }
         }
         this.overlays = newOverlays;

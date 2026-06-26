@@ -324,7 +324,6 @@ export class Document {
         for (let i = 0; i < this.trackedRanges.length; i++) {
             const range = this.trackedRanges[i].deref();
             if (!range || !range.isValid()) {
-                console.log("Removing invalid range:", range)
                 this.trackedRanges.splice(i, 1);
                 i--;
                 continue;
@@ -344,5 +343,9 @@ export class Document {
                     range.setEnd(range.getEnd() + delta);
             }
         }
+    }
+
+    getTokenAt(offset: Offset) {
+        return this.tokenCache.getTokenAt(offset);
     }
 }

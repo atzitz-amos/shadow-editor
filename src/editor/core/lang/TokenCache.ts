@@ -83,13 +83,51 @@ export class TokenCache {
         }
     }
 
-    // --------------------
-    // Binary-search helpers
-    // --------------------
 
     public createTokenStream(): TokenStream {
         return new StaticTokenStream(this.getTokens());
     }
+
+    getTokenAt(offset: Offset): Token | null {
+        let lo = 0;
+        let hi = this.tokens.length - 1;
+        let exactMatchIdx = -1;
+
+        while (lo <= hi) {
+            const mid = (lo + hi) >> 1;
+            const r = this.tokens[mid].getRange();
+
+            if (offset >= r.start && offset < r.end) {
+                exactMatchIdx = mid;
+                break;
+            }
+
+            if (offset < r.start) {
+                hi = mid - 1;
+            } else {
+                lo = mid + 1;
+            }
+        }
+
+        if (exactMatchIdx === -1) return null;
+
+        let matchedToken = this.tokens[exactMatchIdx];
+
+        if (matchedToken.getType().shouldSkip && offset === matchedToken.getRange().start) {
+            for (let i = exactMatchIdx - 1; i >= 0; i--) {
+                if (!this.tokens[i].getType().shouldSkip) {
+                    return this.tokens[i];
+                }
+            }
+            return null;
+        }
+
+        return matchedToken;
+    }
+
+    // --------------------
+    // Binary-search helpers
+    // --------------------
 
     /** index of token containing pos, or nearest token to the left (insertion point - 1) */
     private findIndexContainingOrBefore(pos: Offset): number {
@@ -99,7 +137,7 @@ export class TokenCache {
             const mid = (lo + hi) >> 1;
             const r = this.tokens[mid].getRange();
             if (r.contains(pos)) return mid;
-            if (r.start >= pos) { // <-- changed from `>` to `>=`
+            if (r.start >= pos) {
                 hi = mid - 1;
             } else {
                 result = mid;

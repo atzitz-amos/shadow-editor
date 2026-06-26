@@ -38,7 +38,7 @@ export class InlineInspection extends OverlayWidget {
     destroy(editor: Editor): void {
         this.range.invalidate();
         if (this.overlay) {
-            this.overlay.dispose();
+            this.overlay.cleanupEvents();
         }
         if (this.hoverPopup) {
             this.hoverPopup.dispose(editor);

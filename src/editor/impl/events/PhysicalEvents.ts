@@ -2,6 +2,7 @@ import {EventSubscriber} from "../../../core/events/EventSubscriber";
 import {EditorCancellableEventBase, EditorEventBase} from "../../../core/events/EditorEventBase";
 import {Editor} from "../../Editor";
 import {Caret} from "../../core/caret/Caret";
+import {XYPoint} from "../../core/coordinate/XYPoint";
 
 /**
  * Fired when a key is pressed
@@ -80,6 +81,30 @@ export class MouseReleasedEvent extends EditorEventBase {
 
     getEvent(): MouseEvent {
         return this.event;
+    }
+}
+
+/**
+ * Fired when mouse is moved within editor bounds
+ *
+ * @author Atzitz Amos
+ * @date 10/22/2025
+ * @since 1.0.0
+ */
+export class MouseMovedEvent extends EditorCancellableEventBase {
+    public static readonly SUBSCRIBER = EventSubscriber.create(this);
+
+    constructor(editor: Editor, private event: MouseEvent) {
+        super(editor);
+    }
+
+    getEvent(): MouseEvent {
+        return this.event;
+    }
+
+    getRelativeXY() {
+        const rect = this.getEditor().getView().getLayers().layers_el.getBoundingClientRect();
+        return new XYPoint(this.event.clientX - rect.left, this.event.clientY - rect.top);
     }
 }
 

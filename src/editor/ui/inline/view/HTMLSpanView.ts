@@ -2,6 +2,7 @@ import {Editor} from "../../../Editor";
 import {HTMLView} from "./HTMLView";
 import {HTMLViewUtils} from "./HTMLViewUtils";
 import {HTMLUtils} from "../../../utils/HTMLUtils";
+import {TextAttributeKey} from "../../highlighter/style/TextAttributeKey";
 
 /**
  * Represents multiple inline span HTML elements in the editor UI linked together as a single view.
@@ -26,11 +27,6 @@ export class HTMLSpanView implements HTMLView {
     }
 
     getElementsAt(x: int, y: int): HTMLElement[] {
-        switch(1) {
-            case 1:
-                console.log(2);
-        }
-
         return this.elements.filter(e => HTMLUtils.isInBound(e, x, y, 15));
     }
 
@@ -98,6 +94,12 @@ export class HTMLSpanView implements HTMLView {
 
     getCommonStylesheet(): CSSStyleDeclaration {
         return this.stylesheet;
+    }
+
+    applyTextAttributes(attributes: TextAttributeKey) {
+        for (const element of this.elements) {
+            attributes.applyStyle(element);
+        }
     }
 
     getAssociatedElements(): HTMLElement[] {

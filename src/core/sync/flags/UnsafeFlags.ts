@@ -7,5 +7,5 @@
 export enum UnsafeFlags {
     FILE_SAVE = 1,
     FILE_SYNC = 2,
-    PERSISTENCE = 4,
+    PERSISTENCE = 4
 }

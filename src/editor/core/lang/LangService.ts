@@ -31,6 +31,8 @@ export class LangService {
 
     private synFile: SynFile;
 
+    private isSynTreeClean: boolean = false;
+
     constructor(private editor: Editor) {
         editor.getEventBus().subscribe(this, DocumentModificationEvent.SUBSCRIBER, this.onDocumentChange);
     }
@@ -95,6 +97,8 @@ export class LangService {
     }
 
     private scheduleParsing(document: Document) {
+        this.isSynTreeClean = false;
+
         Scheduler.debounce(() => {
             const start = performance.now();
             const builder = new ASTBuilder(
@@ -111,7 +115,12 @@ export class LangService {
             //     + (performance.now() - start) + "ms");
             this.synFile = builder.close();
 
+            this.isSynTreeClean = true;
             this.editor.getEventBus().syncPublish(new SynTreeChangedEvent(this.editor, this.synFile, this.currentLanguage!));
         }, 10 * Math.log(this.editor.getOpenedDocument().getTotalDocumentLength()));
+    }
+
+    isSynTreeDirty() {
+        return !this.isSynTreeClean;
     }
 }

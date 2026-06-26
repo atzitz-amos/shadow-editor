@@ -17,5 +17,4 @@ export class TextBackground implements TextAttributeBase {
     apply(element: HTMLElement): void {
         element.style.background = this.background;
     }
-
 }

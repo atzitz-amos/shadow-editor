@@ -9,9 +9,10 @@ import {WorkspaceFile} from "../workspace/filesystem/tree/WorkspaceFile";
 import {InspectionBase} from "./inspections/Inspection";
 import {InspectionEngine} from "./inspections/InspectionEngine";
 import {ExtensionPoint} from "../plugins/extensionPoints/ExtensionPoint";
-import {SmartInlineInsertAction} from "./smart/SmartInlineInsertAction";
-import {SmartInlineDeleteAction} from "./smart/SmartInlineDeleteAction";
-import {ActionManager} from "../actions/ActionManager";
+import {SmartInlineInsertAction} from "./smart/insert/SmartInlineInsertAction";
+import {SmartInlineDeleteAction} from "./smart/delete/SmartInlineDeleteAction";
+import {SmartInlineHighlight} from "./smart/highlight/SmartInlineHighlight";
+import {TokenHoverAction} from "./tokenhover/TokenHoverAction";
 
 export class LangSupport {
     private static instance: LangSupport;
@@ -22,6 +23,9 @@ export class LangSupport {
 
     private static readonly smartInsertEP: ExtensionPoint<SmartInlineInsertAction> = new ExtensionPoint("smart", SmartInlineInsertAction);
     private static readonly smartDeleteEP: ExtensionPoint<SmartInlineDeleteAction> = new ExtensionPoint("smart", SmartInlineDeleteAction);
+    private static readonly smartHighlightEP: ExtensionPoint<SmartInlineHighlight> = new ExtensionPoint("smart", SmartInlineHighlight);
+
+    private static readonly tokenHoverEP: ExtensionPoint<TokenHoverAction> = new ExtensionPoint("tokenhover", TokenHoverAction);
 
     constructor() {
     }
@@ -65,6 +69,14 @@ export class LangSupport {
 
     getAllSmartDeleteActions(language: LanguageBase): SmartInlineDeleteAction[] {
         return LangSupport.smartDeleteEP.getAll().filter(action => action.getApplicableLanguages().includes(language));
+    }
+
+    getAllSmartHighlights(language: LanguageBase): SmartInlineHighlight[] {
+        return LangSupport.smartHighlightEP.getAll().filter(action => action.getApplicableLanguages().includes(language));
+    }
+
+    getAllTokenHoverActions(language: LanguageBase): TokenHoverAction[] {
+        return LangSupport.tokenHoverEP.getAll().filter(action => action.getApplicableLanguages().includes(language));
     }
 
     getFileTypeHandler(file: WorkspaceFile): FileTypeHandler | null {

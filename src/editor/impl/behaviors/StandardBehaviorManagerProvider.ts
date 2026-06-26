@@ -1,6 +1,7 @@
 import {BehaviorManager} from "../../core/behaviors/manager/BehaviorManager";
 import {StandardLanguageLayer} from "./lang/StandardLanguageLayer";
 import {StandardBehaviorsLayer} from "./StandardBehaviorsLayer";
+import {Editor} from "../../Editor";
 
 /**
  *

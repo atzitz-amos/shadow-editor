@@ -25,7 +25,7 @@ export class ASTViewerWidget extends UIComponent {
 
     private collapsedNodes: Set<string> = new Set();
 
-    private isFollowing: boolean = false;
+    private followingElement: HTMLElement | null;
 
     constructor() {
         super(HTMLUtils.createDiv("ast-viewer-widget"));
@@ -33,7 +33,6 @@ export class ASTViewerWidget extends UIComponent {
 
     public onCaretMoved(offset: Offset) {
         if (!this.editor || !this.synFile) return;
-        if (!this.isFollowing) return;
         const root = this.getChildren()[0] as SynTreeNode;
 
         let node = root.getNode();
@@ -60,10 +59,7 @@ export class ASTViewerWidget extends UIComponent {
         }
 
         // Scroll to the corresponding node in the AST viewer
-        const element = tree.getUnderlyingElement();
-        if (element) {
-            element.scrollIntoView({behavior: "smooth", block: "center"});
-        }
+        this.followingElement = tree.getUnderlyingElement();
     }
 
     public draw(): void {
@@ -85,11 +81,9 @@ export class ASTViewerWidget extends UIComponent {
         `;
 
         header.querySelector(".ast-viewer-toggle-follow")?.addEventListener("click", () => {
-            this.isFollowing = !this.isFollowing;
-            if (this.isFollowing) {
-                header.querySelector(".ast-viewer-toggle-follow")?.classList.add("is-active");
-            } else {
-                header.querySelector(".ast-viewer-toggle-follow")?.classList.remove("is-active");
+            if (this.followingElement) {
+                this.followingElement.scrollIntoView({behavior: "smooth", block: "center"});
+                this.followingElement.style.border = "1px solid red";
             }
         });
 

@@ -1,5 +1,6 @@
 import {Editor} from "../../../Editor";
 import {Component} from "../../../core/components/Component";
+import {TextAttributeKey} from "../../highlighter/style/TextAttributeKey";
 
 /**
  * A proxy between an {@link Component} and it's associated {@link HTMLElement}
@@ -35,6 +36,8 @@ export interface HTMLView {
     getParentElement(): HTMLElement | null;
 
     getCommonStylesheet(): CSSStyleDeclaration;
+
+    applyTextAttributes(attributes: TextAttributeKey): void;
 
     isInBound(x: number, y: number, delta?: number): boolean;
 

@@ -77,7 +77,6 @@ export class ViewPainter {
 
         for (const overlay of overlays) {
             const range = overlay.getRange();
-            if (!range.isValid()) continue;
 
             const spans: HTMLSpanElement[] = [];
 

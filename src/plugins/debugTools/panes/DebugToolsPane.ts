@@ -28,13 +28,11 @@ export default class DebugToolsPane extends AbstractPane {
     }
 
     onHide() {
-        console.log("Remove");
         GlobalState.getMainEventBus().unsubscribe(this, SynTreeChangedEvent.SUBSCRIBER);
         GlobalState.getMainEventBus().unsubscribe(this, CaretMovedEvent.SUBSCRIBER);
     }
 
     protected onShow() {
-        console.log("Show")
         if (GlobalState.getMainEditor() !== null) {
             (this.getComponent() as DebugToolsPaneComponent).onSynTreeChanged(
                 GlobalState.getMainEditor(),

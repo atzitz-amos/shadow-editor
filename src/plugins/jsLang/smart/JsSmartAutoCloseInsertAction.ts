@@ -1,5 +1,5 @@
 import {LanguageBase} from "../../../core/lang/LanguageBase";
-import {SmartAutoCloseInsertAction} from "../../../core/lang/smart/SmartAutoCloseAction";
+import {SmartAutoCloseInsertAction} from "../../../core/lang/smart/insert/SmartAutoCloseAction";
 import JsLang from "../lang/JsLang";
 
 /**
@@ -24,6 +24,6 @@ export default class JsSmartAutoCloseInsertAction extends SmartAutoCloseInsertAc
     }
 
     shouldAutoClose(char: string, closeChar: string, trailingChar: string): boolean {
-        return trailingChar !== closeChar && /^[\s,.;:!?)]*$/.test(trailingChar);
+        return trailingChar !== closeChar && /^[\s,.;:)]*$/.test(trailingChar);
     }
 }

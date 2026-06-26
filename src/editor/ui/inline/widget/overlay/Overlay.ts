@@ -2,6 +2,7 @@ import {OverlayEvent} from "./OverlayEvent";
 import {TextRange} from "../../../../core/coordinate/range/TextRange";
 import {HTMLView} from "../../view/HTMLView";
 import {Editor} from "../../../../Editor";
+import {TextAttributeKey} from "../../../highlighter/style/TextAttributeKey";
 
 /**
  * A wrapper around an HTMLSpanView that represents an overlay in the editor.
@@ -30,7 +31,13 @@ export class Overlay {
         return this.range;
     }
 
-    public style(styles: Record<any, any>): void {
+    public style(attributes: TextAttributeKey): void;
+    public style(styles: Record<any, any>): void;
+    public style(styles: Record<any, any> | TextAttributeKey): void {
+        if (styles instanceof TextAttributeKey) {
+            this.view.applyTextAttributes(styles);
+            return;
+        }
         const stylesheet = this.view.getCommonStylesheet();
         for (const key in styles) {
             if (styles.hasOwnProperty(key)) {
@@ -57,6 +64,6 @@ export class Overlay {
         });
     }
 
-    public dispose(): void {
+    public cleanupEvents(): void {
     }
 }

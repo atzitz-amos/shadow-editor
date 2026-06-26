@@ -1,6 +1,6 @@
-import {EditorCharTypedContext} from "../../../editor/core/behaviors/context/EditorCharTypedContext";
-import {BehaviorHandlingMode} from "../../../editor/core/behaviors/manager/BehaviorHandlingMode";
-import {LanguageBase} from "../LanguageBase";
+import {EditorCharTypedContext} from "../../../../editor/core/behaviors/context/EditorCharTypedContext";
+import {BehaviorHandlingMode} from "../../../../editor/core/behaviors/manager/BehaviorHandlingMode";
+import {LanguageBase} from "../../LanguageBase";
 import {SmartInlineInsertAction} from "./SmartInlineInsertAction";
 
 /**

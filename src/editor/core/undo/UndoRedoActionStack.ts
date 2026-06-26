@@ -128,7 +128,6 @@ export class UndoRedoActionStack {
             if (node.action) actions.push(node.action);
             node = node.prev;
         }
-        console.log(actions.reverse());
     }
 
     onReplaced(caret: Caret, old: Offset, range: TextRange, oldText: string, newText: string) {

@@ -1,5 +1,5 @@
 import {LanguageBase} from "../../../core/lang/LanguageBase";
-import {SmartSkipSecondCloseableCharAction} from "../../../core/lang/smart/SmartSkipSecondCloseableCharAction";
+import {SmartSkipSecondCloseableCharAction} from "../../../core/lang/smart/insert/SmartSkipSecondCloseableCharAction";
 import JsLang from "../lang/JsLang";
 
 /**

@@ -22,6 +22,7 @@ import {
     KeyPressedEvent,
     KeyReleasedEvent,
     KeyTypedEvent,
+    MouseMovedEvent,
     MousePressedEvent,
     MouseReleasedEvent
 } from "./impl/events/PhysicalEvents";
@@ -247,6 +248,10 @@ export class Editor {
         return this.coordinateMapper.xyToLogical(new XYPoint(x, y));
     }
 
+    public xyToExactOffset(xy: XYPoint) {
+        return this.coordinateMapper.xyToExactOffset(xy);
+    }
+
     public yToLine(y: number): number {
         return this.coordinateMapper.yToLine(y);
     }
@@ -396,6 +401,8 @@ export class Editor {
     }
 
     onMouseMove(event: MouseEvent) {
+        if (!this.eventBus.publishCancellable(new MouseMovedEvent(this, event))) return;
+
         if (ModifierKeyHolder.isMouseDown()) {
             ModifierKeyHolder.getInstance().setIsDragging(true);
             this.moveCaretToMouseEvent(event);

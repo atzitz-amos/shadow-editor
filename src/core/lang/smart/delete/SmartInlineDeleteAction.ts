@@ -1,6 +1,6 @@
-import {LanguageBase} from "../LanguageBase";
-import {EditorDeleteContext} from "../../../editor/core/behaviors/context/EditorDeleteContext";
-import {BehaviorHandlingMode} from "../../../editor/core/behaviors/manager/BehaviorHandlingMode";
+import {LanguageBase} from "../../LanguageBase";
+import {EditorDeleteContext} from "../../../../editor/core/behaviors/context/EditorDeleteContext";
+import {BehaviorHandlingMode} from "../../../../editor/core/behaviors/manager/BehaviorHandlingMode";
 
 /**
  *

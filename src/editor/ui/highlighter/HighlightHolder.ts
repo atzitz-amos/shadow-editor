@@ -7,9 +7,12 @@ import {TextAttributeKey} from "./style/TextAttributeKey";
 import {TextRange} from "../../core/coordinate/range/TextRange";
 import {Editor} from "../../Editor";
 import {Fragment} from "../../core/components/fragments/Fragment";
+import {OverlayWidget} from "../inline/widget/overlay/OverlayWidget";
 
 export class HighlightHolder {
     private fragments: Fragment[] = [];
+
+    private overlays: OverlayWidget[] = [];
 
     constructor(private editor: Editor) {
     }
@@ -18,12 +21,18 @@ export class HighlightHolder {
         this.fragments.push(new Fragment(range, attributes, classNames ?? []));
     }
 
+    addOverlay(widget: OverlayWidget) {
+        this.overlays.push(widget);
+    }
+
     clear() {
         this.fragments = [];
+        this.overlays = [];
     }
 
     clearRange(range: TextRange) {
         const next: Fragment[] = [];
+        const nextOverlays: OverlayWidget[] = []
 
         for (const fragment of this.fragments) {
             const fragmentRange = fragment.getRange();
@@ -56,7 +65,16 @@ export class HighlightHolder {
             }
         }
 
+        for (const overlay of this.overlays) {
+            if (overlay.getRange().intersects(range)) {
+                overlay.destroy(this.editor);
+            } else {
+                nextOverlays.push(overlay);
+            }
+        }
+
         this.fragments = next;
+        this.overlays = nextOverlays;
     }
 
     toFragments(): Fragment[] {

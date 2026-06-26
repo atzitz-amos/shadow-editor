@@ -150,6 +150,48 @@ export class EditorCoordinateMapper {
         return this.visualToLogical(this.xyToNearestVisual(point));
     }
 
+    /**
+     * Convert an XY point to an exact offset or null if the point is outside the bounds of the editor
+     */
+    xyToExactOffset(point: XYPoint): Offset | null {
+        const charSize = this.view.getCharSize();
+        const lineHeight = this.view.getLineHeight();
+
+        const scrollXChars = this.view.scroll.scrollXOffset === 0 ? this.view.scroll.scrollXChars : this.view.scroll.scrollXChars - 1;
+        const scrollYLines = this.view.scroll.scrollYOffset === 0 ? this.view.scroll.scrollYLines : this.view.scroll.scrollYLines - 1;
+
+        let visualX = Math.round((point.x + this.view.scroll.scrollXOffset) / charSize) + scrollXChars;
+        let visualY = Math.floor((point.y + this.view.scroll.scrollYOffset) / lineHeight) + scrollYLines;
+
+        const document = this.editor.getOpenedDocument();
+
+        if (visualY < 0 || visualY >= document.getLineCount()) return null;
+
+        const inlays = this.inlayManager.getInlays();
+        const lineStart = document.getLineData(visualY).getStart();
+
+        let logicalDelta = 0;
+
+        for (let inlay of inlays) {
+            if (inlay.offset >= lineStart && inlay.offset < lineStart + visualX) {
+                const inlayVisual = this.offsetToVisual(inlay.offset);
+                const inlayXY = this.visualToXY(inlayVisual);
+                if (point.x > inlayXY.x && point.x < inlayXY.x + inlay.width / 2) {
+                    return inlay.offset;
+                }
+
+                visualX = Math.round((point.x + this.view.scroll.scrollXOffset - inlay.width) / charSize) + scrollXChars;
+                visualX = Math.max(inlay.offset - lineStart + logicalDelta, visualX);
+
+                logicalDelta += inlay.deltaOffset;
+            }
+        }
+
+        if (visualX < 0 || visualX > document.getLineLength(visualY)) return null;
+
+        return this.visualToOffset(new VisualPosition(visualX + logicalDelta, visualY));
+    }
+
     yToLine(y: number) {
         const lineHeight = this.view.getLineHeight();
         const scrollYLines = this.view.scroll.scrollYOffset === 0 ? this.view.scroll.scrollYLines : this.view.scroll.scrollYLines - 1;
