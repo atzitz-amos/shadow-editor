@@ -4,13 +4,37 @@
 
 A complete editor written from scratch in TypeScript supporting text highlighting, AST parsers, and more.
 
+<p align="center">
+  <img src="./docs/assets/screenshot_ide.png" alt="Shadow Editor" width="900"/>
+</p>
+
 This file aims at providing with the basic functionality
 and installation features. In case you are interested by plugin development, you can check
-out [DOCUMENTATION.md](/DOCUMENTATION.md).  
+out [DOCUMENTATION.md](/docs/DOCUMENTATION.md).  
 <br>
 > [!NOTE]
 > This project is still under developpment and hence doesn't provide a release bundle. The only way to use this project
 > for now is to download the source code directly.
+
+***
+
+## Features
+
+### AST Viewer
+
+Shadow Editor ships with a built-in AST viewer, letting you inspect the parse tree of any open document in real time alongside the editor.
+
+<p align="center">
+  <img src="./docs/assets/screenshot_ast_tree.png" alt="AST Viewer panel showing a parsed JavaScript file" width="900"/>
+</p>
+
+### Inspections
+
+The editor continuously analyses your code and surfaces diagnostics inline — warnings, errors, and hints appear directly at the relevant location without interrupting your flow.
+
+<p align="center">
+  <img src="./docs/assets/screenshot_inspections.png" alt="Inline inspection showing a switch case fall-through warning" width="900"/>
+</p>
 
 ***
 
@@ -74,7 +98,7 @@ if (!app) {
 
 The Shadow Editor is extremely configurable by using Plugins. Plugins can be used for a wide variety of purposes, such
 as adding support for new languages, providing with new actions, or even modifying the user interface. You can check
-out [DOCUMENTATION.md](/DOCUMENTATION.md) for more details about plugin development. However, here
+out [DOCUMENTATION.md](/docs/DOCUMENTATION.md) for more details about plugin development. However, here
 are some examples of how to use plugins in your application:
 
 ### Enabling

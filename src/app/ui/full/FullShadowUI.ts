@@ -9,6 +9,8 @@ import {UIResizeEvent} from "../../core/events/UIResizeEvent";
 import {Editor} from "../../../editor/Editor";
 import {UICommonKeys} from "../../core/UICommonKeys";
 import {IdePopup} from "../../../core/ui/lib/popup/IdePopup";
+import {UIHooks} from "../../../core/ui/engine/listeners/hooks/UIHooks";
+import {UICommonHooks} from "../../core/UICommonHooks";
 
 
 /**
@@ -47,6 +49,10 @@ export class FullShadowUI implements ShadowUI {
             if (event.key === "Escape") {
                 this.cancelPopup();
             }
+        });
+
+        document.addEventListener("focusin", e => {
+            UIHooks.trigger(UICommonHooks.FOCUS_CHANGE, e.relatedTarget, e.target);
         });
     }
 

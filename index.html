@@ -59,6 +59,7 @@
             import {SynSuiteWindowRenderer} from "./src/core/lang/suite/renderer/SynSuiteWindowRenderer";
             import {PopupUtilsCore} from "./src/core/ui/lib/popup/PopupUtilsCore";
             import {FaIcon} from "./src/core/ui/icons/FaIcon";
+            import {ProjectFilesPaneHelper} from "./src/app/ui/full/panes/projectFiles/ProjectFilesPaneHelper";
 
             window.FaIcon = FaIcon;
             window.SimpleTooltipPopup = SimpleTooltipPopup;
@@ -67,6 +68,9 @@
             window.AbstractSynTemplate = JsSynTemplate;
             window.SynSuiteRender = SynSuiteWindowRenderer;
             window.SynModTree = SynModificationTree;
+
+            window.ProjectFilesPaneHelper = ProjectFilesPaneHelper;
+
             console.log(SerializationUtils.getSerializableClassName(SettingBase))
 
             // Main entry point - launch the app and wait for startup to complete

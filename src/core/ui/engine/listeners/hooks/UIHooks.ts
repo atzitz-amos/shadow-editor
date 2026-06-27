@@ -1,5 +1,6 @@
 import {UIHook} from "./UIHook";
 import {UIListenersManager} from "../UIListenersManager";
+import {UIComponent} from "../../components/UIComponent";
 
 /**
  *
@@ -20,7 +21,7 @@ export class UIHooks {
             if (context.private) {
                 throw new Error("@UIHooks.react cannot be used on private methods.");
             }
-    
+
             if (Array.isArray(hook)) {
                 for (const h of hook) {
                     doAddHook(h);
@@ -37,6 +38,23 @@ export class UIHooks {
                     );
                 });
             }
+        };
+    }
+
+    public static redrawOn(...hooks: UIHook<any>[]) {
+        return <T extends new (...args: any[]) => UIComponent>(
+            value: T,
+            _context: ClassDecoratorContext
+        ): T => {
+            // @ts-ignore
+            return class extends value {
+                constructor(...args: any[]) {
+                    super(...args);
+                    for (const h of hooks) {
+                        UIHooks.on(h, this, this.redraw.bind(this));
+                    }
+                }
+            } as unknown as T;
         };
     }
 

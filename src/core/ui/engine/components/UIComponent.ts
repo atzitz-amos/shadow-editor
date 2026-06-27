@@ -64,6 +64,18 @@ export abstract class UIComponent implements Drawable, Disposable {
         return null;
     }
 
+    public queryChildSelector(selector: string): UIComponent | null {
+        if (this.getUnderlyingElement().querySelector(selector) !== null) {
+            return this;
+        }
+        for (const child of this.children) {
+            if (child.queryChildSelector(selector)) {
+                return child;
+            }
+        }
+        return null;
+    }
+
     public addChild(child: UIComponent): void {
         this.children.push(child);
         child.mount(this);
@@ -147,6 +159,10 @@ export abstract class UIComponent implements Drawable, Disposable {
 
     public getUnderlyingElement(): HTMLElement {
         return this.element;
+    }
+
+    public hasFocus() {
+        return document.activeElement === this.getUnderlyingElement() || this.getUnderlyingElement().contains(document.activeElement);
     }
 
     protected addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void {

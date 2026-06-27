@@ -1,7 +1,7 @@
-import {UIComponent} from "../../../../../core/ui/engine/components/UIComponent";
-import {HTMLUtils} from "../../../../../editor/utils/HTMLUtils";
-import {Workspace} from "../../../../../core/workspace/Workspace";
-import {ActiveWorkspaceHelper} from "../../../../../core/global/ActiveWorkspaceHelper";
+import {UIComponent} from "../../../../../../core/ui/engine/components/UIComponent";
+import {HTMLUtils} from "../../../../../../editor/utils/HTMLUtils";
+import {Workspace} from "../../../../../../core/workspace/Workspace";
+import {ActiveWorkspaceHelper} from "../../../../../../core/global/ActiveWorkspaceHelper";
 import {ProjectFilesTreeDirectory} from "./ProjectFilesTreeDirectory";
 
 /**

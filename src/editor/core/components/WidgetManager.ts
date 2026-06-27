@@ -124,10 +124,6 @@ export class WidgetManager {
         this.overlays = newOverlays;
     }
 
-    removeOverlay(overlay: OverlayWidget) {
-
-    }
-
     private cleanupStaleOverlays() {
         let newOverlays: OverlayWidget[] = [];
         for (let overlay of this.overlays) {

@@ -1,6 +1,6 @@
 import {WorkspaceDirectory} from "./tree/WorkspaceDirectory";
 import {RelativePath, RelativePathInput} from "./path/RelativePath";
-import {NodeEntry} from "./tree/NodeEntry";
+import {FSNodeEntry} from "./tree/FSNodeEntry";
 import {WorkspaceFile} from "./tree/WorkspaceFile";
 import {FSImpl} from "./impl/FSImpl";
 import {MetadataStore} from "./metadata/MetadataStore";
@@ -28,7 +28,7 @@ export class WorkspaceFS {
      * This avoids repeated wrapper allocations and repeated handle lookups for hot paths
      * (e.g. frequent getEntry/exists calls from UI).
      */
-    private readonly childrenCache: Map<FileSystemDirectoryHandle, Map<string, NodeEntry>> = new Map();
+    private readonly childrenCache: Map<FileSystemDirectoryHandle, Map<string, FSNodeEntry>> = new Map();
 
     constructor(name: string, virtualHandle: FileSystemDirectoryHandle) {
         this.virtualHandle = virtualHandle;
@@ -77,7 +77,7 @@ export class WorkspaceFS {
         return this.getOrCreateChild(arg, name, handle) as WorkspaceFile;
     }
 
-    async getEntry(path: RelativePathInput): Promise<NodeEntry> {
+    async getEntry(path: RelativePathInput): Promise<FSNodeEntry> {
         const rp = RelativePath.of(path);
         if (rp.isEmpty()) {
             return this.getRoot();
@@ -163,11 +163,11 @@ export class WorkspaceFS {
         return node as WorkspaceFile;
     }
 
-    async exists(entry: NodeEntry): Promise<boolean>;
+    async exists(entry: FSNodeEntry): Promise<boolean>;
 
     async exists(path: RelativePathInput): Promise<boolean>;
 
-    async exists(arg: NodeEntry | RelativePathInput): Promise<boolean> {
+    async exists(arg: FSNodeEntry | RelativePathInput): Promise<boolean> {
         if (typeof arg === "string" || Array.isArray(arg) || arg instanceof RelativePath) {
             const rp = RelativePath.of(arg as RelativePathInput);
             if (rp.isEmpty()) {
@@ -220,7 +220,7 @@ export class WorkspaceFS {
         }
 
         // NodeEntry overload: check by parent + name (root always exists).
-        const entry = arg as NodeEntry;
+        const entry = arg as FSNodeEntry;
         const parent = entry.getParent();
         if (!parent) return true;
 
@@ -244,11 +244,11 @@ export class WorkspaceFS {
         }
     }
 
-    async isFile(entry: NodeEntry): Promise<boolean>;
+    async isFile(entry: FSNodeEntry): Promise<boolean>;
 
     async isFile(path: RelativePathInput): Promise<boolean>;
 
-    async isFile(arg: NodeEntry | RelativePathInput): Promise<boolean> {
+    async isFile(arg: FSNodeEntry | RelativePathInput): Promise<boolean> {
         if (typeof arg === "string" || Array.isArray(arg) || arg instanceof RelativePath) {
             const entry = await this.getEntry(arg);
             return entry instanceof WorkspaceFile;
@@ -256,11 +256,11 @@ export class WorkspaceFS {
         return arg instanceof WorkspaceFile;
     }
 
-    async isDirectory(entry: NodeEntry): Promise<boolean>;
+    async isDirectory(entry: FSNodeEntry): Promise<boolean>;
 
     async isDirectory(path: RelativePathInput): Promise<boolean>;
 
-    async isDirectory(arg: NodeEntry | RelativePathInput): Promise<boolean> {
+    async isDirectory(arg: FSNodeEntry | RelativePathInput): Promise<boolean> {
         if (typeof arg === "string" || Array.isArray(arg) || arg instanceof RelativePath) {
             const entry = await this.getEntry(arg);
             return entry instanceof WorkspaceDirectory;
@@ -268,11 +268,11 @@ export class WorkspaceFS {
         return arg instanceof WorkspaceDirectory;
     }
 
-    async deleteEntry(entry: NodeEntry): Promise<void>;
+    async deleteEntry(entry: FSNodeEntry): Promise<void>;
 
     async deleteEntry(path: RelativePathInput): Promise<void>;
 
-    async deleteEntry(arg: NodeEntry | RelativePathInput): Promise<void> {
+    async deleteEntry(arg: FSNodeEntry | RelativePathInput): Promise<void> {
         if (typeof arg === "string" || Array.isArray(arg) || arg instanceof RelativePath) {
             arg = await this.getEntry(arg);
         }
@@ -286,11 +286,11 @@ export class WorkspaceFS {
         this.invalidateChild(parent.getHandle(), arg.getHandle().name);
     }
 
-    async renameEntry(entry: NodeEntry, newName: string): Promise<NodeEntry>;
+    async renameEntry(entry: FSNodeEntry, newName: string): Promise<FSNodeEntry>;
 
-    async renameEntry(path: RelativePathInput, newName: string): Promise<NodeEntry>;
+    async renameEntry(path: RelativePathInput, newName: string): Promise<FSNodeEntry>;
 
-    async renameEntry(arg: NodeEntry | RelativePathInput, newName: string): Promise<NodeEntry> {
+    async renameEntry(arg: FSNodeEntry | RelativePathInput, newName: string): Promise<FSNodeEntry> {
         if (typeof arg === "string" || Array.isArray(arg) || arg instanceof RelativePath) {
             arg = await this.getEntry(arg);
         }
@@ -381,8 +381,8 @@ export class WorkspaceFS {
         return this.metadataStore.getMetadata(arg.getPath());
     }
 
-    async getChildren(parent: WorkspaceDirectory): Promise<NodeEntry[]> {
-        const entries: NodeEntry[] = [];
+    async getChildren(parent: WorkspaceDirectory): Promise<FSNodeEntry[]> {
+        const entries: FSNodeEntry[] = [];
         const handle = parent.getHandle();
         for await (const [name, childHandle] of handle.entries()) {
             entries.push(this.getOrCreateChild(parent, name, childHandle));
@@ -390,7 +390,7 @@ export class WorkspaceFS {
         return entries;
     }
 
-    private getOrCreateChild(parent: WorkspaceDirectory, name: string, handle: FileSystemHandle): NodeEntry {
+    private getOrCreateChild(parent: WorkspaceDirectory, name: string, handle: FileSystemHandle): FSNodeEntry {
         const parentHandle = parent.getHandle();
         const cached = this.getCachedChild(parentHandle, name);
         if (cached) {
@@ -401,7 +401,7 @@ export class WorkspaceFS {
             }
         }
 
-        let entry: NodeEntry;
+        let entry: FSNodeEntry;
         if (handle.kind === "directory") {
             entry = new WorkspaceDirectory(this, name, parent, handle as FileSystemDirectoryHandle);
         } else {
@@ -411,11 +411,11 @@ export class WorkspaceFS {
         return entry;
     }
 
-    private getCachedChild(parentHandle: FileSystemDirectoryHandle, name: string): NodeEntry | undefined {
+    private getCachedChild(parentHandle: FileSystemDirectoryHandle, name: string): FSNodeEntry | undefined {
         return this.childrenCache.get(parentHandle)?.get(name);
     }
 
-    private cacheChild(parentHandle: FileSystemDirectoryHandle, name: string, entry: NodeEntry): void {
+    private cacheChild(parentHandle: FileSystemDirectoryHandle, name: string, entry: FSNodeEntry): void {
         let map = this.childrenCache.get(parentHandle);
         if (!map) {
             map = new Map();

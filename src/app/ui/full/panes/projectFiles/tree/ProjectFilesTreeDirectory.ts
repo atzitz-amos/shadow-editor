@@ -1,8 +1,12 @@
-import {UIComponent} from "../../../../../core/ui/engine/components/UIComponent";
-import {HTMLUtils} from "../../../../../editor/utils/HTMLUtils";
-import {NodeEntry} from "../../../../../core/workspace/filesystem/tree/NodeEntry";
+import {UIComponent} from "../../../../../../core/ui/engine/components/UIComponent";
+import {HTMLUtils} from "../../../../../../editor/utils/HTMLUtils";
+import {FSNodeEntry} from "../../../../../../core/workspace/filesystem/tree/FSNodeEntry";
 import {ProjectFilesTreeItem} from "./ProjectFilesTreeItem";
-import {WorkspaceDirectory} from "../../../../../core/workspace/filesystem/tree/WorkspaceDirectory";
+import {WorkspaceDirectory} from "../../../../../../core/workspace/filesystem/tree/WorkspaceDirectory";
+import {ProjectFilesTreeNode} from "./ProjectFilesTreeNode";
+import {UIHooks} from "../../../../../../core/ui/engine/listeners/hooks/UIHooks";
+import {WorkspaceHooks} from "../../../../../core/UICommonHooks";
+import {ProjectFilesPaneHelper} from "../ProjectFilesPaneHelper";
 
 /**
  *
@@ -10,11 +14,11 @@ import {WorkspaceDirectory} from "../../../../../core/workspace/filesystem/tree/
  * @date 4/29/2026
  * @since 1.0.0
  */
-export class ProjectFilesTreeDirectory extends UIComponent {
+export class ProjectFilesTreeDirectory extends UIComponent implements ProjectFilesTreeNode {
     isLoaded: boolean = false;
     private readonly depth: number;
     private readonly directory: WorkspaceDirectory;
-    private entries: NodeEntry[] = [];
+    private entries: FSNodeEntry[] = [];
     private isExpanded: boolean = true;
 
     constructor(root: HTMLElement, directory: WorkspaceDirectory, depth: number) {
@@ -23,20 +27,29 @@ export class ProjectFilesTreeDirectory extends UIComponent {
         this.directory = directory;
     }
 
+    getEntry(): FSNodeEntry {
+        return this.directory;
+    }
+
+    getDepth(): number {
+        return this.depth;
+    }
+
     public setExpanded(expanded: boolean) {
         if (this.isExpanded !== expanded) {
             this.isExpanded = expanded;
             this.updateExpanded();
-
         }
     }
 
     public setSelected() {
         document.querySelector(".tree-item-file-header.selected, .tree-item-header.selected")?.classList.remove("selected");
         this.getUnderlyingElement().querySelector(".tree-item-header")?.classList.add("selected");
+
+        ProjectFilesPaneHelper.setSelected(this);
     }
 
-    public setEntries(entries: NodeEntry[]) {
+    public setEntries(entries: FSNodeEntry[]) {
         this.entries = entries;
         this.entries.sort((a, b) => {
             if (a.isDirectory() && !b.isDirectory()) {
@@ -83,7 +96,7 @@ export class ProjectFilesTreeDirectory extends UIComponent {
                 directory.load();
                 this.addChild(directory);
             } else if (entry.isFile()) {
-                this.addChild(new ProjectFilesTreeItem(childrenContainer, entry.getPath(), entry.getURI(), this.depth + 1));
+                this.addChild(new ProjectFilesTreeItem(childrenContainer, entry, this.depth + 1));
             }
         }
 

@@ -74,11 +74,16 @@ export default class MyPlugin extends EditorPlugin {
 #### Extension Points
 The editor functionalities can be extended using extension points. Here is a table of some of the most common extension points:
 
-| Extension Point | Description                                  |
-|:----------------|:---------------------------------------------|
-| `lang`          | Add support for a new language               |
-| `action`        | Add a new action to the editor               |
-| `startupPhase`  | Add a new startup phase to the loading cycle |
+| Extension Point | Description                                                          |
+|:----------------|:---------------------------------------------------------------------|
+| `lang`          | Add support for a new language                                       |
+| `inspections`   | Adds inline inspections                                              |
+| `smart`         | Adds SmartInlineActions, as for instance auto close open parenthesis |
+| `tokenhover`    | Adds an action when the user hovers a specific token in the editor   |
+| `action`        | Add a new action to the editor                                       |
+| `pane`          | Adds a new pane to the editor                                        |
+| `styles`        | Adds a custom stylesheet to the editor                               |
+| `startupPhase`  | Add a new startup phase to the loading cycle                         |
 
 To register an extension points, just create a folder with the name of the extension point in your plugin directory.
 Each extension point has its own format for the extension definition. 

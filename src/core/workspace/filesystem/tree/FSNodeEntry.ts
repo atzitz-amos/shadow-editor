@@ -8,7 +8,7 @@ import {WorkspaceFile} from "./WorkspaceFile";
  * @date 3/17/2026
  * @since 1.0.0
  */
-export interface NodeEntry {
+export interface FSNodeEntry {
     getHandle(): FileSystemHandle;
 
     getParent(): WorkspaceDirectory | null;

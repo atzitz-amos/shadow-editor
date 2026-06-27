@@ -31,5 +31,4 @@ export class ProjectFilesPane extends AbstractPane {
     protected getPreferredDockPosition(): PaneDockPosition {
         return PaneDockPosition.LEFT;
     }
-
 }

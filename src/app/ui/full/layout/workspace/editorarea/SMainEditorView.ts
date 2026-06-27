@@ -69,6 +69,7 @@ export class SMainEditorView extends UIComponent {
             } else {
                 this.currentEditor.changeDocument(this.currentTab.getDocument());
             }
+            this.currentEditor.getView().focus();
 
             if (!this.getChildren().includes(this.metaRowView)) {
                 this.addChildBefore(this.metaRowView, this.editorElement);

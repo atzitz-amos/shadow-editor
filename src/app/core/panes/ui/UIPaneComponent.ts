@@ -15,6 +15,8 @@ import {PaneHooks} from "../../UICommonHooks";
 export abstract class UIPaneComponent extends UIComponent {
     constructor(private readonly pane: IPane) {
         super(HTMLUtils.createElement(`div#pane-id-${pane.getId()}.pane-component.pane-component-${pane.getDockPosition()}`));
+
+        this.getUnderlyingElement().setAttribute("tabindex", "0")
     }
 
     protected onPaneShown(): void {

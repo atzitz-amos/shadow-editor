@@ -80,6 +80,16 @@ export class PaneManager {
         return Array.from(this.panes.values());
     }
 
+    getByClass<T extends IPane>(cls: Class<T>): T[] {
+        const result: T[] = [];
+        for (const pane of this.panes.values()) {
+            if (pane instanceof cls) {
+                result.push(pane as T);
+            }
+        }
+        return result;
+    }
+
     togglePane(id: string) {
         const pane = this.panes.get(id)!;
         if (pane.isActive()) this.hide(pane);

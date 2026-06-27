@@ -1,5 +1,5 @@
 import {UIPaneComponent} from "../../../../core/panes/ui/UIPaneComponent";
-import {ProjectFilesTree} from "./ProjectFilesTree";
+import {ProjectFilesTree} from "./tree/ProjectFilesTree";
 import {IPane} from "../../../../core/panes/pane/IPane";
 
 /**

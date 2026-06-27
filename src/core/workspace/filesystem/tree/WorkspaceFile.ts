@@ -1,4 +1,4 @@
-import {NodeEntry} from "./NodeEntry";
+import {FSNodeEntry} from "./FSNodeEntry";
 import {WorkspaceDirectory} from "./WorkspaceDirectory";
 import {WorkspaceFS} from "../WorkspaceFS";
 import {RelativePath} from "../path/RelativePath";
@@ -11,7 +11,7 @@ import {URITargetType} from "../../../uri/URITargetType";
  * @date 3/17/2026
  * @since 1.0.0
  */
-export class WorkspaceFile implements NodeEntry {
+export class WorkspaceFile implements FSNodeEntry {
     public constructor(private fs: WorkspaceFS, private name: string, private parent: WorkspaceDirectory, private handle: FileSystemFileHandle) {
     }
 
