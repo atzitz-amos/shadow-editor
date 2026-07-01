@@ -7,6 +7,7 @@ import {SynDocument} from "../../api/document/SynDocument";
 import {SynNode} from "../../api/SynNode";
 import {SynScopeImpl} from "../scope/SynScopeImpl";
 import {LanguageBase} from "../../../LanguageBase";
+import {SynNodeVisitor} from "../../utils/visitors/SynNodeVisitor";
 
 /**
  *
@@ -47,5 +48,10 @@ export class SynTreeImpl extends AbstractSynParentElement implements SynTree {
 
     getURI(): EditorURI {
         return this.document.getURI();
+    }
+
+    accept(visitor: SynNodeVisitor) {
+        visitor.visitTree(this);
+        super.accept(visitor);
     }
 }

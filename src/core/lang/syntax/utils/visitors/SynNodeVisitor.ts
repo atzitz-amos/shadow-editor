@@ -4,6 +4,7 @@ import {SynASTElement} from "../../api/tree/SynASTElement";
 import {SynFile} from "../../api/filesystem/SynFile";
 import {AbstractSynTemplate} from "../../writer/template/AbstractSynTemplate";
 import {SynNode} from "../../api/SynNode";
+import {SynTree} from "../../api/tree/SynTree";
 
 /**
  *
@@ -17,6 +18,10 @@ export class SynNodeVisitor {
     }
 
     visitNode(node: SynNode): void {
+    }
+
+    visitTree(tree: SynTree): void {
+
     }
 
     visitFile(file: SynFile): void {

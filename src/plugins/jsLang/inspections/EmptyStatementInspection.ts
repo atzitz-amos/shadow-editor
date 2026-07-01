@@ -33,6 +33,14 @@ export default class EmptyStatementInspection {
         return new class extends JsSynVisitor {
             visitEmptyStatement(element: JsEmptyStatement) {
                 holder.registerProblem(inspection, "Empty statement", element, [new class extends QuickFix {
+                    getId(): string {
+                        throw new Error("Method not implemented.");
+                    }
+
+                    getDescription(): string {
+                        throw new Error("Method not implemented.");
+                    }
+
                     applyFix(node: JsEmptyStatement, synModTree: SynModificationTree): void {
                         synModTree.removeNode(node);
                     }

@@ -1,7 +1,7 @@
 import {SynNode} from "../api/SynNode";
-import {SourceModificationRecord} from "./SourceModificationRecord";
 import {SynPrinter} from "./SynPrinter";
 import {TextRange} from "../../../../editor/core/coordinate/range/TextRange";
+import {SynASTElementImpl} from "../impl/tree/SynASTElementImpl";
 
 /**
  *
@@ -27,9 +27,13 @@ export class SourceRewriter {
         return rewrittenSource;
     }
 
+    replace(text: string, range: TextRange, node: SynNode) {
+        return text.slice(0, range.start) + this.printer.print(node) + text.slice(range.end);
+    }
+
     private collectSynthetic(root: SynNode): SynNode[] {
         let result: SynNode[] = [];
-        if (root.isSynElement() && root.isSynthetic()) {
+        if (root instanceof SynASTElementImpl && root.isSynthetic()) {
             result.push(root);
         } else {
             for (const child of root.getChildren()) {
@@ -37,9 +41,5 @@ export class SourceRewriter {
             }
         }
         return result;
-    }
-
-    replace(text: string, range: TextRange, node: SynNode) {
-        return text.slice(0, range.start) + this.printer.print(node) + text.slice(range.end);
     }
 }

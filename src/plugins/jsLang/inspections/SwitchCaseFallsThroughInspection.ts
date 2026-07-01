@@ -51,6 +51,14 @@ export default class SwitchCaseFallsThroughInspection extends InspectionBase {
 }
 
 class SwitchCaseFallsThroughQuickFix extends QuickFix {
+    getId(): string {
+        throw new Error("Method not implemented.");
+    }
+
+    getDescription(): string {
+        throw new Error("Method not implemented.");
+    }
+
     applyFix(element: SynASTElement, synModTree: SynModificationTree): void {
         synModTree.insertBefore(element, new JsSynTemplate("break"));
     }

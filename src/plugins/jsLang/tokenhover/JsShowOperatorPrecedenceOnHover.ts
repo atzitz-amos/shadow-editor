@@ -1,5 +1,4 @@
 import {LanguageBase} from "../../../core/lang/LanguageBase";
-import {SynFile} from "../../../core/lang/syntax/api/filesystem/SynFile";
 import {Token} from "../../../core/lang/syntax/builder/tokens/Token";
 import {TokenHoverAction} from "../../../core/lang/tokenhover/TokenHoverAction";
 import {EditorBehaviorContext} from "../../../editor/core/behaviors/context/EditorBehaviorContext";
@@ -10,6 +9,7 @@ import {JsCodeBlock} from "../lang/syntax/JsCodeBlock";
 import {JsBinaryExpr} from "../lang/syntax/expr/JsBinaryExpr";
 import {TextAttributeKey} from "../../../editor/ui/highlighter/style/TextAttributeKey";
 import {TextBackground} from "../../../editor/ui/highlighter/style/TextBackground";
+import {SynTree} from "../../../core/lang/syntax/api/tree/SynTree";
 
 /**
  *
@@ -43,8 +43,8 @@ export default class JsShowOperatorPrecedenceOnHover extends TokenHoverAction {
         return true;
     }
 
-    execute(ctx: EditorBehaviorContext, file: SynFile | null, token: Token): void {
-        const codeblock = file?.getChildren()[0];
+    execute(ctx: EditorBehaviorContext, tree: SynTree | null, token: Token): void {
+        const codeblock = tree?.getChildren()[0];
         if (!codeblock || !(codeblock instanceof JsCodeBlock)) return;
 
         const expr = codeblock.getDeepestChildAt(token.getRange().getStart())?.getParent();

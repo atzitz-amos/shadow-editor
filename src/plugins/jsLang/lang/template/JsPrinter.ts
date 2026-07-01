@@ -40,6 +40,7 @@ import {JsForInStatement} from "../syntax/statements/JsForInStatement";
 import {JsForIStatement} from "../syntax/statements/JsForIStatement";
 import {JsStatement} from "../syntax/statements/JsStatement";
 import {JsIfStatement} from "../syntax/statements/JsIfStatement";
+import {SynTree} from "../../../../core/lang/syntax/api/tree/SynTree";
 
 /**
  *
@@ -354,7 +355,11 @@ export class JsPrinter extends JsSynVisitor implements SynPrinter {
     }
 
     visitFile(file: SynFile) {
-        for (const child of file.getChildren()) {
+        this.visitTree(file.getSynDocument().getTree())
+    }
+
+    visitTree(tree: SynTree) {
+        for (const child of tree.getChildren()) {
             this.visitNext(child);
             this.newline();
         }

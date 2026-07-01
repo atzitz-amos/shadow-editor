@@ -1,7 +1,6 @@
 import {Token} from "../../tokens/Token";
 import {ASTBuilder} from "./ASTBuilder";
 import {ASTType} from "../nodes/ASTGrammar";
-import {ASTSlot} from "../nodes/ASTSlot";
 
 export interface Marker {
     getLastTokenOffset(): number;
@@ -65,7 +64,7 @@ export class TokenStreamMarker implements Marker {
         this.builder.rollbackTo(this);
     }
 
-    done(type: ASTType, slot?: ASTSlot): void {
-        this.builder.build(this, type, slot);
+    done(type: ASTType): void {
+        this.builder.build(this, type);
     }
 }

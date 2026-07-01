@@ -8,7 +8,7 @@ import {ASTNode} from "../builder/parser/nodes/ASTNode";
  * @since 1.0.0
  */
 export class DefaultSynElement extends SynASTElementImpl {
-    constructor(private node: ASTNode) {
+    constructor(protected node: ASTNode) {
         super(node);
     }
 }

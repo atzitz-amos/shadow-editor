@@ -2,6 +2,7 @@ import {Token} from "../syntax/builder/tokens/Token";
 import {SynFile} from "../syntax/api/filesystem/SynFile";
 import {LanguageBase} from "../LanguageBase";
 import {EditorBehaviorContext} from "../../../editor/core/behaviors/context/EditorBehaviorContext";
+import {SynTree} from "../syntax/api/tree/SynTree";
 
 /**
  *
@@ -16,7 +17,7 @@ export abstract class TokenHoverAction {
 
     abstract getDelay(): number;
 
-    abstract execute(ctx: EditorBehaviorContext, file: SynFile | null, token: Token): void;
+    abstract execute(ctx: EditorBehaviorContext, tree: SynTree | null, token: Token): void;
 
     abstract cleanup(ctx: EditorBehaviorContext): void;
 

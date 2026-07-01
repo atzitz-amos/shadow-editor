@@ -120,7 +120,7 @@ export class StandardLanguageLayer implements ILanguageLayer {
             if (tokenHover.isApplicable(ctx, tokenAt)) {
                 this.tokenHoverTimeouts.push(setTimeout(() => {
                     this.activeTokenHovers.push(tokenHover);
-                    tokenHover.execute(ctx, editor.getLangService().getSynFile(), tokenAt);
+                    tokenHover.execute(ctx, editor.getLangService().getSynFile().getSynDocument().getTree(), tokenAt);
                 }, tokenHover.getDelay()));
             }
         }
