@@ -1,5 +1,5 @@
 import {LanguageBase} from "../../../core/lang/LanguageBase";
-import {SynFile} from "../../../core/lang/syntax/api/SynFile";
+import {SynFile} from "../../../core/lang/syntax/api/filesystem/SynFile";
 import {Token} from "../../../core/lang/syntax/builder/tokens/Token";
 import {TokenHoverAction} from "../../../core/lang/tokenhover/TokenHoverAction";
 import {EditorBehaviorContext} from "../../../editor/core/behaviors/context/EditorBehaviorContext";
@@ -47,7 +47,7 @@ export default class JsShowOperatorPrecedenceOnHover extends TokenHoverAction {
         const codeblock = file?.getChildren()[0];
         if (!codeblock || !(codeblock instanceof JsCodeBlock)) return;
 
-        const expr = codeblock.findDeepestChildAt(token.getRange().getStart())?.getParent();
+        const expr = codeblock.getDeepestChildAt(token.getRange().getStart())?.getParent();
         if (!expr || !(expr instanceof JsBinaryExpr)) return;
 
         this.leftOverlay = new HighlightOverlay(expr.getLeft().getTextRange(), JsShowOperatorPrecedenceOnHover.HIGHLIGHT_ATTRIBUTE_KEY);

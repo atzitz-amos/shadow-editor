@@ -1,4 +1,4 @@
-import {SynNodeVisitor} from "../../../../../core/lang/syntax/visitors/SynNodeVisitor";
+import {SynNodeVisitor} from "../../../../../core/lang/syntax/utils/visitors/SynNodeVisitor";
 import {JsNewExpr} from "../expr/JsNewExpr";
 import {JsArrayAccessExpr} from "../expr/JsArrayAccessExpr";
 import {JsAssignmentExpr} from "../expr/JsAssignmentExpr";
@@ -41,6 +41,10 @@ import {JsIfStatement} from "../statements/JsIfStatement";
  * @since 1.0.0
  */
 export class JsSynVisitor extends SynNodeVisitor {
+    isRecursive(): boolean {
+        return false;
+    }
+
     visitExpr(element: JsExpr): void {
         this.visitElement(element);
     }

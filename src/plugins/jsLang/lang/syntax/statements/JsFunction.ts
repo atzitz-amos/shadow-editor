@@ -21,8 +21,8 @@ export class JsFunction extends JsStatement {
     constructor(node: ASTNode) {
         super(node);
 
-        this.parameters = this.findNthChildOfType(JsFunctionParameters, 0)!;
-        this.body = this.findNthChildOfType(JsCodeBlock, 0)!;
+        this.parameters = this.getNthChildOfType(JsFunctionParameters, 0)!;
+        this.body = this.getNthChildOfType(JsCodeBlock, 0)!;
 
         for (let token of this.getAllToken()) {
             if (token.getValue() === "async") {

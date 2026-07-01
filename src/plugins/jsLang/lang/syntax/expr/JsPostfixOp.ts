@@ -1,6 +1,6 @@
 import {JsExpr} from "./JsExpr";
 import {ASTNode} from "../../../../../core/lang/syntax/builder/parser/nodes/ASTNode";
-import {SynNodeVisitor} from "../../../../../core/lang/syntax/visitors/SynNodeVisitor";
+import {SynNodeVisitor} from "../../../../../core/lang/syntax/utils/visitors/SynNodeVisitor";
 import {JsSynVisitor} from "../visitors/JsSynVisitor";
 import {SynTokenNode} from "../../../../../core/lang/syntax/impl/SynTokenNode";
 
@@ -17,7 +17,7 @@ export class JsPostfixOp extends JsExpr {
     public constructor(node: ASTNode) {
         super(node);
 
-        this.operand = this.findNthChildOfType(JsExpr, 0)!;
+        this.operand = this.getNthChildOfType(JsExpr, 0)!;
         this.op = this.getAllToken()[0];
     }
 
@@ -36,8 +36,8 @@ export class JsPostfixOp extends JsExpr {
     accept(visitor: SynNodeVisitor) {
         if (visitor instanceof JsSynVisitor) {
             visitor.visitPostfixOp(this);
-        } else {
-            super.accept(visitor);
         }
+
+        super.accept(visitor);
     }
 }

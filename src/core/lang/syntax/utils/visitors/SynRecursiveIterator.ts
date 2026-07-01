@@ -1,6 +1,6 @@
-import {SynNode} from "../api/SynNode";
-import {SynTokenNode} from "../impl/SynTokenNode";
-import {SynElementImpl} from "../impl/SynElementImpl";
+import {SynNode} from "../../api/SynNode";
+import {SynTokenNode} from "../../impl/SynTokenNode";
+import {SynASTElementImpl} from "../../impl/tree/SynASTElementImpl";
 
 /**
  *
@@ -25,7 +25,7 @@ export class SynRecursiveIterator implements Iterator<SynNode> {
             if (this._skipComments && current instanceof SynTokenNode && current.token.isCommentToken()) {
                 continue;
             }
-            if (this._onlyElements && !(current instanceof SynElementImpl)) {
+            if (this._onlyElements && !(current instanceof SynASTElementImpl)) {
                 continue;
             }
             if (this._skipSkippableElements && current instanceof SynTokenNode && current.token.shouldSkip()) {

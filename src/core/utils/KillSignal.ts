@@ -18,6 +18,8 @@ export interface KillSignal {
 }
 
 export class EmptyKillSignal implements KillSignal {
+    public static readonly INSTANCE = new EmptyKillSignal();
+
     check(): void {
         // Do nothing
     }

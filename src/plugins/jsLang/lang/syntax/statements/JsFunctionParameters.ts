@@ -1,4 +1,4 @@
-import {SynElementImpl} from "../../../../../core/lang/syntax/impl/SynElementImpl";
+import {SynASTElementImpl} from "../../../../../core/lang/syntax/impl/tree/SynASTElementImpl";
 import {ASTNode} from "../../../../../core/lang/syntax/builder/parser/nodes/ASTNode";
 
 /**
@@ -7,7 +7,7 @@ import {ASTNode} from "../../../../../core/lang/syntax/builder/parser/nodes/ASTN
  * @date 6/3/2026
  * @since 1.0.0
  */
-export class JsFunctionParameters extends SynElementImpl {
+export class JsFunctionParameters extends SynASTElementImpl {
     constructor(node: ASTNode) {
         super(node);
     }

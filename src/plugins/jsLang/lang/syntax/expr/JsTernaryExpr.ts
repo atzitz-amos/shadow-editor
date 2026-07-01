@@ -1,5 +1,5 @@
 import {ASTNode} from "../../../../../core/lang/syntax/builder/parser/nodes/ASTNode";
-import {SynNodeVisitor} from "../../../../../core/lang/syntax/visitors/SynNodeVisitor";
+import {SynNodeVisitor} from "../../../../../core/lang/syntax/utils/visitors/SynNodeVisitor";
 import {JsSynVisitor} from "../visitors/JsSynVisitor";
 import {JsExpr} from "./JsExpr";
 
@@ -16,9 +16,9 @@ export class JsTernaryExpr extends JsExpr {
 
     constructor(node: ASTNode) {
         super(node);
-        this.condition = this.findNthChild(0) as JsExpr;
-        this.trueExpr = this.findNthChild(2) as JsExpr;
-        this.falseExpr = this.findNthChild(4) as JsExpr;
+        this.condition = this.getNthChild(0) as JsExpr;
+        this.trueExpr = this.getNthChild(2) as JsExpr;
+        this.falseExpr = this.getNthChild(4) as JsExpr;
     }
 
     getCondition(): JsExpr {
@@ -40,8 +40,8 @@ export class JsTernaryExpr extends JsExpr {
     accept(visitor: SynNodeVisitor) {
         if (visitor instanceof JsSynVisitor) {
             visitor.visitTernaryExpr(this);
-        } else {
-            super.accept(visitor);
         }
+
+        super.accept(visitor);
     }
 }

@@ -47,10 +47,10 @@ export class AnnotatorService {
         if (event.getLanguage() === null) return;
 
         this.problems = [];
-        const holder = new ProblemsHolder(event.getFile());
+        const holder = new ProblemsHolder(event.getDocument());
 
         event.getEditor().getLangSupport().getInspectionEngineForLanguage(event.getLanguage())
-            .runInspections(holder, event.getFile());
+            .runInspections(holder, event.getDocument());
 
         // console.log(holder.getProblems().map(p => `${p.getDescription()} at ${p.getRange().toString()}`));
 

@@ -9,10 +9,11 @@ import {TokenCache} from "./TokenCache";
 import {EditorLanguageChanged} from "./events/EditorLanguageChanged";
 import {Scheduler} from "../../../core/scheduler/Scheduler";
 import {ASTBuilder} from "../../../core/lang/syntax/builder/parser/builder/ASTBuilder";
-import {SynFileImpl} from "../../../core/lang/syntax/impl/SynFileImpl";
-import {SynFile} from "../../../core/lang/syntax/api/SynFile";
+import {SynFileImpl} from "../../../core/lang/syntax/impl/filesystem/SynFileImpl";
+import {SynFile} from "../../../core/lang/syntax/api/filesystem/SynFile";
 import {SynTreeChangedEvent} from "./events/SynTreeChangedEvent";
-import {EmptyKillSignal} from "../../../core/lang/syntax/builder/parser/builder/KillSignal";
+import {EmptyKillSignal} from "../../../core/utils/KillSignal";
+import {SynDocumentImpl} from "../../../core/lang/syntax/impl/document/SynDocumentImpl";
 
 /**
  * Class associated with an editor that holds the current language, lexer, parser, highlighter as
@@ -22,7 +23,7 @@ import {EmptyKillSignal} from "../../../core/lang/syntax/builder/parser/builder/
  * @date 10/18/2025
  * @since 1.0.0
  */
-export class LangService {
+export class EditorLangService {
     private currentLanguage: LanguageBase | null = null;
     private myLexer: IncrementalLexer | null = null;
 
@@ -71,6 +72,10 @@ export class LangService {
         return this.myIncrementalHighlighter;
     }
 
+    isSynTreeDirty() {
+        return !this.isSynTreeClean;
+    }
+
     private setupLanguageComponents() {
         if (this.currentLanguage) {
             this.myLexer = this.currentLanguage.createLexer();
@@ -100,27 +105,30 @@ export class LangService {
         this.isSynTreeClean = false;
 
         Scheduler.debounce(() => {
+            if (!this.currentLanguage) return;
+
             const start = performance.now();
+            const synDocument = new SynDocumentImpl(document);
+            this.synFile = new SynFileImpl(document.getAssociatedFile()!, synDocument);
+
             const builder = new ASTBuilder(
-                document.getTokenCache().createTokenStream(),
+                synDocument,
+                this.currentLanguage,
                 new EmptyKillSignal(),
-                new SynFileImpl(document)
             );
 
-            this.currentLanguage?.createParser(builder).parse();
+            this.currentLanguage.createParser(builder).parse();
             // console.log("Successfully parsed "
             //     + this.editor.getOpenedDocument().getLineCount()
             //     + " lines (" + this.editor.getOpenedDocument().getTotalDocumentLength()
             //     + " chars) in "
             //     + (performance.now() - start) + "ms");
-            this.synFile = builder.close();
+            const synTree = builder.close();
+
+            synDocument.setTree(synTree);
 
             this.isSynTreeClean = true;
-            this.editor.getEventBus().syncPublish(new SynTreeChangedEvent(this.editor, this.synFile, this.currentLanguage!));
+            this.editor.getEventBus().syncPublish(new SynTreeChangedEvent(this.editor, synDocument, this.currentLanguage!));
         }, 10 * Math.log(this.editor.getOpenedDocument().getTotalDocumentLength()));
-    }
-
-    isSynTreeDirty() {
-        return !this.isSynTreeClean;
     }
 }

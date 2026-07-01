@@ -1,8 +1,8 @@
-import {SynFile} from "../../../../core/lang/syntax/api/SynFile";
 import {EditorEventBase} from "../../../../core/events/EditorEventBase";
 import {Editor} from "../../../Editor";
 import {EventSubscriber} from "../../../../core/events/EventSubscriber";
 import {LanguageBase} from "../../../../core/lang/LanguageBase";
+import {SynDocument} from "../../../../core/lang/syntax/api/document/SynDocument";
 
 /**
  *
@@ -13,12 +13,12 @@ import {LanguageBase} from "../../../../core/lang/LanguageBase";
 export class SynTreeChangedEvent extends EditorEventBase {
     public static readonly SUBSCRIBER = EventSubscriber.create(this);
 
-    public constructor(editor: Editor, private readonly file: SynFile, private readonly language: LanguageBase) {
+    public constructor(editor: Editor, private readonly document: SynDocument, private readonly language: LanguageBase) {
         super(editor);
     }
 
-    public getFile(): SynFile {
-        return this.file;
+    public getDocument(): SynDocument {
+        return this.document;
     }
 
     public getLanguage(): LanguageBase {

@@ -8,9 +8,10 @@ import {SynSuiteEngine} from "../../../core/lang/suite/SynSuiteEngine";
 import {SynAutomatedTestResult} from "../../../core/lang/suite/SynAutomatedTestResult";
 import {NavPaneContainer} from "../../../core/ui/lib/menu/NavPaneContainer";
 import {PopupUtilsCore} from "../../../core/ui/lib/popup/PopupUtilsCore";
+import {SynDocument} from "../../../core/lang/syntax/api/document/SynDocument";
 
 export class SynSuiteWidget extends UIComponent {
-    private synFile: any | null = null;
+    private synDocument: any | null = null;
     private navPane!: NavPaneContainer;
     private selectedPluginId: string | null = null;
 
@@ -37,7 +38,7 @@ export class SynSuiteWidget extends UIComponent {
     }
 
     public getActiveFile(): any | null {
-        return this.synFile;
+        return this.synDocument?.getAssociatedFile();
     }
 
     public getSelectedPluginId(): string | null {
@@ -48,8 +49,8 @@ export class SynSuiteWidget extends UIComponent {
         this.selectedPluginId = id;
     }
 
-    public onSynTreeChanged(synFile: any | null): void {
-        this.synFile = synFile;
+    public onSynTreeChanged(synDocument: SynDocument | null): void {
+        this.synDocument = synDocument;
         this.redraw();
     }
 }

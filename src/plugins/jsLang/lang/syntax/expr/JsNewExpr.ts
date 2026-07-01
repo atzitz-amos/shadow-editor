@@ -1,5 +1,5 @@
 import {ASTNode} from "../../../../../core/lang/syntax/builder/parser/nodes/ASTNode";
-import {SynNodeVisitor} from "../../../../../core/lang/syntax/visitors/SynNodeVisitor";
+import {SynNodeVisitor} from "../../../../../core/lang/syntax/utils/visitors/SynNodeVisitor";
 import {JsSynVisitor} from "../visitors/JsSynVisitor";
 import {JsExpr} from "./JsExpr";
 
@@ -15,11 +15,11 @@ export class JsNewExpr extends JsExpr {
 
     constructor(node: ASTNode) {
         super(node);
-        this.callee = this.findNthChild(1) as JsExpr;
+        this.callee = this.getNthChild(1) as JsExpr;
         this.argumentsExpr = [];
 
         for (let i = 3; ; i++) {
-            const child = this.findNthChild(i);
+            const child = this.getNthChild(i);
             if (!child) {
                 break;
             }
@@ -44,8 +44,8 @@ export class JsNewExpr extends JsExpr {
     accept(visitor: SynNodeVisitor) {
         if (visitor instanceof JsSynVisitor) {
             visitor.visitNewExpr(this);
-        } else {
-            super.accept(visitor);
         }
+
+        super.accept(visitor);
     }
 }

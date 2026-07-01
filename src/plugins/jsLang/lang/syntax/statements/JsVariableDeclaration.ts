@@ -1,7 +1,7 @@
 import {ASTNode} from "../../../../../core/lang/syntax/builder/parser/nodes/ASTNode";
 import {SynTokenNode} from "../../../../../core/lang/syntax/impl/SynTokenNode";
 import {JsDeclarator} from "./JsDeclarator";
-import {SynNodeVisitor} from "../../../../../core/lang/syntax/visitors/SynNodeVisitor";
+import {SynNodeVisitor} from "../../../../../core/lang/syntax/utils/visitors/SynNodeVisitor";
 import {JsSynVisitor} from "../visitors/JsSynVisitor";
 import {JsStatement} from "./JsStatement";
 
@@ -19,7 +19,7 @@ export class JsVariableDeclaration extends JsStatement {
         super(node);
 
         this.token = this.getAllToken()[0];
-        this.declarations = this.findAllChildrenOfType(JsDeclarator);
+        this.declarations = this.getAllChildrenOfType(JsDeclarator);
     }
 
     getKindToken(): SynTokenNode {
@@ -45,8 +45,8 @@ export class JsVariableDeclaration extends JsStatement {
     accept(visitor: SynNodeVisitor) {
         if (visitor instanceof JsSynVisitor) {
             visitor.visitVariableDeclaration(this);
-        } else {
-            super.accept(visitor);
         }
+
+        super.accept(visitor);
     }
 }

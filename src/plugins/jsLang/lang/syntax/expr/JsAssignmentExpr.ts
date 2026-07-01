@@ -1,5 +1,5 @@
 import {ASTNode} from "../../../../../core/lang/syntax/builder/parser/nodes/ASTNode";
-import {SynNodeVisitor} from "../../../../../core/lang/syntax/visitors/SynNodeVisitor";
+import {SynNodeVisitor} from "../../../../../core/lang/syntax/utils/visitors/SynNodeVisitor";
 import {JsSynVisitor} from "../visitors/JsSynVisitor";
 import {JsExpr} from "./JsExpr";
 import {SynTokenNode} from "../../../../../core/lang/syntax/impl/SynTokenNode";
@@ -20,9 +20,9 @@ export class JsAssignmentExpr extends JsExpr {
     constructor(node: ASTNode) {
         super(node);
 
-        this.left = this.findNthChild(0) as JsExpr;
-        this.operator = this.findNthChild(1) as SynTokenNode;
-        this.right = this.findNthChild(2) as JsExpr;
+        this.left = this.getNthChild(0) as JsExpr;
+        this.operator = this.getNthChild(1) as SynTokenNode;
+        this.right = this.getNthChild(2) as JsExpr;
     }
 
     getOperator(): SynTokenNode {
@@ -56,9 +56,9 @@ export class JsAssignmentExpr extends JsExpr {
     accept(visitor: SynNodeVisitor) {
         if (visitor instanceof JsSynVisitor) {
             visitor.visitAssignmentExpr(this);
-        } else {
-            super.accept(visitor);
         }
+
+        super.accept(visitor);
     }
 }
 

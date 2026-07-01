@@ -49,17 +49,18 @@
             import {IntSetting} from "./src/core/settings/base/IntSetting";
             import {SettingBase} from "./src/core/settings/base/SettingBase";
             import {JsSynVisitor} from "./src/plugins/jsLang/lang/syntax/visitors/JsSynVisitor";
-            import {SynRecursiveVisitorImpl} from "./src/core/lang/syntax/visitors/SynRecursiveVisitorImpl";
-            import {SynRecursiveLazyVisitorImpl} from "./src/core/lang/syntax/visitors/SynRecursiveLazyVisitorImpl";
+            import {SynRecursiveVisitor} from "./src/core/lang/syntax/utils/visitors/SynRecursiveVisitor";
+            import {SynLazyVisitorOptimizer} from "./src/core/lang/syntax/utils/visitors/SynLazyVisitorOptimizer";
             import DebugToolsPlugin from "./src/plugins/debugTools/DebugToolsPlugin";
             import {SourceRewriter} from "./src/core/lang/syntax/writer/SourceRewriter";
-            import {AbstractSynTemplate} from "./src/core/lang/syntax/tree/AbstractSynTemplate";
-            import {SynModificationTree} from "./src/core/lang/syntax/tree/SynModificationTree";
+            import {AbstractSynTemplate} from "./src/core/lang/syntax/writer/template/AbstractSynTemplate";
+            import {SynModificationTree} from "./src/core/lang/syntax/writer/template/SynModificationTree";
             import {JsSynTemplate} from "./src/plugins/jsLang/lang/template/JsSynTemplate";
             import {SynSuiteWindowRenderer} from "./src/core/lang/suite/renderer/SynSuiteWindowRenderer";
             import {PopupUtilsCore} from "./src/core/ui/lib/popup/PopupUtilsCore";
             import {FaIcon} from "./src/core/ui/icons/FaIcon";
             import {ProjectFilesPaneHelper} from "./src/app/ui/full/panes/projectFiles/ProjectFilesPaneHelper";
+            import {ActiveWorkspaceHelper} from "./src/core/global/ActiveWorkspaceHelper";
 
             window.FaIcon = FaIcon;
             window.SimpleTooltipPopup = SimpleTooltipPopup;
@@ -107,6 +108,7 @@
                 window.editor = ui.getMainEditor();
 
                 window.workspace = workspace;
+                window.ActiveWorkspaceHelper = ActiveWorkspaceHelper;
                 window.TextRange = TextRange;
                 window.SerializationUtils = SerializationUtils;
 
@@ -114,8 +116,8 @@
                 window.JsLangPlugin = JSLangPlugin.class;
                 window.JsLang = JsLang;
                 window.JsVisitor = JsSynVisitor;
-                window.SynRecursiveVisitorImpl = SynRecursiveVisitorImpl;
-                window.SynRecursiveLazyVisitorImpl = SynRecursiveLazyVisitorImpl;
+                window.SynRecursiveVisitor = SynRecursiveVisitor;
+                window.SynLazyVisitorOptimizer = SynLazyVisitorOptimizer;
 
                 window.JsGr = JsLexicalGrammar;
                 window.JsIncrLex = JsIncrLexer;

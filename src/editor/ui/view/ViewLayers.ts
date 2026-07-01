@@ -199,7 +199,7 @@ class CaretSelectionElement {
                 this.selectionStartEl.style.width = HTMLUtils.px(ex - sx + (sx == 0 ? this.OFFSET : 0));
             } else {
                 this.selectionStartEl.style.display = 'block';
-                this.selectionStartEl.style.left = HTMLUtils.px(sx);
+                this.selectionStartEl.style.left = HTMLUtils.px(sx + (sx == 0 ? 0 : this.OFFSET));
                 this.selectionStartEl.style.top = HTMLUtils.px(sy);
                 this.selectionStartEl.style.width = HTMLUtils.px(this.view.getViewWidth());
                 if (lineCount > 1) {
@@ -209,7 +209,7 @@ class CaretSelectionElement {
                 }
                 this.selectionEndEl.style.display = 'block';
                 this.selectionEndEl.style.top = HTMLUtils.px(ey);
-                this.selectionEndEl.style.width = HTMLUtils.px(ex);
+                this.selectionEndEl.style.width = HTMLUtils.px(ex + this.OFFSET);
             }
         }
     }

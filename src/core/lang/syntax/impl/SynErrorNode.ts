@@ -1,25 +1,28 @@
 import {TextRange} from "../../../../editor/core/coordinate/range/TextRange";
 import {ASTGrammar, ASTType} from "../builder/parser/nodes/ASTGrammar";
 import {SynNode} from "../api/SynNode";
-import {SynElement} from "../api/SynElement";
-import {SynFile} from "../api/SynFile";
+import {SynASTElement} from "../api/tree/SynASTElement";
 import {EditorURI} from "../../../uri/EditorURI";
 import {URITargetType} from "../../../uri/URITargetType";
-import {SynNodeVisitor} from "../visitors/SynNodeVisitor";
+import {SynNodeVisitor} from "../utils/visitors/SynNodeVisitor";
+import {SynDocument} from "../api/document/SynDocument";
+import {SynParentElement} from "../api/tree/SynParentElement";
+import {SynLeafElement} from "../api/tree/SynLeafElement";
+import {SynScope} from "../api/scope/SynScope";
 
 
-export class SynErrorNode implements SynNode {
-    private parent: SynElement | null = null;
+export class SynErrorNode implements SynNode, SynLeafElement {
+    private parent: SynParentElement | null = null;
 
-    constructor(private range: TextRange, private message: string, private file: SynFile) {
+    constructor(private range: TextRange, private message: string, private document: SynDocument) {
     }
 
     getURI(): EditorURI {
-        return this.file.getURI().selectedRegion(this.range, URITargetType.ERROR);
+        return this.document.getURI().selectedRegion(this.range, URITargetType.ERROR);
     }
 
-    getSynFile(): SynFile {
-        return this.file;
+    getSynDocument(): SynDocument {
+        return this.document;
     }
 
     getType(): ASTType {
@@ -66,16 +69,20 @@ export class SynErrorNode implements SynNode {
         return `#ERROR(${this.message})`;
     }
 
-    isSynElement(): this is SynElement {
+    isSynElement(): this is SynASTElement {
         return false;
     }
 
-    _setParent(parent: SynElement): void {
+    _setParent(parent: SynParentElement): void {
         this.parent = parent;
     }
 
-    getParent(): SynElement | null {
+    getParent(): SynParentElement | null {
         return this.parent;
+    }
+
+    getParentScope(): SynScope {
+        return this.parent!.getParentScope();
     }
 
     isSynthetic(): boolean {

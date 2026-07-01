@@ -1,18 +1,19 @@
-import {LanguageBase} from "../../LanguageBase";
-import {SynNode} from "../api/SynNode";
-import {TextRange} from "../../../../editor/core/coordinate/range/TextRange";
-import {EditorURI} from "../../../uri/EditorURI";
-import {SynElement} from "../api/SynElement";
-import {SynFile} from "../api/SynFile";
-import {SynNodeVisitor} from "../visitors/SynNodeVisitor";
+import {LanguageBase} from "../../../LanguageBase";
+import {SynNode} from "../../api/SynNode";
+import {TextRange} from "../../../../../editor/core/coordinate/range/TextRange";
+import {EditorURI} from "../../../../uri/EditorURI";
+import {SynASTElement} from "../../api/tree/SynASTElement";
+import {SynFile} from "../../api/filesystem/SynFile";
+import {SynNodeVisitor} from "../../utils/visitors/SynNodeVisitor";
 import {SynTemplateFile} from "./SynTemplateFile";
-import {SynModifiableFile} from "../api/SynModifiableFile";
-import {ASTBuilder} from "../builder/parser/builder/ASTBuilder";
-import {TokenStream} from "../builder/tokens/TokenStream";
-import {EmptyKillSignal} from "../builder/parser/builder/KillSignal";
-import {SynCodeBlock} from "../api/SynCodeBlock";
-import {SourceRewriter} from "../writer/SourceRewriter";
-import {SynRecursiveVisitorImpl} from "../visitors/SynRecursiveVisitorImpl";
+import {SynModifiableFile} from "../../api/filesystem/SynModifiableFile";
+import {ASTBuilder} from "../../builder/parser/builder/ASTBuilder";
+import {TokenStream} from "../../builder/tokens/TokenStream";
+import {EmptyKillSignal} from "../../../../utils/KillSignal";
+import {SynCodeBlock} from "../../api/SynCodeBlock";
+import {SourceRewriter} from "../SourceRewriter";
+import {SynRecursiveVisitor} from "../../utils/visitors/SynRecursiveVisitor";
+import {SynParentElement} from "../../api/tree/SynParentElement";
 
 /**
  *
@@ -25,14 +26,14 @@ export abstract class AbstractSynTemplate implements SynNode {
     private readonly file: SynTemplateFile;
     private readonly replacement: Map<string, SynNode> = new Map();
 
-    private parent: SynElement | null = null;
+    private parent: SynParentElement | null = null;
 
     public constructor(protected readonly template: string) {
         this.file = new SynTemplateFile();
         this.root = this.parse(this.createTokenStream(template), this.file);
     }
 
-    getSynFile(): SynFile {
+    getSynDocument(): SynFile {
         return this.file;
     }
 
@@ -48,14 +49,14 @@ export abstract class AbstractSynTemplate implements SynNode {
         return this.root.getTextRange();
     }
 
-    getParent(): SynElement | null {
+    getParent(): SynParentElement | null {
         return this.parent;
     }
 
     getText(): string {
         // We need to walk the tree and mark the ranges of the replaced nodes
         const ranges = new Map<string, TextRange>();
-        new SynRecursiveVisitorImpl(this.visitReplaceableNodes((node, name) => ranges.set(name, node.getTextRange()))).visitNode(this.root);
+        new SynRecursiveVisitor(this.visitReplaceableNodes((node, name) => ranges.set(name, node.getTextRange()))).visitNode(this.root);
 
         const rewriter = new SourceRewriter(this.getLanguage().getPrinter());
         let text = this.template;
@@ -89,11 +90,11 @@ export abstract class AbstractSynTemplate implements SynNode {
         return siblings[index - 1];
     }
 
-    _setParent(parent: SynElement): void {
+    _setParent(parent: SynParentElement): void {
         this.parent = parent;
     }
 
-    isSynElement<T extends SynNode>(this: T): this is SynElement {
+    isSynElement<T extends SynNode>(this: T): this is SynASTElement {
         return false;
     }
 

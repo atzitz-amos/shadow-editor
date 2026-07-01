@@ -55,8 +55,8 @@ export class WorkspaceFile implements FSNodeEntry {
         return new EditorURI(this.getPath().toString(), URITargetType.FILE);
     }
 
-    getLength() {
-        return 0; // TODO
+    async getLength() {
+        return (await this.getTextContent()).length;
     }
 
     isDirectory(): this is WorkspaceDirectory {

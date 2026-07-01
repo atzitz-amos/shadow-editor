@@ -1,5 +1,5 @@
 import {SynNodeVisitor} from "./SynNodeVisitor";
-import {SynNode} from "../api/SynNode";
+import {SynNode} from "../../api/SynNode";
 
 /**
  *
@@ -7,8 +7,13 @@ import {SynNode} from "../api/SynNode";
  * @date 6/1/2026
  * @since 1.0.0
  */
-export class SynRecursiveVisitorImpl {
+export class SynRecursiveVisitor extends SynNodeVisitor {
     public constructor(private visitor: SynNodeVisitor) {
+        super();
+    }
+
+    isRecursive(): boolean {
+        return true;
     }
 
     visitNode(node: SynNode) {

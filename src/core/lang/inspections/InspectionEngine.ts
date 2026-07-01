@@ -1,7 +1,8 @@
 import {InspectionBase} from "./Inspection";
 import {ProblemsHolder} from "./problems/ProblemsHolder";
-import {SynFile} from "../syntax/api/SynFile";
-import {SynRecursiveLazyVisitorImpl} from "../syntax/visitors/SynRecursiveLazyVisitorImpl";
+import {SynFile} from "../syntax/api/filesystem/SynFile";
+import {SynLazyVisitorOptimizer} from "../syntax/utils/visitors/SynLazyVisitorOptimizer";
+import {SynDocument} from "../syntax/api/document/SynDocument";
 
 /**
  *
@@ -14,9 +15,9 @@ export class InspectionEngine {
 
     }
 
-    public runInspections(holder: ProblemsHolder, file: SynFile): void {
-        const visitor = new SynRecursiveLazyVisitorImpl(this.inspections.map(i => i.buildVisitor(holder)));
-        visitor.visitNode(file);
+    public runInspections(holder: ProblemsHolder, document: SynDocument): void {
+        const visitor = new SynLazyVisitorOptimizer(this.inspections.map(i => i.buildVisitor(holder)));
+        visitor.visitNode(document.getTree());
     }
 
     filter(func: (inspection: InspectionBase) => boolean) {

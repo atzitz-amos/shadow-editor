@@ -49,7 +49,7 @@ export class TabsManager {
     }
 
     setActive(tab: ITab) {
-        if (this.activeTab?.getId() === tab.getId()) return;
+        if (this.activeTab?.getId() === tab.getId()) return UIHooks.trigger(TabHooks.TAB_ACTIVE, tab);
         if (this.activeTab) {
             this.activeTab.setActive(false);
             UIHooks.trigger(TabHooks.TAB_HIDE, this.activeTab);

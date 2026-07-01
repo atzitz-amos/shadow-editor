@@ -1,6 +1,6 @@
 import {InspectionBase} from "../../../core/lang/inspections/Inspection";
 import {ProblemsHolder} from "../../../core/lang/inspections/problems/ProblemsHolder";
-import {SynNodeVisitor} from "../../../core/lang/syntax/visitors/SynNodeVisitor";
+import {SynNodeVisitor} from "../../../core/lang/syntax/utils/visitors/SynNodeVisitor";
 import {LanguageBase} from "../../../core/lang/LanguageBase";
 import {InspectionSeverity} from "../../../core/lang/inspections/InspectionSeverity";
 import {JsSynVisitor} from "../lang/syntax/visitors/JsSynVisitor";

@@ -1,9 +1,9 @@
 import {CodeProblem} from "./CodeProblem";
-import {SynFile} from "../../syntax/api/SynFile";
 import {InspectionBase} from "../Inspection";
 import {SynNode} from "../../syntax/api/SynNode";
 import {TextRange} from "../../../../editor/core/coordinate/range/TextRange";
 import {QuickFix} from "../quickfix/QuickFix";
+import {SynDocument} from "../../syntax/api/document/SynDocument";
 
 /**
  *
@@ -14,7 +14,7 @@ import {QuickFix} from "../quickfix/QuickFix";
 export class ProblemsHolder {
     private problems: CodeProblem[] = [];
 
-    public constructor(private readonly file: SynFile) {
+    public constructor(private readonly document: SynDocument) {
     }
 
     public registerProblem(inspection: InspectionBase, description: string, node: SynNode, fixes: QuickFix[] = [], range?: TextRange) {

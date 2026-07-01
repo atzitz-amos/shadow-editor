@@ -1,10 +1,9 @@
 import {LanguageBase} from "../../../../core/lang/LanguageBase";
-import {AbstractSynTemplate} from "../../../../core/lang/syntax/tree/AbstractSynTemplate";
+import {AbstractSynTemplate} from "../../../../core/lang/syntax/writer/template/AbstractSynTemplate";
 import JsLang from "../JsLang";
-import {SynNodeVisitor} from "../../../../core/lang/syntax/visitors/SynNodeVisitor";
+import {SynNodeVisitor} from "../../../../core/lang/syntax/utils/visitors/SynNodeVisitor";
 import {JsSynVisitor} from "../syntax/visitors/JsSynVisitor";
 import {JsIdentifier} from "../syntax/literal/JsIdentifier";
-import {SynSymbol} from "../../../../core/lang/syntax/api/SynSymbol";
 import {JsMemberAccessExpr} from "../syntax/expr/JsMemberAccessExpr";
 import {SynNode} from "../../../../core/lang/syntax/api/SynNode";
 

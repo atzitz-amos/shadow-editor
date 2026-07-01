@@ -1,9 +1,9 @@
-import {SynNode} from "../api/SynNode";
-import {SynTokenNode} from "../impl/SynTokenNode";
-import {SynErrorNode} from "../impl/SynErrorNode";
-import {SynElement} from "../api/SynElement";
-import {SynFile} from "../api/SynFile";
-import {AbstractSynTemplate} from "../tree/AbstractSynTemplate";
+import {SynTokenNode} from "../../impl/SynTokenNode";
+import {SynErrorNode} from "../../impl/SynErrorNode";
+import {SynASTElement} from "../../api/tree/SynASTElement";
+import {SynFile} from "../../api/filesystem/SynFile";
+import {AbstractSynTemplate} from "../../writer/template/AbstractSynTemplate";
+import {SynNode} from "../../api/SynNode";
 
 /**
  *
@@ -12,6 +12,10 @@ import {AbstractSynTemplate} from "../tree/AbstractSynTemplate";
  * @since 1.0.0
  */
 export class SynNodeVisitor {
+    isRecursive(): boolean {
+        return false;
+    }
+
     visitNode(node: SynNode): void {
     }
 
@@ -22,7 +26,7 @@ export class SynNodeVisitor {
         this.visitNode(template);
     }
 
-    visitElement(element: SynElement): void {
+    visitElement(element: SynASTElement): void {
         this.visitNode(element);
     }
 

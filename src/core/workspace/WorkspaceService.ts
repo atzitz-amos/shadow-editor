@@ -28,7 +28,6 @@ export class WorkspaceService implements PersistedObject {
     }
 
     public begin() {
-
     }
 
     getPersistedKey(): string {
@@ -53,11 +52,11 @@ export class WorkspaceService implements PersistedObject {
         return Array.from(this.workspaces.values());
     }
 
-    addWorkspace(name: string): void {
-        if (this.workspaces.has(name)) {
-            throw new Error(`Workspace with name ${name} already exists`);
+    persistWorkspace(workspace: Workspace): void {
+        if (this.workspaces.has(workspace.getName())) {
+            throw new Error(`Workspace with name ${workspace.getName()} already exists`);
         }
-        this.workspaces.set(name, new Workspace(name));
+        this.workspaces.set(workspace.getName(), workspace);
 
         UnsafeFlagsService.flag(UnsafeFlags.PERSISTENCE);
     }

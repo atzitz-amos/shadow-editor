@@ -36,11 +36,11 @@ export default class DebugToolsPane extends AbstractPane {
         if (GlobalState.getMainEditor() !== null) {
             (this.getComponent() as DebugToolsPaneComponent).onSynTreeChanged(
                 GlobalState.getMainEditor(),
-                GlobalState.getMainEditor().getLangService().getSynFile());
+                GlobalState.getMainEditor().getLangService().getSynFile().getSynDocument());
         }
 
         GlobalState.getMainEventBus().subscribe(this, SynTreeChangedEvent.SUBSCRIBER, e => {
-            (this.getComponent() as DebugToolsPaneComponent).onSynTreeChanged(e.getEditor(), e.getFile());
+            (this.getComponent() as DebugToolsPaneComponent).onSynTreeChanged(e.getEditor(), e.getDocument());
         });
 
         GlobalState.getMainEventBus().subscribe(this, CaretMovedEvent.SUBSCRIBER, e => {

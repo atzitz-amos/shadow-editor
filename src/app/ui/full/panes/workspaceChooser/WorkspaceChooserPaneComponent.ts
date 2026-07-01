@@ -53,6 +53,7 @@ export class WorkspaceChooserPaneComponent extends UIPaneComponent {
 
     @UIMutators.on(UICommonMutators.WORKSPACE_LIST, MutatationType.MUTATED)
     private onWorkspaceListMutated() {
+        console.log("mutated workspace list");
         this.draw();
     }
 }

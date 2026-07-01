@@ -7,11 +7,12 @@ import {LangSupport} from "../LangSupport";
 import {Document} from "../../../editor/core/document/Document";
 import {LanguageBase} from "../LanguageBase";
 import {ASTBuilder} from "../syntax/builder/parser/builder/ASTBuilder";
-import {EmptyKillSignal} from "../syntax/builder/parser/builder/KillSignal";
-import {SynFileImpl} from "../syntax/impl/SynFileImpl";
+import {EmptyKillSignal} from "../../utils/KillSignal";
 import {Logger} from "vite";
 import {UseLogger} from "../../logging/logger/LoggerDecorators";
 import {SynSuiteWindowRenderer} from "./renderer/SynSuiteWindowRenderer";
+import {SynDocumentImpl} from "../syntax/impl/document/SynDocumentImpl";
+import {SynDocument} from "../syntax/api/document/SynDocument";
 
 /**
  *
@@ -37,13 +38,13 @@ export class SynSuiteEngine {
             return;
         }
 
-        const file = editor.getLangService().getSynFile();
+        const document = editor.getLangService().getSynFile().getSynDocument();
         const content = editor.getOpenedDocument().getTextContent();
 
-        const holder = new ProblemsHolder(file);
+        const holder = new ProblemsHolder(document);
         editor.getLangSupport().getInspectionEngineForLanguage(editor.getCurrentLanguage()!)
             .filter(inspection => LangSupport.definingPlugin(inspection) === pluginId)
-            .runInspections(holder, file);
+            .runInspections(holder, document);
 
         const problems = holder.getProblems().map(p => ({
             inspectionKey: p.getInspection().getId(),
@@ -57,7 +58,7 @@ export class SynSuiteEngine {
             description: description ?? "",
             language: editor.getCurrentLanguage()!.getKey(),
             code: content,
-            expectedTree: file.toTreeRepr(),
+            expectedTree: document.getTree().toTreeRepr(),
             expectedInspections: problems
         });
     }
@@ -113,24 +114,24 @@ export class SynSuiteEngine {
 
         // Overhead
         const document = new Document(0, test.code, lang);
-        let synFile: SynFileImpl = new SynFileImpl(document);
-        const holder = new ProblemsHolder(synFile);
+        let synDocument: SynDocument = new SynDocumentImpl(document);
+        const holder = new ProblemsHolder(synDocument);
 
         const lexStart = performance.now();
         lang.createLexer().lexAll(document);
         const lexEnd = performance.now();
 
-        const astBuilder = new ASTBuilder(document.getTokenCache().createTokenStream(), new EmptyKillSignal(), synFile);
+        const astBuilder = new ASTBuilder(synDocument, synDocument.getLanguage(), new EmptyKillSignal());
         lang.createParser(astBuilder).parse();
         astBuilder.close();
         const parseEnd = performance.now();
 
         LangSupport.getInstance().getInspectionEngineForLanguage(lang)
             .filter(inspection => LangSupport.definingPlugin(inspection) === pluginId)
-            .runInspections(holder, synFile);
+            .runInspections(holder, synDocument);
         const inspectEnd = performance.now();
 
-        const treeRepr = synFile.toTreeRepr();
+        const treeRepr = synDocument.getTree().toTreeRepr();
         const inspections = holder.getProblems().map(p => ({
             inspectionKey: p.getInspection().getId(),
             message: p.getDescription(),

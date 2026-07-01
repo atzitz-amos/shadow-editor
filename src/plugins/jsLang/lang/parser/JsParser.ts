@@ -4,7 +4,7 @@ import {JsExprParser} from "./JsExprParser";
 import {ASTBuilder} from "../../../../core/lang/syntax/builder/parser/builder/ASTBuilder";
 import {IParser} from "../../../../core/lang/syntax/builder/parser/IParser";
 import {Marker} from "../../../../core/lang/syntax/builder/parser/builder/Marker";
-import {SynScopeType} from "../../../../core/lang/syntax/builder/parser/scopes/SynScopeType";
+import {SynScopeType} from "../../../../core/lang/syntax/api/scope/SynScopeType";
 
 
 export class JsParser implements IParser {

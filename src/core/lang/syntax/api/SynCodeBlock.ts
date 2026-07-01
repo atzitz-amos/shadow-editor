@@ -1,6 +1,6 @@
-import {SynElementImpl} from "../impl/SynElementImpl";
+import {SynASTElementImpl} from "../impl/tree/SynASTElementImpl";
 import {ASTNode} from "../builder/parser/nodes/ASTNode";
-import {SynScope} from "../builder/parser/scopes/SynScope";
+import {SynScope} from "./scope/SynScope";
 
 /**
  *
@@ -8,7 +8,7 @@ import {SynScope} from "../builder/parser/scopes/SynScope";
  * @date 11/23/2025
  * @since 1.0.0
  */
-export abstract class SynCodeBlock extends SynElementImpl {
+export abstract class SynCodeBlock extends SynASTElementImpl {
     protected constructor(node: ASTNode) {
         super(node);
     }

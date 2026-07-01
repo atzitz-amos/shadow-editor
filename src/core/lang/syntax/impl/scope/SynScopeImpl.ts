@@ -1,9 +1,9 @@
-import {SynScopeType} from "./SynScopeType";
-import {SynCodeBlock} from "../../../api/SynCodeBlock";
-import {SynDeclaration} from "../../../impl/SynDeclaration";
-import {URILocatedResource} from "../../../../../uri/URILocatedResource";
-import {EditorURI} from "../../../../../uri/EditorURI";
-import {URITargetType} from "../../../../../uri/URITargetType";
+import {SynScopeType} from "../../api/scope/SynScopeType";
+import {SynCodeBlock} from "../../api/SynCodeBlock";
+import {SynDeclaration} from "../reference/SynDeclaration";
+import {EditorURI} from "../../../../uri/EditorURI";
+import {URITargetType} from "../../../../uri/URITargetType";
+import {SynScope} from "../../api/scope/SynScope";
 
 
 /**
@@ -13,24 +13,14 @@ import {URITargetType} from "../../../../../uri/URITargetType";
  * @date 12/4/2025
  * @since 1.0.0
  */
-export interface SynScope extends URILocatedResource {
-    getType(): SynScopeType;
-
-    getAssociatedCodeBlock(): SynCodeBlock;
-
-    getParent(): SynScope;
-
-    getDeclarations(): Map<String, SynDeclaration>;
-
-    resolve(name: string): SynDeclaration | null;
-}
-
 export class SynScopeImpl implements SynScope {
+    public static readonly GLOBAL_SCOPE: SynScope = new SynScopeImpl(SynScopeType.Global, null);
+
     private children: SynScopeImpl[] = [];
+
     private declarations: Map<String, SynDeclaration> = new Map<String, SynDeclaration>();
 
     private codeBlock: SynCodeBlock;
-
     private childCount: number = 0;
     private readonly scopeId: number;
 
@@ -42,7 +32,7 @@ export class SynScopeImpl implements SynScope {
 
     getURI(): EditorURI {
         if (this.parent !== this) return this.getParent().getURI().extendAnchor(this.type.getDebugName() + this.scopeId.toString());
-        return this.codeBlock.getSynFile().getURI().extendAnchor(this.type.getDebugName() + this.scopeId.toString(), URITargetType.SCOPE);
+        return this.codeBlock.getSynDocument().getURI().extendAnchor(this.type.getDebugName() + this.scopeId.toString(), URITargetType.SCOPE);
     }
 
     getParent(): SynScope {

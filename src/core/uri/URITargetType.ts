@@ -7,6 +7,7 @@
  */
 export enum URITargetType {
     FILE = "project://",
+    DOCUMENT = "document://",
     SYMBOL = "symbol://",
     SCOPE = "scope://",
     ERROR = "error://",
@@ -26,6 +27,8 @@ export function URITargetFromString(targetString: string): URITargetType {
             return URITargetType.SCOPE;
         case "error://":
             return URITargetType.ERROR;
+        case "document://":
+            return URITargetType.DOCUMENT;
         default:
             throw new Error(`Unknown target type: ${targetString}`);
     }

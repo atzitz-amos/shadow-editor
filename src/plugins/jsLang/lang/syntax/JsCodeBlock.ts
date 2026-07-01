@@ -2,7 +2,7 @@ import {SynCodeBlock} from "../../../../core/lang/syntax/api/SynCodeBlock";
 import {ASTNode} from "../../../../core/lang/syntax/builder/parser/nodes/ASTNode";
 import {SynNode} from "../../../../core/lang/syntax/api/SynNode";
 import {SynTokenNode} from "../../../../core/lang/syntax/impl/SynTokenNode";
-import {SynNodeVisitor} from "../../../../core/lang/syntax/visitors/SynNodeVisitor";
+import {SynNodeVisitor} from "../../../../core/lang/syntax/utils/visitors/SynNodeVisitor";
 import {JsSynVisitor} from "./visitors/JsSynVisitor";
 
 /**
@@ -30,8 +30,8 @@ export class JsCodeBlock extends SynCodeBlock {
     accept(visitor: SynNodeVisitor) {
         if (visitor instanceof JsSynVisitor) {
             visitor.visitCodeBlock(this);
-        } else {
-            super.accept(visitor);
         }
+
+        super.accept(visitor);
     }
 }

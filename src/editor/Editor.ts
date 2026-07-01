@@ -14,7 +14,7 @@ import {InlayManager} from "./core/inlay/InlayManager";
 import {PluginManager} from "../core/plugins/PluginManager";
 import {LanguageBase} from "../core/lang/LanguageBase";
 import {LangSupport} from "../core/lang/LangSupport";
-import {LangService} from "./core/lang/LangService";
+import {EditorLangService} from "./core/lang/EditorLangService";
 import {EventBus} from "../core/events/EventBus";
 import {KeybindManager} from "../core/keybinds/KeybindManager";
 import {EditorAttachedEvent} from "./impl/events/EditorAttachedEvent";
@@ -50,7 +50,7 @@ export class Editor {
     private readonly widgetManager: WidgetManager;
     private readonly inlayManager: InlayManager;
     private readonly caretModel: CaretModel;
-    private readonly langService: LangService;
+    private readonly langService: EditorLangService;
     private readonly undoRedo: UndoRedoManager;
 
     private readonly eventBus: EventBus;
@@ -71,7 +71,7 @@ export class Editor {
 
         this.behaviorManager = StandardBehaviorManagerProvider.createDefault();
 
-        this.langService = new LangService(this);
+        this.langService = new EditorLangService(this);
         this.widgetManager = new WidgetManager(this);
         this.undoRedo = new UndoRedoManager(this);
 
@@ -170,7 +170,7 @@ export class Editor {
         return this.undoRedo;
     }
 
-    getLangService(): LangService {
+    getLangService(): EditorLangService {
         return this.langService;
     }
 

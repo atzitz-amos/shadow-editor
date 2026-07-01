@@ -2,7 +2,7 @@ import {JsStatement} from "./JsStatement";
 import {JsExpr} from "../expr/JsExpr";
 import {JsCodeBlock} from "../JsCodeBlock";
 import {ASTNode} from "../../../../../core/lang/syntax/builder/parser/nodes/ASTNode";
-import {SynNodeVisitor} from "../../../../../core/lang/syntax/visitors/SynNodeVisitor";
+import {SynNodeVisitor} from "../../../../../core/lang/syntax/utils/visitors/SynNodeVisitor";
 import {JsSynVisitor} from "../visitors/JsSynVisitor";
 
 /**
@@ -18,8 +18,8 @@ export class JsDoWhileStatement extends JsStatement {
     constructor(node: ASTNode) {
         super(node);
 
-        this.body = this.findNthChildOfType(JsCodeBlock, 0)!;
-        this.expr = this.findNthChildOfType(JsExpr, 0)!;
+        this.body = this.getNthChildOfType(JsCodeBlock, 0)!;
+        this.expr = this.getNthChildOfType(JsExpr, 0)!;
     }
 
     getExpr() {
@@ -33,8 +33,8 @@ export class JsDoWhileStatement extends JsStatement {
     accept(visitor: SynNodeVisitor) {
         if (visitor instanceof JsSynVisitor) {
             visitor.visitDoWhileStatement(this);
-        } else {
-            super.accept(visitor);
         }
+
+        super.accept(visitor);
     }
 }

@@ -1,6 +1,6 @@
 import {InspectionSeverity} from "./InspectionSeverity";
 import {LanguageBase} from "../LanguageBase";
-import {SynNodeVisitor} from "../syntax/visitors/SynNodeVisitor";
+import {SynNodeVisitor} from "../syntax/utils/visitors/SynNodeVisitor";
 import {ProblemsHolder} from "./problems/ProblemsHolder";
 
 /**

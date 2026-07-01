@@ -31,8 +31,6 @@ export class ReplaceTextAction extends TextEditAction {
         editor.getOpenedDocument().insertText(this.range.start, this.oldText);
         caret.moveToOffset(this.caretOld);
 
-        caret.getSelectionModel().select(this.range.start, this.range.start + this.oldText.length);
-
         editor.repaintView();
     }
 

@@ -1,6 +1,6 @@
-import {SynScopeImpl} from "./SynScope";
-import {SynScopeType} from "./SynScopeType";
-import {SynCodeBlock} from "../../../api/SynCodeBlock";
+import {SynScopeImpl} from "./SynScopeImpl";
+import {SynScopeType} from "../../api/scope/SynScopeType";
+import {SynCodeBlock} from "../../api/SynCodeBlock";
 
 /**
  * Tree to build scopes hierarchy

@@ -1,5 +1,5 @@
 import {SynNodeVisitor} from "./SynNodeVisitor";
-import {SynNode} from "../api/SynNode";
+import {SynNode} from "../../api/SynNode";
 
 /**
  * Lazy implementation of the visitor pattern, that wraps multiple visitors into one for performance reasons.
@@ -8,7 +8,7 @@ import {SynNode} from "../api/SynNode";
  * @date 6/1/2026
  * @since 1.0.0
  */
-export class SynRecursiveLazyVisitorImpl {
+export class SynLazyVisitorOptimizer {
     public constructor(private visitors: SynNodeVisitor[]) {
     }
 

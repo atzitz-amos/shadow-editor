@@ -2,11 +2,11 @@ import {InspectionBase} from "../../../core/lang/inspections/Inspection";
 import {InspectionSeverity} from "../../../core/lang/inspections/InspectionSeverity";
 import {ProblemsHolder} from "../../../core/lang/inspections/problems/ProblemsHolder";
 import {LanguageBase} from "../../../core/lang/LanguageBase";
-import {SynNodeVisitor} from "../../../core/lang/syntax/visitors/SynNodeVisitor";
+import {SynNodeVisitor} from "../../../core/lang/syntax/utils/visitors/SynNodeVisitor";
 import JsLang from "../lang/JsLang";
 import {JsSynVisitor} from "../lang/syntax/visitors/JsSynVisitor";
 import {JsReturnStatement} from "../lang/syntax/statements/JsReturnStatement";
-import {SynScopeType} from "../../../core/lang/syntax/builder/parser/scopes/SynScopeType";
+import {SynScopeType} from "../../../core/lang/syntax/api/scope/SynScopeType";
 
 /**
  *

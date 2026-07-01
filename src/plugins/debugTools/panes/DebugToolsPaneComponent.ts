@@ -3,8 +3,9 @@ import {IPane} from "../../../app/core/panes/pane/IPane";
 import {ASTViewerWidget} from "./ASTViewerWidget";
 import {TabPane} from "../../../core/ui/lib/tabs/TabPane";
 import {SynSuiteWidget} from "./SynSuiteWidget";
-import {SynFile} from "../../../core/lang/syntax/api/SynFile";
+import {SynFile} from "../../../core/lang/syntax/api/filesystem/SynFile";
 import {Editor} from "../../../editor/Editor";
+import {SynDocument} from "../../../core/lang/syntax/api/document/SynDocument";
 
 /**
  *
@@ -31,9 +32,9 @@ export class DebugToolsPaneComponent extends UIPaneComponent {
         this.drawChildren();
     }
 
-    onSynTreeChanged(editor: Editor, synFile: SynFile): void {
-        this.astViewerWidget.onSynTreeChanged(editor, synFile);
-        this.synSuiteWidget.onSynTreeChanged(synFile);
+    onSynTreeChanged(editor: Editor, synDocument: SynDocument): void {
+        this.astViewerWidget.onSynTreeChanged(editor, synDocument);
+        this.synSuiteWidget.onSynTreeChanged(synDocument);
     }
 
     onCaretMoved(offset: Offset): void {

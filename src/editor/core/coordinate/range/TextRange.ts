@@ -1,6 +1,6 @@
 import {Serializable, SerializableType} from "../../../../core/persistence/serializable/Serializable";
 
-export type HasRange = { range: TextRange };
+export type HasRange = { getTextRange(): TextRange };
 
 /**
  * Represents a TextRange in the editor
@@ -81,6 +81,16 @@ export class TextRange implements Serializable {
 
     toString() {
         return `[${this.start}, ${this.end}]`;
+    }
+
+    static enclosing(items: HasRange[]) {
+        let start = 0, end = 0;
+        for (const item of items) {
+            if (item.getTextRange().start < start) start = item.getTextRange().start;
+            if (item.getTextRange().end > end) end = item.getTextRange().end;
+        }
+
+        return new TextRange(start, end);
     }
 }
 

@@ -1,12 +1,12 @@
-import {TextRange} from "../../../../editor/core/coordinate/range/TextRange";
-import {EditorURI} from "../../../uri/EditorURI";
-import {RelativePath} from "../../../workspace/filesystem/path/RelativePath";
-import {WorkspaceFile} from "../../../workspace/filesystem/tree/WorkspaceFile";
-import {SynElement} from "../api/SynElement";
-import {SynFile} from "../api/SynFile";
-import {SynModifiableFile} from "../api/SynModifiableFile";
-import {SynNode} from "../api/SynNode";
-import {SynNodeVisitor} from "../visitors/SynNodeVisitor";
+import {TextRange} from "../../../../../editor/core/coordinate/range/TextRange";
+import {EditorURI} from "../../../../uri/EditorURI";
+import {RelativePath} from "../../../../workspace/filesystem/path/RelativePath";
+import {WorkspaceFile} from "../../../../workspace/filesystem/tree/WorkspaceFile";
+import {SynASTElement} from "../../api/tree/SynASTElement";
+import {SynFile} from "../../api/filesystem/SynFile";
+import {SynModifiableFile} from "../../api/filesystem/SynModifiableFile";
+import {SynNode} from "../../api/SynNode";
+import {SynNodeVisitor} from "../../utils/visitors/SynNodeVisitor";
 
 /**
  *
@@ -28,7 +28,7 @@ export class SynTemplateFile implements SynModifiableFile {
         return null;
     }
 
-    getSynFile(): SynFile {
+    getSynDocument(): SynFile {
         return this;
     }
 
@@ -54,7 +54,7 @@ export class SynTemplateFile implements SynModifiableFile {
         return EditorURI.invalid();
     }
 
-    getParent(): SynElement | null {
+    getParent(): SynASTElement | null {
         return null;
     }
 
@@ -66,11 +66,11 @@ export class SynTemplateFile implements SynModifiableFile {
         return null;
     }
 
-    _setParent(parent: SynElement): void {
+    _setParent(parent: SynASTElement): void {
         throw new Error("Method not implemented.");
     }
 
-    isSynElement<T extends SynNode>(this: T): this is SynElement {
+    isSynElement<T extends SynNode>(this: T): this is SynASTElement {
         return false;
     }
 

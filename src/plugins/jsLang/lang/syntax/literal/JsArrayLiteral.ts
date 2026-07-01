@@ -1,5 +1,5 @@
 import {ASTNode} from "../../../../../core/lang/syntax/builder/parser/nodes/ASTNode";
-import {SynNodeVisitor} from "../../../../../core/lang/syntax/visitors/SynNodeVisitor";
+import {SynNodeVisitor} from "../../../../../core/lang/syntax/utils/visitors/SynNodeVisitor";
 import {JsSynVisitor} from "../visitors/JsSynVisitor";
 import {JsExpr} from "../expr/JsExpr";
 
@@ -15,7 +15,7 @@ export class JsArrayLiteral extends JsExpr {
     constructor(node: ASTNode) {
         super(node);
 
-        this.elements = this.findAllChildrenOfType(JsExpr);
+        this.elements = this.getAllChildrenOfType(JsExpr);
     }
 
     getElements(): JsExpr[] {

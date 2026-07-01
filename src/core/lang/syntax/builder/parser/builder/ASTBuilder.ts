@@ -10,17 +10,20 @@ import {TokenExpectation} from "./TokenExpectation";
 import {SynNode} from "../../../api/SynNode";
 import {ASTNode} from "../nodes/ASTNode";
 import {DefaultSynElement} from "../../../impl/DefaultSynElement";
-import {SynScopeTree} from "../scopes/SynScopeTree";
-import {SynScopeType} from "../scopes/SynScopeType";
+import {SynScopeTree} from "../../../impl/scope/SynScopeTree";
+import {SynScopeType} from "../../../api/scope/SynScopeType";
 import {SynCodeBlock} from "../../../api/SynCodeBlock";
-import {SynDeclaration} from "../../../impl/SynDeclaration";
-import {SynFile} from "../../../api/SynFile";
-import {KillSignal} from "./KillSignal";
-import {SynModifiableFile} from "../../../api/SynModifiableFile";
+import {SynDeclaration} from "../../../impl/reference/SynDeclaration";
+import {KillSignal} from "../../../../../utils/KillSignal";
+import {SynDocument} from "../../../api/document/SynDocument";
+import {SynTree} from "../../../api/tree/SynTree";
+import {SynTreeImpl} from "../../../impl/tree/SynTreeImpl";
+import {LanguageBase} from "../../../../LanguageBase";
 
 export class ASTBuilder {
-    private readonly production: SynNode[] = [];
+    private readonly stream: TokenStream;
 
+    private readonly production: SynNode[] = [];
     private readonly scopeTree: SynScopeTree;
 
     private currentOffset: number = 0;
@@ -29,7 +32,8 @@ export class ASTBuilder {
     private isErrorState: boolean = false;
     private wasInErrorState: boolean = false;
 
-    constructor(private stream: TokenStream, private signal: KillSignal, private file: SynModifiableFile) {
+    constructor(private readonly document: SynDocument, private readonly language: LanguageBase, private signal: KillSignal) {
+        this.stream = document.makeTokenStream();
         this.scopeTree = new SynScopeTree();
     }
 
@@ -111,7 +115,7 @@ export class ASTBuilder {
         }
         this.currentOffset = token.getRange().end;
         if (shouldAppend && !token.shouldSkip())
-            this.production.push(new SynTokenNode(token, this.file));
+            this.production.push(new SynTokenNode(token, this.document));
         if (token.isCommentToken() || token.shouldSkip()) {
             return this.advance(shouldAppend);
         }
@@ -155,22 +159,22 @@ export class ASTBuilder {
 
     errorVirtual(msg: string) {
         this.isErrorState = true;
-        this.production.push(new SynErrorNode(new TextRange(this.lastTokenOffset, this.lastTokenOffset), msg, this.file));
+        this.production.push(new SynErrorNode(new TextRange(this.lastTokenOffset, this.lastTokenOffset), msg, this.document));
     }
 
     errorBefore(token: Token, msg: string) {
         this.isErrorState = true;
-        this.production.push(new SynErrorNode(new TextRange(token.getRange().start, token.getRange().start + 1), msg, this.file));
+        this.production.push(new SynErrorNode(new TextRange(token.getRange().start, token.getRange().start + 1), msg, this.document));
     }
 
     errorOn(token: Token, msg: string) {
         this.isErrorState = true;
-        this.production.push(new SynErrorNode(token.getRange(), msg, this.file));
+        this.production.push(new SynErrorNode(token.getRange(), msg, this.document));
     }
 
     errorAt(at: Offset, msg: string) {
         this.isErrorState = true;
-        this.production.push(new SynErrorNode(new TextRange(at, at), msg, this.file));
+        this.production.push(new SynErrorNode(new TextRange(at, at), msg, this.document));
     }
 
     markErrorAndRemove(token: Token, msg: string) {
@@ -179,7 +183,7 @@ export class ASTBuilder {
             if (ast.getTextRange().is(token.getRange())) {
                 this.production.splice(i, 1);
                 this.isErrorState = true;
-                this.production.push(new SynErrorNode(token.getRange(), msg, this.file));
+                this.production.push(new SynErrorNode(token.getRange(), msg, this.document));
                 return;
             }
         }
@@ -187,7 +191,7 @@ export class ASTBuilder {
 
     popAndError(msg: string) {
         this.isErrorState = true;
-        this.production.push(new SynErrorNode(this.production.pop()!.getTextRange(), msg, this.file));
+        this.production.push(new SynErrorNode(this.production.pop()!.getTextRange(), msg, this.document));
     }
 
     build(marker: Marker, type: ASTType) {
@@ -207,8 +211,8 @@ export class ASTBuilder {
 
     addToProduction(type: ASTType, children: SynNode[], range: TextRange) {
         let node: ASTNode;
-        if (type.role === ASTGrammarRole.CODEBLOCK) node = new ASTNode(type, this.file, children, range, this.scopeTree.getCurrentScope()!.getParent());
-        else node = new ASTNode(type, this.file, children, range, this.scopeTree.getCurrentScope()!);
+        if (type.role === ASTGrammarRole.CODEBLOCK) node = new ASTNode(type, this.document, children, range, this.scopeTree.getCurrentScope()!.getParent());
+        else node = new ASTNode(type, this.document, children, range, this.scopeTree.getCurrentScope()!);
 
         if (type.treeBuilder) {
             let synElement = type.treeBuilder(node);
@@ -229,7 +233,7 @@ export class ASTBuilder {
             this.currentOffset = token.getRange().end;
             this.stream.consume();
             if (token.isCommentToken())
-                this.production.push(new SynTokenNode(token, this.file));
+                this.production.push(new SynTokenNode(token, this.document));
         }
     }
 
@@ -237,16 +241,17 @@ export class ASTBuilder {
         return this.production;
     }
 
-    close(): SynFile {
+    close(): SynTree {
         if (this.scopeTree.getCurrentScope()?.getType() !== SynScopeType.Global) {
             console.warn("Unclosed scopes detected at end of file: " + this.scopeTree.getCurrentScope());
         }
 
-        for (const node of this.production) {
-            this.file.addChild(node);
+        if (this.production.length > 1) {
+            console.warn("Multiple top-level nodes detected at end of file. Wrapping in a default AST node. This is probably" +
+                "unintentional");
         }
 
-        return this.file;
+        return new SynTreeImpl(this.language, this.production, this.document);
     }
 
     beforeNewLine() {

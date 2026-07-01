@@ -1,6 +1,5 @@
-import {SynElementImpl} from "../../../../../core/lang/syntax/impl/SynElementImpl";
 import {ASTNode} from "../../../../../core/lang/syntax/builder/parser/nodes/ASTNode";
-import {SynNodeVisitor} from "../../../../../core/lang/syntax/visitors/SynNodeVisitor";
+import {SynNodeVisitor} from "../../../../../core/lang/syntax/utils/visitors/SynNodeVisitor";
 import {JsSynVisitor} from "../visitors/JsSynVisitor";
 import {JsExpr} from "../expr/JsExpr";
 import {JsStatement} from "./JsStatement";
@@ -17,18 +16,18 @@ export class JsReturnStatement extends JsStatement {
     constructor(node: ASTNode) {
         super(node);
 
-        this.expr = this.findNthChildOfType(JsExpr, 0) || null;
+        this.expr = this.getNthChildOfType(JsExpr, 0) || null;
     }
 
-    getExpr(): JsExpr| null {
+    getExpr(): JsExpr | null {
         return this.expr;
     }
 
     accept(visitor: SynNodeVisitor) {
         if (visitor instanceof JsSynVisitor) {
             visitor.visitReturnStatement(this);
-        } else {
-            super.accept(visitor);
         }
+
+        super.accept(visitor);
     }
 }

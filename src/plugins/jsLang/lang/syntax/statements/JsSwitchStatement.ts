@@ -1,9 +1,9 @@
-import {SynElementImpl} from "../../../../../core/lang/syntax/impl/SynElementImpl";
+import {SynASTElementImpl} from "../../../../../core/lang/syntax/impl/tree/SynASTElementImpl";
 import {ASTNode} from "../../../../../core/lang/syntax/builder/parser/nodes/ASTNode";
 import {SynTokenNode} from "../../../../../core/lang/syntax/impl/SynTokenNode";
 import {SynNode} from "../../../../../core/lang/syntax/api/SynNode";
 import {JsCodeBlock} from "../JsCodeBlock";
-import {SynNodeVisitor} from "../../../../../core/lang/syntax/visitors/SynNodeVisitor";
+import {SynNodeVisitor} from "../../../../../core/lang/syntax/utils/visitors/SynNodeVisitor";
 import {JsSynVisitor} from "../visitors/JsSynVisitor";
 import {JsStatement} from "./JsStatement";
 
@@ -37,13 +37,13 @@ export class JsSwitchCase extends JsStatement {
     accept(visitor: SynNodeVisitor) {
         if (visitor instanceof JsSynVisitor) {
             visitor.visitSwitchCaseClause(this);
-        } else {
-            super.accept(visitor);
         }
+
+        super.accept(visitor);
     }
 }
 
-export class JsSwitchStatement extends SynElementImpl {
+export class JsSwitchStatement extends SynASTElementImpl {
     private readonly cases: JsSwitchCase[];
 
     private readonly expr: SynNode;
@@ -54,8 +54,8 @@ export class JsSwitchStatement extends SynElementImpl {
 
         // 'switch' '(' expr ')' body
         this.expr = node.children[2];
-        this.body = this.findAllChildrenOfType(JsCodeBlock)[0];
-        this.cases = this.body.findAllChildrenOfType(JsSwitchCase);
+        this.body = this.getAllChildrenOfType(JsCodeBlock)[0];
+        this.cases = this.body.getAllChildrenOfType(JsSwitchCase);
     }
 
     getExpr(): SynNode {
@@ -93,8 +93,8 @@ export class JsSwitchStatement extends SynElementImpl {
     accept(visitor: SynNodeVisitor) {
         if (visitor instanceof JsSynVisitor) {
             visitor.visitSwitchStatement(this);
-        } else {
-            super.accept(visitor);
         }
+
+        super.accept(visitor);
     }
 }

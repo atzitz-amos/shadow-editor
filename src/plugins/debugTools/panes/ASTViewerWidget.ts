@@ -1,14 +1,16 @@
 import {UIComponent} from "../../../core/ui/engine/components/UIComponent";
 import {HTMLUtils} from "../../../editor/utils/HTMLUtils";
 import {SynNode} from "../../../core/lang/syntax/api/SynNode";
-import {SynFile} from "../../../core/lang/syntax/api/SynFile";
-import {SynElementImpl} from "../../../core/lang/syntax/impl/SynElementImpl";
-import {SynFileImpl} from "../../../core/lang/syntax/impl/SynFileImpl";
+import {SynASTElementImpl} from "../../../core/lang/syntax/impl/tree/SynASTElementImpl";
+import {SynFileImpl} from "../../../core/lang/syntax/impl/filesystem/SynFileImpl";
 import {SynTokenNode} from "../../../core/lang/syntax/impl/SynTokenNode";
 import {SynErrorNode} from "../../../core/lang/syntax/impl/SynErrorNode";
-import {SynRecursiveIterator} from "../../../core/lang/syntax/visitors/SynRecursiveIterator";
+import {SynRecursiveIterator} from "../../../core/lang/syntax/utils/visitors/SynRecursiveIterator";
 import {AstOverlayHighlight} from "../overlays/AstOverlayHighlight";
 import {Editor} from "../../../editor/Editor";
+import {SynDocument} from "../../../core/lang/syntax/api/document/SynDocument";
+import {SynDocumentImpl} from "../../../core/lang/syntax/impl/document/SynDocumentImpl";
+import {SynTreeImpl} from "../../../core/lang/syntax/impl/tree/SynTreeImpl";
 
 /**
  *
@@ -17,7 +19,7 @@ import {Editor} from "../../../editor/Editor";
  * @since 1.0.0
  */
 export class ASTViewerWidget extends UIComponent {
-    private synFile: SynFile | null = null;
+    private synDocument: SynDocument | null = null;
     private editor: Editor | null = null;
 
     private scrollTop: number = 0;
@@ -32,13 +34,13 @@ export class ASTViewerWidget extends UIComponent {
     }
 
     public onCaretMoved(offset: Offset) {
-        if (!this.editor || !this.synFile) return;
+        if (!this.editor || !this.synDocument) return;
         const root = this.getChildren()[0] as SynTreeNode;
 
         let node = root.getNode();
         let tree = root;
         while (true) {
-            if (node instanceof SynElementImpl || node instanceof SynFileImpl) {
+            if (node instanceof SynASTElementImpl || node instanceof SynFileImpl) {
                 let foundChild = false;
                 for (const child of tree.getChildren()) {
                     const childNode = (child as SynTreeNode).getNode();
@@ -64,7 +66,7 @@ export class ASTViewerWidget extends UIComponent {
 
     public draw(): void {
         this.setInnerHTML("");
-        if (!this.synFile) {
+        if (!this.synDocument) {
             this.setInnerHTML(`<div class="ast-viewer-placeholder">No file loaded</div>`);
             return;
         }
@@ -72,7 +74,7 @@ export class ASTViewerWidget extends UIComponent {
         header.innerHTML = `
            <div class="ast-viewer-header-left">
                 <div class="overline"> AST VIEWER</div>
-                <div class="ast-viewer-filename">${this.synFile.getWorkspaceFile()?.getName() ?? "unknown file"}</div>
+                <div class="ast-viewer-filename">${this.synDocument.getAssociatedFile()?.getName() ?? "unknown file"}</div>
            </div>
            
            <div class="ast-viewer-header-right">
@@ -89,7 +91,7 @@ export class ASTViewerWidget extends UIComponent {
 
         const body = HTMLUtils.createDiv("ast-viewer-body");
 
-        this.addChild(new SynTreeNode(this, body, this.synFile));
+        this.addChild(new SynTreeNode(this, body, this.synDocument.getTree()));
 
         this.addHtmlElement(header);
         this.addHtmlElement(body);
@@ -101,7 +103,7 @@ export class ASTViewerWidget extends UIComponent {
 
     }
 
-    onSynTreeChanged(editor: Editor, synFile: SynFile) {
+    onSynTreeChanged(editor: Editor, synDocument: SynDocument) {
         // Save scroll position before redraw
         const body = this.getUnderlyingElement()?.querySelector(".ast-viewer-body");
         if (body) {
@@ -109,11 +111,11 @@ export class ASTViewerWidget extends UIComponent {
             this.scrollLeft = body.scrollLeft;
         }
 
-        this.synFile = synFile;
+        this.synDocument = synDocument;
         this.editor = editor;
-        if (this.synFile) {
+        if (this.synDocument) {
             let newCollapsedNodes = new Set<string>();
-            for (const node of new SynRecursiveIterator(this.synFile)) {
+            for (const node of new SynRecursiveIterator(this.synDocument.getTree())) {
                 if (this.wasCollapsed(node)) {
                     newCollapsedNodes.add(node.toTreeRepr());
                 }
@@ -125,7 +127,7 @@ export class ASTViewerWidget extends UIComponent {
     }
 
     wasCollapsed(node: SynNode) {
-        if (!(node instanceof SynElementImpl)) return false;
+        if (!(node instanceof SynASTElementImpl)) return false;
         return this.collapsedNodes.has(node.toTreeRepr());
     }
 
@@ -232,13 +234,12 @@ class SynTreeNode extends UIComponent {
     draw() {
         this.setInnerHTML("");
 
-        if (this.node instanceof SynElementImpl || this.node instanceof SynFileImpl) {
+        if (this.node instanceof SynASTElementImpl || this.node instanceof SynTreeImpl) {
             this.drawElement();
         } else if (this.node instanceof SynTokenNode) {
             this.drawToken();
         } else if (this.node instanceof SynErrorNode) {
             this.drawError();
-
         }
     }
 

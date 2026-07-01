@@ -4,7 +4,7 @@ import {JsVariableDeclaration} from "./JsVariableDeclaration";
 import {JsExpr} from "../expr/JsExpr";
 import {JsCodeBlock} from "../JsCodeBlock";
 import {ASTNode} from "../../../../../core/lang/syntax/builder/parser/nodes/ASTNode";
-import {SynNodeVisitor} from "../../../../../core/lang/syntax/visitors/SynNodeVisitor";
+import {SynNodeVisitor} from "../../../../../core/lang/syntax/utils/visitors/SynNodeVisitor";
 import {JsSynVisitor} from "../visitors/JsSynVisitor";
 
 /**
@@ -26,9 +26,9 @@ export class JsForIStatement extends JsStatement {
 
         let base = this.declarator instanceof JsVariableDeclaration ? 0 : 1;
 
-        this.cond = this.findNthChildOfType(JsExpr, base) ?? null;
-        this.incr = this.findNthChildOfType(JsExpr, base + 1) ?? null;
-        this.body = this.findNthChildOfType(JsCodeBlock, 0)!;
+        this.cond = this.getNthChildOfType(JsExpr, base) ?? null;
+        this.incr = this.getNthChildOfType(JsExpr, base + 1) ?? null;
+        this.body = this.getNthChildOfType(JsCodeBlock, 0)!;
     }
 
     getDeclarator() {
@@ -50,8 +50,8 @@ export class JsForIStatement extends JsStatement {
     accept(visitor: SynNodeVisitor) {
         if (visitor instanceof JsSynVisitor) {
             visitor.visitForIStatement(this);
-        } else {
-            super.accept(visitor);
         }
+
+        super.accept(visitor);
     }
 }

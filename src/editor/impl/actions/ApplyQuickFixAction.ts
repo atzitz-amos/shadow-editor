@@ -4,7 +4,7 @@ import {KeybindContextDescriptor} from "../../../core/keybinds/context/KeybindCo
 import {Key} from "../../../core/keybinds/Keybind";
 import {GlobalState} from "../../../core/global/GlobalState";
 import {CodeProblem} from "../../../core/lang/inspections/problems/CodeProblem";
-import {SynModificationTree} from "../../../core/lang/syntax/tree/SynModificationTree";
+import {SynModificationTree} from "../../../core/lang/syntax/writer/template/SynModificationTree";
 
 /**
  *

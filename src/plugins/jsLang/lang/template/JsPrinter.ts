@@ -20,14 +20,14 @@ import {JsBooleanLiteral} from "../syntax/literal/JsBooleanLiteral";
 import {JsNullLiteral} from "../syntax/literal/JsNullLiteral";
 import {JsUndefinedLiteral} from "../syntax/literal/JsUndefinedLiteral";
 import {JsArrayLiteral} from "../syntax/literal/JsArrayLiteral";
-import {SynElement} from "../../../../core/lang/syntax/api/SynElement";
+import {SynASTElement} from "../../../../core/lang/syntax/api/tree/SynASTElement";
 import {JsDeclarator} from "../syntax/statements/JsDeclarator";
 import {JsReturnStatement} from "../syntax/statements/JsReturnStatement";
 import {JsBreakStatement} from "../syntax/statements/JsBreakStatement";
 import {JsSwitchCase, JsSwitchStatement} from "../syntax/statements/JsSwitchStatement";
 import {JsEmptyStatement} from "../syntax/statements/JsEmptyStatement";
-import {SynFile} from "../../../../core/lang/syntax/api/SynFile";
-import {AbstractSynTemplate} from "../../../../core/lang/syntax/tree/AbstractSynTemplate";
+import {SynFile} from "../../../../core/lang/syntax/api/filesystem/SynFile";
+import {AbstractSynTemplate} from "../../../../core/lang/syntax/writer/template/AbstractSynTemplate";
 import {SynTokenNode} from "../../../../core/lang/syntax/impl/SynTokenNode";
 import {SynErrorNode} from "../../../../core/lang/syntax/impl/SynErrorNode";
 import {JsVariableDeclaration} from "../syntax/statements/JsVariableDeclaration";
@@ -369,7 +369,7 @@ export class JsPrinter extends JsSynVisitor implements SynPrinter {
         });
     }
 
-    visitElement(element: SynElement) {
+    visitElement(element: SynASTElement) {
         super.visitElement(element);
     }
 

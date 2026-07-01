@@ -1,6 +1,6 @@
 import {ASTNode} from "../../../../../core/lang/syntax/builder/parser/nodes/ASTNode";
 import {JsExpr} from "./JsExpr";
-import {SynNodeVisitor} from "../../../../../core/lang/syntax/visitors/SynNodeVisitor";
+import {SynNodeVisitor} from "../../../../../core/lang/syntax/utils/visitors/SynNodeVisitor";
 import {JsSynVisitor} from "../visitors/JsSynVisitor";
 
 /**
@@ -15,8 +15,8 @@ export class JsArrayAccessExpr extends JsExpr {
 
     constructor(node: ASTNode) {
         super(node);
-        this.array = this.findNthChildOfType(JsExpr, 0)!;
-        this.index = this.findNthChildOfType(JsExpr, 1)!;
+        this.array = this.getNthChildOfType(JsExpr, 0)!;
+        this.index = this.getNthChildOfType(JsExpr, 1)!;
     }
 
     getArrayName(): JsExpr {
@@ -34,8 +34,8 @@ export class JsArrayAccessExpr extends JsExpr {
     accept(visitor: SynNodeVisitor) {
         if (visitor instanceof JsSynVisitor) {
             visitor.visitArrayAccessExpr(this);
-        } else {
-            super.accept(visitor);
         }
+
+        super.accept(visitor);
     }
 }

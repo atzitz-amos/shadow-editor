@@ -1,5 +1,5 @@
 import {Editor} from "../../../../editor/Editor";
-import {SynFile} from "../api/SynFile";
+import {SynFile} from "../api/filesystem/SynFile";
 import {GlobalState} from "../../../global/GlobalState";
 import {SynTreeChangedEvent} from "../../../../editor/core/lang/events/SynTreeChangedEvent";
 

@@ -1,6 +1,6 @@
 import {JsStatement} from "./JsStatement";
 import {ASTNode} from "../../../../../core/lang/syntax/builder/parser/nodes/ASTNode";
-import {SynNodeVisitor} from "../../../../../core/lang/syntax/visitors/SynNodeVisitor";
+import {SynNodeVisitor} from "../../../../../core/lang/syntax/utils/visitors/SynNodeVisitor";
 import {JsSynVisitor} from "../visitors/JsSynVisitor";
 import {JsIdentifier} from "../literal/JsIdentifier";
 import {JsVariableDeclaration} from "./JsVariableDeclaration";
@@ -25,8 +25,8 @@ export class JsForInStatement extends JsStatement {
 
         let base = this.declarator instanceof JsVariableDeclaration ? 0 : 1;
 
-        this.expr = this.findNthChildOfType(JsExpr, base)!;
-        this.body = this.findNthChildOfType(JsCodeBlock, 0)!;
+        this.expr = this.getNthChildOfType(JsExpr, base)!;
+        this.body = this.getNthChildOfType(JsCodeBlock, 0)!;
     }
 
     getDeclarator() {
@@ -44,8 +44,8 @@ export class JsForInStatement extends JsStatement {
     accept(visitor: SynNodeVisitor) {
         if (visitor instanceof JsSynVisitor) {
             visitor.visitForInStatement(this);
-        } else {
-            super.accept(visitor);
         }
+
+        super.accept(visitor);
     }
 }

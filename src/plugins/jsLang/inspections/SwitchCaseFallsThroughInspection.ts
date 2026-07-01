@@ -2,15 +2,15 @@ import {InspectionBase} from "../../../core/lang/inspections/Inspection";
 import {InspectionSeverity} from "../../../core/lang/inspections/InspectionSeverity";
 import {ProblemsHolder} from "../../../core/lang/inspections/problems/ProblemsHolder";
 import {LanguageBase} from "../../../core/lang/LanguageBase";
-import {SynNodeVisitor} from "../../../core/lang/syntax/visitors/SynNodeVisitor";
+import {SynNodeVisitor} from "../../../core/lang/syntax/utils/visitors/SynNodeVisitor";
 import JsLang from "../lang/JsLang";
 import {JsSynVisitor} from "../lang/syntax/visitors/JsSynVisitor";
 import {JsSwitchStatement} from "../lang/syntax/statements/JsSwitchStatement";
 import {JsReturnStatement} from "../lang/syntax/statements/JsReturnStatement";
 import {JsBreakStatement} from "../lang/syntax/statements/JsBreakStatement";
 import {QuickFix} from "../../../core/lang/inspections/quickfix/QuickFix";
-import {SynModificationTree} from "../../../core/lang/syntax/tree/SynModificationTree";
-import {SynElement} from "../../../core/lang/syntax/api/SynElement";
+import {SynModificationTree} from "../../../core/lang/syntax/writer/template/SynModificationTree";
+import {SynASTElement} from "../../../core/lang/syntax/api/tree/SynASTElement";
 import {JsSynTemplate} from "../lang/template/JsSynTemplate";
 
 /**
@@ -51,7 +51,7 @@ export default class SwitchCaseFallsThroughInspection extends InspectionBase {
 }
 
 class SwitchCaseFallsThroughQuickFix extends QuickFix {
-    applyFix(element: SynElement, synModTree: SynModificationTree): void {
+    applyFix(element: SynASTElement, synModTree: SynModificationTree): void {
         synModTree.insertBefore(element, new JsSynTemplate("break"));
     }
 }

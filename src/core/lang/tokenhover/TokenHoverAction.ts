@@ -1,5 +1,5 @@
 import {Token} from "../syntax/builder/tokens/Token";
-import {SynFile} from "../syntax/api/SynFile";
+import {SynFile} from "../syntax/api/filesystem/SynFile";
 import {LanguageBase} from "../LanguageBase";
 import {EditorBehaviorContext} from "../../../editor/core/behaviors/context/EditorBehaviorContext";
 

@@ -1,8 +1,8 @@
-import {SynDeclaration} from "../../../../../core/lang/syntax/impl/SynDeclaration";
+import {SynDeclaration} from "../../../../../core/lang/syntax/impl/reference/SynDeclaration";
 import {ASTNode} from "../../../../../core/lang/syntax/builder/parser/nodes/ASTNode";
 import {SynTokenNode} from "../../../../../core/lang/syntax/impl/SynTokenNode";
 import {SynErrorNode} from "../../../../../core/lang/syntax/impl/SynErrorNode";
-import {SynNodeVisitor} from "../../../../../core/lang/syntax/visitors/SynNodeVisitor";
+import {SynNodeVisitor} from "../../../../../core/lang/syntax/utils/visitors/SynNodeVisitor";
 import {JsSynVisitor} from "../visitors/JsSynVisitor";
 import {JsExpr} from "../expr/JsExpr";
 import {JsVariableDeclaration} from "./JsVariableDeclaration";
@@ -21,12 +21,12 @@ export class JsDeclarator extends SynDeclaration {
     constructor(node: ASTNode) {
         super(node);
 
-        this.name = this.findNthChild(0) as SynTokenNode | SynErrorNode;
+        this.name = this.getNthChild(0) as SynTokenNode | SynErrorNode;
 
-        const eqToken = this.findNthChild(1);
+        const eqToken = this.getNthChild(1);
         if (eqToken instanceof SynTokenNode) {
             this.equToken = eqToken;
-            this.expr = this.findNthChild(2) as JsExpr;
+            this.expr = this.getNthChild(2) as JsExpr;
         } else {
             this.equToken = null;
             this.expr = null;
@@ -62,9 +62,9 @@ export class JsDeclarator extends SynDeclaration {
     accept(visitor: SynNodeVisitor) {
         if (visitor instanceof JsSynVisitor) {
             visitor.visitDeclarator(this);
-        } else {
-            super.accept(visitor);
         }
+
+        super.accept(visitor);
     }
 
     isConst() {

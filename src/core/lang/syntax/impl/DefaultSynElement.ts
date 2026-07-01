@@ -1,4 +1,4 @@
-import {SynElementImpl} from "./SynElementImpl";
+import {SynASTElementImpl} from "./tree/SynASTElementImpl";
 import {ASTNode} from "../builder/parser/nodes/ASTNode";
 
 /**
@@ -7,7 +7,7 @@ import {ASTNode} from "../builder/parser/nodes/ASTNode";
  * @date 11/25/2025
  * @since 1.0.0
  */
-export class DefaultSynElement extends SynElementImpl {
+export class DefaultSynElement extends SynASTElementImpl {
     constructor(private node: ASTNode) {
         super(node);
     }

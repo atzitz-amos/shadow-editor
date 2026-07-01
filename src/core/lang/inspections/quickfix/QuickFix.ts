@@ -1,5 +1,5 @@
 import {SynNode} from "../../syntax/api/SynNode";
-import {SynModificationTree} from "../../syntax/tree/SynModificationTree";
+import {SynModificationTree} from "../../syntax/writer/template/SynModificationTree";
 
 /**
  *

@@ -1,12 +1,12 @@
-import {SynNode} from "../api/SynNode";
-import {SourceModificationRecord} from "../writer/SourceModificationRecord";
+import {SynNode} from "../../api/SynNode";
+import {SourceModificationRecord} from "../SourceModificationRecord";
 import {AbstractSynTemplate} from "./AbstractSynTemplate";
-import {TextRange} from "../../../../editor/core/coordinate/range/TextRange";
-import {SourceRewriter} from "../writer/SourceRewriter";
-import {LanguageBase} from "../../LanguageBase";
-import {SynElement} from "../api/SynElement";
-import {SynTokenNode} from "../impl/SynTokenNode";
-import {TokenType} from "../builder/tokens/TokenType";
+import {TextRange} from "../../../../../editor/core/coordinate/range/TextRange";
+import {SourceRewriter} from "../SourceRewriter";
+import {LanguageBase} from "../../../LanguageBase";
+import {SynASTElement} from "../../api/tree/SynASTElement";
+import {SynTokenNode} from "../../impl/SynTokenNode";
+import {TokenType} from "../../builder/tokens/TokenType";
 
 /**
  *
@@ -53,7 +53,7 @@ export class SynModificationTree {
 
         // we modify the parent children and set it to synthetic so that it will be rewritten by the SourceRewriter
         (parent as any).children = [...siblings.slice(0, index), newNode, ...siblings.slice(index)];
-        (parent as SynElement).setSynthetic();
+        (parent as SynASTElement).setSynthetic();
     }
 
     public insertAfter(node: SynNode, newNode: AbstractSynTemplate) {
@@ -69,14 +69,14 @@ export class SynModificationTree {
 
         // we modify the parent children and set it to synthetic so that it will be rewritten by the SourceRewriter
         (parent as any).children = [...siblings.slice(0, index + 1), newNode, ...siblings.slice(index + 1)];
-        (parent as SynElement).setSynthetic();
+        (parent as SynASTElement).setSynthetic();
     }
 
     removeNode(node: SynNode) {
         this.modifications.push(new SourceModificationRecord(node.getTextRange(), ""));
     }
 
-    replaceToken(parent: SynElement, token: SynTokenNode, type: TokenType, value: string) {
+    replaceToken(parent: SynASTElement, token: SynTokenNode, type: TokenType, value: string) {
         this.modifications.push(new SourceModificationRecord(token.getTextRange(), value));
     }
 }
