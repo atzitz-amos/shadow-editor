@@ -7,12 +7,12 @@ import {LangSupport} from "../LangSupport";
 import {Document} from "../../../editor/core/document/Document";
 import {LanguageBase} from "../LanguageBase";
 import {ASTBuilder} from "../syntax/builder/parser/builder/ASTBuilder";
-import {EmptyKillSignal} from "../../utils/KillSignal";
+import {KillSignalTriggeredError, TimeoutKillSignal} from "../../utils/KillSignal";
 import {Logger} from "vite";
 import {UseLogger} from "../../logging/logger/LoggerDecorators";
 import {SynSuiteWindowRenderer} from "./renderer/SynSuiteWindowRenderer";
-import {SynDocumentImpl} from "../syntax/impl/document/SynDocumentImpl";
 import {SynDocument} from "../syntax/api/document/SynDocument";
+import {SynDocumentManager} from "../syntax/manager/SynDocumentManager";
 
 /**
  *
@@ -30,7 +30,7 @@ export class SynSuiteEngine {
         return this.instance;
     }
 
-    public snapshot(key: string, pluginId: string, description?: string) {
+    public async snapshot(key: string, pluginId: string, description?: string) {
         const editor = GlobalState.getMainEditor();
 
         if (editor.getCurrentLanguage() === null) {
@@ -38,7 +38,7 @@ export class SynSuiteEngine {
             return;
         }
 
-        const document = editor.getLangService().getSynFile().getSynDocument();
+        const document = await editor.getLangService().getSynFile().getSynDocument();
         const content = editor.getOpenedDocument().getTextContent();
 
         const holder = new ProblemsHolder(document);
@@ -114,17 +114,33 @@ export class SynSuiteEngine {
 
         // Overhead
         const document = new Document(0, test.code, lang);
-        let synDocument: SynDocument = new SynDocumentImpl(document);
+        let synDocument: SynDocument = SynDocumentManager.createVirtualSynDocument(document);
         const holder = new ProblemsHolder(synDocument);
 
         const lexStart = performance.now();
         lang.createLexer().lexAll(document);
         const lexEnd = performance.now();
 
-        const astBuilder = new ASTBuilder(synDocument, synDocument.getLanguage(), new EmptyKillSignal());
-        lang.createParser(astBuilder).parse();
-        astBuilder.close();
-        const parseEnd = performance.now();
+        let astBuilder, tree, parseEnd;
+        try {
+            astBuilder = new ASTBuilder(synDocument, synDocument.getLanguage(), new TimeoutKillSignal(1000));
+            lang.createParser(astBuilder).parse();
+            tree = astBuilder.close();
+            synDocument.commit(tree, document.getModificationTimestamp());
+            parseEnd = performance.now();
+        } catch (e) {
+            if (e instanceof KillSignalTriggeredError) {
+                return new SynAutomatedTestResult(
+                    test,
+                    ["Parser timed out"],
+                    "",
+                    [],
+                    lexEnd - lexStart,
+                    0,
+                    0,
+                    true);
+            } else throw e;
+        }
 
         LangSupport.getInstance().getInspectionEngineForLanguage(lang)
             .filter(inspection => LangSupport.definingPlugin(inspection) === pluginId)

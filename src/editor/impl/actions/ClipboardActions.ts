@@ -11,16 +11,26 @@ import {ClipboardUtils} from "../../core/clipboard/ClipboardUtils";
  * @since 1.0.0
  */
 export class CopyAction extends AbstractAction {
-    id = "Copy";
-    description = "Copy the selected text to the clipboard.";
-    defaultKeybinding = {
-        key: Key.C,
-        ctrl: true,
-        alt: false,
-        shift: false
+    getName(): string {
+        return "Copy";
     }
 
-    keybindContext = KeybindContextDescriptor.IN_MAIN_EDITOR;
+    getDescription(): string {
+        return "Copy the selected text to the clipboard.";
+    }
+
+    getDefaultKeybinding() {
+        return {
+            key: Key.C,
+            ctrl: true,
+            alt: false,
+            shift: false
+        };
+    }
+
+    getKeybindContext(): KeybindContextDescriptor {
+        return KeybindContextDescriptor.IN_MAIN_EDITOR;
+    }
 
     run(ctx: KeybindContext): void {
         const editor = ctx.requireEditor();
@@ -38,16 +48,26 @@ export class CopyAction extends AbstractAction {
 
 
 export class CutAction extends AbstractAction {
-    id = "Cut";
-    description = "Cut the selected text to the clipboard.";
-    defaultKeybinding = {
-        key: Key.X,
-        ctrl: true,
-        alt: false,
-        shift: false
+    getName(): string {
+        return "Cut";
     }
 
-    keybindContext = KeybindContextDescriptor.IN_MAIN_EDITOR;
+    getDescription(): string {
+        return "Cut the selected text to the clipboard.";
+    }
+
+    getDefaultKeybinding() {
+        return {
+            key: Key.X,
+            ctrl: true,
+            alt: false,
+            shift: false
+        };
+    }
+
+    getKeybindContext(): KeybindContextDescriptor {
+        return KeybindContextDescriptor.IN_MAIN_EDITOR;
+    }
 
     run(ctx: KeybindContext): void {
         const editor = ctx.requireEditor();
@@ -66,19 +86,31 @@ export class CutAction extends AbstractAction {
 }
 
 export class PasteAction extends AbstractAction {
-    id = "Paste";
-    description = "Paste the text from the clipboard.";
-    defaultKeybinding = {
-        key: Key.V,
-        ctrl: true,
-        alt: false,
-        shift: false
+    getName(): string {
+        return "Paste";
     }
 
-    keybindContext = KeybindContextDescriptor.IN_MAIN_EDITOR;
+    getDescription(): string {
+        return "Paste the text from the clipboard.";
+    }
+
+    getDefaultKeybinding() {
+        return {
+            key: Key.V,
+            ctrl: true,
+            alt: false,
+            shift: false
+        };
+    }
+
+    getKeybindContext(): KeybindContextDescriptor {
+        return KeybindContextDescriptor.IN_MAIN_EDITOR;
+    }
 
     run(ctx: KeybindContext): void {
         const editor = ctx.requireEditor();
+
+        ctx.getEvent().preventDefault();
 
         ClipboardUtils.getClipboardText().then(text => {
             if (text) {

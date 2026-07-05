@@ -3,6 +3,10 @@ import {JsFunctionParameters} from "./JsFunctionParameters";
 import {SynTokenNode} from "../../../../../core/lang/syntax/impl/SynTokenNode";
 import {JsCodeBlock} from "../JsCodeBlock";
 import {JsStatement} from "./JsStatement";
+import {JsFunction} from "../api/JsFunction";
+import {SynNodeVisitor} from "../../../../../core/lang/syntax/utils/visitors/SynNodeVisitor";
+import {JsSynVisitor} from "../visitors/JsSynVisitor";
+import {JsLexicalGrammar} from "../../lexer/JsLexicalGrammar";
 
 /**
  *
@@ -10,7 +14,7 @@ import {JsStatement} from "./JsStatement";
  * @date 12/25/2025
  * @since 1.0.0
  */
-export class JsFunction extends JsStatement {
+export class JsFunctionStatement extends JsStatement implements JsFunction {
     private readonly name: SynTokenNode;
     private readonly parameters: JsFunctionParameters;
     private readonly body: JsCodeBlock;
@@ -26,13 +30,32 @@ export class JsFunction extends JsStatement {
 
         for (let token of this.getAllToken()) {
             if (token.getValue() === "async") {
-                this.asyncToken = token;
+                if (!this.asyncToken) this.asyncToken = token;
+                else this.name = token;
             } else if (token.getValue() === "*") {
                 this.generatorToken = token;
-            } else if (token.getValue() !== "function" && this.name === undefined) {
-                this.name = token;
+            } else if (token.token.getType() === JsLexicalGrammar.IDENTIFIER || token.token.getType() === JsLexicalGrammar.KEYWORD) {
+                if (token.getValue() !== "function" && this.name === null)
+                    this.name = token;
             }
         }
+
+        if (this.asyncToken && !this.name) {
+            this.name = this.asyncToken;
+            this.asyncToken = undefined;
+        }
+    }
+
+    isAsync(): boolean {
+        return this.asyncToken !== undefined;
+    }
+
+    isGenerator(): boolean {
+        return this.generatorToken !== undefined;
+    }
+
+    isFunctionExpr(): boolean {
+        return false;
     }
 
     getName(): string {
@@ -49,5 +72,12 @@ export class JsFunction extends JsStatement {
 
     public toDebugString(): string {
         return `(${this.node.type.debugName} ${this.getElementChildren().map(child => child.toDebugString()).join(" ")})`;
+    }
+
+    accept(visitor: SynNodeVisitor) {
+        if (visitor instanceof JsSynVisitor) {
+            visitor.visitFunctionStatement(this);
+        }
+        super.accept(visitor);
     }
 }

@@ -33,6 +33,10 @@ import {JsForOfStatement} from "../statements/JsForOfStatement";
 import {JsWhileStatement} from "../statements/JsWhileStatement";
 import {JsDoWhileStatement} from "../statements/JsDoWhileStatement";
 import {JsIfStatement} from "../statements/JsIfStatement";
+import {JsFunction} from "../api/JsFunction";
+import {JsFunctionStatement} from "../statements/JsFunctionStatement";
+import {JsFunctionExpr} from "../expr/JsFunctionExpr";
+import {JsArrowFunctionExpr} from "../expr/JsArrowFunctionExpr";
 
 /**
  *
@@ -179,6 +183,22 @@ export class JsSynVisitor extends SynNodeVisitor {
 
     visitEmptyStatement(element: JsEmptyStatement) {
         this.visitStatement(element);
+    }
+
+    visitFunction(element: JsFunction) {
+
+    }
+
+    visitFunctionStatement(element: JsFunctionStatement) {
+        this.visitFunction(element);
+    }
+
+    visitFunctionExpr(element: JsFunctionExpr) {
+        this.visitFunction(element);
+    }
+
+    visitArrowFunction(element: JsArrowFunctionExpr) {
+        this.visitFunction(element);
     }
 
     visitCodeBlock(element: JsCodeBlock) {

@@ -223,12 +223,15 @@ export class Lifecycle {
         const {PersistenceRecoveryPhase} = await import("./startup/phases/PersistenceRecoveryPhase");
         const {ServiceBeginPhase} = await import("./startup/phases/ServiceBeginPhase");
         const {AppReadyPhase} = await import("./startup/phases/AppReadyPhase");
+        const {EditorComponentsInitPhase} = await import("./startup/phases/EditorComponentsInitPhase");
 
         // Priority 20: Recover persisted data
         this.phases.push(new PersistenceRecoveryPhase(this.persistedObjects));
 
         // Priority 30: Start services
         this.phases.push(new ServiceBeginPhase(this.services, this.distantServices));
+
+        this.phases.push(new EditorComponentsInitPhase());
 
         // Priority 100: Mark app as ready
         this.phases.push(new AppReadyPhase(app));

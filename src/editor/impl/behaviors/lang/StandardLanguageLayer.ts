@@ -118,9 +118,9 @@ export class StandardLanguageLayer implements ILanguageLayer {
             if (!this.hoverRequirementsSatisfied(tokenHover, tokenAt, event.getEvent())) continue;
 
             if (tokenHover.isApplicable(ctx, tokenAt)) {
-                this.tokenHoverTimeouts.push(setTimeout(() => {
+                this.tokenHoverTimeouts.push(setTimeout(async () => {
                     this.activeTokenHovers.push(tokenHover);
-                    tokenHover.execute(ctx, editor.getLangService().getSynFile().getSynDocument().getTree(), tokenAt);
+                    tokenHover.execute(ctx, (await editor.getLangService().getSynFile().getSynDocument()).getTree(), tokenAt);
                 }, tokenHover.getDelay()));
             }
         }

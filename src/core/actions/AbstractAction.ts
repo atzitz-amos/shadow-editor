@@ -5,17 +5,33 @@ import {KeybindContext} from "../keybinds/context/KeybindContext";
 
 
 export abstract class AbstractAction {
+    private static readonly registry: Map<Class<AbstractAction>, AbstractAction> = new Map<Class<AbstractAction>, AbstractAction>();
     id: string;
-    name: string;
-    description: string;
-
-    defaultKeybinding?: Keybind;
-    keybindContext: KeybindContextDescriptor = KeybindContextDescriptor.IN_MAIN_EDITOR;
 
     constructor() {
-        this.id = Registry.getActionIdFor(this.name);
+        this.id = Registry.getActionIdFor(this.getName());
+
+        AbstractAction.registry.set(this.constructor as Class<AbstractAction>, this);
     }
 
-    abstract run(ctx: KeybindContext): void;
+    public static get class() {
+        return this.registry.get(this)!;
+    }
+
+    getId(): string {
+        return this.id;
+    }
+
+    abstract run(ctx: KeybindContext): void | Promise<void>;
+
+    abstract getName(): string;
+
+    abstract getDescription(): string;
+
+    abstract getDefaultKeybinding(): Keybind | null;
+
+    getKeybindContext(): KeybindContextDescriptor {
+        return KeybindContextDescriptor.IN_MAIN_EDITOR;
+    }
 }
 

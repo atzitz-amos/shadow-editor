@@ -3,15 +3,22 @@ import {Key} from "../../../core/keybinds/Keybind";
 import {KeybindContext} from "../../../core/keybinds/context/KeybindContext";
 
 export class SelectAllAction extends AbstractAction {
-    name = 'SelectAll';
-    description = 'Select all text in the editor.';
+    getName(): string {
+        return 'SelectAll';
+    }
 
-    defaultKeybinding = {
-        key: Key.A,
-        ctrl: true,
-        alt: false,
-        shift: false
-    };
+    getDescription(): string {
+        return 'Select all text in the editor.';
+    }
+
+    getDefaultKeybinding() {
+        return {
+            key: Key.A,
+            ctrl: true,
+            alt: false,
+            shift: false
+        };
+    }
 
     run(ctx: KeybindContext) {
         const editor = ctx.requireEditor();
@@ -25,11 +32,19 @@ export class SelectAllAction extends AbstractAction {
 export class SelectDoubleClickAction extends AbstractAction {
     static readonly DELIMITER = /[\s.,;:!?(){}[\]<>]/;
 
-    name = 'SelectDoubleClick';
-    description = 'Select word under the caret.';
-    defaultKeybinding = {
-        key: Key.LeftDoubleClick,
-        shift: false
+    getName(): string {
+        return 'SelectDoubleClick';
+    }
+
+    getDescription(): string {
+        return 'Select word under the caret.';
+    }
+
+    getDefaultKeybinding() {
+        return {
+            key: Key.LeftDoubleClick,
+            shift: false
+        };
     }
 
     run(ctx: KeybindContext) {
@@ -44,11 +59,19 @@ export class SelectDoubleClickAction extends AbstractAction {
 
 
 export class SelectTripleClickAction extends AbstractAction {
-    name = 'SelectTripleClick';
-    description = 'Select the whole line.';
-    defaultKeybinding = {
-        key: Key.LeftTripleClick,
-        shift: false
+    getName(): string {
+        return 'SelectTripleClick';
+    }
+
+    getDescription(): string {
+        return 'Select the whole line.';
+    }
+
+    getDefaultKeybinding() {
+        return {
+            key: Key.LeftTripleClick,
+            shift: false
+        };
     }
 
     run(ctx: KeybindContext) {

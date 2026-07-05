@@ -7,6 +7,7 @@ import {JsExprParser} from "./JsExprParser";
 import {ASTGrammar, ASTType} from "../../../../core/lang/syntax/builder/parser/nodes/ASTGrammar";
 import {ASTBuilder} from "../../../../core/lang/syntax/builder/parser/builder/ASTBuilder";
 import {Marker} from "../../../../core/lang/syntax/builder/parser/builder/Marker";
+import {SynScopeType} from "../../../../core/lang/syntax/api/scope/SynScopeType";
 
 export enum OperatorPrecedence {
     COMMA = 10,
@@ -103,19 +104,114 @@ export class JsPrattParser {
     }
 
     parseObjectLiteral(start: Marker) {
-        // TODO
+        while (!this.builder.done() && !this.builder.isNext(JsLexicalGrammar.RBRACE)) {
+            if (this.builder.consumeIf(JsLexicalGrammar.COMMA)) {
+                continue;
+            }
+
+            if (this.builder.isNext(JsLexicalGrammar.ELLIPSIS)) {
+                const spreadStart = this.builder.mark();
+                this.builder.advance(); // Consume '...'
+                this.parseExpression(OperatorPrecedence.ASSIGNMENT);
+                spreadStart.done(JsGrammar.SpreadExpr);
+            } else {
+                const keyStart = this.builder.mark();
+                let isComputed = false;
+
+                // 1. Property Key
+                if (this.builder.consumeIf(JsLexicalGrammar.LBRACKET)) {
+                    isComputed = true;
+                    this.parseExpression(); // Computed key expression
+                    this.builder.expect(JsLexicalGrammar.RBRACKET).orError("Expected ']'");
+                } else {
+                    const keyToken = this.builder.advance();
+                    if (!keyToken) {
+                        this.builder.errorVirtual("Unexpected end of object literal");
+                        keyStart.rollback();
+                        break;
+                    }
+                }
+
+                // 2. Property Value or Shorthand
+                if (this.builder.consumeIf(JsLexicalGrammar.COLON)) {
+                    keyStart.done(JsGrammar.ObjectPropertyKey);
+
+                    const valStart = this.builder.mark();
+                    this.parseExpression(OperatorPrecedence.ASSIGNMENT);
+                    valStart.done(JsGrammar.ObjectPropertyValue);
+                } else if (!isComputed && this.builder.lookBehind()?.getType() === JsLexicalGrammar.IDENTIFIER) {
+                    // Shorthand property (e.g., { myVar })
+                    keyStart.done(JsGrammar.ObjectPropertyShorthand);
+                } else {
+                    keyStart.done(JsGrammar.ObjectPropertyKey);
+                    this.builder.errorVirtual("Expected ':' after property key");
+                }
+            }
+        }
+
+        this.builder.expect(JsLexicalGrammar.RBRACE).orError("Expected '}'");
+        start.done(JsGrammar.ObjectLiteral);
     }
 
-    tryParseGroupingOrArrowFunction(start: Marker) {
-        // TODO
+    tryParseGroupingOrArrowFunction(start: Marker, hasAsyncToken: boolean = false) {
+        const rollbackMarker = this.builder.mark();
+
+        // Speculatively parse as function parameters: (a, b)
+        this.parseFunctionArguments();
+
+        if (this.builder.isNext(JsLexicalGrammar.RPAREN)) {
+            const next = this.builder.lookAhead(1);
+            if (next && next.getValue() === "=>") {
+                rollbackMarker.done(JsGrammar.FunctionArguments);
+                this.builder.advance(); // Consume ')'
+
+                if (!this.builder.beforeNewLine()) {
+                    this.builder.advance(); // Consume '=>'
+
+                    // Arrow Function Body
+                    if (this.builder.isNext(JsLexicalGrammar.LBRACE)) {
+                        this.parseArrowFunctionBlockBody(hasAsyncToken);
+                    } else {
+                        this.parseExpression(OperatorPrecedence.ASSIGNMENT);
+                    }
+
+                    start.done(JsGrammar.ArrowFunctionExpression);
+                    return;
+                }
+            }
+        }
+
+        // Not an arrow function! Gracefully rollback state to the open parenthesis
+        this.builder.rollbackTo(rollbackMarker);
+
+        // Standard grouping expression parsing
         this.parseExpression();
         this.builder.expect(JsLexicalGrammar.RPAREN).orError("Expected ')'");
         start.done(JsGrammar.GroupExpr);
     }
 
-    tryParseIdentifierOrArrowFunction(start: Marker) {
-        // TODO
-        return start.done(JsGrammar.Identifier);
+    tryParseIdentifierOrArrowFunction(start: Marker, hasAsyncToken: boolean = false) {
+        const next = this.builder.seek();
+
+        // Differentiate `a => {}` from a simple identifier `a`
+        if (!this.builder.beforeNewLine() && next && next.getValue() === "=>") {
+            this.builder.advance(); // Consume '=>'
+
+            // Arrow Function Body
+            if (this.builder.isNext(JsLexicalGrammar.LBRACE)) {
+                this.parseArrowFunctionBlockBody(hasAsyncToken);
+            } else {
+                this.parseExpression(OperatorPrecedence.ASSIGNMENT);
+            }
+
+            start.done(JsGrammar.ArrowFunctionExpression);
+            return;
+        } else {
+            if (hasAsyncToken) {
+                this.builder.popAndError("Unexpected identifier");
+            }
+            start.done(JsGrammar.Identifier);
+        }
     }
 
     parseFunctionArguments() {
@@ -127,7 +223,16 @@ export class JsPrattParser {
                 break;
             }
         }
+
         this.parser.setIsSpreadAllowed(oldSpreadAllowed);
+    }
+
+    /**
+     * Helper to parse the `{ ... }` body of an Arrow Function.
+     * Applies `JsGrammar.CodeBlock` using your builder patterns.
+     */
+    private parseArrowFunctionBlockBody(isAsync: boolean) {
+        this.parser.parseBlock(true, true, isAsync, false, SynScopeType.Function)
     }
 
     private nud(): ErrorHandlingMode {
@@ -167,7 +272,7 @@ export class JsPrattParser {
             }
             this.parseExpression(OperatorPrecedence.PREFIX);
             start.done(JsGrammar.SpreadExpr);
-        } else if (type === JsLexicalGrammar.KEYWORD) {
+        } else if (type === JsLexicalGrammar.KEYWORD || value === "async" || value === "await") {
             this.parseKeywordNud(value, start);
         } else if (type === JsLexicalGrammar.LPAREN) {
             this.tryParseGroupingOrArrowFunction(start);
@@ -218,13 +323,32 @@ export class JsPrattParser {
                 this.myExprParser.parseSuperExpression(start);
                 break;
             case "async":
-                // TODO
-                break;
+                const notBeforeNL = !this.builder.beforeNewLine();
+
+                if (notBeforeNL && this.builder.isNext(JsLexicalGrammar.KEYWORD, "function")) {
+                    this.myExprParser.parseFunctionExpression(start, true);
+                } else {
+                    const next = this.builder.seek();
+                    if (notBeforeNL && next && next.getType() === JsLexicalGrammar.LPAREN) {
+                        this.builder.advance(); // Consume '('
+                        this.tryParseGroupingOrArrowFunction(start, true);
+                    } else if (notBeforeNL && next && next.getType() === JsLexicalGrammar.IDENTIFIER) {
+                        this.builder.advance(); // Consume the identifier (argument)
+                        this.tryParseIdentifierOrArrowFunction(start);
+                    } else {
+                        start.done(JsGrammar.Identifier);
+                    }
+                }
+                break
             case "yield":
                 this.myExprParser.parseYieldExpression(start);
                 break;
             case "await":
-                this.myExprParser.parseAwaitExpression(start);
+                if (this.parser.isAsyncAllowed()) {
+                    this.parseExpression(OperatorPrecedence.PREFIX);
+                    start.done(JsGrammar.AwaitStatement);
+                } else
+                    this.tryParseIdentifierOrArrowFunction(start);
                 break;
             default:
                 this.builder.popAndError(`Unexpected keyword '${value}'`);
@@ -252,7 +376,7 @@ export class JsPrattParser {
         } else if (type === JsLexicalGrammar.QUESTION_MARK) {
             this.parseExpression();
             this.builder.expect(JsLexicalGrammar.COLON).orError("Expected ':'");
-            this.parseExpression(OperatorPrecedence.TERNARY);
+            this.parseExpression(OperatorPrecedence.TERNARY - 1);
             marker.done(JsGrammar.TernaryExpr);
             return;
         } else if (type === JsLexicalGrammar.ASSIGNMENT_OPERATOR) {
@@ -343,7 +467,7 @@ export class JsPrattParser {
                     return 0;
             }
         } else if (type === JsLexicalGrammar.POSTFIX_OPERATOR) {
-            return OperatorPrecedence.POSTFIX;
+            return this.builder.beforeNewLine() ? 0 : OperatorPrecedence.POSTFIX;
         } else if (type === JsLexicalGrammar.KEYWORD) {
             if (token.getValue() === "instanceof") {
                 return OperatorPrecedence.INSTANCEOF_IN;

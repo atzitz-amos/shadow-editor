@@ -5,6 +5,7 @@ import {ASTBuilder} from "../../../../core/lang/syntax/builder/parser/builder/AS
 import {IParser} from "../../../../core/lang/syntax/builder/parser/IParser";
 import {Marker} from "../../../../core/lang/syntax/builder/parser/builder/Marker";
 import {SynScopeType} from "../../../../core/lang/syntax/api/scope/SynScopeType";
+import {TokenExpectation} from "../../../../core/lang/syntax/builder/parser/builder/TokenExpectation";
 
 
 export class JsParser implements IParser {
@@ -15,6 +16,8 @@ export class JsParser implements IParser {
     public myIsInLoop = false;
 
     private readonly myExprParser: JsExprParser;
+
+    private isDoWhileASI: boolean = false;
 
     constructor(private builder: ASTBuilder) {
         this.myExprParser = new JsExprParser(this, builder);
@@ -64,12 +67,21 @@ export class JsParser implements IParser {
         return this.myIsSpreadAllowed;
     }
 
+    isSemicolonOrASI() {
+        return this.builder.done()
+            || this.builder.isNext(JsLexicalGrammar.RBRACE)
+            || this.builder.isNext(JsLexicalGrammar.SEMICOLON)
+            || this.builder.beforeNewLine();
+    }
+
     insertSemicolonIfNeeded(): boolean {
-        if (this.builder.beforeNewLine() || this.builder.done() || this.builder.isNext(JsLexicalGrammar.RBRACE)) {
+        if (this.isDoWhileASI) {
+            this.isDoWhileASI = false;
             return true;
         }
-        return !!this.builder.consumeIf(JsLexicalGrammar.SEMICOLON);
+        if (!!this.builder.consumeIf(JsLexicalGrammar.SEMICOLON)) return true;
 
+        return this.builder.beforeNewLine() || this.builder.done() || this.builder.isNext(JsLexicalGrammar.RBRACE);
     }
 
     parse(): void {
@@ -80,7 +92,9 @@ export class JsParser implements IParser {
         if (this.builder.isNext(JsLexicalGrammar.LBRACE)) {
             this.parseBlock(true);
         } else {
+            const start = this.builder.mark();
             this.parseStatementOrExpr();
+            start.done(JsGrammar.CodeBlock);
         }
     }
 
@@ -111,7 +125,7 @@ export class JsParser implements IParser {
     }
 
     parseStatementOrExpr(): void {
-        if (this.builder.isNext(JsLexicalGrammar.KEYWORD)) {
+        if (this.builder.isNext(JsLexicalGrammar.KEYWORD) || this.builder.isNextOneOf(JsLexicalGrammar.IDENTIFIER, "async", "static", "await")) {
             this.parseStatement();
         } else if (this.builder.isNext(JsLexicalGrammar.LBRACE)) {
             this.parseBlock();
@@ -120,11 +134,15 @@ export class JsParser implements IParser {
             this.builder.advance(); // consume ';'
             marker.done(JsGrammar.EmptyStatement);
             return;
+        } else if (this.builder.isNext(JsLexicalGrammar.IDENTIFIER) && this.builder.lookAhead(1)?.getType() === JsLexicalGrammar.COLON) {
+            this.parseLabel();
         } else {
             this.parseExpression();
         }
 
-        this.insertSemicolonIfNeeded();
+        if (!this.insertSemicolonIfNeeded()) {
+            this.builder.errorVirtual("Expected ';'");
+        }
     }
 
     parseStatement() {
@@ -160,8 +178,8 @@ export class JsParser implements IParser {
             case "finally":
                 this.reportOutOfContextKeyword("finally outside of try block");
                 break;
-            case "static":
             case "async":
+            case "static":
             case "function":
                 this.parseFunctionDeclaration();
                 break;
@@ -219,6 +237,7 @@ export class JsParser implements IParser {
         while (this.builder.isNext(JsLexicalGrammar.KEYWORD, "else")) {
             this.parseElseIfClause();
         }
+        startMarker.done(JsGrammar.IfStatement);
     }
 
     parseIfClause(startMarker: Marker): boolean {
@@ -250,7 +269,7 @@ export class JsParser implements IParser {
     parseForStatement() {
         const marker = this.builder.mark();
         this.builder.advance(); // consume 'for'
-        this.builder.consumeIf(JsLexicalGrammar.KEYWORD, "await");
+        this.builder.consumeIf(JsLexicalGrammar.IDENTIFIER, "await");
 
         if (!this.builder.expect(JsLexicalGrammar.LPAREN).failWith("Expected '('").isValid()) {
             return marker.done(JsGrammar.ForIStatement);
@@ -348,6 +367,10 @@ export class JsParser implements IParser {
             .then(JsLexicalGrammar.LPAREN).failWith("Expected '('")
             .then(() => this.parseExpression())
             .then(JsLexicalGrammar.RPAREN).failWith("Expected ')'")
+
+        if (!this.builder.isNext(JsLexicalGrammar.SEMICOLON) && !this.builder.beforeNewLine()) {
+            this.isDoWhileASI = true;
+        }
 
         marker.done(JsGrammar.DoWhileStatement);
     }
@@ -448,8 +471,16 @@ export class JsParser implements IParser {
     parseFunctionDeclaration() {
         const marker = this.builder.mark();
 
-        this.builder.consumeIf(JsLexicalGrammar.KEYWORD, "static");
-        let isAsync = !!this.builder.consumeIf(JsLexicalGrammar.KEYWORD, "async");
+        const isStatic = !!this.builder.consumeIf(JsLexicalGrammar.IDENTIFIER, "static");
+        if (isStatic && this.builder.beforeNewLine()) {
+            marker.rollback();
+            return this.parseExpression();
+        }
+        let isAsync = !!this.builder.consumeIf(JsLexicalGrammar.IDENTIFIER, "async");
+        if (isAsync && this.builder.beforeNewLine()) {
+            marker.rollback();
+            return this.parseExpression();
+        }
 
         let isValid = this.builder.expect(JsLexicalGrammar.KEYWORD, "function").orError("Expected 'function'"); // consume 'function'
         if (!isValid) {
@@ -474,7 +505,7 @@ export class JsParser implements IParser {
         const marker = this.builder.mark();
 
         this.builder.advance(); // consume 'return'
-        if (!this.insertSemicolonIfNeeded()) {
+        if (!this.isSemicolonOrASI()) {
             this.parseExpression();
         }
         marker.done(JsGrammar.ReturnStatement);
@@ -483,7 +514,7 @@ export class JsParser implements IParser {
     parseBreakStatement() {
         const marker = this.builder.mark();
         this.builder.advance(); // consume 'break'
-        if (!this.insertSemicolonIfNeeded()) {
+        if (!this.isSemicolonOrASI()) {
             this.builder.expect(JsLexicalGrammar.IDENTIFIER).orError("Expected label identifier");
         }
         marker.done(JsGrammar.BreakStatement);
@@ -493,7 +524,7 @@ export class JsParser implements IParser {
         const marker = this.builder.mark();
 
         this.builder.advance(); // consume 'continue'
-        if (!this.insertSemicolonIfNeeded()) {
+        if (!this.isSemicolonOrASI()) {
             this.builder.expect(JsLexicalGrammar.IDENTIFIER).orError("Expected label identifier");
         }
         marker.done(JsGrammar.ContinueStatement);
@@ -503,6 +534,11 @@ export class JsParser implements IParser {
         const marker = this.builder.mark();
 
         this.builder.advance(); // consume 'throw'
+
+        if (this.isSemicolonOrASI()) {
+            this.builder.errorVirtual("Expected expression");
+            return marker.done(JsGrammar.ThrowStatement);
+        }
         this.parseExpression();
         marker.done(JsGrammar.ThrowStatement);
     }
@@ -542,14 +578,28 @@ export class JsParser implements IParser {
     parseClassElement() {
         const start = this.builder.mark();
 
+        const isStatic = this.builder.consumeIf(JsLexicalGrammar.IDENTIFIER, "static");
+        const isAsync = this.builder.consumeIf(JsLexicalGrammar.IDENTIFIER, "async");
         const isPrivateField = this.builder.consumeIf(JsLexicalGrammar.HASHTAG); // If it's a private field or method
-        const isStatic = !!this.builder.consumeIf(JsLexicalGrammar.KEYWORD, "static");
-        const isAsync = !!this.builder.consumeIf(JsLexicalGrammar.KEYWORD, "async");
+
+        if (isStatic || isAsync) {
+            // We try to treat it as an identifier
+            if (this.builder.isNext(JsLexicalGrammar.LPAREN)) {
+                start.rollback();
+                return this.parseClassMethodDefinition(start, false)
+            } else if (this.builder.isNext(JsLexicalGrammar.ASSIGNMENT_OPERATOR, '=') || this.builder.isNext(JsLexicalGrammar.SEMICOLON) || this.builder.beforeNewLine()) {
+                start.rollback();
+                if (isAsync && !isStatic) {
+                    this.builder.popAndError("Class field cannot be async");
+                }
+                return this.parseClassFieldDefinition(start);
+            }
+        }
 
         const next = this.builder.seek()!;
-        if (next.isType(JsLexicalGrammar.IDENTIFIER)) {
+        if (next.isType(JsLexicalGrammar.IDENTIFIER) || next.isType(JsLexicalGrammar.KEYWORD)) {
             if (this.builder.lookAhead(1)?.isType(JsLexicalGrammar.LPAREN)) {
-                this.parseClassMethodDefinition(start, isAsync);
+                this.parseClassMethodDefinition(start, !!isAsync);
             } else {
                 if (isAsync) {
                     this.builder.popAndError("Class field cannot be async");
@@ -559,24 +609,24 @@ export class JsParser implements IParser {
         } else if (next.isType(JsLexicalGrammar.MATHEMATICAL_OPERATOR) && next.getValue() === "*") {
             this.builder.advance(); // consume '*'
             if (this.builder.isNext(JsLexicalGrammar.LBRACKET))
-                this.parseClassComputedPropertyMethod(start, isAsync, true);
+                this.parseClassComputedPropertyMethod(start, !!isAsync, true);
             else
-                this.parseClassMethodDefinition(start, isAsync, true);
+                this.parseClassMethodDefinition(start, !!isAsync, true);
         } else if (next.isType(JsLexicalGrammar.KEYWORD)) {
             if (isPrivateField) {
-                this.builder.markErrorAndRemove(isPrivateField!, "Unexpected '#'");
+                this.builder.markErrorAndRemove(isPrivateField, "Unexpected '#'");
             }
             if (next.getValue() === "constructor") {
                 if (isAsync) {
-                    this.builder.popAndError("Constructor cannot be async");
+                    this.builder.markErrorAndRemove(isAsync, "Constructor cannot be async");
                 }
                 if (isStatic) {
-                    this.builder.popAndError("Constructor cannot be static");
+                    this.builder.markErrorAndRemove(isStatic, "Constructor cannot be static");
                 }
                 this.parseClassMethodDefinition(start, false);
             } else if (next.getValue() === "get" || next.getValue() === "set") {
                 if (!this.builder.lookAhead(1)!.isType(JsLexicalGrammar.IDENTIFIER)) {
-                    this.parseClassMethodDefinition(start, isAsync);
+                    this.parseClassMethodDefinition(start, !!isAsync);
                 } else {
                     if (isAsync) {
                         this.builder.popAndError("Getter/Setter cannot be async");
@@ -591,7 +641,7 @@ export class JsParser implements IParser {
             this.builder.advance(); // consume ';'
             start.done(JsGrammar.EmptyStatement);
         } else if (next.isType(JsLexicalGrammar.LBRACKET)) {
-            this.parseClassComputedPropertyMethod(start, isAsync);
+            this.parseClassComputedPropertyMethod(start, !!isAsync);
         } else {
             this.builder.advance(); // consume the token
             this.builder.popAndError("Unexpected token in class body");
@@ -634,9 +684,14 @@ export class JsParser implements IParser {
     }
 
     parseClassFieldDefinition(start: Marker) {
-        this.builder.expect(JsLexicalGrammar.IDENTIFIER).failWith("Field requires name");
+        if (this.builder.isNext(JsLexicalGrammar.KEYWORD)) this.builder.advance();
+        else this.builder.expect(JsLexicalGrammar.IDENTIFIER).failWith("Field requires name");
+
         if (this.builder.consumeIf(JsLexicalGrammar.ASSIGNMENT_OPERATOR, "=")) {
             this.parseExpression();
+        }
+        if (!this.insertSemicolonIfNeeded()) {
+            this.builder.errorVirtual("Expected ';'");
         }
         start.done(JsGrammar.ClassField);
     }
@@ -655,7 +710,12 @@ export class JsParser implements IParser {
 
     parseClassAccessor(start: Marker) {
         this.builder.advance(); // consume 'get' | 'set'
-        this.builder.expect(JsLexicalGrammar.IDENTIFIER).failWith("Accessor requires name")
+
+        let tokenExpectation: TokenExpectation;
+        if (this.builder.isNext(JsLexicalGrammar.KEYWORD)) tokenExpectation = this.builder.expect(JsLexicalGrammar.KEYWORD);
+        else tokenExpectation = this.builder.expect(JsLexicalGrammar.IDENTIFIER);
+
+        tokenExpectation.failWith("Accessor requires name")
             .then(JsLexicalGrammar.LPAREN).failWith("Expected '('")
             .then(() => {
                 if (this.builder.lookBehind()!.getValue() === "set") {
@@ -686,6 +746,14 @@ export class JsParser implements IParser {
         this.builder.expect(JsLexicalGrammar.RPAREN).orError("Expected ')'");
         this.parseBlockStatement();
         marker.done(JsGrammar.ForIStatement);
+    }
+
+    private parseLabel() {
+        const marker = this.builder.mark();
+        this.builder.advance(); // consume label identifier
+        this.builder.expect(JsLexicalGrammar.COLON).orError("Expected ':'");
+        this.parseStatementOrExpr();
+        marker.done(JsGrammar.LabelStatement);
     }
 
     private parseExpression(allowComma: boolean = true): void {

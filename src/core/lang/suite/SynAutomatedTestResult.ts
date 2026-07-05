@@ -14,11 +14,13 @@ export class SynAutomatedTestResult {
                        public actualInspections: SynSuiteInspection[],
                        public lexerTime: number,
                        public parserTime: number,
-                       public inspectionTime: number) {
+                       public inspectionTime: number,
+                       public timed_out: boolean = false) {
 
     }
 
     public passed(): boolean {
+        if (this.timed_out) return false;
         const treeMatches = this.test.expectedTree === this.actualTree;
         const inspectionsMatch = this.test.expectedInspections.length === this.actualInspections.length &&
             this.test.expectedInspections.every(expected => {

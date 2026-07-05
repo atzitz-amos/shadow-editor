@@ -62,6 +62,14 @@
             import {ProjectFilesPaneHelper} from "./src/app/ui/full/panes/projectFiles/ProjectFilesPaneHelper";
             import {ActiveWorkspaceHelper} from "./src/core/global/ActiveWorkspaceHelper";
 
+            window.disableTimebomb = () => {
+                window["isParseTimeBombDisabled"] = true;
+            }
+
+            window.enableTimebomb = () => {
+                window["isParseTimeBombDisabled"] = false;
+            }
+
             window.FaIcon = FaIcon;
             window.SimpleTooltipPopup = SimpleTooltipPopup;
             window.PopupUtilsCore = PopupUtilsCore;

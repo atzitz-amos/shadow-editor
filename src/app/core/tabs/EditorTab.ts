@@ -1,6 +1,7 @@
 import {Document} from "../../../editor/core/document/Document";
 import {ITab} from "./ITab";
 import {Registry} from "../../../editor/core/Registry";
+import {UIComponent} from "../../../core/ui/engine/components/UIComponent";
 
 /**
  *
@@ -16,6 +17,10 @@ export class EditorTab implements ITab {
 
     constructor(private readonly title: string, private readonly document: Document) {
         this.id = Registry.getTabId(this);
+    }
+
+    getComponent(): UIComponent | null {
+        return null;
     }
 
     getId(): string {

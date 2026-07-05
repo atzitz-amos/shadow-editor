@@ -1,4 +1,4 @@
-import {Document} from "../../../editor/core/document/Document";
+import {UIComponent} from "../../../core/ui/engine/components/UIComponent";
 
 /**
  *
@@ -19,5 +19,5 @@ export interface ITab {
 
     setActive(active: boolean): void;
 
-    getDocument(): Document;
+    getComponent(): UIComponent | null;
 }

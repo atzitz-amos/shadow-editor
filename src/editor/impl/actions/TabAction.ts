@@ -4,15 +4,22 @@ import {KeybindContext} from "../../../core/keybinds/context/KeybindContext";
 
 
 export class TabAction extends AbstractAction {
-    name = 'TabAction';
-    description = 'Insert a tab character at the caret position.';
+    getName(): string {
+        return 'TabAction';
+    }
 
-    defaultKeybinding = {
-        key: Key.TAB,
-        ctrl: false,
-        alt: false,
-        shift: false
-    };
+    getDescription(): string {
+        return 'Insert a tab character at the caret position.';
+    }
+
+    getDefaultKeybinding() {
+        return {
+            key: Key.TAB,
+            ctrl: false,
+            alt: false,
+            shift: false
+        };
+    }
 
     run(ctx: KeybindContext) {
         const editor = ctx.requireEditor();

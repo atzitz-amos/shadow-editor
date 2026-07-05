@@ -6,6 +6,7 @@ import {FSNodeEntry} from "../../../../../../core/workspace/filesystem/tree/FSNo
 import {TabsManager} from "../../../../../core/tabs/TabsManager";
 import {UIHooks} from "../../../../../../core/ui/engine/listeners/hooks/UIHooks";
 import {TabHooks, UICommonHooks, WorkspaceHooks} from "../../../../../core/UICommonHooks";
+import {EditorTab} from "../../../../../core/tabs/EditorTab";
 
 /**
  *
@@ -29,7 +30,9 @@ export class SEditorBreadcrumbs extends UIComponent {
         const workspace = ActiveWorkspaceHelper.getInstance();
         if (!workspace) return;
 
-        let entry: FSNodeEntry | undefined | null = TabsManager.getInstance().getActiveTab()?.getDocument().getAssociatedFile();
+        let activeTab = TabsManager.getInstance().getActiveTab();
+        if (!activeTab || !(activeTab instanceof EditorTab)) return;
+        let entry: FSNodeEntry | undefined | null = activeTab.getDocument().getAssociatedFile();
         let active = true;
         if (!entry) return;
         if (ProjectFilesPaneHelper.hasFocus()) {

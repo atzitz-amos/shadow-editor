@@ -7,7 +7,7 @@ import {DocumentInsertEvent} from "./events/DocumentInsertEvent";
 import {DocumentModificationEvent} from "./events/DocumentModificationEvent";
 import {DocumentDeleteEvent} from "./events/DocumentDeleteEvent";
 import {WorkspaceFile} from "../../../core/workspace/filesystem/tree/WorkspaceFile";
-import {TokenCache} from "../lang/TokenCache";
+import {TokenCache} from "./TokenCache";
 import {Scheduler} from "../../../core/scheduler/Scheduler";
 import {GlobalState} from "../../../core/global/GlobalState";
 import {DocumentSaveRequestEvent} from "./events/DocumentSaveRequestEvent";
@@ -16,12 +16,15 @@ import {UnsafeFlagsService} from "../../../core/sync/flags/UnsafeFlagsService";
 import {UnsafeFlags} from "../../../core/sync/flags/UnsafeFlags";
 import {TrackedRange} from "../coordinate/range/TrackedRange";
 import {UndoRedoActionStack} from "../undo/UndoRedoActionStack";
+import {EditorDocumentManager} from "./EditorDocumentManager";
 
 /**
  * Represents an opened file in the editor
  * Store the language, the line-breaks, the components and the AST of a file */
 export class Document {
     private editor: Editor | null = null;
+
+    private modificationTimestamp: number = 0;
 
     private data: EditorRawData;
     private file: WorkspaceFile | null = null;
@@ -198,6 +201,7 @@ export class Document {
 
     public insertText(offset: Offset, text: string): void {
         this.data.insert(offset, text);
+        this.modificationTimestamp++;
 
         this.updateTrackedRanges(offset, text.length);
         this.recomputeLines(offset, text, false);
@@ -212,6 +216,7 @@ export class Document {
 
     public deleteAt(at: Offset, n: number): string {
         let deleted = this.data.delete(at, n);
+        this.modificationTimestamp++;
 
         this.updateTrackedRanges(at, -n);
         this.recomputeLines(at, deleted, true);
@@ -228,6 +233,8 @@ export class Document {
 
     public replaceRange(range: TextRange, text: string): string {
         let deleted = this.data.delete(range.start, range.getLength());
+        this.modificationTimestamp++;
+
         this.recomputeLines(range.start, deleted, true);
 
         if (this.isLinkedToEditor()) {
@@ -253,6 +260,14 @@ export class Document {
         const range = new TrackedRange(start, end, isGreedyLeft, isGreedyRight);
         this.addTrackedRange(range);
         return range;
+    }
+
+    getTokenAt(offset: Offset) {
+        return this.tokenCache.getTokenAt(offset);
+    }
+
+    getModificationTimestamp() {
+        return this.modificationTimestamp;
     }
 
     private parseLines(): void {
@@ -343,9 +358,5 @@ export class Document {
                     range.setEnd(range.getEnd() + delta);
             }
         }
-    }
-
-    getTokenAt(offset: Offset) {
-        return this.tokenCache.getTokenAt(offset);
     }
 }

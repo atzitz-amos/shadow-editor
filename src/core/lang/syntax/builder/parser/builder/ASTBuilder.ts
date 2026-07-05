@@ -143,6 +143,11 @@ export class ASTBuilder {
         return next !== null && next.isType(type) && (!value || next.getValue() === value);
     }
 
+    isNextOneOf(type: TokenType, ...value: string[]) {
+        let next = this.seek();
+        return next !== null && next.isType(type) && value.includes(next.getValue());
+    }
+
     expect(type: TokenType, value: string | null = null, shouldConsumeOnError: boolean = false): TokenExpectation {
         if (this.isNext(type, value)) {
             this.isErrorState = false;
@@ -254,11 +259,32 @@ export class ASTBuilder {
         return new SynTreeImpl(this.language, this.production, this.document);
     }
 
-    beforeNewLine() {
-        return this.stream.seek()?.getValue() === "\n";
+    beforeNewLine(): boolean {
+        let backwardIndex = -1;
+        let backwardToken = this.stream.seekN(backwardIndex);
+
+        while (backwardToken && (backwardToken.isCommentToken() || backwardToken.shouldSkip())) {
+            if (backwardToken.getValue() === "\n") {
+                return true;
+            }
+            backwardToken = this.stream.seekN(--backwardIndex);
+        }
+
+        let forwardIndex = 0;
+        let forwardToken = this.stream.seekN(forwardIndex);
+
+        while (forwardToken && (forwardToken.shouldSkip() || forwardToken.isCommentToken())) {
+            if (forwardToken.getValue() === "\n") {
+                return true;
+            }
+            forwardToken = this.stream.seekN(++forwardIndex);
+        }
+
+        return false;
     }
 
     wasInvalid() {
         return this.wasInErrorState;
     }
 }
+

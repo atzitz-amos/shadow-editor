@@ -18,11 +18,11 @@ import {JsUndefinedLiteral} from "../syntax/literal/JsUndefinedLiteral";
 import {JsReturnStatement} from "../syntax/statements/JsReturnStatement";
 import {JsSwitchCase, JsSwitchStatement} from "../syntax/statements/JsSwitchStatement";
 import {JsBreakStatement} from "../syntax/statements/JsBreakStatement";
-import {JsFunction} from "../syntax/statements/JsFunction";
+import {JsFunctionStatement} from "../syntax/statements/JsFunctionStatement";
 import {JsLiteral} from "../syntax/literal/JsLiteral";
 import {JsExpr} from "../syntax/expr/JsExpr";
 import {JsSpreadExpr} from "../syntax/expr/JsSpreadExpr";
-import {JsFunctionParameters} from "../syntax/statements/JsFunctionParameters";
+import {JsFunctionParameter, JsFunctionParameters} from "../syntax/statements/JsFunctionParameters";
 import {JsVariableDeclaration} from "../syntax/statements/JsVariableDeclaration";
 import {JsEmptyStatement} from "../syntax/statements/JsEmptyStatement";
 import {JsPrefixOp} from "../syntax/expr/JsPrefixOp";
@@ -34,6 +34,8 @@ import {JsForIStatement} from "../syntax/statements/JsForIStatement";
 import {JsWhileStatement} from "../syntax/statements/JsWhileStatement";
 import {JsForOfStatement} from "../syntax/statements/JsForOfStatement";
 import {JsIfStatement} from "../syntax/statements/JsIfStatement";
+import {JsFunctionExpr} from "../syntax/expr/JsFunctionExpr";
+import {JsArrowFunctionExpr} from "../syntax/expr/JsArrowFunctionExpr";
 
 export class JsGrammar {
     public static readonly CodeBlock = ASTGrammar.createCodeBlock("CodeBlock", JsCodeBlock.builder());
@@ -61,10 +63,11 @@ export class JsGrammar {
     public static readonly YieldStatement = ASTGrammar.create("YieldStatement");
     public static readonly AwaitStatement = ASTGrammar.create("AwaitStatement");
     public static readonly DebuggerStatement = ASTGrammar.create("DebuggerStatement");
+    public static readonly LabelStatement = ASTGrammar.create("LabelStatement");
 
-    public static readonly FunctionDeclaration = ASTGrammar.create("FunctionDeclaration", JsFunction.builder());
+    public static readonly FunctionDeclaration = ASTGrammar.create("FunctionDeclaration", JsFunctionStatement.builder());
     public static readonly FunctionArguments = ASTGrammar.create("FunctionArguments", JsFunctionParameters.builder());
-    public static readonly FunctionArgument = ASTGrammar.create("FunctionArgument");
+    public static readonly FunctionArgument = ASTGrammar.create("FunctionArgument", JsFunctionParameter.builder());
     public static readonly ClassDeclaration = ASTGrammar.create("ClassDeclaration");
     public static readonly ClassBody = ASTGrammar.createCodeBlock("ClassBody", JsCodeBlock.builder());
     public static readonly ClassMethodDeclaration = ASTGrammar.create("ClassMethod");
@@ -100,8 +103,8 @@ export class JsGrammar {
     public static readonly GroupExpr = ASTGrammar.create("GroupExpr", JsGroupExpr.builder());
 
     public static readonly ClassExpression = ASTGrammar.create("ClassExpression", JsExpr.builder());
-    public static readonly FunctionExpression = ASTGrammar.create("FunctionExpression", JsExpr.builder());
-    public static readonly ArrowFunctionExpression = ASTGrammar.create("ArrowFunctionExpression", JsExpr.builder());
+    public static readonly FunctionExpression = ASTGrammar.create("FunctionExpression", JsFunctionExpr.builder());
+    public static readonly ArrowFunctionExpression = ASTGrammar.create("ArrowFunctionExpression", JsArrowFunctionExpr.builder());
 
 
     public static readonly CommaExpr = ASTGrammar.create("CommaExpr", JsExpr.builder());

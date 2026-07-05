@@ -8,6 +8,7 @@ import {Document} from "../../../../../editor/core/document/Document";
 import {SynTree} from "../../api/tree/SynTree";
 import {LanguageBase} from "../../../LanguageBase";
 import {SynTreeImpl} from "../tree/SynTreeImpl";
+import {SynFile} from "../../api/filesystem/SynFile";
 
 /**
  *
@@ -17,12 +18,18 @@ import {SynTreeImpl} from "../tree/SynTreeImpl";
  */
 export class SynDocumentImpl implements SynDocument {
     private static DOCUMENT_ID = 0;
-    private readonly id: number;
-    private readonly problemsHolder: ProblemsHolder;
-    private readonly language: LanguageBase;
-    private tree: SynTree;
 
-    constructor(private readonly document: Document) {
+    private readonly id: number;
+
+    private modificationTimestamp: number = 0;
+    private dirty: boolean = true;
+
+    private tree: SynTree;
+    private readonly language: LanguageBase;
+
+    private readonly problemsHolder: ProblemsHolder;
+
+    constructor(private readonly document: Document, private readonly synFile: SynFile | null) {
         this.id = SynDocumentImpl.DOCUMENT_ID++;
 
         this.problemsHolder = new ProblemsHolder(this);
@@ -31,12 +38,29 @@ export class SynDocumentImpl implements SynDocument {
         this.tree = new SynTreeImpl(this.language, [], this);
     }
 
-    setTree(synTree: SynTree) {
+    isDirty(): boolean {
+        return this.dirty;
+    }
+
+    markDirty(flag: boolean): void {
+        this.dirty =  flag;
+    }
+
+    commit(synTree: SynTree, timestamp: number) {
         this.tree = synTree;
+        this.modificationTimestamp = timestamp;
     }
 
     getAssociatedFile(): WorkspaceFile | null {
         return this.document.getAssociatedFile();
+    }
+
+    getSynFile(): SynFile | null {
+        return this.synFile;
+    }
+
+    getModificationTimestamp(): number {
+        return this.modificationTimestamp;
     }
 
     getURI(): EditorURI {

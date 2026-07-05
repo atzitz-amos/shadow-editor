@@ -17,14 +17,21 @@ function handleClearSelection(caret: Caret, shouldMove: boolean) {
 }
 
 export class MoveCaretLeftAction extends AbstractAction {
-    name = 'MoveCaretLeft';
-    description = 'Move the caret to the left by one character.';
+    getName(): string {
+        return 'MoveCaretLeft';
+    }
 
-    defaultKeybinding = {
-        key: Key.ARROW_LEFT,
-        ctrl: false,
-        alt: false,
-    };
+    getDescription(): string {
+        return 'Move the caret to the left by one character.';
+    }
+
+    getDefaultKeybinding() {
+        return {
+            key: Key.ARROW_LEFT,
+            ctrl: false,
+            alt: false,
+        };
+    }
 
     run(ctx: KeybindContext) {
         const editor = ctx.requireEditor();
@@ -44,15 +51,21 @@ export class MoveCaretLeftAction extends AbstractAction {
 }
 
 export class MoveCaretRightAction extends AbstractAction {
-    name = 'MoveCaretRight';
-    description = 'Move the caret to the right by one character.';
+    getName(): string {
+        return 'MoveCaretRight';
+    }
 
-    defaultKeybinding = {
-        key: Key.ARROW_RIGHT,
-        ctrl: false,
-        alt: false,
+    getDescription(): string {
+        return 'Move the caret to the right by one character.';
+    }
 
-    };
+    getDefaultKeybinding() {
+        return {
+            key: Key.ARROW_RIGHT,
+            ctrl: false,
+            alt: false,
+        };
+    }
 
     run(ctx: KeybindContext) {
         const editor = ctx.requireEditor();
@@ -71,15 +84,21 @@ export class MoveCaretRightAction extends AbstractAction {
 }
 
 export class MoveCaretUpAction extends AbstractAction {
-    name = 'MoveCaretUp';
-    description = 'Move the caret up one line.';
+    getName(): string {
+        return 'MoveCaretUp';
+    }
 
-    defaultKeybinding = {
-        key: Key.ARROW_UP,
-        ctrl: false,
-        alt: false,
+    getDescription(): string {
+        return 'Move the caret up one line.';
+    }
 
-    };
+    getDefaultKeybinding() {
+        return {
+            key: Key.ARROW_UP,
+            ctrl: false,
+            alt: false,
+        };
+    }
 
     run(ctx: KeybindContext) {
         const editor = ctx.requireEditor();
@@ -106,14 +125,21 @@ export class MoveCaretUpAction extends AbstractAction {
 }
 
 export class MoveCaretDownAction extends AbstractAction {
-    name = 'MoveCaretDown';
-    description = 'Move the caret down one line.';
+    getName(): string {
+        return 'MoveCaretDown';
+    }
 
-    defaultKeybinding = {
-        key: Key.ARROW_DOWN,
-        ctrl: false,
-        alt: false,
-    };
+    getDescription(): string {
+        return 'Move the caret down one line.';
+    }
+
+    getDefaultKeybinding() {
+        return {
+            key: Key.ARROW_DOWN,
+            ctrl: false,
+            alt: false,
+        };
+    }
 
     run(ctx: KeybindContext) {
         const editor = ctx.requireEditor();
@@ -139,14 +165,21 @@ export class MoveCaretDownAction extends AbstractAction {
 }
 
 export class MoveCaretToStartAction extends AbstractAction {
-    name = 'MoveCaretToStart';
-    description = 'Move the caret to the start of the line.';
+    getName(): string {
+        return 'MoveCaretToStart';
+    }
 
-    defaultKeybinding = {
-        key: Key.HOME,
-        ctrl: false,
-        alt: false
-    };
+    getDescription(): string {
+        return 'Move the caret to the start of the line.';
+    }
+
+    getDefaultKeybinding() {
+        return {
+            key: Key.HOME,
+            ctrl: false,
+            alt: false
+        };
+    }
 
     run(ctx: KeybindContext) {
         const editor = ctx.requireEditor();
@@ -160,14 +193,21 @@ export class MoveCaretToStartAction extends AbstractAction {
 }
 
 export class MoveCaretToEndAction extends AbstractAction {
-    name = 'MoveCaretToEnd';
-    description = 'Move the caret to the end of the line.';
+    getName(): string {
+        return 'MoveCaretToEnd';
+    }
 
-    defaultKeybinding = {
-        key: Key.END,
-        ctrl: false,
-        alt: false
-    };
+    getDescription(): string {
+        return 'Move the caret to the end of the line.';
+    }
+
+    getDefaultKeybinding() {
+        return {
+            key: Key.END,
+            ctrl: false,
+            alt: false
+        };
+    }
 
     run(ctx: KeybindContext) {
         const editor = ctx.requireEditor();
@@ -185,14 +225,21 @@ export class MoveCaretToEndAction extends AbstractAction {
 }
 
 export class CtrlMoveCaretLeftAction extends AbstractAction {
-    name = 'CtrlMoveCaretLeft';
-    description = 'Move the caret to the beginning of the previous word.';
+    getName(): string {
+        return 'CtrlMoveCaretLeft';
+    }
 
-    defaultKeybinding = {
-        key: Key.ARROW_LEFT,
-        ctrl: true,
-        alt: false,
-    };
+    getDescription(): string {
+        return 'Move the caret to the beginning of the previous word.';
+    }
+
+    getDefaultKeybinding() {
+        return {
+            key: Key.ARROW_LEFT,
+            ctrl: true,
+            alt: false,
+        };
+    }
 
     run(ctx: KeybindContext) {
         const editor = ctx.requireEditor();
@@ -206,14 +253,21 @@ export class CtrlMoveCaretLeftAction extends AbstractAction {
 }
 
 export class CtrlMoveCaretRightAction extends AbstractAction {
-    name = 'CtrlMoveCaretRight';
-    description = 'Move the caret to the beginning of the next word.';
+    getName(): string {
+        return 'CtrlMoveCaretRight';
+    }
 
-    defaultKeybinding = {
-        key: Key.ARROW_RIGHT,
-        ctrl: true,
-        alt: false,
-    };
+    getDescription(): string {
+        return 'Move the caret to the beginning of the next word.';
+    }
+
+    getDefaultKeybinding() {
+        return {
+            key: Key.ARROW_RIGHT,
+            ctrl: true,
+            alt: false,
+        };
+    }
 
     run(ctx: KeybindContext) {
         const editor = ctx.requireEditor();

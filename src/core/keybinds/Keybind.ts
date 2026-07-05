@@ -71,6 +71,26 @@ export enum Key {
     TILDE = "~",
     CAPS_LOCK = "CapsLock",
     INSERT = "Insert",
+
+    // Numpad Keys
+    NUMPAD0 = "Numpad0",
+    NUMPAD1 = "Numpad1",
+    NUMPAD2 = "Numpad2",
+    NUMPAD3 = "Numpad3",
+    NUMPAD4 = "Numpad4",
+    NUMPAD5 = "Numpad5",
+    NUMPAD6 = "Numpad6",
+    NUMPAD7 = "Numpad7",
+    NUMPAD8 = "Numpad8",
+    NUMPAD9 = "Numpad9",
+    NUMPAD_ENTER = "NumpadEnter",
+    NUMPAD_ADD = "NumpadAdd",
+    NUMPAD_SUBTRACT = "NumpadSubtract",
+    NUMPAD_MULTIPLY = "NumpadMultiply",
+    NUMPAD_DIVIDE = "NumpadDivide",
+    NUMPAD_DECIMAL = "NumpadDecimal",
+
+    // Mouse Clicks
     LeftClick = "LClick",
     LeftDoubleClick = "LDoubleClick",
     LeftTripleClick = "LTripleClick",
@@ -84,36 +104,36 @@ export type Keybind = {
     ctrl?: boolean | null;
     shift?: boolean | null;
     alt?: boolean | null;
-    context?: KeybindContextDescriptor;
+    priority?: number;
 };
 
 export class Shortcut {
-    public static ctrl(key: Key, context?: KeybindContextDescriptor): Keybind {
-        return {key, ctrl: true, context};
+    public static ctrl(key: Key): Keybind {
+        return {key, ctrl: true};
     }
 
-    public static ctrlAlt(key: Key, context?: KeybindContextDescriptor): Keybind {
-        return {key, ctrl: true, alt: true, context};
+    public static ctrlAlt(key: Key): Keybind {
+        return {key, ctrl: true, alt: true};
     }
 
-    public static ctrlShift(key: Key, context?: KeybindContextDescriptor): Keybind {
-        return {key, ctrl: true, shift: true, context};
+    public static ctrlShift(key: Key): Keybind {
+        return {key, ctrl: true, shift: true};
     }
 
-    public static altShift(key: Key, context?: KeybindContextDescriptor): Keybind {
-        return {key, alt: true, shift: true, context};
+    public static altShift(key: Key): Keybind {
+        return {key, alt: true, shift: true};
     }
 
-    public static ctrlShiftAlt(key: Key, context?: KeybindContextDescriptor): Keybind {
-        return {key, ctrl: true, shift: true, alt: true, context};
+    public static ctrlShiftAlt(key: Key): Keybind {
+        return {key, ctrl: true, shift: true, alt: true};
     }
 
-    public static shift(key: Key, context?: KeybindContextDescriptor): Keybind {
-        return {key, shift: true, context};
+    public static shift(key: Key): Keybind {
+        return {key, shift: true};
     }
 
-    public static alt(key: Key, context?: KeybindContextDescriptor): Keybind {
-        return {key, alt: true, context};
+    public static alt(key: Key): Keybind {
+        return {key, alt: true};
     }
 }
 
@@ -169,4 +189,21 @@ export class ModifierKeyHolder {
         this.isShiftPressed = false;
         this.isMouseDown = false;
     }
+
+    clearCtrl(): void {
+        this.isCtrlPressed = false;
+    }
+
+    clearShift() {
+        this.isShiftPressed = false;
+    }
+
+    clearAlt() {
+        this.isAltPressed = false;
+    }
+
+    clearMouseDown(): void {
+        this.isMouseDown = false;
+    }
 }
+

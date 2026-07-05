@@ -355,7 +355,7 @@ export class JsPrinter extends JsSynVisitor implements SynPrinter {
     }
 
     visitFile(file: SynFile) {
-        this.visitTree(file.getSynDocument().getTree())
+        this.visitTree(file.getCachedSynDocument()!.getTree())
     }
 
     visitTree(tree: SynTree) {

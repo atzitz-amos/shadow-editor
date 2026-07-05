@@ -4,6 +4,7 @@ import {JsGrammar} from "./JsGrammar";
 import {ErrorHandlingMode, JsPrattParser, OperatorPrecedence} from "./JsPrattParser";
 import {ASTBuilder} from "../../../../core/lang/syntax/builder/parser/builder/ASTBuilder";
 import {Marker} from "../../../../core/lang/syntax/builder/parser/builder/Marker";
+import {SynScopeType} from "../../../../core/lang/syntax/api/scope/SynScopeType";
 
 export class JsExprParser {
     private myPrattParser: JsPrattParser;
@@ -178,22 +179,12 @@ export class JsExprParser {
             this.builder.advance(); // consume function name
         }
 
-        const oldIsInFunction = this.parser.isInFunction();
-        const oldIsAsyncAllowed = this.parser.isAsyncAllowed();
-        const oldIsInGenerator = this.parser.isInGenerator();
-
-        this.parser.setInFunction(true);
-        this.parser.setInAsync(isAsync);
-        this.parser.setInGenerator(isGenerator);
-
         this.builder.expect(JsLexicalGrammar.LPAREN).failWith("Expected '('")
             .then(() => this.parseFunctionArgumentDeclaration())
             .then(JsLexicalGrammar.RPAREN).failWith("Expected ')'")
-            .then(() => this.parser.parseBlock(true));
+            .then(() => this.parser.parseBlock(true, true, isAsync, isGenerator, SynScopeType.Function));
 
-        this.parser.setInFunction(oldIsInFunction);
-        this.parser.setInAsync(oldIsAsyncAllowed);
-        this.parser.setInGenerator(oldIsInGenerator);
+        start.done(JsGrammar.FunctionExpression);
     }
 
     parseClassExpression(start: Marker) {
@@ -243,17 +234,6 @@ export class JsExprParser {
 
         if (!this.parser.isInGenerator()) {
             this.builder.errorOn(token!, "'yield' used outside of a generator function");
-        }
-    }
-
-    parseAwaitExpression(start: Marker) {
-        const token = this.builder.lookBehind(); // get 'await'
-        if (!this.parser.insertSemicolonIfNeeded()) {
-            this.parseExpression();
-        }
-        start.done(JsGrammar.AwaitStatement);
-        if (!this.parser.isAsyncAllowed()) {
-            this.builder.errorOn(token!, "'await' used outside of an async function");
         }
     }
 }

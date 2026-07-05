@@ -107,6 +107,7 @@ export class Editor {
         this.document.saveCaretOffset();
 
         this.caretModel.removeAllIncludingPrimary();
+        this.widgetManager.clearAllOverlays();
 
         this.document.linkEditor(null);
         this.document = document;

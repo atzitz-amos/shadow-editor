@@ -15,6 +15,7 @@ export function UseLogger(name: string) {
             enumerable: true,
             configurable: true
         });
+
         return constructor;
     };
 }

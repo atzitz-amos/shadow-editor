@@ -10,22 +10,39 @@ import {Key, ModifierKeyHolder} from "../../../core/keybinds/Keybind";
  * @since 1.0.0
  */
 export class EnterAction extends AbstractAction {
-    id = "Enter";
-    description = "Inserts a new line at the current cursor position.";
-
-    defaultKeybinding = {
-        key: Key.ENTER,
-        ctrl: null,
-        shift: null,
-        alt: false
+    getName(): string {
+        return "Enter";
     }
-    keybindContext = KeybindContextDescriptor.IN_MAIN_EDITOR;
+
+    getDescription(): string {
+        return "Inserts a new line at the current cursor position.";
+    }
+
+    getDefaultKeybinding() {
+        return {
+            key: Key.ENTER,
+            ctrl: null,
+            shift: null,
+            alt: false
+        };
+    }
+
+    getKeybindContext(): KeybindContextDescriptor {
+        return KeybindContextDescriptor.IN_MAIN_EDITOR;
+    }
 
     run(ctx: KeybindContext): void {
         const editor = ctx.requireEditor();
-        
+
         editor.getCaretModel().forEachCaret(caret => {
             const line = editor.getOpenedDocument().getLineAt(caret.getOffset());
+
+            if (ctx.getEvent().shiftKey) {
+                editor.insertText(line.getEnd(), "\n");
+                caret.moveToOffset(line.getEnd() + 1, false);
+                return;
+            }
+
             let indent = 0;
             if (line) {
                 indent = line.getText().match(/^\s*/)?.[0].length || 0;

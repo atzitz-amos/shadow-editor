@@ -13,17 +13,25 @@ import {SynModificationTree} from "../../../core/lang/syntax/writer/template/Syn
  * @since 1.0.0
  */
 export class ApplyQuickFixAction extends AbstractAction {
-    name = "ApplyQuickFix";
+    getName(): string {
+        return "ApplyQuickFix";
+    }
 
-    description = "Applies the selected quick fix to the code.";
+    getDescription(): string {
+        return "Applies the selected quick fix to the code.";
+    }
 
-    keybindContext = KeybindContextDescriptor.IN_MAIN_EDITOR;
+    getKeybindContext(): KeybindContextDescriptor {
+        return KeybindContextDescriptor.IN_MAIN_EDITOR;
+    }
 
-    defaultKeybinding = {
-        key: Key.ENTER,
-        ctrl: false,
-        alt: true,
-        shift: false
+    getDefaultKeybinding() {
+        return {
+            key: Key.ENTER,
+            ctrl: false,
+            alt: true,
+            shift: false
+        };
     }
 
 

@@ -225,6 +225,7 @@ div.ast-viewer-toggle-follow.is-active {
     display: flex;
     flex-direction: column;
     gap: 8px;
+    cursor: pointer;
 }
 
 .syn-test-card-header {

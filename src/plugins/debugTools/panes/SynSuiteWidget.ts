@@ -9,9 +9,14 @@ import {SynAutomatedTestResult} from "../../../core/lang/suite/SynAutomatedTestR
 import {NavPaneContainer} from "../../../core/ui/lib/menu/NavPaneContainer";
 import {PopupUtilsCore} from "../../../core/ui/lib/popup/PopupUtilsCore";
 import {SynDocument} from "../../../core/lang/syntax/api/document/SynDocument";
+import {WorkspaceFile} from "../../../core/workspace/filesystem/tree/WorkspaceFile";
+import {IdeActionButton} from "../../../core/ui/lib/buttons/IdeActionButton";
+import SynSuiteSnapshotAction from "../actions/SynSuiteSnapshotAction";
+import {UIVariant} from "../../../core/ui/lib/theme/UIVariant";
+import {SynSuiteWindowRenderer} from "../../../core/lang/suite/renderer/SynSuiteWindowRenderer";
 
 export class SynSuiteWidget extends UIComponent {
-    private synDocument: any | null = null;
+    private synDocument: SynDocument | null = null;
     private navPane!: NavPaneContainer;
     private selectedPluginId: string | null = null;
 
@@ -37,8 +42,8 @@ export class SynSuiteWidget extends UIComponent {
         return this.navPane;
     }
 
-    public getActiveFile(): any | null {
-        return this.synDocument?.getAssociatedFile();
+    public getActiveFile(): WorkspaceFile | null {
+        return this.synDocument?.getAssociatedFile() ?? null;
     }
 
     public getSelectedPluginId(): string | null {
@@ -67,29 +72,17 @@ export class SynSuiteDashboardView extends UIComponent {
     draw(): void {
         this.setInnerHTML("");
 
-        // 1. Snapshot Capture Trigger Controls
         const activeFile = this.controller.getActiveFile();
         if (activeFile) {
             const snapContainer = HTMLUtils.createElement<HTMLDivElement>("div.syn-snap-box", this.getUnderlyingElement());
             snapContainer.style.marginBottom = "12px";
 
-            // Using a structural dot modifier so your loop assigns the custom element correctly
-            const snapBtn = document.createElement("ide-button") as HTMLElement;
-            snapBtn.className = "syn-suite-snapshot";
-            snapBtn.innerText = "Snapshot current file";
-            snapContainer.appendChild(snapBtn);
+            const snapBtn = new IdeActionButton("Snapshot current file", SynSuiteSnapshotAction.class, UIVariant.SECONDARY);
+            snapBtn.getClassList().add("syn-suite-snapshot");
+            this.addChildTo(snapBtn, snapContainer);
 
-            snapBtn.addEventListener("click", async () => {
-                const testKey = await PopupUtilsCore.askString("Enter a unique test key for this snapshot", "Key");
-                if (!testKey) return;
 
-                const description = await PopupUtilsCore.askString("Enter a description for this snapshot", "Description");
-                if (!description) return;
-
-                const activePlugin = this.controller.getSelectedPluginId() ?? "default-plugin";
-                SynSuiteEngine.getInstance().snapshot(testKey, activePlugin, "Manual editor workspace state save");
-                this.redraw();
-            });
+            snapBtn.afterActionRan(() => this.redraw());
         }
 
         // 2. Render Stored Plugin Matrix Groups
@@ -113,6 +106,7 @@ export class SynSuiteDashboardView extends UIComponent {
                 this.controller.getNavPane().pushPane(pluginId, detailsView);
             });
         });
+        this.drawChildren();
     }
 }
 
@@ -161,17 +155,21 @@ export class SynSuiteDetailsView extends UIComponent {
             const card = HTMLUtils.createElement<HTMLDivElement>("div.syn-test-card", wrapper);
             const isPassed = res.passed();
 
+            card.onclick = () => {
+                new SynSuiteWindowRenderer().render(this.runResults, testKey);
+            };
+
             card.innerHTML = `
                 <div class="syn-test-card-header">
                     <span class="syn-test-name">${testKey}</span>
                     <span class="syn-status-badge ${isPassed ? 'passed' : 'failed'}">
-                        ${isPassed ? 'PASSED' : 'FAILED'}
+                        ${isPassed ? 'PASSED' : res.timed_out ? 'TIMED OUT' : 'FAILED'}
                     </span>
                 </div>
                 <div class="syn-metric-row">
                     <span>Lex: <span class="syn-metric-value">${res.lexerTime.toFixed(1)}ms</span></span>
-                    <span>Parse: <span class="syn-metric-value">${res.parserTime.toFixed(1)}ms</span></span>
-                    <span>Inspect: <span class="syn-metric-value">${res.inspectionTime.toFixed(1)}ms</span></span>
+                    <span>Parse: <span class="syn-metric-value">${res.timed_out ? "∞" : res.parserTime.toFixed(1)}ms</span></span>
+                    <span>Inspect: <span class="syn-metric-value">${res.timed_out ? "-" : res.inspectionTime.toFixed(1)}ms</span></span>
                 </div>
                 ${!isPassed ? '<div class="patch-action-container" style="margin-top: 6px;"></div>' : ''}
             `;

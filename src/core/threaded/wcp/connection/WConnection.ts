@@ -1,6 +1,6 @@
 import {WCPPort} from "../model/WCPPort";
 import {WCPEndpoint} from "../model/WCPEndpoint";
-import {WorkerRemote} from "../remote/WorkerRemote";
+import {WCPEndpointHandler, WorkerRemote} from "../remote/WorkerRemote";
 
 export class WConnection {
     constructor(
@@ -13,8 +13,8 @@ export class WConnection {
         return this.port;
     }
 
-    public endpoint<TRequest, TResponse>(endpoint: WCPEndpoint<TRequest, TResponse>): WRemoteEndpoint<TRequest, TResponse> {
-        return new WRemoteEndpoint<TRequest, TResponse>(this, endpoint);
+    public getRemote(): WorkerRemote {
+        return this.remote;
     }
 
     public send<TRequest, TResponse>(
@@ -29,21 +29,12 @@ export class WConnection {
     public publish<TRequest>(endpoint: WCPEndpoint<TRequest, any>, payload: TRequest): void {
         this.remote.publish(this.port, endpoint, payload);
     }
-}
 
-export class WRemoteEndpoint<TRequest, TResponse> {
-    constructor(
-        private readonly connection: WConnection,
-        private readonly endpoint: WCPEndpoint<TRequest, TResponse>
-    ) {
-    }
-
-    public send(payload: TRequest, timeoutMs?: number): Promise<TResponse> {
-        return this.connection.send(this.endpoint, payload, timeoutMs);
-    }
-
-    public publish(payload: TRequest): void {
-        this.connection.publish(this.endpoint, payload);
+    public registerEndpoint<TRequest, TResponse>(
+        endpoint: WCPEndpoint<TRequest, TResponse>,
+        handler: WCPEndpointHandler<TRequest, TResponse>
+    ): WConnection {
+        this.remote.registerEndpoint(this.port, endpoint, handler);
+        return this;
     }
 }
-

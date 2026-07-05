@@ -1,4 +1,8 @@
 export class ClipboardUtils {
+    public static sanitizeCRLF(text: string): string {
+        return text.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+    }
+
     public static async copyToClipboard(text: string): Promise<boolean> {
         // Returns whether the copy operation was successful
         if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -36,7 +40,7 @@ export class ClipboardUtils {
     public static async getClipboardText(): Promise<string | null> {
         if (navigator.clipboard && navigator.clipboard.readText) {
             try {
-                return await navigator.clipboard.readText();
+                return ClipboardUtils.sanitizeCRLF(await navigator.clipboard.readText());
             } catch (err) {
                 console.error("Failed to read from clipboard:", err);
                 return null;

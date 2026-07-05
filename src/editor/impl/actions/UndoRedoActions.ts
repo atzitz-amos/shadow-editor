@@ -10,17 +10,26 @@ import {KeybindContextDescriptor} from "../../../core/keybinds/context/KeybindCo
  * @since 1.0.0
  */
 export class UndoAction extends AbstractAction {
-    name = "Undo";
-    description = "Undo the last action";
-
-    defaultKeybinding = {
-        key: Key.Z,
-        ctrl: true,
-        alt: false,
-        shift: false
+    getName(): string {
+        return "Undo";
     }
 
-    keybindContext = KeybindContextDescriptor.IN_MAIN_EDITOR;
+    getDescription(): string {
+        return "Undo the last action";
+    }
+
+    getDefaultKeybinding() {
+        return {
+            key: Key.Z,
+            ctrl: true,
+            alt: false,
+            shift: false
+        };
+    }
+
+    getKeybindContext(): KeybindContextDescriptor {
+        return KeybindContextDescriptor.IN_MAIN_EDITOR;
+    }
 
     run(ctx: KeybindContext): void {
         ctx.requireEditor().getUndoRedo().undo();
@@ -29,17 +38,26 @@ export class UndoAction extends AbstractAction {
 }
 
 export class RedoAction extends AbstractAction {
-    name = "Redo";
-    description = "Redo the last action";
-
-    defaultKeybinding = {
-        key: Key.Z,
-        ctrl: true,
-        alt: false,
-        shift: true
+    getName(): string {
+        return "Redo";
     }
 
-    keybindContext = KeybindContextDescriptor.IN_MAIN_EDITOR;
+    getDescription(): string {
+        return "Redo the last action";
+    }
+
+    getDefaultKeybinding() {
+        return {
+            key: Key.Z,
+            ctrl: true,
+            alt: false,
+            shift: true
+        };
+    }
+
+    getKeybindContext(): KeybindContextDescriptor {
+        return KeybindContextDescriptor.IN_MAIN_EDITOR;
+    }
 
     run(ctx: KeybindContext): void {
         ModifierKeyHolder.getInstance().clear();

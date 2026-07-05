@@ -1,5 +1,6 @@
 import {SynASTElementImpl} from "../../../../../core/lang/syntax/impl/tree/SynASTElementImpl";
 import {ASTNode} from "../../../../../core/lang/syntax/builder/parser/nodes/ASTNode";
+import {SynNodeVisitor} from "../../../../../core/lang/syntax/utils/visitors/SynNodeVisitor";
 
 /**
  *
@@ -12,5 +13,17 @@ export class JsFunctionParameters extends SynASTElementImpl {
         super(node);
     }
 
+    accept(visitor: SynNodeVisitor) {
+        super.accept(visitor);
+    }
+}
 
+export class JsFunctionParameter extends SynASTElementImpl {
+    constructor(node: ASTNode) {
+        super(node);
+    }
+
+    accept(visitor: SynNodeVisitor) {
+        super.accept(visitor);
+    }
 }

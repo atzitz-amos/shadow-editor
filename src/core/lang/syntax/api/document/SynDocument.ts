@@ -6,6 +6,7 @@ import {TextRange} from "../../../../../editor/core/coordinate/range/TextRange";
 import {WorkspaceFile} from "../../../../workspace/filesystem/tree/WorkspaceFile";
 import {SynTree} from "../tree/SynTree";
 import {LanguageBase} from "../../../LanguageBase";
+import {SynFile} from "../filesystem/SynFile";
 
 /**
  *
@@ -18,9 +19,19 @@ export interface SynDocument extends URILocatedResource {
 
     getText(): string;
 
+    commit(tree: SynTree, timestamp: number): void;
+
+    getModificationTimestamp(): number;
+
     getAssociatedFile(): WorkspaceFile | null;
 
+    getSynFile(): SynFile | null;
+
     makeTokenStream(): TokenStream;
+
+    markDirty(flag: boolean): void;
+
+    isDirty(): boolean;
 
     getProblemsHolder(): ProblemsHolder;
 

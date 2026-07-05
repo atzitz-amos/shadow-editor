@@ -14,5 +14,7 @@ export interface SynFile extends URILocatedResource {
 
     getPath(): RelativePath | null;
 
-    getSynDocument(): SynDocument;
+    getSynDocument(): Promise<SynDocument>;
+
+    getCachedSynDocument(): SynDocument | null;
 }

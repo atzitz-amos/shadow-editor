@@ -10,6 +10,19 @@ import {JsPrinter} from "./template/JsPrinter";
 
 
 export default class JsLang extends LanguageBase {
+    private static _instance: JsLang;
+
+    private constructor() {
+        super();
+
+        JsLang._instance = this;
+    }
+
+    public static get class(): JsLang {
+        if (!JsLang._instance) throw new Error("No instance of JsLang was found");
+        return JsLang._instance;
+    }
+
     public getKey(): string {
         return "javascript";
     }

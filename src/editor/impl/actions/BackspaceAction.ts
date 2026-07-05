@@ -5,14 +5,21 @@ import {EditorDeleteContext} from "../../core/behaviors/context/EditorDeleteCont
 
 
 export class BackspaceAction extends AbstractAction {
-    name = 'Backspace';
-    description = 'Delete the selected text or the character at the caret position.';
+    getName(): string {
+        return 'Backspace';
+    }
 
-    defaultKeybinding = {
-        key: Key.BACKSPACE,
-        ctrl: false,
-        alt: false,
-        shift: false
+    getDescription(): string {
+        return 'Delete the selected text or the character at the caret position.';
+    }
+
+    getDefaultKeybinding() {
+        return {
+            key: Key.BACKSPACE,
+            ctrl: false,
+            alt: false,
+            shift: false
+        };
     }
 
     run(ctx: KeybindContext) {
@@ -31,15 +38,21 @@ export class BackspaceAction extends AbstractAction {
 }
 
 export class CtrlBackspaceAction extends AbstractAction {
+    getName(): string {
+        return 'Ctrl+Backspace';
+    }
 
-    name = 'Ctrl+Backspace';
-    description = 'Delete the word before the caret position.';
+    getDescription(): string {
+        return 'Delete the word before the caret position.';
+    }
 
-    defaultKeybinding = {
-        key: Key.BACKSPACE,
-        ctrl: true,
-        alt: false,
-        shift: false
+    getDefaultKeybinding() {
+        return {
+            key: Key.BACKSPACE,
+            ctrl: true,
+            alt: false,
+            shift: false
+        };
     }
 
     run(ctx: KeybindContext) {

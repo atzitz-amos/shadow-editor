@@ -1,5 +1,8 @@
 import {KeybindContextDescriptor} from "./KeybindContextDescriptor";
 import {Editor} from "../../../editor/Editor";
+import {IPane} from "../../../app/core/panes/pane/IPane";
+import {KeybindNotApplicableAbortError} from "./KeybindNotApplicableAbortError";
+import {KeybindEventLike} from "./KeybindEventLike";
 
 /**
  *
@@ -9,10 +12,9 @@ import {Editor} from "../../../editor/Editor";
  */
 export class KeybindContext {
     private readonly editor: Editor | null;
-    private readonly pane: any; // TODO: pane
+    private readonly pane: IPane | null;
 
-
-    constructor(private readonly ctx: KeybindContextDescriptor, private readonly event: KeyboardEvent | MouseEvent, editor: Editor | null = null, pane: any = null) {
+    constructor(private readonly ctx: KeybindContextDescriptor, private readonly event: KeybindEventLike, editor: Editor | null = null, pane: IPane | null = null) {
         this.editor = editor;
         this.pane = pane;
 
@@ -50,7 +52,7 @@ export class KeybindContext {
         return (this.ctx & KeybindContextDescriptor.IN_MAIN_WINDOW) !== 0;
     }
 
-    public requirePane(): any {
+    public requirePane(): IPane {
         if (!this.pane)
             throw new Error(`No pane associated with this KeybindContext.`);
         return this.pane;
@@ -60,7 +62,11 @@ export class KeybindContext {
         return descriptor & this.ctx;
     }
 
-    public getEvent() {
+    public getEvent(): KeybindEventLike {
         return this.event;
+    }
+
+    public abort(): void {
+        throw new KeybindNotApplicableAbortError();
     }
 }

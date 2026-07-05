@@ -1,9 +1,8 @@
 import {WorkspaceFile} from "../../../core/workspace/filesystem/tree/WorkspaceFile";
 import {ITab} from "./ITab";
 import {TabsManager} from "./TabsManager";
-import {Document} from "../../../editor/core/document/Document";
 import {EditorTab} from "./EditorTab";
-import {LangSupport} from "../../../core/lang/LangSupport";
+import {EditorDocumentManager} from "../../../editor/core/document/EditorDocumentManager";
 
 /**
  *
@@ -15,6 +14,7 @@ export class EditorTabsHelper {
     public static getTabsForFile(file: WorkspaceFile): ITab[] {
         const result: ITab[] = [];
         for (const tab of TabsManager.getInstance().getAllTabs()) {
+            if (!(tab instanceof EditorTab)) continue;
             let f = tab.getDocument().getAssociatedFile();
             if (f && f.getPath().equals(file.getPath())) {
                 result.push(tab);
@@ -33,10 +33,7 @@ export class EditorTabsHelper {
     }
 
     public static async newTab(file: WorkspaceFile) {
-        let fileTypeHandler = LangSupport.getInstance().getFileTypeHandler(file);
-        const document = new Document(0, await file.getTextContent(), fileTypeHandler ? fileTypeHandler.getLanguageForFile(file) : null);
-
-        document.linkFile(file);
+        const document = await EditorDocumentManager.getDocumentForFile(file);
         TabsManager.getInstance().open(new EditorTab(file.getName(), document));
     }
 }

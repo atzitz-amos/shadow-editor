@@ -11,6 +11,7 @@ import {UIHooks} from "../../../../../../core/ui/engine/listeners/hooks/UIHooks"
 import {SNoOpenedEditorView} from "./SNoOpenedEditorView";
 import {SMetaRowView} from "./SMetaRowView";
 import {ITab} from "../../../../../core/tabs/ITab";
+import {EditorTab} from "../../../../../core/tabs/EditorTab";
 
 /**
  *
@@ -60,7 +61,7 @@ export class SMainEditorView extends UIComponent {
             if (!this.getChildren().includes(this.noOpenedEditorsView)) {
                 this.addChild(this.noOpenedEditorsView);
             }
-        } else {
+        } else if (this.currentTab instanceof EditorTab) {
             this.editorElement.style.display = "flex";
             this.noOpenedEditorsView.dispose();
 
@@ -76,6 +77,14 @@ export class SMainEditorView extends UIComponent {
             }
             if (!this.currentEditor.isAttached()) this.currentEditor.attach(this.editorElement);
             this.onResize();
+        } else {
+            this.editorElement.style.display = "none";
+            let component = this.currentTab.getComponent();
+            if (!component) return;
+
+            this.noOpenedEditorsView.dispose();
+            this.metaRowView.dispose();
+            this.addChild(component)
         }
 
         this.drawChildren();

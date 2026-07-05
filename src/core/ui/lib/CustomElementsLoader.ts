@@ -1,4 +1,5 @@
 import {Logger} from "../../logging/logger/LoggerCore";
+import {ThreadedUtils} from "../../threaded/ThreadedUtils";
 
 /**
  *
@@ -12,7 +13,7 @@ export class CustomElementsLoader {
     private static isLoaded = false;
 
     public static ensureLoaded() {
-        if (this.isLoaded) {
+        if (ThreadedUtils.isWorkerThread() || this.isLoaded) {
             return;
         }
         this.isLoaded = true;

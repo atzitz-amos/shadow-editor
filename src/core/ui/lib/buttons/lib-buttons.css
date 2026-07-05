@@ -5,7 +5,7 @@ ide-button {
 }
 
 /* Core Internal Button Styling (Inherits variables natively) */
-ide-button .ide-btn {
+.ide-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -29,33 +29,33 @@ ide-button .ide-btn {
 }
 
 /* --- VARIANT 1: PRIMARY --- */
-ide-button[primary] .ide-btn {
+.ide-btn[primary] {
     background-color: var(--ide-btn-primary-bg);
     color: #ffffff;
 }
 
-ide-button[primary] .ide-btn:hover:not(:disabled) {
+.ide-btn[primary]:hover:not(:disabled) {
     background-color: var(--ide-btn-primary-hover);
 }
 
 /* --- VARIANT 2: SECONDARY (Default) --- */
-ide-button:not([primary]):not([ghost]) .ide-btn,
-ide-button[secondary] .ide-btn {
+.ide-btn:not([primary]):not([ghost]),
+.ide-btn[secondary] {
     background-color: var(--ide-btn-secondary-bg);
     border-color: var(--ide-btn-secondary-border);
 }
 
-ide-button:not([primary]):not([ghost]) .ide-btn:hover:not(:disabled),
-ide-button[secondary] .ide-btn:hover:not(:disabled) {
+.ide-btn:hover:not(:disabled):not([primary]):not([ghost]),
+.ide-btn[secondary]:hover:not(:disabled) {
     background-color: var(--ide-btn-secondary-hover);
 }
 
 /* Global Interaction States */
-ide-button .ide-btn:active:not(:disabled) {
+.ide-btn:active:not(:disabled) {
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
 }
 
-ide-button .ide-btn:disabled {
+.ide-btn:disabled {
     background-color: var(--ide-bg-disabled) !important;
     border-color: transparent !important;
     color: var(--ide-text-disabled) !important;
@@ -63,17 +63,17 @@ ide-button .ide-btn:disabled {
     box-shadow: none;
 }
 
-ide-button .ide-btn:focus {
+.ide-btn:focus {
     outline: none;
 }
 
-ide-button .ide-btn:focus-visible {
+.ide-btn:focus-visible {
     outline: 2px solid var(--ide-accent-primary, #4a76bc);
 
     box-shadow: 0 0 0 4px rgba(74, 118, 188, 0.25);
 }
 
-ide-button[primary] .ide-btn:focus-visible {
+.ide-btn[primary]:focus-visible {
     outline-color: #d3d3d3;
     outline-offset: -2px;
     box-shadow: 0 0 0 2px var(--ide-btn-primary-bg);

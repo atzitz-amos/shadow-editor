@@ -1,155 +1,248 @@
 import {Key, Keybind} from "./Keybind";
 import {AbstractAction} from "../actions/AbstractAction";
 import {KeybindContext} from "./context/KeybindContext";
+import {KeybindNotApplicableAbortError} from "./context/KeybindNotApplicableAbortError";
 
 /**
- *
- * @author Atzitz Amos
- * @date 10/22/2025
- * @since 1.0.0
+ * A single (action, keybind) pairing resolved from either the action's
+ * default binding or a user override, ready to be matched against events.
  */
-export class KeybindManager {
-    private static instance: KeybindManager;
+interface ResolvedBinding {
+    action: AbstractAction;
+    keybind: Keybind;
+    source: "user" | "default";
+}
 
-    private actions = new Map<string, AbstractAction>();
-    private keybinds = new Map<string, Keybind>();           // current custom binds
-    private defaultKeybinds = new Map<string, Keybind>();     // defaults
-    private enabled = new Map<string, boolean>();             // enable state
-
-    public static getInstance(): KeybindManager {
-        if (!KeybindManager.instance) {
-            KeybindManager.instance = new KeybindManager();
-        }
-        return KeybindManager.instance;
+/**
+ * KeyboardEvent.key is case-sensitive and shift-sensitive for letters
+ * ("a" vs "A"), but the Key enum only defines lowercase letters and
+ * expects `shift` to be expressed via the Keybind's modifier flags
+ * instead. Digits, punctuation, and named keys (Escape, ArrowUp, ...)
+ * are left untouched since the enum already matches their raw event.key
+ * values exactly, including cases where shift produces a distinct
+ * character (e.g. "/" vs "?") - those are intentionally different Key
+ * values, not modifier variants.
+ */
+function normalizeEventKey(rawKey: string): string {
+    if (rawKey.length === 1 && /[a-zA-Z]/.test(rawKey)) {
+        return rawKey.toLowerCase();
     }
+    return rawKey;
+}
 
-    registerAction(action: AbstractAction, defaultKeybind: Keybind | undefined): void {
-        this.actions.set(action.id, action);
-        if (defaultKeybind) {
-            defaultKeybind.context = action.keybindContext;
+function keyFromKeyboardEvent(e: KeyboardEvent): Key | undefined {
+    if (e.code && e.code.startsWith("Numpad")) {
+        const isNumLockDependent = /^Numpad(\d|Decimal)$/.test(e.code);
 
-            this.defaultKeybinds.set(action.id, defaultKeybind);
-            this.enabled.set(action.id, true);
-            if (!this.keybinds.has(action.id)) this.keybinds.set(action.id, defaultKeybind);
-        } else {
-            this.enabled.set(action.id, false);
-        }
-    }
-
-    unregisterAction(action: AbstractAction) {
-        this.actions.delete(action.id);
-        this.enabled.delete(action.id);
-        this.keybinds.delete(action.id);
-        this.defaultKeybinds.delete(action.id);
-    }
-
-    enable(id: string): void {
-        if (this.actions.has(id)) this.enabled.set(id, true);
-    }
-
-    disable(id: string): void {
-        if (this.actions.has(id)) this.enabled.set(id, false);
-    }
-
-    setKeybind(id: string, newKeybind: Keybind): void {
-        if (!this.actions.has(id)) {
-            throw new Error(`Action with id '${id}' not registered`);
-        }
-        newKeybind.context = this.actions.get(id)!.keybindContext;
-        this.keybinds.set(id, newKeybind);
-    }
-
-    resetKeybind(id: string): void {
-        const def = this.defaultKeybinds.get(id);
-        if (def) this.keybinds.set(id, def);
-    }
-
-    // --- EVENT HANDLING ---
-
-    onKeydown(context: KeybindContext): void {
-        const event = context.getEvent() as KeyboardEvent;
-
-        for (const [id, action] of this.actions.entries()) {
-            if (!this.enabled.get(id)) continue;
-
-            const keybind = this.keybinds.get(id);
-            if (!keybind || !context.applies(keybind.context!)) continue;
-
-            if (this.matchesKeyboardEvent(event, keybind)) {
-                event.preventDefault();
-
-                if (context.isEditorEvent()) context.requireEditor().getUndoRedo().commitPartialEdits();
-                action.run(context);
-                if (context.isEditorEvent()) context.requireEditor().getUndoRedo().commitPartialEdits();
+        if (!isNumLockDependent || e.getModifierState("NumLock")) {
+            if ((Object.values(Key) as string[]).includes(e.code)) {
+                return e.code as Key;
             }
         }
     }
 
-    onMousedown(context: KeybindContext): void {
-        const event = context.getEvent() as MouseEvent;
-        const key = this.mouseEventToKey(event);
-        if (!key) return;
+    const normalized = normalizeEventKey(e.key);
+    return (Object.values(Key) as string[]).includes(normalized)
+        ? (normalized as Key)
+        : undefined;
+}
 
-        for (const [id, action] of this.actions.entries()) {
-            if (!this.enabled.get(id)) continue;
-            const keybind = this.keybinds.get(id);
-            if (!keybind || !context.applies(keybind.context!)) continue;
-
-            if (this.matchesMouseEvent(event, keybind, key)) {
-                event.preventDefault();
-                if (context.isEditorEvent()) context.requireEditor().getUndoRedo().commitPartialEdits();
-                action.run(context);
-                if (context.isEditorEvent()) context.requireEditor().getUndoRedo().commitPartialEdits();
-            }
-        }
-    }
-
-    private matchesKeyboardEvent(event: KeyboardEvent, bind: Keybind): boolean {
-        // normalize to lowercase letters
-        if (event.key.toLowerCase() !== bind.key.toLowerCase()) return false;
-
-        if (bind.ctrl !== undefined && bind.ctrl !== null && bind.ctrl !== event.ctrlKey) return false;
-        if (bind.shift !== undefined && bind.shift !== null && bind.shift !== event.shiftKey) return false;
-        return !(bind.alt !== undefined && bind.alt !== null && bind.alt !== event.altKey);
-    }
-
-    private matchesMouseEvent(event: MouseEvent, bind: Keybind, keyFromEvent: Key): boolean {
-        if (bind.key !== keyFromEvent) return false;
-
-        if (bind.ctrl !== undefined && bind.ctrl !== null && bind.ctrl !== event.ctrlKey) return false;
-        if (bind.shift !== undefined && bind.shift !== null && bind.shift !== event.shiftKey) return false;
-        return !(bind.alt !== undefined && bind.alt !== null && bind.alt !== event.altKey);
-
-
-    }
-
-    private mouseEventToKey(event: MouseEvent): Key | null {
-        switch (event.button) {
-            case 0: // left button
-                switch (event.detail) {
-                    case 1:
-                        return Key.LeftClick;
-                    case 2:
-                        return Key.LeftDoubleClick;
-                    case 3:
-                        return Key.LeftTripleClick;
-                    default:
-                        return Key.LeftClick;
-                }
-            case 1:
-                return Key.MiddleClick;
-            case 2: // right button
-                switch (event.detail) {
-                    case 1:
-                        return Key.RightClick;
-                    case 2:
-                        return Key.RightDoubleClick;
-                    default:
-                        return Key.RightClick;
-                }
-            default:
-                return null;
-        }
+/**
+ * Maps a mousedown event to a Key based on button + click count.
+ * Note: browsers reset e.detail after a short inactivity window, so
+ * double/triple click detection here relies on native browser timing
+ * rather than anything this class tracks itself.
+ */
+function keyFromMouseEvent(e: MouseEvent): Key | undefined {
+    switch (e.button) {
+        case 0: // left
+            if (e.detail >= 3) return Key.LeftTripleClick;
+            if (e.detail === 2) return Key.LeftDoubleClick;
+            return Key.LeftClick;
+        case 1: // middle
+            return Key.MiddleClick;
+        case 2: // right
+            if (e.detail >= 2) return Key.RightDoubleClick;
+            return Key.RightClick;
+        default:
+            return undefined;
     }
 }
 
+/** null/undefined modifier = wildcard, matches either state. */
+function matchesModifier(want: boolean | null | undefined, actual: boolean): boolean {
+    return want === null || want === undefined || want === actual;
+}
+
+function modifiersMatch(kb: Keybind, e: KeyboardEvent | MouseEvent): boolean {
+    return (
+        matchesModifier(kb.ctrl, e.ctrlKey) &&
+        matchesModifier(kb.shift, e.shiftKey) &&
+        matchesModifier(kb.alt, e.altKey)
+    );
+}
+
+/** Number of pinned (non-null) modifiers - higher means more specific. */
+function specificity(kb: Keybind): number {
+    return [kb.ctrl, kb.shift, kb.alt].filter(m => m !== null && m !== undefined).length;
+}
+
+export class KeybindManager {
+    private static readonly instance = new KeybindManager();
+    private readonly actions = new Map<string, AbstractAction>();
+    private readonly defaultKeybinds = new Map<string, Keybind | undefined>();
+    /** null = user explicitly unbound the action; absent key = defer to default. */
+    private readonly userKeybinds = new Map<string, Keybind | null>();
+    private index = new Map<Key, ResolvedBinding[]>();
+    private indexDirty = true;
+
+    public static getInstance(): KeybindManager {
+        return KeybindManager.instance;
+    }
+
+    /**
+     * Registers an action with the manager.
+     *
+     * @param action the action to register
+     * @param defaultKeybind explicit default for this registration; falls
+     *   back to `action.getDefaultKeybinding()` when undefined. Kept as a
+     *   separate parameter so the same action class can be registered
+     *   multiple times (e.g. per-instance commands) with different defaults.
+     */
+    registerAction(action: AbstractAction, defaultKeybind: Keybind | null): void {
+        const id = action.getId();
+        if (this.actions.has(id)) {
+            throw new Error(`Action with id "${id}" is already registered.`);
+        }
+
+        this.actions.set(id, action);
+        this.defaultKeybinds.set(id, defaultKeybind ?? action.getDefaultKeybinding() ?? undefined);
+        this.indexDirty = true;
+    }
+
+    unregisterAction(action: AbstractAction): void {
+        const id = action.getId();
+        this.actions.delete(id);
+        this.defaultKeybinds.delete(id);
+        this.userKeybinds.delete(id);
+        this.indexDirty = true;
+    }
+
+    /**
+     * Sets a user override for an action's keybind.
+     * Pass `undefined` to explicitly unbind the action (distinct from
+     * `resetKeybind`, which reverts to the default instead of unbinding).
+     */
+    setKeybind(id: string, newKeybind: Keybind | undefined): void {
+        if (!this.actions.has(id)) {
+            throw new Error(`Cannot set keybind: no action registered with id "${id}".`);
+        }
+        this.userKeybinds.set(id, newKeybind ?? null);
+        this.indexDirty = true;
+    }
+
+    /** Reverts an action to its default keybind, discarding any user override. */
+    resetKeybind(id: string): void {
+        this.userKeybinds.delete(id);
+        this.indexDirty = true;
+    }
+
+    /** The keybind currently in effect for an action, or undefined if unbound. */
+    getEffectiveKeybind(id: string): Keybind | undefined {
+        if (this.userKeybinds.has(id)) {
+            const override = this.userKeybinds.get(id);
+            return override === null ? undefined : override;
+        }
+        return this.defaultKeybinds.get(id);
+    }
+
+    onKeydown(ctx: KeybindContext): void {
+        const event = ctx.getEvent();
+        if (!(event instanceof KeyboardEvent)) return;
+
+        const key = keyFromKeyboardEvent(event);
+        if (key === undefined) return;
+
+        this.dispatch(this.resolveCandidates(key, event), ctx);
+    }
+
+    onMousedown(ctx: KeybindContext): void {
+        const event = ctx.getEvent();
+        if (!(event instanceof MouseEvent)) return;
+
+        const key = keyFromMouseEvent(event);
+        if (key === undefined) return;
+
+        this.dispatch(this.resolveCandidates(key, event), ctx);
+    }
+
+    private rebuildIndex(): void {
+        this.index = new Map();
+
+        for (const [id, action] of this.actions) {
+            const keybind = this.getEffectiveKeybind(id);
+            if (!keybind) continue;
+
+            const source: "user" | "default" = this.userKeybinds.has(id) ? "user" : "default";
+            const binding: ResolvedBinding = {action, keybind, source};
+
+            const bucket = this.index.get(keybind.key);
+            if (bucket) bucket.push(binding);
+            else this.index.set(keybind.key, [binding]);
+        }
+
+        this.indexDirty = false;
+    }
+
+    /**
+     * Resolves all bindings on a key that structurally match the event's
+     * modifiers, ordered by:
+     *   1. source - user overrides before defaults, since an explicit
+     *      user assignment should win over an incidental default collision
+     *      on the same key
+     *   2. priority - lower runs first (this is what lets two actions like
+     *      "generate constructor" / "open code menu" share Alt+C and be
+     *      tried in a defined order)
+     *   3. specificity - exact modifier matches before wildcard (null)
+     *      modifiers, so a pinned `shift: true` binding isn't shadowed by
+     *      an unrelated `shift: null` binding on the same key
+     */
+    private resolveCandidates(key: Key, event: KeyboardEvent | MouseEvent): ResolvedBinding[] {
+        if (this.indexDirty) this.rebuildIndex();
+
+        const bucket = this.index.get(key) ?? [];
+        return bucket
+            .filter(b => modifiersMatch(b.keybind, event))
+            .sort((a, b) => {
+                if (a.source !== b.source) return a.source === "user" ? -1 : 1;
+
+                const pa = a.keybind.priority ?? 0;
+                const pb = b.keybind.priority ?? 0;
+                if (pa !== pb) return pa - pb;
+
+                return specificity(b.keybind) - specificity(a.keybind);
+            });
+    }
+
+    /**
+     * Tries each candidate in order. An action can call `ctx.abort()` from
+     * within `run()` to signal it isn't actually applicable right now
+     * (e.g. cursor isn't in a class body), which falls through to the
+     * next candidate on the same key.
+     */
+    private dispatch(candidates: ResolvedBinding[], ctx: KeybindContext): void {
+        for (const {action} of candidates) {
+            if (!ctx.applies(action.getKeybindContext())) continue;
+
+            try {
+                action.run(ctx);
+                return;
+            } catch (err) {
+                if (err instanceof KeybindNotApplicableAbortError) {
+                    continue;
+                }
+                throw err;
+            }
+        }
+    }
+}

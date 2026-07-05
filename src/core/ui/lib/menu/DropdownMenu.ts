@@ -3,7 +3,7 @@ import {Icon} from "../../icons/Icon";
 import {FaIcon} from "../../icons/FaIcon";
 import {HTMLUtils} from "../../../../editor/utils/HTMLUtils";
 import {Keybind} from "../../../keybinds/Keybind";
-import {ShortcutBadge} from "./ShortcutBadge";
+import {ShortcutBadge} from "../keybind/ShortcutBadge";
 
 /**
  *

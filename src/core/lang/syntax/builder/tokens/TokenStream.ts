@@ -125,7 +125,7 @@ export class StaticTokenStream extends TokenStream {
     private isInvalidated: boolean = false;
 
     constructor(tokens: Token[]) {
-        super(); // Dummy lexer, not used in StaticTokenStream
+        super();
         this.tokens = tokens;
     }
 

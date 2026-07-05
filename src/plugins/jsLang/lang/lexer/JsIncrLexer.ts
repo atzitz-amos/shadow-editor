@@ -72,11 +72,12 @@ export default class JsIncrLexer extends IncrementalLexer {
             const quote = input.consume()!;
             let value = quote;
             while (!input.isEmpty()) {
-                const c = input.seek()!;
+                let c = input.seek()!;
                 if (c === '\\') {
                     // escape next character
                     value += input.consume();
-                    value += input.consume() || "";  // should fail if escape char at end of input
+                    value += input.consume();
+                    continue;
                 } else if (c === quote) {
                     value += input.consume();
                     break;
@@ -94,15 +95,62 @@ export default class JsIncrLexer extends IncrementalLexer {
         }
 
         // --- Numbers ---
-        if (/[0-9.]/.test(ch)) {
-            const textLeft = input.getRemaining();
+        const isDigit = /^[0-9]$/.test(ch);
+        const isDotNumber = ch === '.' && /^[0-9]$/.test(input.seekNext() || "");
 
-            const match = textLeft.match(JsLexicalGrammar.NUMBER_REGEX);
-            if (match) {
-                const value = match[0];
-                input.jump(value.length);
-                return new Token(JsLexicalGrammar.NUMBER_LITERAL, value, input.getRange(start));
+        if (isDigit || isDotNumber) {
+            let value = "";
+
+            // 1. Check for explicit base prefixes (0x, 0b, 0o)
+            if (ch === '0') {
+                const next = input.seekNext();
+                if (next === 'x' || next === 'X') {
+                    value += input.consume()! + input.consume()!; // 0x
+                    while (/^[0-9a-fA-F_]$/.test(input.seek() || "")) value += input.consume()!;
+                } else if (next === 'b' || next === 'B') {
+                    value += input.consume()! + input.consume()!; // 0b
+                    while (/^[01_]$/.test(input.seek() || "")) value += input.consume()!;
+                } else if (next === 'o' || next === 'O') {
+                    value += input.consume()! + input.consume()!; // 0o
+                    while (/^[0-7_]$/.test(input.seek() || "")) value += input.consume()!;
+                }
             }
+
+            // 2. If it wasn't a special base, parse as decimal (or legacy octal)
+            if (value === "") {
+                // Integer part
+                while (/^[0-9_]$/.test(input.seek() || "")) {
+                    value += input.consume()!;
+                }
+
+                // Fractional part
+                if (input.seek() === '.') {
+                    value += input.consume()!; // consume '.'
+                    while (/^[0-9_]$/.test(input.seek() || "")) {
+                        value += input.consume()!;
+                    }
+                }
+
+                // Exponent part
+                const exp = input.seek();
+                if (exp === 'e' || exp === 'E') {
+                    value += input.consume()!; // consume 'e' or 'E'
+                    const sign = input.seek();
+                    if (sign === '+' || sign === '-') {
+                        value += input.consume()!; // consume sign
+                    }
+                    while (/^[0-9_]$/.test(input.seek() || "")) {
+                        value += input.consume()!;
+                    }
+                }
+            }
+
+            // 3. BigInt suffix (valid for any base prefix)
+            if (input.seek() === 'n') {
+                value += input.consume()!;
+            }
+
+            return new Token(JsLexicalGrammar.NUMBER_LITERAL, value, input.getRange(start));
         }
 
         // --- Identifiers / Keywords ---
@@ -219,6 +267,7 @@ export default class JsIncrLexer extends IncrementalLexer {
             case "-":
             case "*":
             case "/":
+            case "%":
                 return new Token(JsLexicalGrammar.MATHEMATICAL_OPERATOR, c1, input.getRange(start));
             case "&":
             case "|":
