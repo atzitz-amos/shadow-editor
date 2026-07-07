@@ -26,4 +26,12 @@ export class EditorDeleteContext extends EditorBehaviorContext {
     getDeleteCount(): number {
         return this.count;
     }
+
+    isBackspace(): boolean {
+        return this.count < 0;
+    }
+
+    isDelete(): boolean {
+        return this.count > 0;
+    }
 }

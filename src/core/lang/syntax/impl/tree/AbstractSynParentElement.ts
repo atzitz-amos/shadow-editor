@@ -5,7 +5,7 @@ import {SynScope} from "../../api/scope/SynScope";
 import {SynNode} from "../../api/SynNode";
 import {SynParentElement} from "../../api/tree/SynParentElement";
 import {TokenType} from "../../builder/tokens/TokenType";
-import {SynNodeVisitor} from "../../utils/visitors/SynNodeVisitor";
+import {SynNodeVisitor} from "../../visitors/SynNodeVisitor";
 import {SynTokenNode} from "../SynTokenNode";
 
 /**

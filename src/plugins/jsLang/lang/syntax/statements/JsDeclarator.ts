@@ -2,7 +2,7 @@ import {SynDeclaration} from "../../../../../core/lang/syntax/impl/reference/Syn
 import {ASTNode} from "../../../../../core/lang/syntax/builder/parser/nodes/ASTNode";
 import {SynTokenNode} from "../../../../../core/lang/syntax/impl/SynTokenNode";
 import {SynErrorNode} from "../../../../../core/lang/syntax/impl/SynErrorNode";
-import {SynNodeVisitor} from "../../../../../core/lang/syntax/utils/visitors/SynNodeVisitor";
+import {SynNodeVisitor} from "../../../../../core/lang/syntax/visitors/SynNodeVisitor";
 import {JsSynVisitor} from "../visitors/JsSynVisitor";
 import {JsExpr} from "../expr/JsExpr";
 import {JsVariableDeclaration} from "./JsVariableDeclaration";

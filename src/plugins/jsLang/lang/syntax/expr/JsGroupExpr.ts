@@ -1,6 +1,6 @@
 import {JsExpr} from "./JsExpr";
 import {ASTNode} from "../../../../../core/lang/syntax/builder/parser/nodes/ASTNode";
-import {SynNodeVisitor} from "../../../../../core/lang/syntax/utils/visitors/SynNodeVisitor";
+import {SynNodeVisitor} from "../../../../../core/lang/syntax/visitors/SynNodeVisitor";
 import {JsSynVisitor} from "../visitors/JsSynVisitor";
 
 /**

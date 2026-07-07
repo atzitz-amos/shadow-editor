@@ -118,13 +118,12 @@ export class EditorLangService {
             );
 
             this.currentLanguage.createParser(builder).parse();
-            console.log("Successfully parsed "
-                + this.editor.getOpenedDocument().getLineCount()
-                + " lines (" + this.editor.getOpenedDocument().getTotalDocumentLength()
-                + " chars) in "
-                + (performance.now() - start) + "ms");
+            // console.log("Successfully parsed "
+            //     + this.editor.getOpenedDocument().getLineCount()
+            //     + " lines (" + this.editor.getOpenedDocument().getTotalDocumentLength()
+            //     + " chars) in "
+            //     + (performance.now() - start) + "ms");
             const synTree = builder.close();
-            console.log(synTree);
             synDocument.commit(synTree, document.getModificationTimestamp());
 
             this.isSynTreeClean = true;

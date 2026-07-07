@@ -7,7 +7,7 @@ import {SynDocument} from "../../api/document/SynDocument";
 import {SynNode} from "../../api/SynNode";
 import {SynScopeImpl} from "../scope/SynScopeImpl";
 import {LanguageBase} from "../../../LanguageBase";
-import {SynNodeVisitor} from "../../utils/visitors/SynNodeVisitor";
+import {SynNodeVisitor} from "../../visitors/SynNodeVisitor";
 
 /**
  *

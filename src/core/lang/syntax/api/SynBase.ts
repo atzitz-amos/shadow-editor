@@ -1,5 +1,5 @@
 import {TextRange} from "../../../../editor/core/coordinate/range/TextRange";
-import {SynNodeVisitor} from "../utils/visitors/SynNodeVisitor";
+import {SynNodeVisitor} from "../visitors/SynNodeVisitor";
 
 /**
  *

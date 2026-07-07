@@ -20,10 +20,10 @@ export abstract class SmartSkipSecondCloseableCharAction extends SmartInlineInse
         return this.closeableChars.includes(ctx.getContent()) && !ctx.hasSelectionActive() && ctx.getTrailingChar() === ctx.getContent();
     }
 
-    abstract shouldSkip(char: string, trailingChar: string): boolean;
+    abstract shouldSkip(char: string, leadingChar: string): boolean;
 
     invoke(ctx: EditorCharTypedContext): BehaviorHandlingMode {
-        if (this.shouldSkip(ctx.getContent(), ctx.getTrailingChar() ?? '')) {
+        if (this.shouldSkip(ctx.getContent(), ctx.getLeadingChar() ?? '')) {
             const caret = ctx.getCaret();
             caret.shiftRight(true, false);
             caret.refresh();
@@ -32,4 +32,7 @@ export abstract class SmartSkipSecondCloseableCharAction extends SmartInlineInse
         return BehaviorHandlingMode.FORWARD;
     }
 
+    getPriority(): number {
+        return 10;
+    }
 }

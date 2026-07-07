@@ -16,4 +16,8 @@ export abstract class SmartInlineInsertAction {
     abstract isApplicable(ctx: EditorCharTypedContext): boolean;
 
     abstract invoke(ctx: EditorCharTypedContext): BehaviorHandlingMode;
+
+    getPriority() {
+        return 0;
+    }
 }

@@ -18,7 +18,7 @@ export abstract class SmartAutoCloseInsertAction extends SmartInlineInsertAction
 
     abstract getApplicableLanguages(): LanguageBase[];
 
-    abstract shouldAutoClose(char: string, closeChar: string, trailingChar: string): boolean;
+    abstract shouldAutoClose(ctx: EditorCharTypedContext, leadingChar: string, char: string, trailingChar: string): boolean;
 
     isApplicable(ctx: EditorCharTypedContext): boolean {
         return this.closeables[ctx.getContent()] !== undefined;
@@ -34,7 +34,7 @@ export abstract class SmartAutoCloseInsertAction extends SmartInlineInsertAction
             ctx.getCaret().refresh();
             return BehaviorHandlingMode.HANDLED;
         }
-        if (this.shouldAutoClose(ctx.getContent(), this.closeables[ctx.getContent()], ctx.getTrailingChar() ?? '')) {
+        if (this.shouldAutoClose(ctx, ctx.getLeadingChar() ?? '', ctx.getContent(), ctx.getTrailingChar() ?? '')) {
             const caret = ctx.getCaret();
             const offset = caret.getOffset();
             const closeChar = this.closeables[ctx.getContent()];

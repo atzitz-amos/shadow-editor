@@ -4,7 +4,7 @@ import {ASTGrammar, ASTType} from "../builder/parser/nodes/ASTGrammar";
 import {SynNode} from "../api/SynNode";
 import {SynASTElement} from "../api/tree/SynASTElement";
 import {EditorURI} from "../../../uri/EditorURI";
-import {SynNodeVisitor} from "../utils/visitors/SynNodeVisitor";
+import {SynNodeVisitor} from "../visitors/SynNodeVisitor";
 import {SynDocument} from "../api/document/SynDocument";
 import {SynParentElement} from "../api/tree/SynParentElement";
 import {SynLeafElement} from "../api/tree/SynLeafElement";

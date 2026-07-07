@@ -1,5 +1,5 @@
 import {SynASTElementImpl} from "../../../../../core/lang/syntax/impl/tree/SynASTElementImpl";
-import {SynNodeVisitor} from "../../../../../core/lang/syntax/utils/visitors/SynNodeVisitor";
+import {SynNodeVisitor} from "../../../../../core/lang/syntax/visitors/SynNodeVisitor";
 import {JsSynVisitor} from "../visitors/JsSynVisitor";
 import {ASTNode} from "../../../../../core/lang/syntax/builder/parser/nodes/ASTNode";
 

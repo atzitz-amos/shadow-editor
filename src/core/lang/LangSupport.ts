@@ -13,6 +13,7 @@ import {SmartInlineInsertAction} from "./smart/insert/SmartInlineInsertAction";
 import {SmartInlineDeleteAction} from "./smart/delete/SmartInlineDeleteAction";
 import {SmartInlineHighlight} from "./smart/highlight/SmartInlineHighlight";
 import {TokenHoverAction} from "./tokenhover/TokenHoverAction";
+import {SmartInlineEnterAction} from "./smart/enter/SmartInlineEnterAction";
 
 export class LangSupport {
     private static instance: LangSupport;
@@ -23,6 +24,7 @@ export class LangSupport {
 
     private static readonly smartInsertEP: ExtensionPoint<SmartInlineInsertAction> = new ExtensionPoint("smart", SmartInlineInsertAction);
     private static readonly smartDeleteEP: ExtensionPoint<SmartInlineDeleteAction> = new ExtensionPoint("smart", SmartInlineDeleteAction);
+    private static readonly smartEnterEP: ExtensionPoint<SmartInlineEnterAction> = new ExtensionPoint("smart", SmartInlineEnterAction);
     private static readonly smartHighlightEP: ExtensionPoint<SmartInlineHighlight> = new ExtensionPoint("smart", SmartInlineHighlight);
 
     private static readonly tokenHoverEP: ExtensionPoint<TokenHoverAction> = new ExtensionPoint("tokenhover", TokenHoverAction);
@@ -64,15 +66,25 @@ export class LangSupport {
     }
 
     getAllSmartInsertActions(language: LanguageBase): SmartInlineInsertAction[] {
-        return LangSupport.smartInsertEP.getAll().filter(action => action.getApplicableLanguages().includes(language));
+        return LangSupport.smartInsertEP.getAll()
+            .filter(action => action.getApplicableLanguages().includes(language))
+            .toSorted((a, b) => b.getPriority() - a.getPriority());
     }
 
     getAllSmartDeleteActions(language: LanguageBase): SmartInlineDeleteAction[] {
-        return LangSupport.smartDeleteEP.getAll().filter(action => action.getApplicableLanguages().includes(language));
+        return LangSupport.smartDeleteEP.getAll()
+            .filter(action => action.getApplicableLanguages().includes(language))
+            .toSorted((a, b) => b.getPriority() - a.getPriority());
+    }
+
+    getAllSmartEnterActions(language: LanguageBase): SmartInlineEnterAction[] {
+        return LangSupport.smartEnterEP.getAll().filter(action => action.getApplicableLanguages().includes(language))
+            .toSorted((a, b) => b.getPriority() - a.getPriority());
     }
 
     getAllSmartHighlights(language: LanguageBase): SmartInlineHighlight[] {
-        return LangSupport.smartHighlightEP.getAll().filter(action => action.getApplicableLanguages().includes(language));
+        return LangSupport.smartHighlightEP.getAll().filter(action => action.getApplicableLanguages().includes(language))
+            .toSorted((a, b) => b.getPriority() - a.getPriority());
     }
 
     getAllTokenHoverActions(language: LanguageBase): TokenHoverAction[] {

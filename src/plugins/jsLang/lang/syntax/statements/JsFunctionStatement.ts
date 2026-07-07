@@ -4,7 +4,7 @@ import {SynTokenNode} from "../../../../../core/lang/syntax/impl/SynTokenNode";
 import {JsCodeBlock} from "../JsCodeBlock";
 import {JsStatement} from "./JsStatement";
 import {JsFunction} from "../api/JsFunction";
-import {SynNodeVisitor} from "../../../../../core/lang/syntax/utils/visitors/SynNodeVisitor";
+import {SynNodeVisitor} from "../../../../../core/lang/syntax/visitors/SynNodeVisitor";
 import {JsSynVisitor} from "../visitors/JsSynVisitor";
 import {JsLexicalGrammar} from "../../lexer/JsLexicalGrammar";
 

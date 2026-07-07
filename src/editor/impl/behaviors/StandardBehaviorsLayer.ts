@@ -39,7 +39,7 @@ export class StandardBehaviorsLayer implements IBehaviorProvider {
     }
 
     getEnterPressedBehavior(): EditorBehavior {
-        return EditorBehavior.DO_NOTHING;
+        return DefaultBehaviors.ENTER_PRESSED_BEHAVIOR;
     }
 
     getPasteBehavior(): EditorBehavior {

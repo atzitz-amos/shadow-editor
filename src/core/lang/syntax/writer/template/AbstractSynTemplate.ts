@@ -4,7 +4,7 @@ import {TextRange} from "../../../../../editor/core/coordinate/range/TextRange";
 import {EditorURI} from "../../../../uri/EditorURI";
 import {SynASTElement} from "../../api/tree/SynASTElement";
 import {SynFile} from "../../api/filesystem/SynFile";
-import {SynNodeVisitor} from "../../utils/visitors/SynNodeVisitor";
+import {SynNodeVisitor} from "../../visitors/SynNodeVisitor";
 import {SynTemplateFile} from "./SynTemplateFile";
 import {SynModifiableFile} from "../../api/filesystem/SynModifiableFile";
 import {ASTBuilder} from "../../builder/parser/builder/ASTBuilder";
@@ -12,7 +12,7 @@ import {TokenStream} from "../../builder/tokens/TokenStream";
 import {EmptyKillSignal} from "../../../../utils/KillSignal";
 import {SynCodeBlock} from "../../api/SynCodeBlock";
 import {SourceRewriter} from "../SourceRewriter";
-import {SynRecursiveVisitor} from "../../utils/visitors/SynRecursiveVisitor";
+import {SynRecursiveVisitor} from "../../visitors/SynRecursiveVisitor";
 import {SynParentElement} from "../../api/tree/SynParentElement";
 
 /**

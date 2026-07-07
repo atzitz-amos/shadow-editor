@@ -1,7 +1,9 @@
 import {JsLiteral} from "./JsLiteral";
-import {SynNodeVisitor} from "../../../../../core/lang/syntax/utils/visitors/SynNodeVisitor";
+import {SynNodeVisitor} from "../../../../../core/lang/syntax/visitors/SynNodeVisitor";
 import {JsSynVisitor} from "../visitors/JsSynVisitor";
 import {TextRange} from "../../../../../editor/core/coordinate/range/TextRange";
+import {JsSynUtils} from "../utils/JsSynUtils";
+import {SynTokenNode} from "../../../../../core/lang/syntax/impl/SynTokenNode";
 
 /**
  *
@@ -13,7 +15,6 @@ export class JsStringLiteral extends JsLiteral {
     accept(visitor: SynNodeVisitor) {
         if (visitor instanceof JsSynVisitor) {
             visitor.visitStringLiteral(this);
-            "        ";
         } else {
             super.accept(visitor);
         }

@@ -251,11 +251,6 @@ export class ASTBuilder {
             console.warn("Unclosed scopes detected at end of file: " + this.scopeTree.getCurrentScope());
         }
 
-        if (this.production.length > 1) {
-            console.warn("Multiple top-level nodes detected at end of file. Wrapping in a default AST node. This is probably" +
-                "unintentional");
-        }
-
         return new SynTreeImpl(this.language, this.production, this.document);
     }
 
@@ -287,4 +282,3 @@ export class ASTBuilder {
         return this.wasInErrorState;
     }
 }
-

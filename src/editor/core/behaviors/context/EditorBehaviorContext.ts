@@ -4,6 +4,8 @@ import {Caret} from "../../caret/Caret";
 import {SelectionModel} from "../../caret/Selection";
 import {LogicalPosition} from "../../coordinate/LogicalPosition";
 import {VisualPosition} from "../../coordinate/VisualPosition";
+import {Token} from "../../../../core/lang/syntax/builder/tokens/Token";
+import {LineData} from "../../document/LineData";
 
 /**
  *
@@ -12,7 +14,24 @@ import {VisualPosition} from "../../coordinate/VisualPosition";
  * @since 1.0.0
  */
 export class EditorBehaviorContext implements IBehaviorContext {
+    private line: LineData | null = null;
+
+    private readonly leadingChar: string | null;
+    private readonly trailingChar: string | null;
+
+    private readonly tokenAt: Token | null;
+
     constructor(private readonly editor: Editor, private readonly caret: Caret) {
+        const document = this.editor.getOpenedDocument();
+        const offset = this.caret.getOffset();
+
+        if (offset <= 0) this.leadingChar = null;
+        else this.leadingChar = document.getTextBetween(offset - 1, offset);
+
+        if (offset >= document.getTotalDocumentLength()) this.trailingChar = null;
+        else this.trailingChar = document.getTextBetween(offset, offset + 1);
+
+        this.tokenAt = document.getTokenAt(offset);
     }
 
     getEditor(): Editor {
@@ -47,17 +66,22 @@ export class EditorBehaviorContext implements IBehaviorContext {
         return this.caret.getVisual();
     }
 
-    getTrailingChar(): string | null {
-        const document = this.editor.getOpenedDocument();
-        const offset = this.caret.getOffset();
-        if (offset >= document.getTotalDocumentLength()) return null;
-        return document.getTextBetween(offset, offset + 1);
+    getLeadingChar(): string | null {
+        return this.leadingChar;
     }
 
-    getLeadingChar(): string | null {
-        const document = this.editor.getOpenedDocument();
-        const offset = this.caret.getOffset();
-        if (offset <= 0) return null;
-        return document.getTextBetween(offset - 1, offset);
+    getTrailingChar(): string | null {
+        return this.trailingChar;
+    }
+
+    getTokenAtCaret(): Token | null {
+        return this.tokenAt;
+    }
+
+    getLineData(): LineData {
+        if (!this.line) {
+            this.line = this.editor.getOpenedDocument().getLineAt(this.getCaretOffset());
+        }
+        return this.line;
     }
 }

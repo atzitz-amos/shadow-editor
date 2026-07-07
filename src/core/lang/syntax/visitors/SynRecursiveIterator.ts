@@ -1,6 +1,6 @@
-import {SynNode} from "../../api/SynNode";
-import {SynTokenNode} from "../../impl/SynTokenNode";
-import {SynASTElementImpl} from "../../impl/tree/SynASTElementImpl";
+import {SynNode} from "../api/SynNode";
+import {SynTokenNode} from "../impl/SynTokenNode";
+import {SynASTElementImpl} from "../impl/tree/SynASTElementImpl";
 
 /**
  *

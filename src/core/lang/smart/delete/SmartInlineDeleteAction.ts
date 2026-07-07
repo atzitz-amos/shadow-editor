@@ -14,4 +14,8 @@ export abstract class SmartInlineDeleteAction {
     abstract isApplicable(ctx: EditorDeleteContext): boolean;
 
     abstract invoke(ctx: EditorDeleteContext): BehaviorHandlingMode;
+
+    getPriority() {
+        return 0;
+    }
 }

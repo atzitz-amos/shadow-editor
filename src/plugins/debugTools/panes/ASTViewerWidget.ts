@@ -5,7 +5,7 @@ import {SynASTElementImpl} from "../../../core/lang/syntax/impl/tree/SynASTEleme
 import {SynFileImpl} from "../../../core/lang/syntax/impl/filesystem/SynFileImpl";
 import {SynTokenNode} from "../../../core/lang/syntax/impl/SynTokenNode";
 import {SynErrorNode} from "../../../core/lang/syntax/impl/SynErrorNode";
-import {SynRecursiveIterator} from "../../../core/lang/syntax/utils/visitors/SynRecursiveIterator";
+import {SynRecursiveIterator} from "../../../core/lang/syntax/visitors/SynRecursiveIterator";
 import {AstOverlayHighlight} from "../overlays/AstOverlayHighlight";
 import {Editor} from "../../../editor/Editor";
 import {SynDocument} from "../../../core/lang/syntax/api/document/SynDocument";

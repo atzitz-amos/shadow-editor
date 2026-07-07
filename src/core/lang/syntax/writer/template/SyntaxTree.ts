@@ -1,6 +1,6 @@
 import {SynCodeBlock} from "../../api/SynCodeBlock";
-import {SynNodeVisitor} from "../../utils/visitors/SynNodeVisitor";
-import {SynRecursiveVisitor} from "../../utils/visitors/SynRecursiveVisitor";
+import {SynNodeVisitor} from "../../visitors/SynNodeVisitor";
+import {SynRecursiveVisitor} from "../../visitors/SynRecursiveVisitor";
 import {SynScope} from "../../api/scope/SynScope";
 
 /**

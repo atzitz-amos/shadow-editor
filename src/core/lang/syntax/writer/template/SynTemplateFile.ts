@@ -6,7 +6,7 @@ import {SynASTElement} from "../../api/tree/SynASTElement";
 import {SynFile} from "../../api/filesystem/SynFile";
 import {SynModifiableFile} from "../../api/filesystem/SynModifiableFile";
 import {SynNode} from "../../api/SynNode";
-import {SynNodeVisitor} from "../../utils/visitors/SynNodeVisitor";
+import {SynNodeVisitor} from "../../visitors/SynNodeVisitor";
 
 /**
  *

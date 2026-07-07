@@ -1,5 +1,5 @@
 import {SynNodeVisitor} from "./SynNodeVisitor";
-import {SynNode} from "../../api/SynNode";
+import {SynNode} from "../api/SynNode";
 
 /**
  *

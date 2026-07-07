@@ -1,7 +1,7 @@
 import {InspectionBase} from "./Inspection";
 import {ProblemsHolder} from "./problems/ProblemsHolder";
 import {SynFile} from "../syntax/api/filesystem/SynFile";
-import {SynLazyVisitorOptimizer} from "../syntax/utils/visitors/SynLazyVisitorOptimizer";
+import {SynLazyVisitorOptimizer} from "../syntax/visitors/SynLazyVisitorOptimizer";
 import {SynDocument} from "../syntax/api/document/SynDocument";
 
 /**

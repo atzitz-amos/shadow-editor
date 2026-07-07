@@ -4,7 +4,7 @@ import {ASTNode} from "../../../../../core/lang/syntax/builder/parser/nodes/ASTN
 import {JsCodeBlock} from "../JsCodeBlock";
 import {JsFunctionParameters} from "../statements/JsFunctionParameters";
 import {SynTokenNode} from "../../../../../core/lang/syntax/impl/SynTokenNode";
-import {SynNodeVisitor} from "../../../../../core/lang/syntax/utils/visitors/SynNodeVisitor";
+import {SynNodeVisitor} from "../../../../../core/lang/syntax/visitors/SynNodeVisitor";
 import {JsSynVisitor} from "../visitors/JsSynVisitor";
 
 /**

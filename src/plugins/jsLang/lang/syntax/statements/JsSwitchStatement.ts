@@ -3,7 +3,7 @@ import {ASTNode} from "../../../../../core/lang/syntax/builder/parser/nodes/ASTN
 import {SynTokenNode} from "../../../../../core/lang/syntax/impl/SynTokenNode";
 import {SynNode} from "../../../../../core/lang/syntax/api/SynNode";
 import {JsCodeBlock} from "../JsCodeBlock";
-import {SynNodeVisitor} from "../../../../../core/lang/syntax/utils/visitors/SynNodeVisitor";
+import {SynNodeVisitor} from "../../../../../core/lang/syntax/visitors/SynNodeVisitor";
 import {JsSynVisitor} from "../visitors/JsSynVisitor";
 import {JsStatement} from "./JsStatement";
 

@@ -2,7 +2,7 @@ import {InspectionSeverity} from "../../../core/lang/inspections/InspectionSever
 import {LanguageBase} from "../../../core/lang/LanguageBase";
 import JsLang from "../lang/JsLang";
 import {ProblemsHolder} from "../../../core/lang/inspections/problems/ProblemsHolder";
-import {SynNodeVisitor} from "../../../core/lang/syntax/utils/visitors/SynNodeVisitor";
+import {SynNodeVisitor} from "../../../core/lang/syntax/visitors/SynNodeVisitor";
 import {JsSynVisitor} from "../lang/syntax/visitors/JsSynVisitor";
 import {JsEmptyStatement} from "../lang/syntax/statements/JsEmptyStatement";
 import {QuickFix} from "../../../core/lang/inspections/quickfix/QuickFix";

@@ -2,7 +2,7 @@ import {SynASTElement} from "../../api/tree/SynASTElement";
 import {TextRange} from "../../../../../editor/core/coordinate/range/TextRange";
 import {ASTNode} from "../../builder/parser/nodes/ASTNode";
 import {EditorURI} from "../../../../uri/EditorURI";
-import {SynNodeVisitor} from "../../utils/visitors/SynNodeVisitor";
+import {SynNodeVisitor} from "../../visitors/SynNodeVisitor";
 import {ASTType} from "../../builder/parser/nodes/ASTGrammar";
 import {SynDocument} from "../../api/document/SynDocument";
 import {SynScope} from "../../api/scope/SynScope";

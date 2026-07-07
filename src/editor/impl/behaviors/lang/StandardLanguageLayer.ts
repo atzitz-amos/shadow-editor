@@ -50,19 +50,47 @@ export class StandardLanguageLayer implements ILanguageLayer {
     }
 
     getDeleteBackwardBehavior(): DeleteBackwardBehavior {
-        return EditorBehavior.FORWARD_ALL;
+        return DeleteBackwardBehavior.wrapping(this, ctx => {
+            for (const action of GlobalState.getLangSupport().getAllSmartDeleteActions(this.language)) {
+                if (action.isApplicable(ctx)) {
+                    if (action.invoke(ctx) === BehaviorHandlingMode.HANDLED) return BehaviorHandlingMode.HANDLED;
+                }
+            }
+            return BehaviorHandlingMode.FORWARD;
+        });
     }
 
     getDeleteForwardBehavior(): DeleteForwardBehavior {
-        return EditorBehavior.FORWARD_ALL;
+        return DeleteForwardBehavior.wrapping(this, ctx => {
+            for (const action of GlobalState.getLangSupport().getAllSmartDeleteActions(this.language)) {
+                if (action.isApplicable(ctx)) {
+                    if (action.invoke(ctx) === BehaviorHandlingMode.HANDLED) return BehaviorHandlingMode.HANDLED;
+                }
+            }
+            return BehaviorHandlingMode.FORWARD;
+        });
     }
 
     getCtrlDeleteBehavior(): CtrlDeleteBehavior {
-        return EditorBehavior.FORWARD_ALL;
+        return CtrlDeleteBehavior.wrapping(this, ctx => {
+            for (const action of GlobalState.getLangSupport().getAllSmartDeleteActions(this.language)) {
+                if (action.isApplicable(ctx)) {
+                    if (action.invoke(ctx) === BehaviorHandlingMode.HANDLED) return BehaviorHandlingMode.HANDLED;
+                }
+            }
+            return BehaviorHandlingMode.FORWARD;
+        });
     }
 
     getEnterPressedBehavior(): EnterPressedBehavior {
-        return EditorBehavior.FORWARD_ALL;
+        return EnterPressedBehavior.wrapping(this, ctx => {
+            for (const action of GlobalState.getLangSupport().getAllSmartEnterActions(this.language)) {
+                if (action.isApplicable(ctx)) {
+                    if (action.invoke(ctx) === BehaviorHandlingMode.HANDLED) return BehaviorHandlingMode.HANDLED;
+                }
+            }
+            return BehaviorHandlingMode.FORWARD;
+        });
     }
 
     getTabPressedBehavior(): TabPressedBehavior {

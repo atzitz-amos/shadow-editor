@@ -15,4 +15,8 @@ export abstract class SmartInlineHighlight {
     abstract apply(ctx: EditorBehaviorContext, holder: HighlightHolder): void;
 
     abstract getApplicableLanguages(): LanguageBase[];
+
+    getPriority() {
+        return 0;
+    }
 }

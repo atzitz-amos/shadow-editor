@@ -16,7 +16,6 @@ import {UnsafeFlagsService} from "../../../core/sync/flags/UnsafeFlagsService";
 import {UnsafeFlags} from "../../../core/sync/flags/UnsafeFlags";
 import {TrackedRange} from "../coordinate/range/TrackedRange";
 import {UndoRedoActionStack} from "../undo/UndoRedoActionStack";
-import {EditorDocumentManager} from "./EditorDocumentManager";
 
 /**
  * Represents an opened file in the editor
@@ -40,6 +39,27 @@ export class Document {
     constructor(private caretOffset: Offset, content: string, private language: LanguageBase | null = null) {
         this.data = new EditorRawData(content);
         this.parseLines();
+    }
+
+    /**
+     * Binary search helper to find the line index for a given offset.
+     * Finds the largest line index `i` such that `this.lineBreaks[i] <= offset`.
+     */
+    private findLineIndex(offset: Offset): number {
+        let low = 0;
+        let high = this.lineBreaks.length - 1;
+        let index = 0;
+
+        while (low <= high) {
+            const mid = (low + high) >> 1;
+            if (this.lineBreaks[mid] <= offset) {
+                index = mid;
+                low = mid + 1;
+            } else {
+                high = mid - 1;
+            }
+        }
+        return index;
     }
 
     public getSavedCaretOffset(): Offset {
@@ -153,30 +173,19 @@ export class Document {
     }
 
     public getLineStart(at: Offset): Offset {
-        for (let i = 1; i < this.lineBreaks.length; i++) {
-            if (this.lineBreaks[i] > at) {
-                return this.lineBreaks[i - 1];
-            }
-        }
-        return this.lineBreaks[this.lineBreaks.length - 1];
+        return this.lineBreaks[this.findLineIndex(at)];
     }
 
-    public getLineEnd(at: Offset) {
-        for (let i = 0; i < this.lineBreaks.length; i++) {
-            if (this.lineBreaks[i] > at) {
-                return this.lineBreaks[i] - 1;
-            }
+    public getLineEnd(at: Offset): Offset {
+        const index = this.findLineIndex(at);
+        if (index + 1 < this.lineBreaks.length) {
+            return this.lineBreaks[index + 1] - 1;
         }
         return this.getTotalDocumentLength();
     }
 
     public getLineAt(offset: Offset): LineData {
-        for (let i = 0; i < this.lineBreaks.length; i++) {
-            if (this.lineBreaks[i] > offset) {
-                return this.lines[i - 1];
-            }
-        }
-        return this.lines[this.lines.length - 1];
+        return this.lines[this.findLineIndex(offset)];
     }
 
     public getLineBetween(from: int, to: int): LineData[] {

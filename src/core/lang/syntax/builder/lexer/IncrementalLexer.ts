@@ -24,12 +24,19 @@ export abstract class IncrementalLexer implements ILexer {
 
         const tokens: Token[] = [];
 
-        while (!source.isEmpty()) {
-            tokens.push(this.tokenize(source));
+        let overshotCount = 0;
 
-            if (source.getOffset() === endOffset) break;
+        while (!source.isEmpty()) {
+            let token = this.tokenize(source);
+            tokens.push(token);
+
+            if (source.getOffset() === endOffset) {
+                console.log(`Aligned on boundary: stop! (${overshotCount} overshots, ${tokens.length} retokenized)`)
+                break;
+            }
             if (source.getOffset() > endOffset) {
-                endOffset = cache.findNextWhitespaceToken(source.getOffset() + changedOffset) + changedOffset;
+                endOffset = cache.findNextWhitespaceToken(source.getOffset() - changedOffset) + changedOffset;
+                overshotCount++;
             }
         }
 

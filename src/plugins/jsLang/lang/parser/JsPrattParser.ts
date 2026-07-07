@@ -154,6 +154,10 @@ export class JsPrattParser {
     }
 
     tryParseGroupingOrArrowFunction(start: Marker, hasAsyncToken: boolean = false) {
+        if (this.builder.done()) {
+            this.builder.errorVirtual("Unexpected end of input");
+            return ErrorHandlingMode.ERROR_NODE;
+        }
         const rollbackMarker = this.builder.mark();
 
         // Speculatively parse as function parameters: (a, b)
@@ -176,7 +180,7 @@ export class JsPrattParser {
                     }
 
                     start.done(JsGrammar.ArrowFunctionExpression);
-                    return;
+                    return ErrorHandlingMode.NONE;
                 }
             }
         }
@@ -188,6 +192,8 @@ export class JsPrattParser {
         this.parseExpression();
         this.builder.expect(JsLexicalGrammar.RPAREN).orError("Expected ')'");
         start.done(JsGrammar.GroupExpr);
+
+        return ErrorHandlingMode.NONE;
     }
 
     tryParseIdentifierOrArrowFunction(start: Marker, hasAsyncToken: boolean = false) {
@@ -275,7 +281,7 @@ export class JsPrattParser {
         } else if (type === JsLexicalGrammar.KEYWORD || value === "async" || value === "await") {
             this.parseKeywordNud(value, start);
         } else if (type === JsLexicalGrammar.LPAREN) {
-            this.tryParseGroupingOrArrowFunction(start);
+            return this.tryParseGroupingOrArrowFunction(start);
         } else if (type === JsLexicalGrammar.IDENTIFIER) {
             this.tryParseIdentifierOrArrowFunction(start);
         } else {

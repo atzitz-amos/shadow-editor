@@ -2,6 +2,7 @@ import {AbstractAction} from "../../../core/actions/AbstractAction";
 import {KeybindContext} from "../../../core/keybinds/context/KeybindContext";
 import {KeybindContextDescriptor} from "../../../core/keybinds/context/KeybindContextDescriptor";
 import {Key, ModifierKeyHolder} from "../../../core/keybinds/Keybind";
+import {EditorBehaviorContext} from "../../core/behaviors/context/EditorBehaviorContext";
 
 /**
  *
@@ -35,21 +36,7 @@ export class EnterAction extends AbstractAction {
         const editor = ctx.requireEditor();
 
         editor.getCaretModel().forEachCaret(caret => {
-            const line = editor.getOpenedDocument().getLineAt(caret.getOffset());
-
-            if (ctx.getEvent().shiftKey) {
-                editor.insertText(line.getEnd(), "\n");
-                caret.moveToOffset(line.getEnd() + 1, false);
-                return;
-            }
-
-            let indent = 0;
-            if (line) {
-                indent = line.getText().match(/^\s*/)?.[0].length || 0;
-                indent = Math.min(indent, caret.getLogical().col);
-            }
-
-            editor.typeForCaret(caret, "\n" + " ".repeat(indent), !ModifierKeyHolder.isCtrlPressed());
+            editor.getBehaviorManager().invokeEnterPressed(new EditorBehaviorContext(editor, caret));
         });
         editor.getView().resetBlink();
 

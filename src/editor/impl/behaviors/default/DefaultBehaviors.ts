@@ -2,6 +2,7 @@ import {DefaultCharTypedBehavior} from "./DefaultCharTypedBehavior";
 import {DefaultDeleteForwardBehavior} from "./DefaultDeleteForwardBehavior";
 import {DefaultDeleteBackwardBehavior} from "./DefaultDeleteBackwardBehavior";
 import {DefaultCtrlDeleteBehavior} from "./DefaultCtrlDeleteBehavior";
+import {DefaultEnterPressedBehavior} from "./DefaultEnterPressedBehavior";
 
 /**
  *
@@ -14,4 +15,5 @@ export class DefaultBehaviors {
     public static readonly DELETE_FORWARD_BEHAVIOR = new DefaultDeleteForwardBehavior();
     public static readonly DELETE_BACKWARD_BEHAVIOR = new DefaultDeleteBackwardBehavior();
     public static readonly CTRL_DELETE_BEHAVIOR = new DefaultCtrlDeleteBehavior();
+    public static readonly ENTER_PRESSED_BEHAVIOR = new DefaultEnterPressedBehavior();
 }

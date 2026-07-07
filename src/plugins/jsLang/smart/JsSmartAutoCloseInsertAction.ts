@@ -1,6 +1,10 @@
 import {LanguageBase} from "../../../core/lang/LanguageBase";
 import {SmartAutoCloseInsertAction} from "../../../core/lang/smart/insert/SmartAutoCloseAction";
 import JsLang from "../lang/JsLang";
+import {JsSmartActionsUtils} from "./JsSmartActionsUtils";
+import {EditorCharTypedContext} from "../../../editor/core/behaviors/context/EditorCharTypedContext";
+import {JsLexicalGrammar} from "../lang/lexer/JsLexicalGrammar";
+import {JsSynUtils} from "../lang/syntax/utils/JsSynUtils";
 
 /**
  *
@@ -10,20 +14,26 @@ import JsLang from "../lang/JsLang";
  */
 export default class JsSmartAutoCloseInsertAction extends SmartAutoCloseInsertAction {
     constructor() {
-        super({
-            '"': '"',
-            "'": "'",
-            "[": "]",
-            "(": ")",
-            "{": "}"
-        });
+        super(JsSmartActionsUtils.AUTOCLOSEABLES);
     }
 
     getApplicableLanguages(): LanguageBase[] {
         return [JsLang.class];
     }
 
-    shouldAutoClose(char: string, closeChar: string, trailingChar: string): boolean {
-        return trailingChar !== closeChar && /^[\s,.;:)]*$/.test(trailingChar);
+    shouldAutoClose(ctx: EditorCharTypedContext, leadingChar: string, char: string, trailingChar: string): boolean {
+        const document = ctx.getEditor().getOpenedDocument();
+        let token = ctx.getTokenAtCaret();
+        if (!token && ctx.getCaretOffset() > 0) {
+            token = document.getTokenAt(ctx.getCaretOffset() - 1)!; // Sticky 
+        }
+        if (token?.isCommentToken()) return false;
+        if ((char === "'" || char === '"')) {
+            if (token?.getType() === JsLexicalGrammar.STRING_LITERAL) {
+                return !JsSynUtils.isStringLiteralUnterminated(token);
+            }
+        } else if (token?.getType() === JsLexicalGrammar.STRING_LITERAL) return false;
+
+        return trailingChar !== JsSmartActionsUtils.closing(char) && JsSmartActionsUtils.isValidTrailingChar(trailingChar);
     }
 }
