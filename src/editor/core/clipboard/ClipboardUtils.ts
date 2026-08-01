@@ -1,9 +1,9 @@
 export class ClipboardUtils {
     public static sanitizeCRLF(text: string): string {
         return text
-            .replace(/\r\n/g, "\n")
-            .replace(/\r/g, "\n")
-            .replace(/\t/, "    ");
+            .replaceAll(/\r\n/g, "\n")
+            .replaceAll(/\r/g, "\n")
+            .replaceAll(/\t/g, "    ");
     }
 
     public static async copyToClipboard(text: string): Promise<boolean> {

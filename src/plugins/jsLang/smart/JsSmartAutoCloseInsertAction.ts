@@ -25,7 +25,7 @@ export default class JsSmartAutoCloseInsertAction extends SmartAutoCloseInsertAc
         const document = ctx.getEditor().getOpenedDocument();
         let token = ctx.getTokenAtCaret();
         if (!token && ctx.getCaretOffset() > 0) {
-            token = document.getTokenAt(ctx.getCaretOffset() - 1)!; // Sticky 
+            token = document.getTokenAt(ctx.getCaretOffset() - 1)!; // Greedy left
         }
         if (token?.isCommentToken()) return false;
         if ((char === "'" || char === '"')) {

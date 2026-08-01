@@ -9,7 +9,6 @@ import {SynRecursiveIterator} from "../../../core/lang/syntax/visitors/SynRecurs
 import {AstOverlayHighlight} from "../overlays/AstOverlayHighlight";
 import {Editor} from "../../../editor/Editor";
 import {SynDocument} from "../../../core/lang/syntax/api/document/SynDocument";
-import {SynDocumentImpl} from "../../../core/lang/syntax/impl/document/SynDocumentImpl";
 import {SynTreeImpl} from "../../../core/lang/syntax/impl/tree/SynTreeImpl";
 
 /**

@@ -6,14 +6,15 @@ import {IParser} from "../../../../core/lang/syntax/builder/parser/IParser";
 import {Marker} from "../../../../core/lang/syntax/builder/parser/builder/Marker";
 import {SynScopeType} from "../../../../core/lang/syntax/api/scope/SynScopeType";
 import {TokenExpectation} from "../../../../core/lang/syntax/builder/parser/builder/TokenExpectation";
+import {IncrementalParser} from "../../../../core/lang/syntax/builder/parser/optimizer/api/IncrementalParser";
+import {ParserBoundaryNode} from "../../../../core/lang/syntax/builder/parser/optimizer/api/ParserBoundaryNode";
 
-
+@IncrementalParser
 export class JsParser implements IParser {
     public myIsInAsync = true;
     public myIsInGenerator = false;
     public myIsInFunction = false;
     public myIsSpreadAllowed = false;
-    public myIsInLoop = false;
 
     private readonly myExprParser: JsExprParser;
 
@@ -39,10 +40,6 @@ export class JsParser implements IParser {
         this.myIsInFunction = isInFunction;
     }
 
-    setInLoop(isInLoop: boolean): void {
-        this.myIsInLoop = isInLoop;
-    }
-
     setIsSpreadAllowed(isSpreadAllowed: boolean): void {
         this.myIsSpreadAllowed = isSpreadAllowed;
     }
@@ -57,10 +54,6 @@ export class JsParser implements IParser {
 
     isInFunction(): boolean {
         return this.myIsInFunction;
-    }
-
-    isInLoop(): boolean {
-        return this.myIsInLoop;
     }
 
     isSpreadAllowed(): boolean {
@@ -98,6 +91,7 @@ export class JsParser implements IParser {
         }
     }
 
+    @ParserBoundaryNode
     parseBlock(expectBrace = true, isFunction = true, isAsync = false, isGenerator = false, scopeType?: SynScopeType): void {
         const prevIsInAsync = this.myIsInAsync;
         const prevIsInGenerator = this.myIsInGenerator;
@@ -106,22 +100,24 @@ export class JsParser implements IParser {
         this.setInAsync(isAsync);
         this.setInGenerator(isGenerator);
 
-        const marker = this.builder.mark(scopeType ?? SynScopeType.Block);
-        if (expectBrace) {
-            const isValid = this.builder.expect(JsLexicalGrammar.LBRACE).failWith("Expected '{'").isValid();
-            if (!isValid) return marker.done(JsGrammar.CodeBlock);
+        try {
+            const marker = this.builder.mark(scopeType ?? SynScopeType.Block);
+            if (expectBrace) {
+                const isValid = this.builder.expect(JsLexicalGrammar.LBRACE).failWith("Expected '{'").isValid();
+                if (!isValid) return marker.done(JsGrammar.CodeBlock);
+            }
+            while (!this.builder.done() && !(expectBrace && this.builder.isNext(JsLexicalGrammar.RBRACE))) {
+                this.parseStatementOrExpr();
+            }
+            if (expectBrace) {
+                this.builder.expect(JsLexicalGrammar.RBRACE).orError("Expected '}'");
+            }
+            marker.done(JsGrammar.CodeBlock);
+        } finally {
+            this.setInFunction(prevIsInFunction);
+            this.setInAsync(prevIsInAsync);
+            this.setInGenerator(prevIsInGenerator);
         }
-        while (!this.builder.done() && !(expectBrace && this.builder.isNext(JsLexicalGrammar.RBRACE))) {
-            this.parseStatementOrExpr();
-        }
-        if (expectBrace) {
-            this.builder.expect(JsLexicalGrammar.RBRACE).orError("Expected '}'");
-        }
-        marker.done(JsGrammar.CodeBlock);
-
-        this.setInFunction(prevIsInFunction);
-        this.setInAsync(prevIsInAsync);
-        this.setInGenerator(prevIsInGenerator);
     }
 
     parseStatementOrExpr(): void {

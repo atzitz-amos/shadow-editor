@@ -24,13 +24,9 @@ export class SynFileImpl implements SynFile {
         return this.file.getURI();
     }
 
-    async getSynDocument(): Promise<SynDocument> {
+    getSynDocument(): SynDocument {
         if (!this.synDocument)
-            this.synDocument = SynDocumentManager.createSynDocument(await EditorDocumentManager.getDocumentForFile(this.file), this);
-        return this.synDocument;
-    }
-
-    getCachedSynDocument(): SynDocument | null {
+            this.synDocument = SynDocumentManager.createSynDocument(EditorDocumentManager.getDocumentForFile(this.file), this);
         return this.synDocument;
     }
 

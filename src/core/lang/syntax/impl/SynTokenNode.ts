@@ -16,6 +16,10 @@ export class SynTokenNode implements SynNode, SynLeafElement {
     constructor(public token: Token, public document: SynDocument) {
     }
 
+    getTokenCount(): number {
+        return 1;
+    }
+
     getURI(): EditorURI {
         return this.document.getURI().selectedRegion(this.getTextRange());
     }
@@ -85,6 +89,10 @@ export class SynTokenNode implements SynNode, SynLeafElement {
     }
 
     isSynthetic(): boolean {
+        return false;
+    }
+
+    isParentElement(): this is never {
         return false;
     }
 

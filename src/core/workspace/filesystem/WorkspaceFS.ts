@@ -62,7 +62,7 @@ export class WorkspaceFS {
             arg = await this.getDir(arg);
         }
         const handle = await FSImpl.createSubDir(arg.getHandle(), name);
-        return this.getOrCreateChild(arg, name, handle) as WorkspaceDirectory;
+        return await this.getOrCreateChild(arg, name, handle) as WorkspaceDirectory;
     }
 
     async createFile(parent: WorkspaceDirectory, name: string): Promise<WorkspaceFile>;
@@ -74,7 +74,7 @@ export class WorkspaceFS {
             arg = await this.getDir(arg);
         }
         const handle = await FSImpl.createFile(arg.getHandle(), name);
-        return this.getOrCreateChild(arg, name, handle) as WorkspaceFile;
+        return await this.getOrCreateChild(arg, name, handle) as WorkspaceFile;
     }
 
     async getEntry(path: RelativePathInput): Promise<FSNodeEntry> {
@@ -106,14 +106,14 @@ export class WorkspaceFS {
                 // Prefer directory first, then file.
                 try {
                     const dirHandle = await current.getHandle().getDirectoryHandle(seg, {create: false});
-                    return this.getOrCreateChild(current, seg, dirHandle) as WorkspaceDirectory;
+                    return await this.getOrCreateChild(current, seg, dirHandle) as WorkspaceDirectory;
                 } catch (e) {
                     if (!WorkspaceFS.isNotFoundError(e)) throw e;
                 }
 
                 try {
                     const fileHandle = await current.getHandle().getFileHandle(seg, {create: false});
-                    return this.getOrCreateChild(current, seg, fileHandle) as WorkspaceFile;
+                    return await this.getOrCreateChild(current, seg, fileHandle) as WorkspaceFile;
                 } catch (e) {
                     if (WorkspaceFS.isNotFoundError(e)) {
                         throw new Error(`Entry does not exist at path: ${rp.toString()}`);
@@ -134,7 +134,7 @@ export class WorkspaceFS {
 
             try {
                 const dirHandle = await current.getHandle().getDirectoryHandle(seg, {create: false});
-                current = this.getOrCreateChild(current, seg, dirHandle) as WorkspaceDirectory;
+                current = await this.getOrCreateChild(current, seg, dirHandle) as WorkspaceDirectory;
             } catch (e) {
                 if (WorkspaceFS.isNotFoundError(e)) {
                     throw new Error(`Directory does not exist at path: ${RelativePath.of(segments.slice(0, i + 1)).toString()}`);
@@ -316,7 +316,7 @@ export class WorkspaceFS {
                 const directory = arg as WorkspaceDirectory;
                 const newHandle = await FSImpl.createSubDir(parent.getHandle(), newName);
                 await this.copyDirectoryContents(directory.getHandle(), newHandle);
-                const renamed = this.getOrCreateChild(parent, newName, newHandle) as WorkspaceDirectory;
+                const renamed = await this.getOrCreateChild(parent, newName, newHandle) as WorkspaceDirectory;
                 await this.clearCacheSubtree(directory.getHandle());
                 await FSImpl.deleteEntryRecursive(parent.getHandle(), oldName);
                 this.invalidateChild(parent.getHandle(), oldName);
@@ -327,7 +327,7 @@ export class WorkspaceFS {
             const file = arg as WorkspaceFile;
             const newHandle = await FSImpl.createFile(parent.getHandle(), newName);
             await this.copyFileContent(file.getHandle(), newHandle);
-            const renamed = this.getOrCreateChild(parent, newName, newHandle) as WorkspaceFile;
+            const renamed = await this.getOrCreateChild(parent, newName, newHandle) as WorkspaceFile;
             await FSImpl.deleteEntry(parent.getHandle(), oldName);
             this.invalidateChild(parent.getHandle(), oldName);
             this.metadataStore.renamePath(oldPath, targetPath);
@@ -359,7 +359,7 @@ export class WorkspaceFS {
         const files: WorkspaceFile[] = [];
 
         for await (const [name, handle] of dir.getHandle().entries()) {
-            const entry = this.getOrCreateChild(dir, name, handle);
+            const entry = await this.getOrCreateChild(dir, name, handle);
             if (entry instanceof WorkspaceFile) {
                 files.push(entry);
             } else if (entry instanceof WorkspaceDirectory) {
@@ -385,12 +385,12 @@ export class WorkspaceFS {
         const entries: FSNodeEntry[] = [];
         const handle = parent.getHandle();
         for await (const [name, childHandle] of handle.entries()) {
-            entries.push(this.getOrCreateChild(parent, name, childHandle));
+            entries.push(await this.getOrCreateChild(parent, name, childHandle));
         }
         return entries;
     }
 
-    private getOrCreateChild(parent: WorkspaceDirectory, name: string, handle: FileSystemHandle): FSNodeEntry {
+    private async getOrCreateChild(parent: WorkspaceDirectory, name: string, handle: FileSystemHandle): Promise<FSNodeEntry> {
         const parentHandle = parent.getHandle();
         const cached = this.getCachedChild(parentHandle, name);
         if (cached) {
@@ -406,6 +406,7 @@ export class WorkspaceFS {
             entry = new WorkspaceDirectory(this, name, parent, handle as FileSystemDirectoryHandle);
         } else {
             entry = new WorkspaceFile(this, name, parent, handle as FileSystemFileHandle);
+            await this.makeAvailable(entry as WorkspaceFile);
         }
         this.cacheChild(parentHandle, name, entry);
         return entry;
@@ -462,5 +463,9 @@ export class WorkspaceFS {
                 await this.clearCacheSubtree(childHandle as FileSystemDirectoryHandle);
             }
         }
+    }
+
+    private async makeAvailable(node: WorkspaceFile) {
+        await node.ensureCacheUpToDate();
     }
 }

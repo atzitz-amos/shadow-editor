@@ -3,6 +3,8 @@ import {ITab} from "./ITab";
 import {TabsManager} from "./TabsManager";
 import {EditorTab} from "./EditorTab";
 import {EditorDocumentManager} from "../../../editor/core/document/EditorDocumentManager";
+import {ActiveWorkspaceHelper} from "../../../core/global/ActiveWorkspaceHelper";
+import {EditorURI} from "../../../core/uri/EditorURI";
 
 /**
  *
@@ -23,17 +25,22 @@ export class EditorTabsHelper {
         return result;
     }
 
-    public static async makeVisible(file: WorkspaceFile): Promise<void> {
+    public static async makeVisible(uri: EditorURI): Promise<void> {
+        const file = await ActiveWorkspaceHelper.getInstance()?.getFS().getFile(uri.getPath());
+        if (!file) {
+            throw new Error(`File not found for URI: ${uri.toString()}`);
+        }
+
         const tabs = this.getTabsForFile(file);
         if (tabs.length > 0) {
             TabsManager.getInstance().open(tabs[0]);
         } else {
-            await EditorTabsHelper.newTab(file);
+            EditorTabsHelper.newTab(file);
         }
     }
 
-    public static async newTab(file: WorkspaceFile) {
-        const document = await EditorDocumentManager.getDocumentForFile(file);
+    public static newTab(file: WorkspaceFile) {
+        const document = EditorDocumentManager.getDocumentForFile(file);
         TabsManager.getInstance().open(new EditorTab(file.getName(), document));
     }
 }

@@ -30,7 +30,7 @@ export class SynSuiteEngine {
         return this.instance;
     }
 
-    public async snapshot(key: string, pluginId: string, description?: string) {
+    public snapshot(key: string, pluginId: string, description?: string) {
         const editor = GlobalState.getMainEditor();
 
         if (editor.getCurrentLanguage() === null) {
@@ -38,7 +38,7 @@ export class SynSuiteEngine {
             return;
         }
 
-        const document = await editor.getLangService().getSynFile().getSynDocument();
+        const document = editor.getLangService().getSynFile().getSynDocument();
         const content = editor.getOpenedDocument().getTextContent();
 
         const holder = new ProblemsHolder(document);

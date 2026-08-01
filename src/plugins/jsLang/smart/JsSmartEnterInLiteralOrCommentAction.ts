@@ -21,8 +21,11 @@ export default class JsSmartEnterInLiteralOrCommentAction extends SmartInlineEnt
 
     isApplicable(ctx: EditorBehaviorContext): boolean {
         const token = ctx.getTokenAtCaret();
-        return !ModifierKeyHolder.isShiftPressed() && token !== null && (
-            token.getType() === JsLexicalGrammar.STRING_LITERAL || token.getType() === JsLexicalGrammar.SINGLE_LINE_COMMENT
+        console.log("Token: " + token?.getType());
+        if (token === null || ModifierKeyHolder.isShiftPressed()) return false;
+        return (
+            token.getType() === JsLexicalGrammar.STRING_LITERAL
+            || token.getType() === JsLexicalGrammar.SINGLE_LINE_COMMENT
         );
     }
 
@@ -32,12 +35,26 @@ export default class JsSmartEnterInLiteralOrCommentAction extends SmartInlineEnt
 
     invoke(ctx: EditorBehaviorContext): BehaviorHandlingMode {
         const token = ctx.getTokenAtCaret()!;
-        const indent = IndentUtils.makeIndentString(token.getRange().start - ctx.getLineData().getStart());
+        const lineStart = ctx.getLineData().getStart();
+
+        const indent = IndentUtils.makeIndentString(token.getRange().start - lineStart);
 
         let content: string;
 
         if (token.isCommentToken()) {
-            content = "\n" + indent + "// ";
+            const text = ctx.getLineData().getText();
+            const commentIndent = IndentUtils.getIndentationString(
+                text.slice(token.getRange().start - lineStart + 2)
+            );
+
+            let afterCaret = text.slice(ctx.getCaretOffset() - lineStart, ctx.getLineData().getLineLength());
+            if (isWhiteSpaceOnly(afterCaret)) {
+                // We delete the whitespace
+                ctx.getEditor().deleteAt(ctx.getCaretOffset(), afterCaret.length);
+                return BehaviorHandlingMode.FORWARD;
+            }
+
+            content = "\n" + indent + "//" + commentIndent;
         } else {
             const quote = JsSynUtils.getStringLiteralQuote(token);
             content = quote + " +\n" + indent + quote;
@@ -47,4 +64,9 @@ export default class JsSmartEnterInLiteralOrCommentAction extends SmartInlineEnt
 
         return BehaviorHandlingMode.HANDLED;
     }
+}
+
+
+function isWhiteSpaceOnly(s: string) {
+    return s.length > 0 && s.trim().length === 0;
 }

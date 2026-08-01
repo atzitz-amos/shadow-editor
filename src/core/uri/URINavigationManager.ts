@@ -1,6 +1,5 @@
 import {EditorURI} from "./EditorURI";
 import {URITargetType} from "./URITargetType";
-import {ActiveWorkspaceHelper} from "../global/ActiveWorkspaceHelper";
 import {UseLogger} from "../logging/logger/LoggerDecorators";
 import {Logger} from "../logging/logger/LoggerCore";
 import {EditorTabsHelper} from "../../app/core/tabs/EditorTabsHelper";
@@ -30,13 +29,7 @@ export class URINavigationManager {
 
     public async navigateAsync(uri: EditorURI): Promise<void> {
         if (uri.getTarget() == URITargetType.FILE) {
-            const file = await ActiveWorkspaceHelper.getInstance()?.getFS().getFile(uri.getPath());
-            if (!file) {
-                this.logger.error("FATAL: File not found for URI: " + uri.toString());
-                return;
-            }
-
-            await EditorTabsHelper.makeVisible(file);
+            await EditorTabsHelper.makeVisible(uri);
         }
     }
 }

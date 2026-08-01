@@ -1,7 +1,5 @@
 import {SynASTElement} from "./tree/SynASTElement";
-import {TextRange} from "../../../../editor/core/coordinate/range/TextRange";
 import {URILocatedResource} from "../../../uri/URILocatedResource";
-import {SynNodeVisitor} from "../visitors/SynNodeVisitor";
 import {SynDocument} from "./document/SynDocument";
 import {SynParentElement} from "./tree/SynParentElement";
 import {SynScope} from "./scope/SynScope";
@@ -33,4 +31,8 @@ export interface SynNode extends SynBase, URILocatedResource {
     toTreeRepr(): string;
 
     isSynthetic(): boolean;
+
+    isParentElement(): this is SynParentElement;
+
+    getTokenCount(): number;
 }

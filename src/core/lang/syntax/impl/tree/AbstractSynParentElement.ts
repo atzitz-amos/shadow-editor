@@ -22,6 +22,8 @@ export abstract class AbstractSynParentElement implements SynParentElement {
 
     }
 
+    abstract getTokenCount(): number;
+
     abstract getParentScope(): SynScope;
 
     abstract getSynDocument(): SynDocument;
@@ -185,6 +187,10 @@ export abstract class AbstractSynParentElement implements SynParentElement {
 
     isSynthetic(): boolean {
         return this.synthetic;
+    }
+
+    isParentElement(): this is SynParentElement {
+        return true;
     }
 
     accept(visitor: SynNodeVisitor): void {

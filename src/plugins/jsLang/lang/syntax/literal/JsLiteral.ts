@@ -16,7 +16,7 @@ export class JsLiteral extends JsExpr {
     constructor(node: ASTNode) {
         super(node);
 
-        this.value = (<SynTokenNode>node.children[0]).getValue();
+        this.value = (<SynTokenNode>this.getNthChild(0)).getValue();
     }
 
     getValue(): string {

@@ -23,13 +23,9 @@ export abstract class SynASTElementImpl extends AbstractSynParentElement impleme
 
     private readonly elementChildren: SynASTElement[];
 
-    private readonly range: TextRange;
-
-
     protected constructor(node: ASTNode) {
         super(node.children);
         this.node = node;
-        this.range = node.range;
         this.scope = node.scope;
         this.document = node.document;
 
@@ -45,7 +41,7 @@ export abstract class SynASTElementImpl extends AbstractSynParentElement impleme
     }
 
     getURI(): EditorURI {
-        return this.document.getURI().selectedRegion(this.range);
+        return this.document.getURI().selectedRegion(this.getTextRange());
     }
 
     getSynDocument(): SynDocument {
@@ -75,7 +71,20 @@ export abstract class SynASTElementImpl extends AbstractSynParentElement impleme
     }
 
     getTextRange(): TextRange {
-        return this.range;
+        let start: number | null;
+        if (this.node.getRelativeOffset() !== null) {
+            const parentStart = this.getParent() !== null ? this.getParent()!.getTextRange().start : 0;
+            start = parentStart + this.node.getRelativeOffset()!;
+        } else {
+            start = this.node.getGlobalOffset();
+        }
+
+        if (!start) start = 0;
+        return new TextRange(start, start + this.node.textLength);
+    }
+
+    getTokenCount(): number {
+        return this.node.getTokenCount();
     }
 
     toDebugString(): string {
@@ -88,5 +97,9 @@ export abstract class SynASTElementImpl extends AbstractSynParentElement impleme
         visitor.visitElement(this);
 
         super.accept(visitor);
+    }
+
+    getASTNode(): ASTNode {
+        return this.node;
     }
 }

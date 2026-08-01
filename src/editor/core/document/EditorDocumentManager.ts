@@ -17,18 +17,21 @@ export class EditorDocumentManager {
         return this.instance;
     }
 
-    public static async getDocumentForFile(file: WorkspaceFile): Promise<Document> {
-        return await this.getInstance().getDocumentForFile(file);
+    public static getDocumentForFile(file: WorkspaceFile): Document {
+        return this.getInstance().getDocumentForFile(file);
     }
 
-    public async getDocumentForFile(file: WorkspaceFile): Promise<Document> {
+    public getDocumentForFile(file: WorkspaceFile): Document {
         if (this.documents.has(file)) return this.documents.get(file)!;
-        return await this.createDocumentForFile(file);
+        return this.createDocumentForFile(file);
     }
 
-    public async createDocumentForFile(file: WorkspaceFile): Promise<Document> {
+    public createDocumentForFile(file: WorkspaceFile): Document {
         let fileTypeHandler = LangSupport.getInstance().getFileTypeHandler(file);
-        const document = new Document(0, await file.getTextContent(), fileTypeHandler ? fileTypeHandler.getLanguageForFile(file) : null);
+        const document = new Document(
+            0,
+            file.getCachedContent() ?? "",
+            fileTypeHandler ? fileTypeHandler.getLanguageForFile(file) : null);
         document.linkFile(file);
         this.documents.set(file, document);
         return document;

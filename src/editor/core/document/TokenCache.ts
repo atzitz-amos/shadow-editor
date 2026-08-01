@@ -113,14 +113,15 @@ export class TokenCache {
 
         let matchedToken = this.tokens[exactMatchIdx];
 
-        if (matchedToken.getType().shouldSkip && offset === matchedToken.getRange().start) {
-            for (let i = exactMatchIdx - 1; i >= 0; i--) {
-                if (!this.tokens[i].getType().shouldSkip) {
-                    return this.tokens[i];
-                }
-            }
-            return null;
-        }
+
+        // if (matchedToken.getType().shouldSkip && offset === matchedToken.getRange().start) {
+        //     for (let i = exactMatchIdx - 1; i >= 0; i--) {
+        //         if (!this.tokens[i].getType().shouldSkip) {
+        //             return this.tokens[i];
+        //         }
+        //     }
+        //     return null;
+        // }
 
         return matchedToken;
     }

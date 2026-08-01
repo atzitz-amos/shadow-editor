@@ -75,10 +75,10 @@ export class Editor {
         this.widgetManager = new WidgetManager(this);
         this.undoRedo = new UndoRedoManager(this);
 
+        this.view = new View(this);
+
         this.document = document;
         this.document.linkEditor(this);
-
-        this.view = new View(this);
 
         this.inlayManager = new InlayManager(this);
         this.coordinateMapper = new EditorCoordinateMapper(this.view);

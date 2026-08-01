@@ -14,8 +14,7 @@ import {EditorTab} from "../../../../../core/tabs/EditorTab";
  * @date 3/7/2026
  * @since 1.0.0
  */
-@UIHooks.redrawOn(UICommonHooks.FOCUS_CHANGE,
-    WorkspaceHooks.WORKSPACE_CHANGED,
+@UIHooks.redrawOn(WorkspaceHooks.WORKSPACE_CHANGED,
     WorkspaceHooks.PROJECT_FILES_SELECTED_CHANGED,
     TabHooks.TAB_ACTIVE)
 export class SEditorBreadcrumbs extends UIComponent {
@@ -51,5 +50,10 @@ export class SEditorBreadcrumbs extends UIComponent {
         }
 
         this.setInnerHTML(html);
+    }
+
+    @UIHooks.react(UICommonHooks.FOCUS_CHANGE)
+    onFocusChange() {
+        
     }
 }

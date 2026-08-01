@@ -26,8 +26,18 @@ export class TabAction extends AbstractAction {
 
         ctx.getEvent().preventDefault();
         editor.getCaretModel().forEachCaret(caret => {
-            editor.getOpenedDocument().getUndoRedoStack().onTyped(caret, caret.getOffset(), '    ');
-            editor.insertText(caret.getOffset(), '    ');
+            if (caret.getSelectionModel().isSelectionActive) {
+                const start = editor.getOpenedDocument().getLineAt(caret.getSelectionModel().getActualStart()).getLineNumber();
+                const end = editor.getOpenedDocument().getLineAt(caret.getSelectionModel().getActualEnd()).getLineNumber();
+
+                for (let i = start; i <= end; i++) {
+                    editor.insertText(editor.getOpenedDocument().getLineData(i).getStart(), '    ');
+                }
+            } else {
+                editor.getOpenedDocument().getUndoRedoStack().onTyped(caret, caret.getOffset(), '    ');
+                editor.insertText(caret.getOffset(), '    ');
+            }
+
         });
         editor.getCaretModel().shift(4);
         editor.getView().resetBlink();

@@ -7,12 +7,11 @@ import {HighlighterBase} from "../../../core/lang/highlighter/HighlighterBase";
 import {Document} from "../document/Document";
 import {TokenCache} from "../document/TokenCache";
 import {EditorLanguageChanged} from "./events/EditorLanguageChanged";
-import {Scheduler} from "../../../core/scheduler/Scheduler";
-import {ASTBuilder} from "../../../core/lang/syntax/builder/parser/builder/ASTBuilder";
 import {SynFileImpl} from "../../../core/lang/syntax/impl/filesystem/SynFileImpl";
 import {SynFile} from "../../../core/lang/syntax/api/filesystem/SynFile";
 import {SynTreeChangedEvent} from "./events/SynTreeChangedEvent";
 import {EmptyKillSignal, TimeoutKillSignal} from "../../../core/utils/KillSignal";
+import {ASTRecoveryBuilder} from "../../../core/lang/syntax/builder/parser/optimizer/recovery/ASTRecoveryBuilder";
 
 /**
  * Class associated with an editor that holds the current language, lexer, parser, highlighter as
@@ -103,31 +102,30 @@ export class EditorLangService {
     private scheduleParsing(document: Document) {
         this.isSynTreeClean = false;
 
-        Scheduler.debounce(async () => {
-            if (!this.currentLanguage) return;
+        if (!this.currentLanguage) return;
 
-            const start = performance.now();
-            this.synFile = new SynFileImpl(document.getAssociatedFile()!);
+        const start = performance.now();
+        this.synFile = new SynFileImpl(document.getAssociatedFile()!);
 
-            const synDocument = await this.synFile.getSynDocument();
+        const synDocument = this.synFile.getSynDocument();
 
-            const builder = new ASTBuilder(
-                synDocument,
-                this.currentLanguage,
-                !!window["isParseTimeBombDisabled"] ? new EmptyKillSignal() : new TimeoutKillSignal(1000),
-            );
+        const builder = new ASTRecoveryBuilder(
+            synDocument,
+            [],
+            this.currentLanguage,
+            !!window["isParseTimeBombDisabled"] ? new EmptyKillSignal() : new TimeoutKillSignal(1000),
+        );
 
-            this.currentLanguage.createParser(builder).parse();
-            // console.log("Successfully parsed "
-            //     + this.editor.getOpenedDocument().getLineCount()
-            //     + " lines (" + this.editor.getOpenedDocument().getTotalDocumentLength()
-            //     + " chars) in "
-            //     + (performance.now() - start) + "ms");
-            const synTree = builder.close();
-            synDocument.commit(synTree, document.getModificationTimestamp());
+        this.currentLanguage.createParser(builder).parse();
+        // console.log("Successfully parsed "
+        //     + this.editor.getOpenedDocument().getLineCount()
+        //     + " lines (" + this.editor.getOpenedDocument().getTotalDocumentLength()
+        //     + " chars) in "
+        //     + (performance.now() - start) + "ms");
+        const synTree = builder.close();
+        synDocument.commit(synTree, document.getModificationTimestamp());
 
-            this.isSynTreeClean = true;
-            this.editor.getEventBus().syncPublish(new SynTreeChangedEvent(this.editor, synDocument, this.currentLanguage!));
-        }, 10 * Math.log(this.editor.getOpenedDocument().getTotalDocumentLength()));
+        this.isSynTreeClean = true;
+        this.editor.getEventBus().syncPublish(new SynTreeChangedEvent(this.editor, synDocument, this.currentLanguage!));
     }
 }

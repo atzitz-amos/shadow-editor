@@ -7,5 +7,5 @@ import {SynNode} from "../SynNode";
  * @since 1.0.0
  */
 export interface SynLeafElement extends SynNode {
-
+    isParentElement(): this is never;
 }

@@ -11,12 +11,6 @@ export interface Marker {
 
     wasErrorAt(): boolean;
 
-    getTokenAt(): Token;
-
-    getTokenBefore(): Token | null;
-
-    getTokenAfter(): Token | null;
-
     rollback(): void;
 
     getTokenIndex(): number;
@@ -46,18 +40,6 @@ export class TokenStreamMarker implements Marker {
 
     getBuilderOffset(): number {
         return this.builderOffset;
-    }
-
-    getTokenAt(): Token {
-        return this.builder.getTokenAt(this.tokenAt)!;
-    }
-
-    getTokenBefore(): Token | null {
-        return this.builder.getTokenAt(this.tokenAt - 1);
-    }
-
-    getTokenAfter(): Token | null {
-        return this.builder.getTokenAt(this.tokenAt + 1);
     }
 
     rollback(): void {

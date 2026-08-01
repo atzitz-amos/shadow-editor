@@ -23,7 +23,8 @@ export default class SynSuiteSnapshotAction extends AbstractAction {
         const description = await PopupUtilsCore.askString("Enter test description:", "description", FaIcon.solid("pencil"));
         if (!description) return;
 
-        await SynSuiteEngine.getInstance().snapshot(key, "default.jsLang", description);
+        SynSuiteEngine.getInstance()
+            .snapshot(key, "default.jsLang", description);
     }
 
     getName(): string {

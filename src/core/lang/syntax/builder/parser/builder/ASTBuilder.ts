@@ -19,12 +19,13 @@ import {SynDocument} from "../../../api/document/SynDocument";
 import {SynTree} from "../../../api/tree/SynTree";
 import {SynTreeImpl} from "../../../impl/tree/SynTreeImpl";
 import {LanguageBase} from "../../../../LanguageBase";
+import {SynASTElementImpl} from "../../../impl/tree/SynASTElementImpl";
 
 export class ASTBuilder {
-    private readonly stream: TokenStream;
+    protected readonly stream: TokenStream;
 
-    private readonly production: SynNode[] = [];
-    private readonly scopeTree: SynScopeTree;
+    protected readonly production: SynNode[] = [];
+    protected readonly scopeTree: SynScopeTree;
 
     private currentOffset: number = 0;
     private lastTokenOffset: number = 0;
@@ -35,10 +36,6 @@ export class ASTBuilder {
     constructor(private readonly document: SynDocument, private readonly language: LanguageBase, private signal: KillSignal) {
         this.stream = document.makeTokenStream();
         this.scopeTree = new SynScopeTree();
-    }
-
-    getTokenAt(tokenOffset: number): Token | null {
-        return this.stream.getAt(tokenOffset);
     }
 
     done(): boolean {
@@ -205,41 +202,13 @@ export class ASTBuilder {
         if (children.length === 1 && type === ASTGrammar.EXPRESSION)
             this.production.push(children[0]);
         else
-            this.addToProduction(type, children, range);
+            this.addToProduction(type, children, this.stream.getIndex() - marker.getTokenIndex(), range);
         this.wasInErrorState = this.isErrorState;
         this.isErrorState = false;
     }
 
     add(type: ASTType) {
-        this.addToProduction(type, [], new TextRange(this.currentOffset, this.currentOffset));
-    }
-
-    addToProduction(type: ASTType, children: SynNode[], range: TextRange) {
-        let node: ASTNode;
-        if (type.role === ASTGrammarRole.CODEBLOCK) node = new ASTNode(type, this.document, children, range, this.scopeTree.getCurrentScope()!.getParent());
-        else node = new ASTNode(type, this.document, children, range, this.scopeTree.getCurrentScope()!);
-
-        if (type.treeBuilder) {
-            let synElement = type.treeBuilder(node);
-            if (synElement instanceof SynCodeBlock) {
-                this.scopeTree.exitScope(synElement);
-            } else if (synElement instanceof SynDeclaration) {
-                this.scopeTree.getCurrentScope()?.addDeclaration(synElement);
-            }
-            this.production.push(synElement);
-        } else {
-            this.production.push(new DefaultSynElement(node));
-        }
-    }
-
-    clearWhitespace() {
-        let token: Token | null;
-        while ((token = this.stream.seek()) && (token.shouldSkip() || token.isCommentToken())) {
-            this.currentOffset = token.getRange().end;
-            this.stream.consume();
-            if (token.isCommentToken())
-                this.production.push(new SynTokenNode(token, this.document));
-        }
+        this.addToProduction(type, [], 0, new TextRange(this.currentOffset, this.currentOffset));
     }
 
     getProduction() {
@@ -280,5 +249,52 @@ export class ASTBuilder {
 
     wasInvalid() {
         return this.wasInErrorState;
+    }
+
+    private clearWhitespace() {
+        let token: Token | null;
+        while ((token = this.stream.seek()) && (token.shouldSkip() || token.isCommentToken())) {
+            this.currentOffset = token.getRange().end;
+            this.stream.consume();
+            if (token.isCommentToken())
+                this.production.push(new SynTokenNode(token, this.document));
+        }
+    }
+
+    private addToProduction(type: ASTType, children: SynNode[], tokenCount: number, range: TextRange) {
+        let node: ASTNode;
+        if (type.role === ASTGrammarRole.CODEBLOCK)
+            node = new ASTNode(type,
+                this.document,
+                children,
+                range.getLength(),
+                tokenCount,
+                this.scopeTree.getCurrentScope()!.getParent());
+        else
+            node = new ASTNode(
+                type,
+                this.document,
+                children,
+                range.getLength(),
+                tokenCount,
+                this.scopeTree.getCurrentScope()!);
+
+        node.setGlobalOffset(range.start);
+        for (const child of children) {
+            if (child instanceof SynASTElementImpl)
+                child.getASTNode().setRelativeOffset(child.getASTNode().getGlobalOffset()! - range.start);
+        }
+
+        if (type.treeBuilder) {
+            let synElement = type.treeBuilder(node);
+            if (synElement instanceof SynCodeBlock) {
+                this.scopeTree.exitScope(synElement);
+            } else if (synElement instanceof SynDeclaration) {
+                this.scopeTree.getCurrentScope()?.addDeclaration(synElement);
+            }
+            this.production.push(synElement);
+        } else {
+            this.production.push(new DefaultSynElement(node));
+        }
     }
 }

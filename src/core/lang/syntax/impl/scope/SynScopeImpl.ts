@@ -31,8 +31,8 @@ export class SynScopeImpl implements SynScope {
     }
 
     getURI(): EditorURI {
-        if (this.parent !== this) return this.getParent().getURI().extendAnchor(this.type.getDebugName() + this.scopeId.toString());
-        return this.codeBlock.getSynDocument().getURI().extendAnchor(this.type.getDebugName() + this.scopeId.toString(), URITargetType.SCOPE);
+        if (this.parent !== this) return this.getParent().getURI().extendAnchor(this.type + this.scopeId.toString());
+        return this.codeBlock.getSynDocument().getURI().extendAnchor(this.type + this.scopeId.toString(), URITargetType.SCOPE);
     }
 
     getParent(): SynScope {

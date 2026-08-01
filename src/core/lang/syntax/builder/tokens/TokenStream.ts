@@ -77,6 +77,8 @@ export abstract class TokenStream {
         return new StaticTokenStream(tokens);
     }
 
+    abstract jumpN(n: number): void;
+
     /**
      * Invalidate the TokenStream
      * An invalidated TokenStream should throw an {@link OutdatedTokenStreamError} when used.
@@ -92,6 +94,8 @@ export abstract class TokenStream {
     abstract seekN(n: number): Token | null;
 
     abstract seekPrevious(): Token | null;
+
+    abstract maxSeekedIndex(): number;
 
     abstract getAt(index: number): Token | null;
 
@@ -119,9 +123,10 @@ export abstract class TokenStream {
 }
 
 export class StaticTokenStream extends TokenStream {
+
     private readonly tokens: Token[];
     private index: number = 0;
-
+    private maxSeeked: number = 0;
     private isInvalidated: boolean = false;
 
     constructor(tokens: Token[]) {
@@ -142,6 +147,7 @@ export class StaticTokenStream extends TokenStream {
     }
 
     getAt(index: number): Token | null {
+        this.maxSeeked = Math.max(this.maxSeeked, index);
         return this.tokens[index] || null;
     }
 
@@ -171,11 +177,24 @@ export class StaticTokenStream extends TokenStream {
     seekN(n: number): Token | null {
         let token: Token;
         token = this.tokens[this.index + n];
+
+        this.maxSeeked = Math.max(this.maxSeeked, this.index + n);
         return token || null;
     }
 
     seekPrevious(): Token | null {
         return this.seekN(-1);
+    }
+
+    jumpN(n: number): void {
+        this.assertNotInvalid();
+
+        this.index += n;
+        this.maxSeeked = Math.max(this.maxSeeked, this.index);
+    }
+
+    maxSeekedIndex(): number {
+        return this.maxSeeked;
     }
 
     consume(): Token | null {

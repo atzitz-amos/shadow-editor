@@ -30,4 +30,6 @@ export interface SynParentElement extends SynNode {
     getAllToken(nested: boolean): SynTokenNode[];
 
     setSynthetic(): void;
+
+    isParentElement(): this is SynParentElement;
 }

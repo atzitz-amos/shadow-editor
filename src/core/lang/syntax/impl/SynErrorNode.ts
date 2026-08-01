@@ -17,6 +17,10 @@ export class SynErrorNode implements SynNode, SynLeafElement {
     constructor(private range: TextRange, private message: string, private document: SynDocument) {
     }
 
+    getTokenCount(): number {
+        return 0;
+    }
+
     getURI(): EditorURI {
         return this.document.getURI().selectedRegion(this.range, URITargetType.ERROR);
     }
@@ -86,6 +90,10 @@ export class SynErrorNode implements SynNode, SynLeafElement {
     }
 
     isSynthetic(): boolean {
+        return false;
+    }
+
+    isParentElement(): this is never {
         return false;
     }
 

@@ -57,7 +57,7 @@ export class ApplyQuickFixAction extends AbstractAction {
 
         const quickFix = selectedProblem?.getQuickFixes()[0];
         if (quickFix) {
-            const replacement = new SynModificationTree(editor.getCurrentLanguage()!, editor.getLangService().getSynFile(), editor.getOpenedDocument().getTextContent());
+            const replacement = new SynModificationTree(editor.getCurrentLanguage()!, editor.getLangService().getSynFile().getSynDocument().getTree(), editor.getOpenedDocument().getTextContent());
             quickFix.applyFix(selectedProblem!.getNode(), replacement);
             const mod = replacement.applyModifications();
             editor.replaceRange(editor.getFullRange(), mod.newText);

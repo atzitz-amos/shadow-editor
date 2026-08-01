@@ -54,4 +54,8 @@ export class SynTreeImpl extends AbstractSynParentElement implements SynTree {
         visitor.visitTree(this);
         super.accept(visitor);
     }
+
+    getTokenCount(): number {
+        return this.children.reduce((count, child) => count + child.getTokenCount(), 0);
+    }
 }

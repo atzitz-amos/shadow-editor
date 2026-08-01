@@ -32,11 +32,11 @@ export default class DebugToolsPane extends AbstractPane {
         GlobalState.getMainEventBus().unsubscribe(this, CaretMovedEvent.SUBSCRIBER);
     }
 
-    protected async onShow() {
+    protected onShow() {
         if (GlobalState.getMainEditor() !== null) {
             (this.getComponent() as DebugToolsPaneComponent).onSynTreeChanged(
                 GlobalState.getMainEditor(),
-                await GlobalState.getMainEditor().getLangService().getSynFile().getSynDocument());
+                GlobalState.getMainEditor().getLangService().getSynFile().getSynDocument());
         }
 
         GlobalState.getMainEventBus().subscribe(this, SynTreeChangedEvent.SUBSCRIBER, e => {

@@ -2,18 +2,18 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <meta name="viewport"
-              content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0 minimum-scale=1.0">
-        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <meta content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0 minimum-scale=1.0"
+              name="viewport">
+        <meta content="ie=edge" http-equiv="X-UA-Compatible">
         <title>Editor Test</title>
 
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com" rel="preconnect">
+        <link crossorigin href="https://fonts.gstatic.com" rel="preconnect">
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
-        <link rel="stylesheet" href="res/editor.css">
+        <link href="res/editor.css" rel="stylesheet">
 
-        <script src="https://kit.fontawesome.com/cb36336f7b.js" crossorigin="anonymous"></script>
+        <script crossorigin="anonymous" src="https://kit.fontawesome.com/cb36336f7b.js"></script>
     </head>
     <body>
         <div class="editor-c" style="display: flex; flex-direction: row"></div>
@@ -34,9 +34,9 @@
             import {EditorURI} from "./src/core/uri/EditorURI";
             import {JsCodeBlock} from "./src/plugins/jsLang/lang/syntax/JsCodeBlock";
             import {JsDeclarator} from "./src/plugins/jsLang/lang/syntax/statements/JsDeclarator";
+            import {JsIdentifier} from "./src/plugins/jsLang/lang/syntax/literal/JsIdentifier";
             import {GlobalState} from "./src/core/global/GlobalState";
             import {ShadowUIFactory} from "./src/app/ui/ShadowUIFactory";
-            import {SyncService} from "./src/core/sync/sync/SyncService";
             import {CommonKeyImpl} from "./src/core/utils/CommonKey";
             import {WorkspaceChooserPane} from "./src/app/ui/full/panes/workspaceChooser/WorkspaceChooserPane";
             import {BlankPane} from "./src/app/ui/full/panes/blank/BlankPane";
@@ -46,14 +46,12 @@
             import {ProjectFilesPane} from "./src/app/ui/full/panes/projectFiles/ProjectFilesPane";
             import {SerializationUtils} from "./src/core/persistence/serializable/SerializationUtils";
             import {SimpleTooltipPopup} from "./src/editor/ui/popups/tooltip/SimpleTooltipPopup";
-            import {IntSetting} from "./src/core/settings/base/IntSetting";
             import {SettingBase} from "./src/core/settings/base/SettingBase";
             import {JsSynVisitor} from "./src/plugins/jsLang/lang/syntax/visitors/JsSynVisitor";
             import {SynRecursiveVisitor} from "./src/core/lang/syntax/visitors/SynRecursiveVisitor";
             import {SynLazyVisitorOptimizer} from "./src/core/lang/syntax/visitors/SynLazyVisitorOptimizer";
             import DebugToolsPlugin from "./src/plugins/debugTools/DebugToolsPlugin";
             import {SourceRewriter} from "./src/core/lang/syntax/writer/SourceRewriter";
-            import {AbstractSynTemplate} from "./src/core/lang/syntax/writer/template/AbstractSynTemplate";
             import {SynModificationTree} from "./src/core/lang/syntax/writer/template/SynModificationTree";
             import {JsSynTemplate} from "./src/plugins/jsLang/lang/template/JsSynTemplate";
             import {SynSuiteWindowRenderer} from "./src/core/lang/suite/renderer/SynSuiteWindowRenderer";
@@ -69,6 +67,8 @@
             window.enableTimebomb = () => {
                 window["isParseTimeBombDisabled"] = false;
             }
+
+            window.disableTimebomb();
 
             window.FaIcon = FaIcon;
             window.SimpleTooltipPopup = SimpleTooltipPopup;
@@ -132,8 +132,6 @@
                 window.DocumentModificationEvent = DocumentModificationEvent;
 
                 window.lex = new JsIncrLex();
-
-                window.InError = InlineError;
 
                 window.Source = Source;
 
