@@ -25,10 +25,10 @@
             import {JsParser} from "./src/plugins/jsLang/lang/parser/JsParser";
             import JSLangPlugin from "./src/plugins/jsLang/JSLangPlugin";
             import JsIncrLexer from "./src/plugins/jsLang/lang/lexer/JsIncrLexer";
-            import {Source} from "./src/core/lang/syntax/builder/tokens/TokenStream";
+            import {Source} from "./src/lang/syntax/builder/tokens/TokenStream";
             import {DocumentModificationEvent} from "./src/editor/core/document/events/DocumentModificationEvent";
             import {Workspace} from "./src/core/workspace/Workspace";
-            import {ASTBuilder} from "./src/core/lang/syntax/builder/parser/builder/ASTBuilder";
+            import {ASTBuilder} from "./src/lang/syntax/builder/parser/builder/ASTBuilder";
             import {ShadowApp} from "./src/app/ShadowApp";
             import {RelativePath} from "./src/core/workspace/filesystem/path/RelativePath";
             import {EditorURI} from "./src/core/uri/EditorURI";
@@ -48,17 +48,19 @@
             import {SimpleTooltipPopup} from "./src/editor/ui/popups/tooltip/SimpleTooltipPopup";
             import {SettingBase} from "./src/core/settings/base/SettingBase";
             import {JsSynVisitor} from "./src/plugins/jsLang/lang/syntax/visitors/JsSynVisitor";
-            import {SynRecursiveVisitor} from "./src/core/lang/syntax/visitors/SynRecursiveVisitor";
-            import {SynLazyVisitorOptimizer} from "./src/core/lang/syntax/visitors/SynLazyVisitorOptimizer";
+            import {SynRecursiveVisitor} from "./src/lang/syntax/visitors/SynRecursiveVisitor";
+            import {SynLazyVisitorOptimizer} from "./src/lang/syntax/visitors/SynLazyVisitorOptimizer";
             import DebugToolsPlugin from "./src/plugins/debugTools/DebugToolsPlugin";
-            import {SourceRewriter} from "./src/core/lang/syntax/writer/SourceRewriter";
-            import {SynModificationTree} from "./src/core/lang/syntax/writer/template/SynModificationTree";
+            import {SourceRewriter} from "./src/lang/syntax/writer/SourceRewriter";
+            import {SynModificationTree} from "./src/lang/syntax/writer/template/SynModificationTree";
             import {JsSynTemplate} from "./src/plugins/jsLang/lang/template/JsSynTemplate";
-            import {SynSuiteWindowRenderer} from "./src/core/lang/suite/renderer/SynSuiteWindowRenderer";
+            import {SynSuiteWindowRenderer} from "./src/app/testLib/lang/suite/renderer/SynSuiteWindowRenderer";
             import {PopupUtilsCore} from "./src/core/ui/lib/popup/PopupUtilsCore";
             import {FaIcon} from "./src/core/ui/icons/FaIcon";
             import {ProjectFilesPaneHelper} from "./src/app/ui/full/panes/projectFiles/ProjectFilesPaneHelper";
             import {ActiveWorkspaceHelper} from "./src/core/global/ActiveWorkspaceHelper";
+            import {UIComponent, UIComponentMixin} from "./src/core/ui/engine/components/UIComponent";
+            import {Measurable} from "./src/core/ui/engine/mixins/Measurable";
 
             window.disableTimebomb = () => {
                 window["isParseTimeBombDisabled"] = true;
@@ -135,6 +137,10 @@
 
                 window.Source = Source;
 
+                window.UIComponentMixin = UIComponentMixin;
+                window.UIComponent = UIComponent;
+                window.Measurable = Measurable;
+
                 window.builder = ASTBuilder;
 
                 window.JsAst = JsGrammar;
@@ -165,7 +171,7 @@
 
             setTimeout(() => {
                 window.t = GlobalState.getTabsManager();
-                window.Tab1 = new EditorTab("myJsFile", new EDoc(0, "let x = 1", JsLang.class));
+                window.Tab1 = new EditorTab("myJsFile", new EDoc(0, "let x = 1", JsLang.INSTANCE));
                 window.Tab2 = new EditorTab("myFile", new EDoc(0, "hello", null));
             }, 100);
         </script>

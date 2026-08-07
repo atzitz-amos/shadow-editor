@@ -1,4 +1,4 @@
-import {ASTGrammar} from "../../../../core/lang/syntax/builder/parser/nodes/ASTGrammar";
+import {ASTGrammar} from "../../../../lang/syntax/builder/parser/nodes/ASTGrammar";
 import {JsCodeBlock} from "../syntax/JsCodeBlock";
 import {JsBinaryExpr} from "../syntax/expr/JsBinaryExpr";
 import {JsTernaryExpr} from "../syntax/expr/JsTernaryExpr";
@@ -36,6 +36,12 @@ import {JsForOfStatement} from "../syntax/statements/JsForOfStatement";
 import {JsIfStatement} from "../syntax/statements/JsIfStatement";
 import {JsFunctionExpr} from "../syntax/expr/JsFunctionExpr";
 import {JsArrowFunctionExpr} from "../syntax/expr/JsArrowFunctionExpr";
+import {JsAwaitExpr} from "../syntax/expr/JsAwaitExpr";
+import {JsClassDeclaration} from "../syntax/objects/JsClassDeclaration";
+import {JsClassMethod} from "../syntax/objects/JsClassMethod";
+import {JsClassField} from "../syntax/objects/JsClassField";
+import {JsClassExpr} from "../syntax/objects/JsClassExpr";
+import {JsArrayDestructuringPatternExpr} from "../syntax/expr/JsArrayDestructuringPatternExpr";
 
 export class JsGrammar {
     public static readonly CodeBlock = ASTGrammar.createCodeBlock("CodeBlock", JsCodeBlock.builder());
@@ -61,17 +67,17 @@ export class JsGrammar {
     public static readonly ContinueStatement = ASTGrammar.create("ContinueStatement");
     public static readonly ThrowStatement = ASTGrammar.create("ThrowStatement");
     public static readonly YieldStatement = ASTGrammar.create("YieldStatement");
-    public static readonly AwaitStatement = ASTGrammar.create("AwaitStatement");
+    public static readonly AwaitStatement = ASTGrammar.create("AwaitExpr", JsAwaitExpr.builder());
     public static readonly DebuggerStatement = ASTGrammar.create("DebuggerStatement");
     public static readonly LabelStatement = ASTGrammar.create("LabelStatement");
 
     public static readonly FunctionDeclaration = ASTGrammar.create("FunctionDeclaration", JsFunctionStatement.builder());
     public static readonly FunctionArguments = ASTGrammar.create("FunctionArguments", JsFunctionParameters.builder());
     public static readonly FunctionArgument = ASTGrammar.create("FunctionArgument", JsFunctionParameter.builder());
-    public static readonly ClassDeclaration = ASTGrammar.create("ClassDeclaration");
+    public static readonly ClassDeclaration = ASTGrammar.create("ClassDeclaration", JsClassDeclaration.builder());
     public static readonly ClassBody = ASTGrammar.createCodeBlock("ClassBody", JsCodeBlock.builder());
-    public static readonly ClassMethodDeclaration = ASTGrammar.create("ClassMethod");
-    public static readonly ClassField = ASTGrammar.create("ClassField");
+    public static readonly ClassMethodDeclaration = ASTGrammar.create("ClassMethod", JsClassMethod.builder());
+    public static readonly ClassField = ASTGrammar.create("ClassField", JsClassField.builder());
 
     public static readonly VariableDeclaration = ASTGrammar.create("VariableDeclaration", JsVariableDeclaration.builder());
     public static readonly VariableDeclarator = ASTGrammar.create("VariableDeclarator", JsDeclarator.builder());
@@ -102,7 +108,7 @@ export class JsGrammar {
     public static readonly SpreadExpr = ASTGrammar.create("SpreadExpr", JsSpreadExpr.builder());
     public static readonly GroupExpr = ASTGrammar.create("GroupExpr", JsGroupExpr.builder());
 
-    public static readonly ClassExpression = ASTGrammar.create("ClassExpression", JsExpr.builder());
+    public static readonly ClassExpression = ASTGrammar.create("ClassExpression", JsClassExpr.builder());
     public static readonly FunctionExpression = ASTGrammar.create("FunctionExpression", JsFunctionExpr.builder());
     public static readonly ArrowFunctionExpression = ASTGrammar.create("ArrowFunctionExpression", JsArrowFunctionExpr.builder());
 
@@ -110,7 +116,7 @@ export class JsGrammar {
     public static readonly CommaExpr = ASTGrammar.create("CommaExpr", JsExpr.builder());
     public static readonly EmptyCommaExpr = ASTGrammar.create("EmptyCommaExpr", JsExpr.builder());
 
-    public static readonly DestructuringListPattern = ASTGrammar.create("DestructuringListPattern", JsExpr.builder());
+    public static readonly DestructuringListPattern = ASTGrammar.create("DestructuringListPattern", JsArrayDestructuringPatternExpr.builder());
     public static readonly DestructuringObjectPattern = ASTGrammar.create("DestructuringObjectPattern", JsExpr.builder());
     public static readonly ObjectPropertyKey = ASTGrammar.create("ObjectPropertyKey");
     public static readonly ObjectPropertyValue = ASTGrammar.create("ObjectPropertyValue");

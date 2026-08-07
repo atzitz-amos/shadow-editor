@@ -1,7 +1,7 @@
-import {SynASTElementImpl} from "../../../../../core/lang/syntax/impl/tree/SynASTElementImpl";
-import {SynNodeVisitor} from "../../../../../core/lang/syntax/visitors/SynNodeVisitor";
+import {SynASTElementImpl} from "../../../../../lang/syntax/impl/tree/SynASTElementImpl";
+import {SynNodeVisitor} from "../../../../../lang/syntax/visitors/SynNodeVisitor";
 import {JsSynVisitor} from "../visitors/JsSynVisitor";
-import {ASTNode} from "../../../../../core/lang/syntax/builder/parser/nodes/ASTNode";
+import {ASTNode} from "../../../../../lang/syntax/builder/parser/nodes/ASTNode";
 
 /**
  *

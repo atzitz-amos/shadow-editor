@@ -1,8 +1,8 @@
-import {SynSymbol} from "../../../../../core/lang/syntax/impl/reference/SynSymbol";
-import {ASTNode} from "../../../../../core/lang/syntax/builder/parser/nodes/ASTNode";
-import {SynTokenNode} from "../../../../../core/lang/syntax/impl/SynTokenNode";
-import {SynDeclaration} from "../../../../../core/lang/syntax/impl/reference/SynDeclaration";
-import {SynNodeVisitor} from "../../../../../core/lang/syntax/visitors/SynNodeVisitor";
+import {SynSymbol} from "../../../../../lang/syntax/impl/reference/SynSymbol";
+import {ASTNode} from "../../../../../lang/syntax/builder/parser/nodes/ASTNode";
+import {SynTokenNode} from "../../../../../lang/syntax/impl/SynTokenNode";
+import {SynDeclaration} from "../../../../../lang/syntax/impl/reference/SynDeclaration";
+import {SynNodeVisitor} from "../../../../../lang/syntax/visitors/SynNodeVisitor";
 import {JsSynVisitor} from "../visitors/JsSynVisitor";
 import {JsExpr} from "../expr/JsExpr";
 

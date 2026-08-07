@@ -6,7 +6,7 @@ import {BehaviorHandlingMode} from "./BehaviorHandlingMode";
 import {ClipboardBehaviorContext} from "../context/ClipboardBehaviorContext";
 import {EditorDeleteContext} from "../context/EditorDeleteContext";
 import {EditorCharTypedContext} from "../context/EditorCharTypedContext";
-import {LanguageBase} from "../../../../core/lang/LanguageBase";
+import {LanguageBase} from "../../../../lang/LanguageBase";
 
 /**
  *

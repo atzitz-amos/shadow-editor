@@ -155,7 +155,7 @@ export class PluginLoader {
                 // ['toolbar', 'items'] → "toolbar.items"
                 const extPoint = extPointSegments.join('.');
 
-                extensionPoints.push({ extCls: module.default, pluginName, extPoint });
+                extensionPoints.push({extCls: module.default, pluginName, extPoint});
                 this.logger.debug(`Found extension point: ${extPoint} for plugin: ${pluginName}`);
             }
         }

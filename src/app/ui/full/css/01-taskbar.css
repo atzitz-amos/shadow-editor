@@ -133,6 +133,10 @@
     animation: ripple 5s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
 
+.pulse-text {
+    translate: 0 -1px;
+}
+
 .pulse-text-sep-dot {
     color: white;
     animation: pulse-text-sep-dot 2s linear infinite;

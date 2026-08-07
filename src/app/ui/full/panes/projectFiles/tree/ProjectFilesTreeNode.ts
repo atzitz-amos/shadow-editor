@@ -7,6 +7,10 @@ import {FSNodeEntry} from "../../../../../../core/workspace/filesystem/tree/FSNo
  * @since 1.0.0
  */
 export interface ProjectFilesTreeNode {
+    setSelected(): void;
+
+    rename(newName: string): void;
+
     getEntry(): FSNodeEntry;
 
     getDepth(): number;

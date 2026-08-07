@@ -1,10 +1,10 @@
-import {LanguageBase} from "../../../core/lang/LanguageBase";
-import {SmartInlineEnterAction} from "../../../core/lang/smart/enter/SmartInlineEnterAction";
+import {LanguageBase} from "../../../lang/LanguageBase";
+import {SmartInlineEnterAction} from "../../../lang/codeAnalysis/smart/enter/SmartInlineEnterAction";
 import {EditorBehaviorContext} from "../../../editor/core/behaviors/context/EditorBehaviorContext";
 import {BehaviorHandlingMode} from "../../../editor/core/behaviors/manager/BehaviorHandlingMode";
 import JsLang from "../lang/JsLang";
 import {JsLexicalGrammar} from "../lang/lexer/JsLexicalGrammar";
-import {IndentUtils} from "../../../core/lang/syntax/utils/IndentUtils";
+import {IndentUtils} from "../../../lang/syntax/utils/IndentUtils";
 import {ModifierKeyHolder} from "../../../core/keybinds/Keybind";
 import {JsSynUtils} from "../lang/syntax/utils/JsSynUtils";
 
@@ -16,13 +16,13 @@ import {JsSynUtils} from "../lang/syntax/utils/JsSynUtils";
  */
 export default class JsSmartEnterInLiteralOrCommentAction extends SmartInlineEnterAction {
     getApplicableLanguages(): LanguageBase[] {
-        return [JsLang.class];
+        return [JsLang.INSTANCE];
     }
 
     isApplicable(ctx: EditorBehaviorContext): boolean {
         const token = ctx.getTokenAtCaret();
         console.log("Token: " + token?.getType());
-        if (token === null || ModifierKeyHolder.isShiftPressed()) return false;
+        if (token === null || token.getRange().start === ctx.getCaretOffset() || ModifierKeyHolder.isShiftPressed()) return false;
         return (
             token.getType() === JsLexicalGrammar.STRING_LITERAL
             || token.getType() === JsLexicalGrammar.SINGLE_LINE_COMMENT

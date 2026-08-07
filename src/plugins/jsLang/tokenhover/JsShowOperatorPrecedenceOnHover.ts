@@ -1,15 +1,15 @@
-import {LanguageBase} from "../../../core/lang/LanguageBase";
-import {Token} from "../../../core/lang/syntax/builder/tokens/Token";
-import {TokenHoverAction} from "../../../core/lang/tokenhover/TokenHoverAction";
+import {LanguageBase} from "../../../lang/LanguageBase";
+import {Token} from "../../../lang/syntax/builder/tokens/Token";
+import {TokenHoverAction} from "../../../lang/codeAnalysis/tokenhover/TokenHoverAction";
 import {EditorBehaviorContext} from "../../../editor/core/behaviors/context/EditorBehaviorContext";
 import {JsLexicalGrammar} from "../lang/lexer/JsLexicalGrammar";
 import JsLang from "../lang/JsLang";
-import {HighlightOverlay} from "../../../editor/ui/inline/widget/overlay/HighlightOverlay";
+import {HighlightOverlay} from "../../../editor/ui/highlighter/overlay/HighlightOverlay";
 import {JsCodeBlock} from "../lang/syntax/JsCodeBlock";
 import {JsBinaryExpr} from "../lang/syntax/expr/JsBinaryExpr";
 import {TextAttributeKey} from "../../../editor/ui/highlighter/style/TextAttributeKey";
 import {TextBackground} from "../../../editor/ui/highlighter/style/TextBackground";
-import {SynTree} from "../../../core/lang/syntax/api/tree/SynTree";
+import {SynTree} from "../../../lang/syntax/api/tree/SynTree";
 
 /**
  *
@@ -24,7 +24,7 @@ export default class JsShowOperatorPrecedenceOnHover extends TokenHoverAction {
     private rightOverlay: HighlightOverlay;
 
     getApplicableLanguages(): LanguageBase[] {
-        return [JsLang.class];
+        return [JsLang.INSTANCE];
     }
 
     isApplicable(ctx: EditorBehaviorContext, token: Token): boolean {

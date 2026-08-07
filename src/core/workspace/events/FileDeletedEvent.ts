@@ -1,7 +1,7 @@
-import {EventBase} from "../../events/EventBase";
 import {EventSubscriber} from "../../events/EventSubscriber";
 import {BubbleDirection} from "../../events/BubbleDirection";
 import {WorkspaceFile} from "../filesystem/tree/WorkspaceFile";
+import {FileSystemEvent} from "./FileSystemEvent";
 
 /**
  *
@@ -9,10 +9,11 @@ import {WorkspaceFile} from "../filesystem/tree/WorkspaceFile";
  * @date 11/19/2025
  * @since 1.0.0
  */
-export class FileDeletedEvent implements EventBase {
+export class FileDeletedEvent extends FileSystemEvent {
     public static readonly SUBSCRIBER = EventSubscriber.create(this);
 
     constructor(private file: WorkspaceFile) {
+        super(file);
     }
 
     getBubbleDirection(): BubbleDirection {

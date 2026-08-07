@@ -1,17 +1,18 @@
 import {JsGrammar} from "./JsGrammar";
 import {JsLexicalGrammar} from "../lexer/JsLexicalGrammar";
 import {JsExprParser} from "./JsExprParser";
-import {ASTBuilder} from "../../../../core/lang/syntax/builder/parser/builder/ASTBuilder";
-import {IParser} from "../../../../core/lang/syntax/builder/parser/IParser";
-import {Marker} from "../../../../core/lang/syntax/builder/parser/builder/Marker";
-import {SynScopeType} from "../../../../core/lang/syntax/api/scope/SynScopeType";
-import {TokenExpectation} from "../../../../core/lang/syntax/builder/parser/builder/TokenExpectation";
-import {IncrementalParser} from "../../../../core/lang/syntax/builder/parser/optimizer/api/IncrementalParser";
-import {ParserBoundaryNode} from "../../../../core/lang/syntax/builder/parser/optimizer/api/ParserBoundaryNode";
+import {ASTBuilder} from "../../../../lang/syntax/builder/parser/builder/ASTBuilder";
+import {IParser} from "../../../../lang/syntax/builder/parser/IParser";
+import {Marker} from "../../../../lang/syntax/builder/parser/builder/Marker";
+import {SynScopeType} from "../../../../lang/syntax/api/scope/SynScopeType";
+import {TokenExpectation} from "../../../../lang/syntax/builder/parser/builder/TokenExpectation";
+import {IncrementalParser} from "../../../../lang/syntax/builder/parser/optimizer/api/IncrementalParser";
+import {ParserBoundaryNode} from "../../../../lang/syntax/builder/parser/optimizer/api/ParserBoundaryNode";
+import {Token} from "../../../../lang/syntax/builder/tokens/Token";
 
 @IncrementalParser
 export class JsParser implements IParser {
-    public myIsInAsync = true;
+    public myIsInAsync = false;
     public myIsInGenerator = false;
     public myIsInFunction = false;
     public myIsSpreadAllowed = false;
@@ -78,7 +79,7 @@ export class JsParser implements IParser {
     }
 
     parse(): void {
-        this.parseBlock(false, false, false, false, SynScopeType.Global);
+        this.parseBlock(false, false, true, false, SynScopeType.Global);
     }
 
     parseBlockStatement(): void {
@@ -121,7 +122,7 @@ export class JsParser implements IParser {
     }
 
     parseStatementOrExpr(): void {
-        if (this.builder.isNext(JsLexicalGrammar.KEYWORD) || this.builder.isNextOneOf(JsLexicalGrammar.IDENTIFIER, "async", "static", "await")) {
+        if (this.builder.isNext(JsLexicalGrammar.KEYWORD) || this.builder.isNextOneOf(JsLexicalGrammar.IDENTIFIER, "async", "await")) {
             this.parseStatement();
         } else if (this.builder.isNext(JsLexicalGrammar.LBRACE)) {
             this.parseBlock();
@@ -175,7 +176,6 @@ export class JsParser implements IParser {
                 this.reportOutOfContextKeyword("finally outside of try block");
                 break;
             case "async":
-            case "static":
             case "function":
                 this.parseFunctionDeclaration();
                 break;
@@ -467,11 +467,6 @@ export class JsParser implements IParser {
     parseFunctionDeclaration() {
         const marker = this.builder.mark();
 
-        const isStatic = !!this.builder.consumeIf(JsLexicalGrammar.IDENTIFIER, "static");
-        if (isStatic && this.builder.beforeNewLine()) {
-            marker.rollback();
-            return this.parseExpression();
-        }
         let isAsync = !!this.builder.consumeIf(JsLexicalGrammar.IDENTIFIER, "async");
         if (isAsync && this.builder.beforeNewLine()) {
             marker.rollback();
@@ -484,6 +479,7 @@ export class JsParser implements IParser {
             return;
         }
         let isGenerator = !!this.builder.consumeIf(JsLexicalGrammar.MATHEMATICAL_OPERATOR, "*");
+
 
         this.builder.expect(JsLexicalGrammar.IDENTIFIER).failWith("Function statement requires name");
 
@@ -501,6 +497,7 @@ export class JsParser implements IParser {
         const marker = this.builder.mark();
 
         this.builder.advance(); // consume 'return'
+        if (!this.isInFunction()) this.builder.errorOn(this.builder.lookBehind()!, "Return statement outside of function");
         if (!this.isSemicolonOrASI()) {
             this.parseExpression();
         }
@@ -576,9 +573,10 @@ export class JsParser implements IParser {
 
         const isStatic = this.builder.consumeIf(JsLexicalGrammar.IDENTIFIER, "static");
         const isAsync = this.builder.consumeIf(JsLexicalGrammar.IDENTIFIER, "async");
+        const isGenerator = this.builder.consumeIf(JsLexicalGrammar.MATHEMATICAL_OPERATOR, "*");
         const isPrivateField = this.builder.consumeIf(JsLexicalGrammar.HASHTAG); // If it's a private field or method
 
-        if (isStatic || isAsync) {
+        if ((isStatic || isAsync) && !isGenerator && !isPrivateField) {
             // We try to treat it as an identifier
             if (this.builder.isNext(JsLexicalGrammar.LPAREN)) {
                 start.rollback();
@@ -593,25 +591,9 @@ export class JsParser implements IParser {
         }
 
         const next = this.builder.seek()!;
-        if (next.isType(JsLexicalGrammar.IDENTIFIER) || next.isType(JsLexicalGrammar.KEYWORD)) {
-            if (this.builder.lookAhead(1)?.isType(JsLexicalGrammar.LPAREN)) {
-                this.parseClassMethodDefinition(start, !!isAsync);
-            } else {
-                if (isAsync) {
-                    this.builder.popAndError("Class field cannot be async");
-                }
-                this.parseClassFieldDefinition(start);
-            }
-        } else if (next.isType(JsLexicalGrammar.MATHEMATICAL_OPERATOR) && next.getValue() === "*") {
-            this.builder.advance(); // consume '*'
-            if (this.builder.isNext(JsLexicalGrammar.LBRACKET))
-                this.parseClassComputedPropertyMethod(start, !!isAsync, true);
-            else
-                this.parseClassMethodDefinition(start, !!isAsync, true);
+        if (next.isType(JsLexicalGrammar.IDENTIFIER)) {
+            this.parseClassMethodOrField(start, isAsync, isGenerator);
         } else if (next.isType(JsLexicalGrammar.KEYWORD)) {
-            if (isPrivateField) {
-                this.builder.markErrorAndRemove(isPrivateField, "Unexpected '#'");
-            }
             if (next.getValue() === "constructor") {
                 if (isAsync) {
                     this.builder.markErrorAndRemove(isAsync, "Constructor cannot be async");
@@ -630,14 +612,16 @@ export class JsParser implements IParser {
                     this.parseClassAccessor(start);
                 }
             } else {
-                this.builder.advance(); // consume the keyword
-                this.builder.popAndError("Unexpected keyword in class body");
+                this.parseClassMethodOrField(start, isAsync, isGenerator);
             }
         } else if (next.isType(JsLexicalGrammar.SEMICOLON)) {
             this.builder.advance(); // consume ';'
             start.done(JsGrammar.EmptyStatement);
         } else if (next.isType(JsLexicalGrammar.LBRACKET)) {
-            this.parseClassComputedPropertyMethod(start, !!isAsync);
+            if (isPrivateField) {
+                this.builder.markErrorAndRemove(isPrivateField, "Unexpected '#'");
+            }
+            this.parseClassComputedProperty(start, !!isAsync);
         } else {
             this.builder.advance(); // consume the token
             this.builder.popAndError("Unexpected token in class body");
@@ -664,13 +648,15 @@ export class JsParser implements IParser {
     }
 
     parseClassMethodDefinition(start: Marker, isAsync: boolean, isGenerator: boolean = false) {
-        if (this.builder.consumeIf(JsLexicalGrammar.KEYWORD)) {
-        } else {
+        const marker = this.builder.mark();
+        if (!this.builder.consumeIf(JsLexicalGrammar.KEYWORD)) {
             if (!this.builder.expect(JsLexicalGrammar.IDENTIFIER).orError("Method requires name")) {
                 start.done(JsGrammar.ClassMethodDeclaration);
                 return;
             }
         }
+        marker.done(JsGrammar.Identifier);
+
         this.builder.expect(JsLexicalGrammar.LPAREN).failWith("Expected '('")
             .then(() => this.myExprParser.parseFunctionArgumentDeclaration())
             .then(JsLexicalGrammar.RPAREN).failWith("Expected ')'")
@@ -680,8 +666,10 @@ export class JsParser implements IParser {
     }
 
     parseClassFieldDefinition(start: Marker) {
+        const marker = this.builder.mark();
         if (this.builder.isNext(JsLexicalGrammar.KEYWORD)) this.builder.advance();
         else this.builder.expect(JsLexicalGrammar.IDENTIFIER).failWith("Field requires name");
+        marker.done(JsGrammar.Identifier);
 
         if (this.builder.consumeIf(JsLexicalGrammar.ASSIGNMENT_OPERATOR, "=")) {
             this.parseExpression();
@@ -692,16 +680,29 @@ export class JsParser implements IParser {
         start.done(JsGrammar.ClassField);
     }
 
-    parseClassComputedPropertyMethod(start: Marker, isAsync: boolean, isGenerator: boolean = false) {
+    parseClassComputedProperty(start: Marker, isAsync: boolean, generatorToken: Token | null = null) {
         this.builder.expect(JsLexicalGrammar.LBRACKET).failWith("Expected '['")
             .then(() => this.parseExpression(false))
-            .then(JsLexicalGrammar.RBRACKET).failWith("Expected ']'")
-            .then(JsLexicalGrammar.LPAREN).failWith("Expected '('")
-            .then(() => this.myExprParser.parseFunctionArgumentDeclaration())
-            .then(JsLexicalGrammar.RPAREN).failWith("Expected ')'")
-            .then(() => this.parseBlock(true, true, isAsync, isGenerator, SynScopeType.Function));
+            .then(JsLexicalGrammar.RBRACKET).failWith("Expected ']'");
 
-        start.done(JsGrammar.ClassMethodDeclaration);
+        if (this.builder.consumeIf(JsLexicalGrammar.LPAREN)) {
+            this.myExprParser.parseFunctionArgumentDeclaration();
+            this.builder.expect(JsLexicalGrammar.RPAREN).failWith("Expected ')'")
+                .then(() => this.parseBlock(true, true, isAsync, !!generatorToken, SynScopeType.Function));
+            start.done(JsGrammar.ClassMethodDeclaration);
+        } else {
+            if (generatorToken) {
+                this.builder.markErrorAndRemove(generatorToken, "Unexpected '*' in class field");
+            }
+
+            if (this.builder.consumeIf(JsLexicalGrammar.ASSIGNMENT_OPERATOR, "=")) {
+                this.parseExpression();
+            }
+            if (!this.insertSemicolonIfNeeded()) {
+                this.builder.errorVirtual("Expected ';'");
+            }
+            start.done(JsGrammar.ClassField);
+        }
     }
 
     parseClassAccessor(start: Marker) {
@@ -721,6 +722,20 @@ export class JsParser implements IParser {
             .then(JsLexicalGrammar.RPAREN).failWith("Expected ')'")
             .then(() => this.parseBlock(true, false, false, false, SynScopeType.Function));
         start.done(JsGrammar.ClassMethodDeclaration);
+    }
+
+    private parseClassMethodOrField(start: Marker, isAsync: Token | null, isGenerator: Token | null) {
+        if (this.builder.lookAhead(1)?.isType(JsLexicalGrammar.LPAREN)) {
+            this.parseClassMethodDefinition(start, !!isAsync);
+        } else {
+            if (isAsync) {
+                this.builder.markErrorAndRemove(isAsync, "Class field cannot be async");
+            }
+            if (isGenerator) {
+                this.builder.markErrorAndRemove(isGenerator, "Class field cannot be a generator");
+            }
+            this.parseClassFieldDefinition(start);
+        }
     }
 
     private isNextOf(): boolean {

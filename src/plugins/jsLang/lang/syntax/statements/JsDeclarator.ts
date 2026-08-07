@@ -1,11 +1,14 @@
-import {SynDeclaration} from "../../../../../core/lang/syntax/impl/reference/SynDeclaration";
-import {ASTNode} from "../../../../../core/lang/syntax/builder/parser/nodes/ASTNode";
-import {SynTokenNode} from "../../../../../core/lang/syntax/impl/SynTokenNode";
-import {SynErrorNode} from "../../../../../core/lang/syntax/impl/SynErrorNode";
-import {SynNodeVisitor} from "../../../../../core/lang/syntax/visitors/SynNodeVisitor";
+import {SynDeclaration} from "../../../../../lang/syntax/impl/reference/SynDeclaration";
+import {ASTNode} from "../../../../../lang/syntax/builder/parser/nodes/ASTNode";
+import {SynTokenNode} from "../../../../../lang/syntax/impl/SynTokenNode";
+import {SynErrorNode} from "../../../../../lang/syntax/impl/SynErrorNode";
+import {SynNodeVisitor} from "../../../../../lang/syntax/visitors/SynNodeVisitor";
 import {JsSynVisitor} from "../visitors/JsSynVisitor";
 import {JsExpr} from "../expr/JsExpr";
 import {JsVariableDeclaration} from "./JsVariableDeclaration";
+import {SynNode} from "../../../../../lang/syntax/api/SynNode";
+import {JsLexicalGrammar} from "../../lexer/JsLexicalGrammar";
+import {JsArrayDestructuringPatternExpr} from "../expr/JsArrayDestructuringPatternExpr";
 
 /**
  *
@@ -31,6 +34,10 @@ export class JsDeclarator extends SynDeclaration {
             this.equToken = null;
             this.expr = null;
         }
+    }
+
+    getAllModifiedIdentifiers(): SynTokenNode[] {
+        return this.getAllModifiedIdentifiersRecursively(this.name);
     }
 
     isInitialized(): boolean {
@@ -69,5 +76,14 @@ export class JsDeclarator extends SynDeclaration {
 
     isConst() {
         return (this.getParent() as JsVariableDeclaration).isConst();
+    }
+
+    private getAllModifiedIdentifiersRecursively(element: SynNode): SynTokenNode[] {
+        let result: SynTokenNode[] = [];
+        if (element instanceof SynTokenNode && element.token.isType(JsLexicalGrammar.IDENTIFIER)) {
+            result.push(element);
+        } else if (element instanceof JsArrayDestructuringPatternExpr) {
+        }
+        return result;
     }
 }

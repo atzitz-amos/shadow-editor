@@ -12,11 +12,15 @@ import {TextAttributeKey} from "../../../ui/highlighter/style/TextAttributeKey";
 export class Fragment {
     private readonly elements: HTMLSpanElement[] = [];
 
-    constructor(private range: TextRange, private attributes: TextAttributeKey, private classList: string[]) {
+    constructor(private range: TextRange, private readonly priority: number, private attributes: TextAttributeKey, private classList: string[]) {
     }
 
     getRange(): TextRange {
         return this.range;
+    }
+
+    getPriority(): number {
+        return this.priority;
     }
 
     getClassList(): string[] {

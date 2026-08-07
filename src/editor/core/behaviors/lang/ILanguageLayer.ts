@@ -1,5 +1,5 @@
 import {IBehaviorProvider} from "../IBehaviorProvider";
-import {LanguageBase} from "../../../../core/lang/LanguageBase";
+import {LanguageBase} from "../../../../lang/LanguageBase";
 
 /**
  *

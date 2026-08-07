@@ -67,7 +67,11 @@ export class WidgetRenderer {
                 const span = document.createElement('span');
                 span.textContent = textContent.substring(prevPos, currPos);
 
-                for (let activeFragment of active) {
+                const sortedActive = [...active].sort(
+                    (a, b) => a.getFragment().getPriority() - b.getFragment().getPriority()
+                );
+
+                for (let activeFragment of sortedActive) {
                     if (activeFragment.type != FragmentType.INLAY) {
                         activeFragment.getFragment().getFragmentStyle().applyStyle(span);
                         for (let className of activeFragment.getFragment().getClassList()) {

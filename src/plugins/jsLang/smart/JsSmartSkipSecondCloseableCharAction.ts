@@ -1,5 +1,7 @@
-import {LanguageBase} from "../../../core/lang/LanguageBase";
-import {SmartSkipSecondCloseableCharAction} from "../../../core/lang/smart/insert/SmartSkipSecondCloseableCharAction";
+import {LanguageBase} from "../../../lang/LanguageBase";
+import {
+    SmartSkipSecondCloseableCharAction
+} from "../../../lang/codeAnalysis/smart/insert/SmartSkipSecondCloseableCharAction";
 import JsLang from "../lang/JsLang";
 import {JsSmartActionsUtils} from "./JsSmartActionsUtils";
 
@@ -15,7 +17,7 @@ export default class JsSmartSkipSecondCloseableCharAction extends SmartSkipSecon
     }
 
     getApplicableLanguages(): LanguageBase[] {
-        return [JsLang.class]
+        return [JsLang.INSTANCE]
     }
 
     shouldSkip(char: string, leadingChar: string): boolean {

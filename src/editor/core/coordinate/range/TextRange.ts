@@ -92,6 +92,10 @@ export class TextRange implements Serializable {
 
         return new TextRange(start, end);
     }
+
+    shiftedBy(delta: number) {
+        return new TextRange(this.start + delta, this.end + delta);
+    }
 }
 
 

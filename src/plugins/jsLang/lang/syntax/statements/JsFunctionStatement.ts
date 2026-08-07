@@ -1,10 +1,10 @@
-import {ASTNode} from "../../../../../core/lang/syntax/builder/parser/nodes/ASTNode";
+import {ASTNode} from "../../../../../lang/syntax/builder/parser/nodes/ASTNode";
 import {JsFunctionParameters} from "./JsFunctionParameters";
-import {SynTokenNode} from "../../../../../core/lang/syntax/impl/SynTokenNode";
+import {SynTokenNode} from "../../../../../lang/syntax/impl/SynTokenNode";
 import {JsCodeBlock} from "../JsCodeBlock";
 import {JsStatement} from "./JsStatement";
 import {JsFunction} from "../api/JsFunction";
-import {SynNodeVisitor} from "../../../../../core/lang/syntax/visitors/SynNodeVisitor";
+import {SynNodeVisitor} from "../../../../../lang/syntax/visitors/SynNodeVisitor";
 import {JsSynVisitor} from "../visitors/JsSynVisitor";
 import {JsLexicalGrammar} from "../../lexer/JsLexicalGrammar";
 
@@ -18,8 +18,8 @@ export class JsFunctionStatement extends JsStatement implements JsFunction {
     private readonly name: SynTokenNode;
     private readonly parameters: JsFunctionParameters;
     private readonly body: JsCodeBlock;
-
     private readonly asyncToken?: SynTokenNode;
+
     private readonly generatorToken?: SynTokenNode;
 
     constructor(node: ASTNode) {
@@ -35,7 +35,7 @@ export class JsFunctionStatement extends JsStatement implements JsFunction {
             } else if (token.getValue() === "*") {
                 this.generatorToken = token;
             } else if (token.token.getType() === JsLexicalGrammar.IDENTIFIER || token.token.getType() === JsLexicalGrammar.KEYWORD) {
-                if (token.getValue() !== "function" && this.name === null)
+                if (token.getValue() !== "function" && this.name === undefined)
                     this.name = token;
             }
         }
@@ -58,8 +58,12 @@ export class JsFunctionStatement extends JsStatement implements JsFunction {
         return false;
     }
 
-    getName(): string {
-        return this.name.getValue();
+    getAsyncToken(): SynTokenNode | undefined {
+        return this.asyncToken;
+    }
+
+    getName(): SynTokenNode {
+        return this.name;
     }
 
     getParameters(): JsFunctionParameters {
@@ -77,6 +81,7 @@ export class JsFunctionStatement extends JsStatement implements JsFunction {
     accept(visitor: SynNodeVisitor) {
         if (visitor instanceof JsSynVisitor) {
             visitor.visitFunctionStatement(this);
+            visitor.visitFunction(this);
         }
         super.accept(visitor);
     }

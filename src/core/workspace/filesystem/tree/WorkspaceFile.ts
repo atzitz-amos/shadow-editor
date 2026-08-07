@@ -4,6 +4,8 @@ import {WorkspaceFS} from "../WorkspaceFS";
 import {RelativePath} from "../path/RelativePath";
 import {EditorURI} from "../../../uri/EditorURI";
 import {URITargetType} from "../../../uri/URITargetType";
+import {GlobalState} from "../../../global/GlobalState";
+import {FileModifiedEvent} from "../../events/FileModifiedEvent";
 
 /**
  *
@@ -84,6 +86,9 @@ export class WorkspaceFile implements FSNodeEntry {
             console.error("Failed to save file:", e);
             return false;
         }
+
+        GlobalState.getMainEventBus()
+            .syncPublish(new FileModifiedEvent(this, this.cachedContent ?? "", content));
 
         const file = await this.handle.getFile();
         this.cachedTimestamp = file.lastModified;

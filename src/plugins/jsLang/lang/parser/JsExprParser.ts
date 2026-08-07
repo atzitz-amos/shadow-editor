@@ -2,9 +2,9 @@ import {JsParser} from "./JsParser";
 import {JsLexicalGrammar} from "../lexer/JsLexicalGrammar";
 import {JsGrammar} from "./JsGrammar";
 import {ErrorHandlingMode, JsPrattParser, OperatorPrecedence} from "./JsPrattParser";
-import {ASTBuilder} from "../../../../core/lang/syntax/builder/parser/builder/ASTBuilder";
-import {Marker} from "../../../../core/lang/syntax/builder/parser/builder/Marker";
-import {SynScopeType} from "../../../../core/lang/syntax/api/scope/SynScopeType";
+import {ASTBuilder} from "../../../../lang/syntax/builder/parser/builder/ASTBuilder";
+import {Marker} from "../../../../lang/syntax/builder/parser/builder/Marker";
+import {SynScopeType} from "../../../../lang/syntax/api/scope/SynScopeType";
 
 export class JsExprParser {
     private myPrattParser: JsPrattParser;
@@ -48,8 +48,8 @@ export class JsExprParser {
     }
 
     parseDestructuringListPattern(): void {
-        const start = this.builder.mark();
         this.builder.consumeIf(JsLexicalGrammar.ELLIPSIS);
+        const start = this.builder.mark();
         this.builder.advance(); // consume '['
         while (!this.builder.done() && !this.builder.isNext(JsLexicalGrammar.RBRACKET)) {
             if (this.builder.isNext(JsLexicalGrammar.COMMA)) {
@@ -67,6 +67,7 @@ export class JsExprParser {
     }
 
     parseDestructuringObjectPattern(): void {
+        this.builder.consumeIf(JsLexicalGrammar.ELLIPSIS);
         const start = this.builder.mark();
         this.builder.advance(); // consume '{'
         while (!this.builder.done() && !this.builder.isNext(JsLexicalGrammar.RBRACE)) {
@@ -162,7 +163,11 @@ export class JsExprParser {
     parseVariableDeclarator() {
         const marker = this.builder.mark();
 
-        if (!this.tryParseDestructuringPattern()) {
+        if (this.tryParseDestructuringPattern()) {
+            if (this.builder.consumeIf(JsLexicalGrammar.ASSIGNMENT_OPERATOR, "=")) {
+                this.parseExpression(false);
+            }
+        } else {
             let isValid = this.builder.expect(JsLexicalGrammar.IDENTIFIER).failWith("Expected variable name").isValid();
             if (isValid && this.builder.consumeIf(JsLexicalGrammar.ASSIGNMENT_OPERATOR, "=")) {
                 this.parseExpression(false);
@@ -237,4 +242,3 @@ export class JsExprParser {
         }
     }
 }
-

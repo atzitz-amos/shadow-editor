@@ -4,7 +4,7 @@ import {Caret} from "../../caret/Caret";
 import {SelectionModel} from "../../caret/Selection";
 import {LogicalPosition} from "../../coordinate/LogicalPosition";
 import {VisualPosition} from "../../coordinate/VisualPosition";
-import {Token} from "../../../../core/lang/syntax/builder/tokens/Token";
+import {Token} from "../../../../lang/syntax/builder/tokens/Token";
 import {LineData} from "../../document/LineData";
 
 /**

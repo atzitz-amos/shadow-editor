@@ -3,8 +3,8 @@ import {KeybindContext} from "../../../core/keybinds/context/KeybindContext";
 import {KeybindContextDescriptor} from "../../../core/keybinds/context/KeybindContextDescriptor";
 import {Key} from "../../../core/keybinds/Keybind";
 import {GlobalState} from "../../../core/global/GlobalState";
-import {CodeProblem} from "../../../core/lang/inspections/problems/CodeProblem";
-import {SynModificationTree} from "../../../core/lang/syntax/writer/template/SynModificationTree";
+import {CodeProblem} from "../../../lang/codeAnalysis/inspections/problems/CodeProblem";
+import {SynModificationTree} from "../../../lang/syntax/writer/template/SynModificationTree";
 
 /**
  *

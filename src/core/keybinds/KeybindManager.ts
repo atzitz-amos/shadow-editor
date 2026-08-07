@@ -156,6 +156,18 @@ export class KeybindManager {
         return this.defaultKeybinds.get(id);
     }
 
+    /**
+     * Public helper: returns true when the given DOM event matches the
+     * provided keybind (key + modifiers). Useful for custom handling or
+     * testing without going through the manager's dispatch pipeline.
+     */
+    public static eventMatchesKeybind(kb: Keybind, event: KeyboardEvent | MouseEvent): boolean {
+        const key = event instanceof KeyboardEvent ? keyFromKeyboardEvent(event) : keyFromMouseEvent(event);
+        if (key === undefined) return false;
+        if (key !== kb.key) return false;
+        return modifiersMatch(kb, event);
+    }
+
     onKeydown(ctx: KeybindContext): void {
         const event = ctx.getEvent();
         if (!(event instanceof KeyboardEvent)) return;

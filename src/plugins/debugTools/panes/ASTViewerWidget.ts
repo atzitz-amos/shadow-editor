@@ -1,15 +1,15 @@
 import {UIComponent} from "../../../core/ui/engine/components/UIComponent";
 import {HTMLUtils} from "../../../editor/utils/HTMLUtils";
-import {SynNode} from "../../../core/lang/syntax/api/SynNode";
-import {SynASTElementImpl} from "../../../core/lang/syntax/impl/tree/SynASTElementImpl";
-import {SynFileImpl} from "../../../core/lang/syntax/impl/filesystem/SynFileImpl";
-import {SynTokenNode} from "../../../core/lang/syntax/impl/SynTokenNode";
-import {SynErrorNode} from "../../../core/lang/syntax/impl/SynErrorNode";
-import {SynRecursiveIterator} from "../../../core/lang/syntax/visitors/SynRecursiveIterator";
+import {SynNode} from "../../../lang/syntax/api/SynNode";
+import {SynASTElementImpl} from "../../../lang/syntax/impl/tree/SynASTElementImpl";
+import {SynFileImpl} from "../../../lang/syntax/impl/filesystem/SynFileImpl";
+import {SynTokenNode} from "../../../lang/syntax/impl/SynTokenNode";
+import {SynErrorNode} from "../../../lang/syntax/impl/SynErrorNode";
+import {SynRecursiveIterator} from "../../../lang/syntax/visitors/SynRecursiveIterator";
 import {AstOverlayHighlight} from "../overlays/AstOverlayHighlight";
 import {Editor} from "../../../editor/Editor";
-import {SynDocument} from "../../../core/lang/syntax/api/document/SynDocument";
-import {SynTreeImpl} from "../../../core/lang/syntax/impl/tree/SynTreeImpl";
+import {SynDocument} from "../../../lang/syntax/api/document/SynDocument";
+import {SynTreeImpl} from "../../../lang/syntax/impl/tree/SynTreeImpl";
 
 /**
  *

@@ -1,10 +1,10 @@
 import {JsExpr} from "./JsExpr";
 import {JsFunction} from "../api/JsFunction";
-import {ASTNode} from "../../../../../core/lang/syntax/builder/parser/nodes/ASTNode";
+import {ASTNode} from "../../../../../lang/syntax/builder/parser/nodes/ASTNode";
 import {JsCodeBlock} from "../JsCodeBlock";
 import {JsFunctionParameters} from "../statements/JsFunctionParameters";
-import {SynTokenNode} from "../../../../../core/lang/syntax/impl/SynTokenNode";
-import {SynNodeVisitor} from "../../../../../core/lang/syntax/visitors/SynNodeVisitor";
+import {SynTokenNode} from "../../../../../lang/syntax/impl/SynTokenNode";
+import {SynNodeVisitor} from "../../../../../lang/syntax/visitors/SynNodeVisitor";
 import {JsSynVisitor} from "../visitors/JsSynVisitor";
 
 /**
@@ -43,8 +43,12 @@ export class JsArrowFunctionExpr extends JsExpr implements JsFunction {
         return this.generatorToken !== undefined;
     }
 
-    getName(): string | null {
+    getName(): SynTokenNode | null {
         return null;
+    }
+
+    getAsyncToken(): SynTokenNode | undefined {
+        return this.asyncToken
     }
 
     getParameters(): JsFunctionParameters {
@@ -62,6 +66,7 @@ export class JsArrowFunctionExpr extends JsExpr implements JsFunction {
     accept(visitor: SynNodeVisitor) {
         if (visitor instanceof JsSynVisitor) {
             visitor.visitArrowFunction(this);
+            visitor.visitFunction(this);
         }
         super.accept(visitor);
     }

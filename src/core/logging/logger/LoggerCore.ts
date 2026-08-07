@@ -1,5 +1,5 @@
 import {LogStyles} from "./LoggerStyles";
-import {LogLevel, LoggerConfig} from "./LoggerTypes";
+import {LoggerConfig, LogLevel} from "./LoggerTypes";
 import {configureLogger, getLoggerConfig, setLoggerLevel} from "./LoggerState";
 import {formatTimestamp, getConsoleMethod, getLevelLabel, getLevelStyle} from "./LoggerUtils";
 

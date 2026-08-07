@@ -25,7 +25,7 @@ export class DocumentModificationEvent extends EditorEventBase {
         return this.affectedRange;
     }
 
-    getLocation(): Offset {
+    getOffset(): Offset {
         return this.affectedRange.start;
     }
 
@@ -40,6 +40,10 @@ export class DocumentModificationEvent extends EditorEventBase {
     getType(): DocumentModificationType {
         if (this.text != null) return DocumentModificationType.INSERTION;
         return DocumentModificationType.DELETION;
+    }
+
+    getTextDelta() {
+        return this.getInsertedText().length - this.getAffectedRange().getLength()
     }
 }
 

@@ -3,7 +3,8 @@ import {Editor} from "../../Editor";
 import {HTMLUtils} from "../../utils/HTMLUtils";
 import {EditorKeysHelper} from "../../core/keycontext/EditorKeysHelper";
 import {CloseOn} from "../../../core/ui/api/Closeable";
-import {MeasurableUIComponent} from "../../../core/ui/engine/components/MeasurableUIComponent";
+import {UIComponentMixin} from "../../../core/ui/engine/components/UIComponent";
+import {Measurable} from "../../../core/ui/engine/mixins/Measurable";
 
 /**
  *
@@ -11,7 +12,7 @@ import {MeasurableUIComponent} from "../../../core/ui/engine/components/Measurab
  * @date 6/1/2026
  * @since 1.0.0
  */
-export abstract class EditorPopup extends MeasurableUIComponent implements InlinePopup {
+export abstract class EditorPopup extends UIComponentMixin(Measurable) implements InlinePopup {
     protected isOpen = false;
 
     protected constructor(protected editor: Editor, className: string, private closeOn: CloseOn) {

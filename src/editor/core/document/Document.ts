@@ -2,7 +2,7 @@ import {Editor} from "../../Editor";
 import {EditorRawData} from "./RawData";
 import {LineData} from "./LineData";
 import {TextRange} from "../coordinate/range/TextRange";
-import {LanguageBase} from "../../../core/lang/LanguageBase";
+import {LanguageBase} from "../../../lang/LanguageBase";
 import {DocumentInsertEvent} from "./events/DocumentInsertEvent";
 import {DocumentModificationEvent} from "./events/DocumentModificationEvent";
 import {DocumentDeleteEvent} from "./events/DocumentDeleteEvent";
@@ -16,6 +16,7 @@ import {UnsafeFlagsService} from "../../../core/sync/flags/UnsafeFlagsService";
 import {UnsafeFlags} from "../../../core/sync/flags/UnsafeFlags";
 import {TrackedRange} from "../coordinate/range/TrackedRange";
 import {UndoRedoActionStack} from "../undo/UndoRedoActionStack";
+import {HighlightHolder} from "../../ui/highlighter/HighlightHolder";
 
 /**
  * Represents an opened file in the editor
@@ -32,34 +33,32 @@ export class Document {
     private lineBreaks: Offset[] = [];
 
     private readonly tokenCache: TokenCache = new TokenCache();
+    private readonly highlightsHolder: HighlightHolder;
+    private annotationsHolder: HighlightHolder;
+
     private readonly myUndoRedoStack: UndoRedoActionStack = new UndoRedoActionStack();
 
     private trackedRanges: WeakRef<TrackedRange>[] = []
 
     constructor(private caretOffset: Offset, content: string, private language: LanguageBase | null = null) {
         this.data = new EditorRawData(content);
+
+        this.highlightsHolder = new HighlightHolder(this, 1);
+        this.annotationsHolder = new HighlightHolder(this, 2, true);
+
         this.parseLines();
     }
 
-    /**
-     * Binary search helper to find the line index for a given offset.
-     * Finds the largest line index `i` such that `this.lineBreaks[i] <= offset`.
-     */
-    private findLineIndex(offset: Offset): number {
-        let low = 0;
-        let high = this.lineBreaks.length - 1;
-        let index = 0;
+    getHighlightsHolder(): HighlightHolder {
+        return this.highlightsHolder;
+    }
 
-        while (low <= high) {
-            const mid = (low + high) >> 1;
-            if (this.lineBreaks[mid] <= offset) {
-                index = mid;
-                low = mid + 1;
-            } else {
-                high = mid - 1;
-            }
-        }
-        return index;
+    getAnnotationsHolder(): HighlightHolder {
+        return this.annotationsHolder
+    }
+
+    setAnnotations(holder: HighlightHolder) {
+        this.annotationsHolder = holder;
     }
 
     public getSavedCaretOffset(): Offset {
@@ -277,6 +276,27 @@ export class Document {
 
     getModificationTimestamp() {
         return this.modificationTimestamp;
+    }
+
+    /**
+     * Binary search helper to find the line index for a given offset.
+     * Finds the largest line index `i` such that `this.lineBreaks[i] <= offset`.
+     */
+    private findLineIndex(offset: Offset): number {
+        let low = 0;
+        let high = this.lineBreaks.length - 1;
+        let index = 0;
+
+        while (low <= high) {
+            const mid = (low + high) >> 1;
+            if (this.lineBreaks[mid] <= offset) {
+                index = mid;
+                low = mid + 1;
+            } else {
+                high = mid - 1;
+            }
+        }
+        return index;
     }
 
     private parseLines(): void {

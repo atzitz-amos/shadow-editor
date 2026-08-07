@@ -1,6 +1,6 @@
 import {EditorEventBase} from "../../../../core/events/EditorEventBase";
 import {Editor} from "../../../Editor";
-import {LanguageBase} from "../../../../core/lang/LanguageBase";
+import {LanguageBase} from "../../../../lang/LanguageBase";
 import {EventSubscriber} from "../../../../core/events/EventSubscriber";
 
 /**

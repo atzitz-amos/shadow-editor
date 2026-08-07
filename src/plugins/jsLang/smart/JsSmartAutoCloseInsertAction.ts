@@ -1,5 +1,5 @@
-import {LanguageBase} from "../../../core/lang/LanguageBase";
-import {SmartAutoCloseInsertAction} from "../../../core/lang/smart/insert/SmartAutoCloseAction";
+import {LanguageBase} from "../../../lang/LanguageBase";
+import {SmartAutoCloseInsertAction} from "../../../lang/codeAnalysis/smart/insert/SmartAutoCloseAction";
 import JsLang from "../lang/JsLang";
 import {JsSmartActionsUtils} from "./JsSmartActionsUtils";
 import {EditorCharTypedContext} from "../../../editor/core/behaviors/context/EditorCharTypedContext";
@@ -18,13 +18,13 @@ export default class JsSmartAutoCloseInsertAction extends SmartAutoCloseInsertAc
     }
 
     getApplicableLanguages(): LanguageBase[] {
-        return [JsLang.class];
+        return [JsLang.INSTANCE];
     }
 
     shouldAutoClose(ctx: EditorCharTypedContext, leadingChar: string, char: string, trailingChar: string): boolean {
         const document = ctx.getEditor().getOpenedDocument();
         let token = ctx.getTokenAtCaret();
-        if (!token && ctx.getCaretOffset() > 0) {
+        if ((!token || token.isType(JsLexicalGrammar.EOL)) && ctx.getCaretOffset() > 0) {
             token = document.getTokenAt(ctx.getCaretOffset() - 1)!; // Greedy left
         }
         if (token?.isCommentToken()) return false;

@@ -1,6 +1,7 @@
-import {Token} from "../../../core/lang/syntax/builder/tokens/Token";
-import {StaticTokenStream, TokenStream} from "../../../core/lang/syntax/builder/tokens/TokenStream";
-import {TokenType} from "../../../core/lang/syntax/builder/tokens/TokenType";
+import {Token} from "../../../lang/syntax/builder/tokens/Token";
+import {StaticTokenStream, TokenStream} from "../../../lang/syntax/builder/tokens/TokenStream";
+import {TokenType} from "../../../lang/syntax/builder/tokens/TokenType";
+import {TextRange} from "../coordinate/range/TextRange";
 
 /**
  * A cache for the incremental parser that stores the current tokens and their states.
@@ -39,24 +40,30 @@ export class TokenCache {
      * Replace all tokens overlapping [start, end) with newTokens, then shift all following tokens by deltaOffset.
      * Uses TextRange.delta(offset) in-place on affected tokens.
      */
-    update(start: Offset, end: Offset, newTokens: Token[], deltaOffset: Offset): void {
-        if (start >= end && newTokens.length === 0 && deltaOffset === 0) return;
+    update(start: Offset, end: Offset, newTokens: Token[], deltaOffset: Offset): TextRange {
+        if (start >= end && newTokens.length === 0 && deltaOffset === 0) return new TextRange(start, end);
 
         const startIdx = this.findFirstIndexWithEndGreaterThan(start);
         const endIdx = this.findFirstIndexWithStartGreaterOrEqual(end);
 
-        // Fast-path: tokens array is empty -> just copy newTokens into it without any spread/apply
+        const actualStart = startIdx < this.tokens.length
+            ? Math.min(start, this.tokens[startIdx].getRange().start)
+            : start;
+
+        const oldActualEnd = endIdx > startIdx
+            ? this.tokens[endIdx - 1].getRange().end
+            : end;
+
         if (this.tokens.length === 0) {
             this.tokens.length = newTokens.length;
             for (let i = 0; i < newTokens.length; i++) {
                 this.tokens[i] = newTokens[i];
             }
         } else {
-            // General path: build merged contents and overwrite the existing array object in-place.
             const before = this.tokens.slice(0, startIdx);
             const after = this.tokens.slice(endIdx);
 
-            this.tokens.length = before.length + newTokens.length + after.length; // resize in-place
+            this.tokens.length = before.length + newTokens.length + after.length;
 
             let p = 0;
             for (let i = 0; i < before.length; i++) this.tokens[p++] = before[i];
@@ -64,11 +71,16 @@ export class TokenCache {
             for (let i = 0; i < after.length; i++) this.tokens[p++] = after[i];
         }
 
-        // Shift ranges of tokens after the inserted tokens by deltaOffset (in-place)
         const shiftFrom = startIdx + newTokens.length;
         for (let i = shiftFrom; i < this.tokens.length; i++) {
             this.tokens[i].getRange().moveBy(deltaOffset);
         }
+
+        const newActualEnd = newTokens.length > 0
+            ? newTokens[newTokens.length - 1].getRange().end
+            : oldActualEnd + deltaOffset;
+
+        return new TextRange(actualStart, newActualEnd);
     }
 
     /** Return a read-only view */

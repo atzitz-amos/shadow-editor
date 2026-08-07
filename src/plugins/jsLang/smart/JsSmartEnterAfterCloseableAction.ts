@@ -1,12 +1,11 @@
-import {LanguageBase} from "../../../core/lang/LanguageBase";
-import {SmartInlineEnterAction} from "../../../core/lang/smart/enter/SmartInlineEnterAction";
+import {LanguageBase} from "../../../lang/LanguageBase";
+import {SmartInlineEnterAction} from "../../../lang/codeAnalysis/smart/enter/SmartInlineEnterAction";
 import {EditorBehaviorContext} from "../../../editor/core/behaviors/context/EditorBehaviorContext";
 import {BehaviorHandlingMode} from "../../../editor/core/behaviors/manager/BehaviorHandlingMode";
 import JsLang from "../lang/JsLang";
 import {JsSmartActionsUtils} from "./JsSmartActionsUtils";
 import {ModifierKeyHolder} from "../../../core/keybinds/Keybind";
-import {IndentUtils} from "../../../core/lang/syntax/utils/IndentUtils";
-import {JsLexicalGrammar} from "../lang/lexer/JsLexicalGrammar";
+import {IndentUtils} from "../../../lang/syntax/utils/IndentUtils";
 
 /**
  *
@@ -16,7 +15,7 @@ import {JsLexicalGrammar} from "../lang/lexer/JsLexicalGrammar";
  */
 export default class JsSmartEnterAfterCloseableAction extends SmartInlineEnterAction {
     getApplicableLanguages(): LanguageBase[] {
-        return [JsLang.class];
+        return [JsLang.INSTANCE];
     }
 
     isApplicable(ctx: EditorBehaviorContext): boolean {

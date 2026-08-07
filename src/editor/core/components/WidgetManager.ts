@@ -3,7 +3,6 @@ import {GutterComponent} from "../../ui/gutter/components/GutterComponent";
 import {GutterLine} from "../../ui/gutter/components/GutterLine";
 import {Editor} from "../../Editor";
 import {WidgetRenderer} from "./WidgetRenderer";
-import {HighlightHolder} from "../../ui/highlighter/HighlightHolder";
 import {OverlayWidget} from "../../ui/inline/widget/overlay/OverlayWidget";
 import {InlayWidget} from "../../ui/inline/widget/inlay/InlayWidget";
 
@@ -16,13 +15,10 @@ export class WidgetManager {
     private gutterComponents: GutterComponent[] = [];
 
     private readonly renderer: WidgetRenderer;
-    private readonly highlightsHolder: HighlightHolder;
+
 
     constructor(private readonly editor: Editor) {
-
         this.renderer = new WidgetRenderer(this);
-
-        this.highlightsHolder = new HighlightHolder(editor);
     }
 
     getAssociatedGutterComponents(line: number) {
@@ -99,10 +95,6 @@ export class WidgetManager {
 
     getRenderer(): WidgetRenderer {
         return this.renderer;
-    }
-
-    getHighlightsHolder() {
-        return this.highlightsHolder;
     }
 
     clearAllOverlays() {

@@ -3,6 +3,7 @@ import {TextRange} from "../../../../core/coordinate/range/TextRange";
 import {HTMLView} from "../../view/HTMLView";
 import {Editor} from "../../../../Editor";
 import {TextAttributeKey} from "../../../highlighter/style/TextAttributeKey";
+import {HighlightTextEffects} from "../../../highlighter/effects/HighlightTextEffects";
 
 /**
  * A wrapper around an HTMLSpanView that represents an overlay in the editor.
@@ -31,11 +32,11 @@ export class Overlay {
         return this.range;
     }
 
-    public style(attributes: TextAttributeKey): void;
+    public style(attributes: TextAttributeKey, effects: HighlightTextEffects | null): void;
     public style(styles: Record<any, any>): void;
-    public style(styles: Record<any, any> | TextAttributeKey): void {
+    public style(styles: Record<any, any> | TextAttributeKey, effects?: HighlightTextEffects | null): void {
         if (styles instanceof TextAttributeKey) {
-            this.view.applyTextAttributes(styles);
+            this.view.applyTextAttributes(styles, effects!);
             return;
         }
         const stylesheet = this.view.getCommonStylesheet();

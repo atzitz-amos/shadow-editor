@@ -1,4 +1,4 @@
-import {LangSupport} from "../../../core/lang/LangSupport";
+import {LangSupport} from "../../../lang/LangSupport";
 import {WorkspaceFile} from "../../../core/workspace/filesystem/tree/WorkspaceFile";
 import {Document} from "./Document";
 

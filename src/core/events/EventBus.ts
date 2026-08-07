@@ -96,20 +96,24 @@ export class EventBus {
      * @param event The event to be published
      * */
     syncPublish<T extends EventBase>(event: T): void {
-        this.dispatchLocal(event);
+        let proto = Object.getPrototypeOf(event);
+        while (proto && proto !== Object.prototype) {
+            this.dispatchLocal(event, proto.constructor);
+            proto = Object.getPrototypeOf(proto);
+        }
 
         if (typeof event.getBubbleDirection === "function") {
-            if (event.getBubbleDirection() & BubbleDirection.BUBBLE_DOWN) {
+            const bubbleDirection = event.getBubbleDirection();
+
+            if (bubbleDirection & BubbleDirection.BUBBLE_DOWN) {
                 for (const childBus of this.children) {
                     childBus.bubbleDown(event);
                 }
             }
 
-            if (event.getBubbleDirection() & BubbleDirection.BUBBLE_UP) {
-                // Bubble up to parent if any
+            if (bubbleDirection & BubbleDirection.BUBBLE_UP) {
                 if (this.parentBus) {
-                    this.parentBus.dispatchLocal(event);
-                    this.parentBus.bubbleUp(event);
+                    this.parentBus.syncPublish(event);
                 }
             }
         }
@@ -140,10 +144,10 @@ export class EventBus {
         }
     }
 
-    protected dispatchLocal<T extends EventBase>(event: T) {
+    protected dispatchLocal<T extends EventBase>(event: T, constructor?: Class<T>) {
         // Use the concrete runtime class as the subscription key.
         // (Currently does not dispatch to base-class listeners.)
-        const subs = this.subscriptions.get(event.constructor as Function);
+        const subs = this.subscriptions.get((constructor ?? event.constructor) as Function);
         if (subs) {
             for (const [subscriber, {callback}] of subs) {
                 // Avoid array allocation from apply().

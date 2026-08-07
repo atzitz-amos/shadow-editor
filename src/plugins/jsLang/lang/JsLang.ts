@@ -1,16 +1,16 @@
-import {LanguageBase} from "../../../core/lang/LanguageBase";
-import {IncrementalLexer} from "../../../core/lang/syntax/builder/lexer/IncrementalLexer";
+import {LanguageBase} from "../../../lang/LanguageBase";
+import {IncrementalLexer} from "../../../lang/syntax/builder/lexer/IncrementalLexer";
 import {JsParser} from "./parser/JsParser";
-import {HighlighterBase} from "../../../core/lang/highlighter/HighlighterBase";
+import {HighlighterBase} from "../../../lang/highlighter/HighlighterBase";
 import {JsHighlighter} from "./highlighter/JsHighlighter";
 import JsIncrLexer from "./lexer/JsIncrLexer";
-import {ASTBuilder} from "../../../core/lang/syntax/builder/parser/builder/ASTBuilder";
-import {IParser} from "../../../core/lang/syntax/builder/parser/IParser";
+import {ASTBuilder} from "../../../lang/syntax/builder/parser/builder/ASTBuilder";
+import {IParser} from "../../../lang/syntax/builder/parser/IParser";
 import {JsPrinter} from "./template/JsPrinter";
 
 
 export default class JsLang extends LanguageBase {
-    private static _instance: JsLang;
+    public static _instance: JsLang;
 
     private constructor() {
         super();
@@ -18,7 +18,7 @@ export default class JsLang extends LanguageBase {
         JsLang._instance = this;
     }
 
-    public static get class(): JsLang {
+    public static get INSTANCE(): JsLang {
         if (!JsLang._instance) throw new Error("No instance of JsLang was found");
         return JsLang._instance;
     }

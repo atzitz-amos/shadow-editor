@@ -69,6 +69,7 @@ export class ViewPainter {
         }
         this.view.setCSSProperties(this.view.view, {"--editor-scroll-offsetY": HTMLUtils.px(scrollOffset || this.view.getLineHeight())});
         this.view.setCSSProperties(this.view.view, {"--editor-scroll-x": HTMLUtils.px(this.view.getScroll().scrollX)});
+
     }
 
     repaintOverlays() {
@@ -77,6 +78,7 @@ export class ViewPainter {
 
         for (const overlay of overlays) {
             const range = overlay.getRange();
+            if (!this.view.maybeVisible(range)) continue;
 
             const spans: HTMLSpanElement[] = [];
 
@@ -92,33 +94,27 @@ export class ViewPainter {
 
                 let line = document.getLineAt(range.start);
                 if (!line) continue;
-                const lineNo = line.getLineNumber();
-
-                if (lineNo >= this.view.getScroll().scrollYLines - 1 && lineNo < this.view.getScroll().scrollYLines + 1 + this.view.getVisualLineCount()) {
-                    this.layers.getOverlayLayer().addOverlayOnLine(lineNo - this.view.getScroll().scrollYLines + 1, element);
-                }
+                this.layers.getOverlayLayer().addOverlayOnLine(line.getLineNumber() - this.view.getScroll().scrollYLines + 1, element);
             } else if (range.end <= document.getTotalDocumentLength()) {
                 while (start < range.end) {
                     let end = document.getLineEnd(start);
 
                     let line = document.getLineAt(start);
                     if (!line) break;
-                    const lineNo = line.getLineNumber();
-                    if (lineNo >= this.view.getScroll().scrollYLines - 1 && lineNo < this.view.getScroll().scrollYLines + 1 + this.view.getVisualLineCount()) {
-                        const isFirstLine = (start === initialStart);
-                        const isLastLine = (range.end <= end);
-                        const isFullLine = overlay.fullLineInBetween() && !isFirstLine && !isLastLine;
 
-                        let element = this.paintOverlay(
-                            overlay,
-                            start,
-                            elementStart,
-                            Math.min(range.end, end) - start,
-                            isFullLine);
-                        spans.push(element);
+                    const isFirstLine = (start === initialStart);
+                    const isLastLine = (range.end <= end);
+                    const isFullLine = overlay.fullLineInBetween() && !isFirstLine && !isLastLine;
 
-                        this.layers.getOverlayLayer().addOverlayOnLine(lineNo - this.view.getScroll().scrollYLines + 1, element);
-                    }
+                    let element = this.paintOverlay(
+                        overlay,
+                        start,
+                        elementStart,
+                        Math.min(range.end, end) - start,
+                        isFullLine);
+                    spans.push(element);
+
+                    this.layers.getOverlayLayer().addOverlayOnLine(line.getLineNumber() - this.view.getScroll().scrollYLines + 1, element);
                     start = end + 1;
                     elementStart = 0;
                 }

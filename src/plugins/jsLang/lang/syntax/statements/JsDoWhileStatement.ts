@@ -1,8 +1,8 @@
 import {JsStatement} from "./JsStatement";
 import {JsExpr} from "../expr/JsExpr";
 import {JsCodeBlock} from "../JsCodeBlock";
-import {ASTNode} from "../../../../../core/lang/syntax/builder/parser/nodes/ASTNode";
-import {SynNodeVisitor} from "../../../../../core/lang/syntax/visitors/SynNodeVisitor";
+import {ASTNode} from "../../../../../lang/syntax/builder/parser/nodes/ASTNode";
+import {SynNodeVisitor} from "../../../../../lang/syntax/visitors/SynNodeVisitor";
 import {JsSynVisitor} from "../visitors/JsSynVisitor";
 
 /**

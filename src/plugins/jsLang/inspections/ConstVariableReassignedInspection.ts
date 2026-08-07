@@ -1,15 +1,15 @@
-import {InspectionBase} from "../../../core/lang/inspections/Inspection";
-import {InspectionSeverity} from "../../../core/lang/inspections/InspectionSeverity";
-import {ProblemsHolder} from "../../../core/lang/inspections/problems/ProblemsHolder";
-import {LanguageBase} from "../../../core/lang/LanguageBase";
-import {SynNodeVisitor} from "../../../core/lang/syntax/visitors/SynNodeVisitor";
+import {InspectionBase} from "../../../lang/codeAnalysis/inspections/Inspection";
+import {InspectionSeverity} from "../../../lang/codeAnalysis/inspections/InspectionSeverity";
+import {ProblemsHolder} from "../../../lang/codeAnalysis/inspections/problems/ProblemsHolder";
+import {LanguageBase} from "../../../lang/LanguageBase";
+import {SynNodeVisitor} from "../../../lang/syntax/visitors/SynNodeVisitor";
 import JsLang from "../lang/JsLang";
 import {JsSynVisitor} from "../lang/syntax/visitors/JsSynVisitor";
 import {JsAssignmentExpr} from "../lang/syntax/expr/JsAssignmentExpr";
 import {JsDeclarator} from "../lang/syntax/statements/JsDeclarator";
-import {QuickFix} from "../../../core/lang/inspections/quickfix/QuickFix";
-import {SynModificationTree} from "../../../core/lang/syntax/writer/template/SynModificationTree";
-import {SynSymbol} from "../../../core/lang/syntax/impl/reference/SynSymbol";
+import {QuickFix} from "../../../lang/codeAnalysis/inspections/quickfix/QuickFix";
+import {SynModificationTree} from "../../../lang/syntax/writer/template/SynModificationTree";
+import {SynSymbol} from "../../../lang/syntax/impl/reference/SynSymbol";
 import {JsVariableDeclaration} from "../lang/syntax/statements/JsVariableDeclaration";
 import {JsLexicalGrammar} from "../lang/lexer/JsLexicalGrammar";
 
@@ -29,7 +29,7 @@ export default class ConstVariableReassignedInspection extends InspectionBase {
     }
 
     getApplicableLanguages(): LanguageBase[] {
-        return [JsLang.class];
+        return [JsLang.INSTANCE];
     }
 
     buildVisitor(holder: ProblemsHolder): SynNodeVisitor {

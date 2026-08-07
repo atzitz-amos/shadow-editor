@@ -98,10 +98,11 @@ export class EditorCoordinateMapper {
         const charSize = this.view.getCharSize();
         const lineHeight = this.view.getLineHeight();
 
-        const scrollYLines = this.view.scroll.scrollYOffset === 0 ? this.view.scroll.scrollYLines : this.view.scroll.scrollYLines - 1;
+        const scrollXChars = this.view.scrolling.scrollXOffset === 0 ? this.view.scrolling.scrollXChars : this.view.scrolling.scrollXChars - 1;
+        const scrollYLines = this.view.scrolling.scrollYOffset === 0 ? this.view.scrolling.scrollYLines : this.view.scrolling.scrollYLines - 1;
 
-        const visualX = (pos.col - logicalDelta - this.view.scroll.scrollXChars) * charSize - this.view.scroll.scrollXOffset;
-        const visualY = (pos.row - scrollYLines) * lineHeight - this.view.scroll.scrollYOffset;
+        const visualX = (pos.col - logicalDelta - scrollXChars) * charSize - this.view.scrolling.scrollXOffset;
+        const visualY = (pos.row - scrollYLines) * lineHeight - this.view.scrolling.scrollYOffset;
 
 
         return new XYPoint(visualX + visualDelta, visualY);
@@ -111,11 +112,11 @@ export class EditorCoordinateMapper {
         const charSize = this.view.getCharSize();
         const lineHeight = this.view.getLineHeight();
 
-        const scrollXChars = this.view.scroll.scrollXOffset === 0 ? this.view.scroll.scrollXChars : this.view.scroll.scrollXChars - 1;
-        const scrollYLines = this.view.scroll.scrollYOffset === 0 ? this.view.scroll.scrollYLines : this.view.scroll.scrollYLines - 1;
+        const scrollXChars = this.view.scrolling.scrollXOffset === 0 ? this.view.scrolling.scrollXChars : this.view.scrolling.scrollXChars - 1;
+        const scrollYLines = this.view.scrolling.scrollYOffset === 0 ? this.view.scrolling.scrollYLines : this.view.scrolling.scrollYLines - 1;
 
-        let visualX = Math.round((point.x + this.view.scroll.scrollXOffset) / charSize) + scrollXChars;
-        let visualY = Math.floor((point.y + this.view.scroll.scrollYOffset) / lineHeight) + scrollYLines;
+        let visualX = Math.round((point.x + this.view.scrolling.scrollXOffset) / charSize) + scrollXChars;
+        let visualY = Math.floor((point.y + this.view.scrolling.scrollYOffset) / lineHeight) + scrollYLines;
 
         const document = this.editor.getOpenedDocument();
         if (visualY < 0) visualY = 0;
@@ -134,7 +135,7 @@ export class EditorCoordinateMapper {
                     return inlayVisual;
                 }
 
-                visualX = Math.round((point.x + this.view.scroll.scrollXOffset - inlay.width) / charSize) + scrollXChars;
+                visualX = Math.round((point.x + this.view.scrolling.scrollXOffset - inlay.width) / charSize) + scrollXChars;
                 visualX = Math.max(inlay.offset - lineStart + logicalDelta, visualX);
 
                 logicalDelta += inlay.deltaOffset;
@@ -157,11 +158,11 @@ export class EditorCoordinateMapper {
         const charSize = this.view.getCharSize();
         const lineHeight = this.view.getLineHeight();
 
-        const scrollXChars = this.view.scroll.scrollXOffset === 0 ? this.view.scroll.scrollXChars : this.view.scroll.scrollXChars - 1;
-        const scrollYLines = this.view.scroll.scrollYOffset === 0 ? this.view.scroll.scrollYLines : this.view.scroll.scrollYLines - 1;
+        const scrollXChars = this.view.scrolling.scrollXOffset === 0 ? this.view.scrolling.scrollXChars : this.view.scrolling.scrollXChars - 1;
+        const scrollYLines = this.view.scrolling.scrollYOffset === 0 ? this.view.scrolling.scrollYLines : this.view.scrolling.scrollYLines - 1;
 
-        let visualX = Math.round((point.x + this.view.scroll.scrollXOffset) / charSize) + scrollXChars;
-        let visualY = Math.floor((point.y + this.view.scroll.scrollYOffset) / lineHeight) + scrollYLines;
+        let visualX = Math.round((point.x + this.view.scrolling.scrollXOffset) / charSize) + scrollXChars;
+        let visualY = Math.floor((point.y + this.view.scrolling.scrollYOffset) / lineHeight) + scrollYLines;
 
         const document = this.editor.getOpenedDocument();
 
@@ -180,7 +181,7 @@ export class EditorCoordinateMapper {
                     return inlay.offset;
                 }
 
-                visualX = Math.round((point.x + this.view.scroll.scrollXOffset - inlay.width) / charSize) + scrollXChars;
+                visualX = Math.round((point.x + this.view.scrolling.scrollXOffset - inlay.width) / charSize) + scrollXChars;
                 visualX = Math.max(inlay.offset - lineStart + logicalDelta, visualX);
 
                 logicalDelta += inlay.deltaOffset;
@@ -194,9 +195,9 @@ export class EditorCoordinateMapper {
 
     yToLine(y: number) {
         const lineHeight = this.view.getLineHeight();
-        const scrollYLines = this.view.scroll.scrollYOffset === 0 ? this.view.scroll.scrollYLines : this.view.scroll.scrollYLines - 1;
+        const scrollYLines = this.view.scrolling.scrollYOffset === 0 ? this.view.scrolling.scrollYLines : this.view.scrolling.scrollYLines - 1;
 
-        let line = Math.floor((y + this.view.scroll.scrollYOffset) / lineHeight) + scrollYLines;
+        let line = Math.floor((y + this.view.scrolling.scrollYOffset) / lineHeight) + scrollYLines;
         if (line < 0) line = 0;
         else if (line >= this.editor.getOpenedDocument().getLineCount()) line = this.editor.getOpenedDocument().getLineCount() - 1;
 

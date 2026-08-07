@@ -2,6 +2,7 @@ import {Component} from "../../core/components/Component";
 import {Editor} from "../../Editor";
 import {View} from "../view/View";
 import {HTMLUtils} from "../../utils/HTMLUtils";
+import {ScrollMode} from "./Scrolling";
 
 
 export class HScrollBar implements Component {
@@ -18,7 +19,8 @@ export class HScrollBar implements Component {
     }
 
     onDestroy(editor: Editor): void {
-
+        document.removeEventListener("mousemove", this.onDocMouseMove);
+        document.removeEventListener("mouseup", this.onDocMouseUp);
     }
 
     onRender() {
@@ -40,75 +42,74 @@ export class HScrollBar implements Component {
             e.stopPropagation();
         });
 
-        document.addEventListener("mousemove", (e) => {
-            if (this.isDragging) {
-                this.drag(e);
-            }
-        });
-
-        document.addEventListener("mouseup", (e) => {
-            this.isDragging = false;
-        });
+        document.addEventListener("mousemove", this.onDocMouseMove);
+        document.addEventListener("mouseup", this.onDocMouseUp);
     }
 
     update() {
-        const scroll = this.view.scroll.scrollX;
-        const width = this.scrollbar.getBoundingClientRect().width;
-        const maxWidth = this.view.getMaxWidth();
+        const scrollX = this.view.scrolling.scrollX;
+        const trackWidth = this.scrollbar.clientWidth;
+        const contentWidth = this.view.getMaxWidth();
+        const maxScrollX = contentWidth - trackWidth;
 
-        if (maxWidth - width <= 3) { // No need to show scrollbar
+        if (maxScrollX <= 3) { // No need to show scrollbar
             this.handle.style.width = "0";
             this.scrollbar.style.pointerEvents = "none";
             return;
         }
         this.scrollbar.style.pointerEvents = "auto";
 
-        const handleWidth = Math.max((width / maxWidth) * width, 20);
-        const handleX = (scroll / maxWidth) * width;
-
+        const handleWidth = Math.max((trackWidth / contentWidth) * trackWidth, 20);
+        const maxHandleLeft = trackWidth - handleWidth;
+        const handleX = maxScrollX > 0 ? (scrollX / maxScrollX) * maxHandleLeft : 0;
 
         this.handle.style.width = HTMLUtils.px(handleWidth);
         this.handle.style.left = HTMLUtils.px(handleX);
     }
 
+    private readonly onDocMouseMove = (e: MouseEvent) => {
+        if (this.isDragging) this.drag(e);
+    };
+
+    private readonly onDocMouseUp = () => {
+        this.isDragging = false;
+    };
+
     private drag(e: MouseEvent) {
         const deltaX = e.clientX - this.startX;
-        const scrollbarWidth = this.scrollbar.clientWidth;
+        const trackWidth = this.scrollbar.clientWidth;
         const handleWidth = this.handle.clientWidth;
-        const maxHandleLeft = scrollbarWidth - handleWidth;
+        const maxHandleLeft = trackWidth - handleWidth;
 
-        let newLeft = Math.min(Math.max(this.startLeft + deltaX, 0), maxHandleLeft);
+        const newLeft = Math.min(Math.max(this.startLeft + deltaX, 0), maxHandleLeft);
+        this.handle.style.left = HTMLUtils.px(newLeft);
 
-        this.handle.style.left = `${newLeft}px`;
-
-        // Map handle position → content scrollLeft
-        const contentWidth = this.view.getMaxWidth();
-        const viewportWidth = this.scrollbar.getBoundingClientRect().width;
-        const maxScrollLeft = contentWidth - viewportWidth;
-
-        const scrollRatio = newLeft / maxHandleLeft;
-        this.view.scrollBy(scrollRatio * maxScrollLeft - this.view.scroll.scrollX, 0);
+        this.setScrollFromHandleLeft(newLeft, maxHandleLeft, trackWidth);
     }
 
     private clicked(e: MouseEvent) {
         const rect = this.scrollbar.getBoundingClientRect();
         const clickX = e.clientX - rect.left;
 
-        const scrollbarHeight = this.scrollbar.clientHeight;
-        const handleHeight = this.handle.clientHeight;
-        const maxHandleLeft = scrollbarHeight - handleHeight;
+        const trackWidth = this.scrollbar.clientWidth;
+        const handleWidth = this.handle.clientWidth;
+        const maxHandleLeft = trackWidth - handleWidth;
 
         // Center the handle where the user clicked
-        let newLeft = Math.min(
-            Math.max(clickX - handleHeight / 2, 0),
-            maxHandleLeft
-        );
+        const newLeft = Math.min(Math.max(clickX - handleWidth / 2, 0), maxHandleLeft);
 
-        const contentHeight = this.view.getMaxHeight();
-        const viewportHeight = this.scrollbar.getBoundingClientRect().height;
-        const maxScrollLeft = contentHeight - viewportHeight;
+        this.setScrollFromHandleLeft(newLeft, maxHandleLeft, trackWidth);
+    }
 
-        const scrollRatio = newLeft / maxHandleLeft;
-        this.view.scrollBy(0, scrollRatio * maxScrollLeft - this.view.scroll.scrollX);
+    private setScrollFromHandleLeft(newLeft: number, maxHandleLeft: number, trackWidth: number) {
+        const contentWidth = this.view.getMaxWidth();
+        const maxScrollX = contentWidth - trackWidth;
+
+        const scrollRatio = maxHandleLeft > 0 ? newLeft / maxHandleLeft : 0;
+        const targetScrollX = scrollRatio * maxScrollX;
+
+        // Absolute positioning — never route scrollbar drag/click through scrollBy,
+        // which normalizes/clamps deltas for wheel input specifically.
+        this.view.scrolling.scrollTo(targetScrollX, this.view.scrolling.scrollY, ScrollMode.Instant);
     }
 }

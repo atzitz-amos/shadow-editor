@@ -7,6 +7,7 @@ import {TabsManager} from "../../../../../core/tabs/TabsManager";
 import {UIHooks} from "../../../../../../core/ui/engine/listeners/hooks/UIHooks";
 import {TabHooks, UICommonHooks, WorkspaceHooks} from "../../../../../core/UICommonHooks";
 import {EditorTab} from "../../../../../core/tabs/EditorTab";
+import {GlobalState} from "../../../../../../core/global/GlobalState";
 
 /**
  *
@@ -14,9 +15,7 @@ import {EditorTab} from "../../../../../core/tabs/EditorTab";
  * @date 3/7/2026
  * @since 1.0.0
  */
-@UIHooks.redrawOn(WorkspaceHooks.WORKSPACE_CHANGED,
-    WorkspaceHooks.PROJECT_FILES_SELECTED_CHANGED,
-    TabHooks.TAB_ACTIVE)
+@UIHooks.redrawOn(WorkspaceHooks.WORKSPACE_CHANGED, WorkspaceHooks.PROJECT_FILES_SELECTED_CHANGED, TabHooks.TAB_ACTIVE)
 export class SEditorBreadcrumbs extends UIComponent {
 
     constructor(root: HTMLElement) {
@@ -32,8 +31,9 @@ export class SEditorBreadcrumbs extends UIComponent {
         let activeTab = TabsManager.getInstance().getActiveTab();
         if (!activeTab || !(activeTab instanceof EditorTab)) return;
         let entry: FSNodeEntry | undefined | null = activeTab.getDocument().getAssociatedFile();
-        let active = true;
         if (!entry) return;
+
+        let active = true;
         if (ProjectFilesPaneHelper.hasFocus()) {
             const tree = ProjectFilesPaneHelper.getSelectedTreeEntry();
             if (!tree) return;
@@ -53,7 +53,10 @@ export class SEditorBreadcrumbs extends UIComponent {
     }
 
     @UIHooks.react(UICommonHooks.FOCUS_CHANGE)
-    onFocusChange() {
-        
+    onFocusChange(old: HTMLElement, new_: HTMLElement) {
+        const root = GlobalState.getMainEditor()?.getView().getRootElement();
+        if (root && root.contains(new_)) {
+            this.redraw();
+        }
     }
 }

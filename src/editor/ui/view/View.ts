@@ -1,6 +1,6 @@
 import {Editor} from "../../Editor";
 import {HTMLUtils} from "../../utils/HTMLUtils";
-import {Scrolling, ScrollMode} from "../scrollbar/Scroll";
+import {Scrolling, ScrollMode} from "../scrollbar/Scrolling";
 import {RenderedLineData} from "../../core/components/WidgetRenderer";
 import {LogicalPosition} from "../../core/coordinate/LogicalPosition";
 import {VisualPosition} from "../../core/coordinate/VisualPosition";
@@ -10,6 +10,7 @@ import {ViewPropertiesManager} from "./properties/ViewPropertiesManager";
 import {Critical} from "../../../core/critical/Critical";
 import {XYPoint} from "../../core/coordinate/XYPoint";
 import {EditorKeyContextManager} from "../../core/keycontext/EditorKeyContextManager";
+import {TextRange} from "../../core/coordinate/range/TextRange";
 
 
 export class View {
@@ -20,7 +21,7 @@ export class View {
 
     myProperties: ViewPropertiesManager;
 
-    scroll: Scrolling;
+    scrolling: Scrolling;
 
     // Data
     lines: RenderedLineData[];
@@ -50,7 +51,7 @@ export class View {
 
     onAttached(root: HTMLElement) {
         this.view = HTMLUtils.createElement('div.editor-view', root) as HTMLDivElement;
-        this.scroll = new Scrolling(this, 0, 0);
+        this.scrolling = new Scrolling(this, 0, 0);
 
         this.initCSS();
 
@@ -72,38 +73,17 @@ export class View {
     }
 
     scrollBy(deltaX: number, deltaY: number) {
-        let newDeltaX = this.scroll.scrollX + deltaX / 2;
-        if (newDeltaX < 0) {
-            this.scroll.scrollX = 0;
-        } else if (newDeltaX > (this.editor.getOpenedDocument().getMaxLengthLine() - this.getVisualCharCount() + 2) * this.getCharSize()) {
-            this.scroll.scrollX = Math.max(0, (this.editor.getOpenedDocument().getMaxLengthLine() - this.getVisualCharCount() + 2) * this.getCharSize());
-        } else {
-            this.scroll.scrollX = newDeltaX;
-        }
-
-        let newDeltaY = this.scroll.scrollY + deltaY;
-        if (newDeltaY < 0) {
-            this.scroll.scrollY = 0;
-        } else if (newDeltaY > (this.editor.getLineCount() - this.getVisualLineCount() + 2) * this.getLineHeight()) {
-            this.scroll.scrollY = Math.max(0, (this.editor.getLineCount() - this.getVisualLineCount() + 2) * this.getLineHeight());
-        } else {
-            this.scroll.scrollY = newDeltaY;
-        }
-
-        this.triggerRepaint();
+        this.scrolling.scrollBy(deltaX, deltaY)
     }
 
     scrollIntoView(position: LogicalPosition, mode: ScrollMode) {
-        let scrollX = this.scrollIntoViewAlongX(position.col, this.scroll.scrollXChars, this.scroll.scrollXChars + this.getVisualCharCount() - 1);
-        let scrollY = this.scrollIntoViewAlongY(position.row, this.scroll.scrollYLines, this.scroll.scrollYLines + this.getVisualLineCount() - 1);
-        if (scrollX !== null) {
-            this.scroll.scrollX = scrollX * this.getCharSize();
-        }
-        if (scrollY !== null) {
-            this.scroll.scrollY = scrollY * this.getLineHeight();
-        }
+        let scrollX = this.scrollIntoViewAlongX(position.col, this.scrolling.scrollXChars, this.scrolling.scrollXChars + this.getVisualCharCount() - 1);
+        let scrollY = this.scrollIntoViewAlongY(position.row, this.scrolling.scrollYLines, this.scrolling.scrollYLines + this.getVisualLineCount() - 1);
 
-        this.triggerRepaint();
+        const targetX = scrollX !== null ? scrollX * this.getCharSize() : this.scrolling.scrollX;
+        const targetY = scrollY !== null ? scrollY * this.getLineHeight() : this.scrolling.scrollY;
+
+        this.scrolling.scrollTo(targetX, targetY, mode);
     }
 
     ensureCaretVisible() {
@@ -116,7 +96,7 @@ export class View {
     }
 
     getScroll(): Scrolling {
-        return this.scroll;
+        return this.scrolling;
     }
 
     getLayers() {
@@ -289,8 +269,8 @@ export class View {
     getLineBoundingBox(line: number): DOMRect {
         // Calculate the bounding box of the line in the view
         // The result might be off screen (negative coordinates or coordinates larger than the view size)
-        let x = -this.scroll.scrollX;
-        let y = (line - this.scroll.scrollYLines) * this.getLineHeight();
+        let x = -this.scrolling.scrollX;
+        let y = (line - this.scrolling.scrollYLines) * this.getLineHeight();
 
         let xy = this.relativeToViewportCoordinates(x, y);
 
@@ -301,6 +281,12 @@ export class View {
         // Convert a point relative to the view element coordinates to viewport coordinates
         let rect = this.view.getBoundingClientRect();
         return new XYPoint(x + rect.left, y + rect.top);
+    }
+
+    maybeVisible(range: TextRange) {
+        let startLine = this.editor.offsetToLogical(range.start).row;
+        let endLine = this.editor.offsetToLogical(range.end).row;
+        return !(endLine < this.scrolling.scrollYLines || startLine > this.scrolling.scrollYLines + this.getVisualLineCount());
     }
 
     private scrollIntoViewAlongX(position: number, scrollStart: number, scrollEnd: number): number | null {

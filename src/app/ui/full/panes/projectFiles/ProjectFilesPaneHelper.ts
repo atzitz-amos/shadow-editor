@@ -5,6 +5,9 @@ import {ProjectFilesTreeNode} from "./tree/ProjectFilesTreeNode";
 import {UIComponent} from "../../../../../core/ui/engine/components/UIComponent";
 import {UIHooks} from "../../../../../core/ui/engine/listeners/hooks/UIHooks";
 import {WorkspaceHooks} from "../../../../core/UICommonHooks";
+import {WorkspaceFile} from "../../../../../core/workspace/filesystem/tree/WorkspaceFile";
+import {PopupUtilsCore} from "../../../../../core/ui/lib/popup/PopupUtilsCore";
+import {WorkspaceDirectory} from "../../../../../core/workspace/filesystem/tree/WorkspaceDirectory";
 
 /**
  *
@@ -28,6 +31,28 @@ export class ProjectFilesPaneHelper {
     public static hasFocus() {
         if (!this.isPresent()) return false;
         return this.getProjectFilesComponent()!.hasFocus();
+    }
+
+    static async renameFile(file: WorkspaceFile) {
+        const newName = await PopupUtilsCore.askString(
+            `Rename file '${file.getName()}' to:`,
+            file.getName()
+        )
+
+        if (newName) {
+            await file.rename(newName);
+        }
+    }
+
+    static async renameDir(directory: WorkspaceDirectory) {
+        const newName = await PopupUtilsCore.askString(
+            `Rename directory '${directory.getName()}' to:`,
+            directory.getName()
+        )
+
+        if (newName) {
+            await directory.rename(newName);
+        }
     }
 
     private static isPresent(): boolean {

@@ -2,6 +2,7 @@ import {Component} from "../../core/components/Component";
 import {Editor} from "../../Editor";
 import {View} from "../view/View";
 import {HTMLUtils} from "../../utils/HTMLUtils";
+import {ScrollMode} from "./Scrolling";
 
 
 export class VScrollBar implements Component {
@@ -14,11 +15,19 @@ export class VScrollBar implements Component {
     private startY: number = 0;
     private startTop: number;
 
+    private readonly onDocMouseMove = (e: MouseEvent) => {
+        if (this.isDragging) this.drag(e);
+    };
+    private readonly onDocMouseUp = () => {
+        this.isDragging = false;
+    };
+
     constructor(private view: View) {
     }
 
     onDestroy(editor: Editor): void {
-
+        document.removeEventListener("mousemove", this.onDocMouseMove);
+        document.removeEventListener("mouseup", this.onDocMouseUp);
     }
 
     onRender() {
@@ -40,33 +49,26 @@ export class VScrollBar implements Component {
             e.stopPropagation();
         });
 
-        document.addEventListener("mousemove", (e) => {
-            if (this.isDragging) {
-                this.drag(e);
-            }
-        });
-
-        document.addEventListener("mouseup", (e) => {
-            this.isDragging = false;
-        });
+        document.addEventListener("mousemove", this.onDocMouseMove);
+        document.addEventListener("mouseup", this.onDocMouseUp);
     }
 
     update() {
-        const scroll = this.view.scroll.scrollY;
-        const height = this.scrollbar.getBoundingClientRect().height;
-        const maxHeight = this.view.getMaxHeight();
+        const scrollY = this.view.scrolling.scrollY;
+        const trackHeight = this.scrollbar.clientHeight;
+        const contentHeight = this.view.getMaxHeight();
+        const maxScrollY = contentHeight - trackHeight;
 
-        if (maxHeight - height <= 3) { // No need to show scrollbar
+        if (maxScrollY <= 3) { // No need to show scrollbar
             this.handle.style.height = "0";
             this.scrollbar.style.pointerEvents = "none";
             return;
         }
-
         this.scrollbar.style.pointerEvents = "auto";
 
-        const handleHeight = Math.max((height / maxHeight) * height, 20);
-        const handleY = (scroll / maxHeight) * height;
-
+        const handleHeight = Math.max((trackHeight / contentHeight) * trackHeight, 20);
+        const maxHandleTop = trackHeight - handleHeight;
+        const handleY = maxScrollY > 0 ? (scrollY / maxScrollY) * maxHandleTop : 0;
 
         this.handle.style.height = HTMLUtils.px(handleHeight);
         this.handle.style.top = HTMLUtils.px(handleY);
@@ -74,42 +76,39 @@ export class VScrollBar implements Component {
 
     private drag(e: MouseEvent) {
         const deltaY = e.clientY - this.startY;
-        const scrollbarHeight = this.scrollbar.clientHeight;
+        const trackHeight = this.scrollbar.clientHeight;
         const handleHeight = this.handle.clientHeight;
-        const maxHandleTop = scrollbarHeight - handleHeight;
+        const maxHandleTop = trackHeight - handleHeight;
 
-        let newTop = Math.min(Math.max(this.startTop + deltaY, 0), maxHandleTop);
+        const newTop = Math.min(Math.max(this.startTop + deltaY, 0), maxHandleTop);
+        this.handle.style.top = HTMLUtils.px(newTop);
 
-        this.handle.style.top = `${newTop}px`;
-
-        // Map handle position → content scrollTop
-        const contentHeight = this.view.getMaxHeight();
-        const viewportHeight = this.scrollbar.getBoundingClientRect().height;
-        const maxScrollTop = contentHeight - viewportHeight;
-
-        const scrollRatio = newTop / maxHandleTop;
-        this.view.scrollBy(0, scrollRatio * maxScrollTop - this.view.scroll.scrollY);
+        this.setScrollFromHandleTop(newTop, maxHandleTop, trackHeight);
     }
 
     private clicked(e: MouseEvent) {
         const rect = this.scrollbar.getBoundingClientRect();
         const clickY = e.clientY - rect.top;
 
-        const scrollbarHeight = this.scrollbar.clientHeight;
+        const trackHeight = this.scrollbar.clientHeight;
         const handleHeight = this.handle.clientHeight;
-        const maxHandleTop = scrollbarHeight - handleHeight;
+        const maxHandleTop = trackHeight - handleHeight;
 
         // Center the handle where the user clicked
-        let newTop = Math.min(
-            Math.max(clickY - handleHeight / 2, 0),
-            maxHandleTop
-        );
+        const newTop = Math.min(Math.max(clickY - handleHeight / 2, 0), maxHandleTop);
 
+        this.setScrollFromHandleTop(newTop, maxHandleTop, trackHeight);
+    }
+
+    private setScrollFromHandleTop(newTop: number, maxHandleTop: number, trackHeight: number) {
         const contentHeight = this.view.getMaxHeight();
-        const viewportHeight = this.scrollbar.getBoundingClientRect().height;
-        const maxScrollTop = contentHeight - viewportHeight;
+        const maxScrollY = contentHeight - trackHeight;
 
-        const scrollRatio = newTop / maxHandleTop;
-        this.view.scrollBy(0, scrollRatio * maxScrollTop - this.view.scroll.scrollY);
+        const scrollRatio = maxHandleTop > 0 ? newTop / maxHandleTop : 0;
+        const targetScrollY = scrollRatio * maxScrollY;
+
+        // Absolute positioning — never route scrollbar drag/click through scrollBy,
+        // which normalizes/clamps deltas for wheel input specifically.
+        this.view.scrolling.scrollTo(this.view.scrolling.scrollX, targetScrollY, ScrollMode.Instant);
     }
 }

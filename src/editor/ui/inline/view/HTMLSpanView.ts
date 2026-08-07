@@ -3,6 +3,7 @@ import {HTMLView} from "./HTMLView";
 import {HTMLViewUtils} from "./HTMLViewUtils";
 import {HTMLUtils} from "../../../utils/HTMLUtils";
 import {TextAttributeKey} from "../../highlighter/style/TextAttributeKey";
+import {HighlightTextEffects} from "../../highlighter/effects/HighlightTextEffects";
 
 /**
  * Represents multiple inline span HTML elements in the editor UI linked together as a single view.
@@ -96,9 +97,12 @@ export class HTMLSpanView implements HTMLView {
         return this.stylesheet;
     }
 
-    applyTextAttributes(attributes: TextAttributeKey) {
+    applyTextAttributes(attributes: TextAttributeKey, effects: HighlightTextEffects | null): void {
         for (const element of this.elements) {
             attributes.applyStyle(element);
+            if (effects) {
+                effects.applyTo(element);
+            }
         }
     }
 

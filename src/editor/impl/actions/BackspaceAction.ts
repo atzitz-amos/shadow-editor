@@ -1,4 +1,4 @@
-import {Key} from "../../../core/keybinds/Keybind";
+import {Key, ModifierKeyHolder} from "../../../core/keybinds/Keybind";
 import {AbstractAction} from "../../../core/actions/AbstractAction";
 import {KeybindContext} from "../../../core/keybinds/context/KeybindContext";
 import {EditorDeleteContext} from "../../core/behaviors/context/EditorDeleteContext";
@@ -18,12 +18,14 @@ export class BackspaceAction extends AbstractAction {
             key: Key.BACKSPACE,
             ctrl: false,
             alt: false,
-            shift: false
+            shift: null
         };
     }
 
     run(ctx: KeybindContext) {
         const editor = ctx.requireEditor();
+
+        ModifierKeyHolder.getInstance().clear();
 
         editor.getCaretModel().forEachCaret(caret => {
             if (caret.getSelectionModel().isSelectionActive)

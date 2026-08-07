@@ -40,7 +40,7 @@ export default class DebugToolsPane extends AbstractPane {
         }
 
         GlobalState.getMainEventBus().subscribe(this, SynTreeChangedEvent.SUBSCRIBER, e => {
-            (this.getComponent() as DebugToolsPaneComponent).onSynTreeChanged(e.getEditor(), e.getDocument());
+            (this.getComponent() as DebugToolsPaneComponent).onSynTreeChanged(e.getEditor(), e.getSynDocument());
         });
 
         GlobalState.getMainEventBus().subscribe(this, CaretMovedEvent.SUBSCRIBER, e => {

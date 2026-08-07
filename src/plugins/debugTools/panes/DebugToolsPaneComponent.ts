@@ -3,9 +3,8 @@ import {IPane} from "../../../app/core/panes/pane/IPane";
 import {ASTViewerWidget} from "./ASTViewerWidget";
 import {TabPane} from "../../../core/ui/lib/tabs/TabPane";
 import {SynSuiteWidget} from "./SynSuiteWidget";
-import {SynFile} from "../../../core/lang/syntax/api/filesystem/SynFile";
 import {Editor} from "../../../editor/Editor";
-import {SynDocument} from "../../../core/lang/syntax/api/document/SynDocument";
+import {SynDocument} from "../../../lang/syntax/api/document/SynDocument";
 
 /**
  *

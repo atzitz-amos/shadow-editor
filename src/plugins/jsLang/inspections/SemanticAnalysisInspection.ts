@@ -1,11 +1,11 @@
-import {InspectionBase} from "../../../core/lang/inspections/Inspection";
-import {ProblemsHolder} from "../../../core/lang/inspections/problems/ProblemsHolder";
-import {SynNodeVisitor} from "../../../core/lang/syntax/visitors/SynNodeVisitor";
-import {LanguageBase} from "../../../core/lang/LanguageBase";
-import {InspectionSeverity} from "../../../core/lang/inspections/InspectionSeverity";
+import {InspectionBase} from "../../../lang/codeAnalysis/inspections/Inspection";
+import {ProblemsHolder} from "../../../lang/codeAnalysis/inspections/problems/ProblemsHolder";
+import {SynNodeVisitor} from "../../../lang/syntax/visitors/SynNodeVisitor";
+import {LanguageBase} from "../../../lang/LanguageBase";
+import {InspectionSeverity} from "../../../lang/codeAnalysis/inspections/InspectionSeverity";
 import {JsSynVisitor} from "../lang/syntax/visitors/JsSynVisitor";
 import JsLang from "../lang/JsLang";
-import {SynErrorNode} from "../../../core/lang/syntax/impl/SynErrorNode";
+import {SynErrorNode} from "../../../lang/syntax/impl/SynErrorNode";
 import {JsForInStatement} from "../lang/syntax/statements/JsForInStatement";
 import {JsForIStatement} from "../lang/syntax/statements/JsForIStatement";
 
@@ -21,7 +21,7 @@ export default class SemanticAnalysisInspection extends InspectionBase {
     }
 
     getApplicableLanguages(): LanguageBase[] {
-        return [JsLang.class];
+        return [JsLang.INSTANCE];
     }
 
     getSeverity(): InspectionSeverity {

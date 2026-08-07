@@ -299,6 +299,7 @@ export class OverlayLayer extends TextLayer {
     }
 
     addOverlayOnLine(n: number, element: HTMLSpanElement) {
+        if (n < 0 || n >= this.overlayPerLine.length) return;
         this.overlayPerLine[n].push(element);
     }
 

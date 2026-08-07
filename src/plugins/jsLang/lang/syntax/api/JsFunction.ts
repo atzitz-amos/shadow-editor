@@ -1,5 +1,6 @@
 import {JsFunctionParameters} from "../statements/JsFunctionParameters";
 import {JsCodeBlock} from "../JsCodeBlock";
+import {SynTokenNode} from "../../../../../lang/syntax/impl/SynTokenNode";
 
 /**
  *
@@ -8,7 +9,9 @@ import {JsCodeBlock} from "../JsCodeBlock";
  * @since 1.0.0
  */
 export interface JsFunction {
-    getName(): string | null;
+    getName(): SynTokenNode | null;
+
+    getAsyncToken(): SynTokenNode | undefined;
 
     getParameters(): JsFunctionParameters;
 

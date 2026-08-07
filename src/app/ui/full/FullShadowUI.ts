@@ -25,7 +25,6 @@ export class FullShadowUI implements ShadowUI {
     private readonly myWorkspace: SEditorWorkspace;
     private readonly myFooter: SFooter;
     private readonly root: HTMLElement;
-
     private readonly myPopupLayer: HTMLElement;
     private activePopup: IdePopup | null = null;
 
@@ -56,6 +55,22 @@ export class FullShadowUI implements ShadowUI {
         });
     }
 
+    getTaskbar(): ShadowTaskbar {
+        return this.myTaskbar;
+    }
+
+    getLeftActionRail(): SLeftActionRail {
+        return this.myLeftActionRail;
+    }
+
+    getWorkspace(): SEditorWorkspace {
+        return this.myWorkspace;
+    }
+
+    getFooter(): SFooter {
+        return this.myFooter;
+    }
+
     getMainEditor(): Editor {
         return this.myWorkspace.getCommonKey(UICommonKeys.MAIN_EDITOR)!;
     }
@@ -68,8 +83,8 @@ export class FullShadowUI implements ShadowUI {
     }
 
     addEventListeners() {
+        GlobalState.getMainEventBus().syncPublish(new UIResizeEvent());
         window.addEventListener("resize", () => {
-            GlobalState.getMainEventBus().syncPublish(new UIResizeEvent());
         });
     }
 

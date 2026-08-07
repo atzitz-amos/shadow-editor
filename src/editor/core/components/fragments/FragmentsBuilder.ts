@@ -11,7 +11,8 @@ import {WidgetManager} from "../WidgetManager";
  */
 export class FragmentsBuilder {
     public static build(range: TextRange, manager: WidgetManager): FragmentEvent[] {
-        const fragments = manager.getHighlightsHolder().toFragments();
+        let fragments = manager.getDocument().getHighlightsHolder().toFragments();
+        fragments = fragments.concat(manager.getDocument().getAnnotationsHolder().toFragments());
         const events = fragments.flatMap(f => f.toEvents(range.start, range.end));
 
         for (const inlay of manager.getInlaysInRange(range)) {

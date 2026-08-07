@@ -1,9 +1,9 @@
-import {LanguageBase} from "../../../core/lang/LanguageBase";
-import {SmartInlineDeleteAction} from "../../../core/lang/smart/delete/SmartInlineDeleteAction";
+import {LanguageBase} from "../../../lang/LanguageBase";
+import {SmartInlineDeleteAction} from "../../../lang/codeAnalysis/smart/delete/SmartInlineDeleteAction";
 import {EditorDeleteContext} from "../../../editor/core/behaviors/context/EditorDeleteContext";
 import {BehaviorHandlingMode} from "../../../editor/core/behaviors/manager/BehaviorHandlingMode";
 import JsLang from "../lang/JsLang";
-import {IndentUtils} from "../../../core/lang/syntax/utils/IndentUtils";
+import {IndentUtils} from "../../../lang/syntax/utils/IndentUtils";
 
 /**
  *
@@ -13,7 +13,7 @@ import {IndentUtils} from "../../../core/lang/syntax/utils/IndentUtils";
  */
 export default class JsSmartBackspaceDedentAction extends SmartInlineDeleteAction {
     getApplicableLanguages(): LanguageBase[] {
-        return [JsLang.class];
+        return [JsLang.INSTANCE];
     }
 
     isApplicable(ctx: EditorDeleteContext): boolean {

@@ -4,7 +4,7 @@ import {TextRange} from "../../../core/coordinate/range/TextRange";
 import {Editor} from "../../../Editor";
 import {SimpleTooltipBuilder} from "../../popups/tooltip/SimpleTooltipBuilder";
 import {OverlayWidget} from "../widget/overlay/OverlayWidget";
-import {InspectionSeverity} from "../../../../core/lang/inspections/InspectionSeverity";
+import {InspectionSeverity} from "../../../../lang/codeAnalysis/inspections/InspectionSeverity";
 import {TrackedRange} from "../../../core/coordinate/range/TrackedRange";
 
 /**

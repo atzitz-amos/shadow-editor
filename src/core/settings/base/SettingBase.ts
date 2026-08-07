@@ -1,6 +1,5 @@
-import {SettingCategory} from "../category/SettingCategory";
 import {SettingsManager} from "../SettingsManager";
-import {SettingCreateEvent} from "../events/SettingCreateEvent";
+import {SettingCreatedEvent} from "../events/SettingCreatedEvent";
 import {SettingChangedEvent} from "../events/SettingChangedEvent";
 import {GlobalState} from "../../global/GlobalState";
 import {Serializable, SerializableType} from "../../persistence/serializable/Serializable";
@@ -19,13 +18,12 @@ export abstract class SettingBase<T extends SerializableType> implements Seriali
     private defaultValue: T;
 
     private description: string;
-    private category: SettingCategory;
     private cssPropertyName: string | null = null;
     private unit?: string;
 
     constructor(private key: string) {
         SettingsManager.deferLoad(this);
-        GlobalState.getMainEventBus().syncPublish(new SettingCreateEvent(this));
+        GlobalState.getMainEventBus().syncPublish(new SettingCreatedEvent(this));
     }
 
     public serialize(): SerializableType {
@@ -38,11 +36,6 @@ export abstract class SettingBase<T extends SerializableType> implements Seriali
 
     public defaultsTo(value: T): SettingBase<T> {
         this.defaultValue = value;
-        return this;
-    }
-
-    public in(category: SettingCategory): SettingBase<T> {
-        this.category = category;
         return this;
     }
 
@@ -71,10 +64,6 @@ export abstract class SettingBase<T extends SerializableType> implements Seriali
 
     public getCurrentValue(): T {
         return this.currentValue ?? this.defaultValue;
-    }
-
-    public getCategory(): SettingCategory {
-        return this.category;
     }
 
     public getCssPropertyName(): string | null {

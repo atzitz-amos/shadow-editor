@@ -1,7 +1,8 @@
 import {EditorPlugin} from "../loader/Plugin";
+import {CollectionUtils} from "../../../editor/utils/collection/CollectionUtils";
 
 export class ExtensionPoint<T> {
-    private static readonly registry = new Map<string, ExtensionPoint<any>[]>();
+    private static readonly registry = new Map<string | null, ExtensionPoint<any>[]>();
     private readonly contributions = new Map<EditorPlugin, T[]>();
 
     private contributeHandler: (p: EditorPlugin, i: T) => void;
@@ -61,6 +62,12 @@ export class ExtensionPoint<T> {
                 if (inspection === cls) return plugin;
             }
         }
+    }
+
+    withDefaultContributors(...contributors: T[]) {
+        CollectionUtils.getOrSet(this.contributions, null, () => [])
+            .push(...contributors);
+        return this;
     }
 
     private accepts(instance: unknown): instance is T {

@@ -1,4 +1,4 @@
-import {SynNodeVisitor} from "../../../../../core/lang/syntax/visitors/SynNodeVisitor";
+import {SynNodeVisitor} from "../../../../../lang/syntax/visitors/SynNodeVisitor";
 import {JsNewExpr} from "../expr/JsNewExpr";
 import {JsArrayAccessExpr} from "../expr/JsArrayAccessExpr";
 import {JsAssignmentExpr} from "../expr/JsAssignmentExpr";
@@ -37,6 +37,13 @@ import {JsFunction} from "../api/JsFunction";
 import {JsFunctionStatement} from "../statements/JsFunctionStatement";
 import {JsFunctionExpr} from "../expr/JsFunctionExpr";
 import {JsArrowFunctionExpr} from "../expr/JsArrowFunctionExpr";
+import {JsAwaitExpr} from "../expr/JsAwaitExpr";
+import {JsClassDeclaration} from "../objects/JsClassDeclaration";
+import {JsClassExpr} from "../objects/JsClassExpr";
+import {JsClassMember} from "../objects/JsClassMember";
+import {JsClassField} from "../objects/JsClassField";
+import {JsClassMethod} from "../objects/JsClassMethod";
+import {JsClass} from "../objects/JsClass";
 
 /**
  *
@@ -50,158 +57,142 @@ export class JsSynVisitor extends SynNodeVisitor {
     }
 
     visitExpr(element: JsExpr): void {
-        this.visitElement(element);
     }
 
     visitGroupExpr(element: JsGroupExpr): void {
-        this.visitExpr(element);
     }
 
     visitArrayAccessExpr(element: JsArrayAccessExpr): void {
-        this.visitExpr(element);
     }
 
     visitAssignmentExpr(element: JsAssignmentExpr): void {
-        this.visitExpr(element);
     }
 
     visitBinaryExpr(element: JsBinaryExpr): void {
-        this.visitExpr(element);
     }
 
     visitTernaryExpr(element: JsTernaryExpr): void {
-        this.visitExpr(element);
     }
 
     visitNewExpr(element: JsNewExpr): void {
-        this.visitExpr(element);
     }
 
     visitCallExpr(element: JsCallExpr): void {
-        this.visitExpr(element);
     }
 
     visitMemberAccessExpr(element: JsMemberAccessExpr): void {
-        this.visitExpr(element);
+    }
+
+    visitAwaitExpr(element: JsAwaitExpr): void {
     }
 
     visitSpreadExpr(element: JsSpreadExpr): void {
-        this.visitExpr(element);
     }
 
     visitPostfixOp(element: JsPostfixOp) {
-        this.visitExpr(element);
     }
 
     visitPrefixOp(element: JsPrefixOp) {
-        this.visitExpr(element);
     }
 
     visitLiteral(element: JsLiteral): void {
-        this.visitExpr(element);
     }
 
     visitIdentifier(element: JsIdentifier): void {
-        this.visitExpr(element);
     }
 
     visitNumberLiteral(element: JsNumberLiteral): void {
-        this.visitLiteral(element);
     }
 
     visitStringLiteral(element: JsStringLiteral): void {
-        this.visitLiteral(element);
     }
 
     visitBooleanLiteral(element: JsBooleanLiteral): void {
-        this.visitLiteral(element);
     }
 
     visitNullLiteral(element: JsNullLiteral): void {
-        this.visitLiteral(element);
     }
 
     visitUndefinedLiteral(element: JsUndefinedLiteral): void {
-        this.visitLiteral(element);
     }
 
     visitArrayLiteral(element: JsArrayLiteral): void {
-        this.visitExpr(element);
     }
 
     visitStatement(element: JsStatement): void {
-        this.visitElement(element);
+
+    }
+
+    visitClass(element: JsClass): void {
+
+    }
+
+    visitClassDeclaration(element: JsClassDeclaration): void {
+    }
+
+    visitClassExpr(element: JsClassExpr): void {
+    }
+
+    visitClassMember(element: JsClassMember): void {
+    }
+
+    visitClassField(element: JsClassField): void {
+    }
+
+    visitClassMethod(element: JsClassMethod): void {
     }
 
     visitDeclarator(element: JsDeclarator): void {
-        this.visitElement(element);
     }
 
     visitReturnStatement(element: JsReturnStatement): void {
-        this.visitStatement(element);
     }
 
     visitBreakStatement(element: JsBreakStatement) {
-        this.visitStatement(element);
     }
 
     visitSwitchStatement(element: JsSwitchStatement): void {
-        this.visitStatement(element);
     }
 
     visitSwitchCaseClause(element: JsSwitchCase): void {
-        this.visitNode(element);
     }
 
     visitVariableDeclaration(element: JsVariableDeclaration) {
-        this.visitStatement(element);
     }
 
     visitForInStatement(element: JsForInStatement) {
-        this.visitStatement(element);
     }
 
     visitForIStatement(element: JsForIStatement) {
-        this.visitStatement(element);
     }
 
     visitForOfStatement(element: JsForOfStatement) {
-        this.visitStatement(element);
     }
 
     visitWhileStatement(element: JsWhileStatement) {
-        this.visitStatement(element);
     }
 
     visitDoWhileStatement(element: JsDoWhileStatement) {
-        this.visitStatement(element);
     }
 
     visitIfStatement(element: JsIfStatement) {
-        this.visitStatement(element);
     }
 
     visitEmptyStatement(element: JsEmptyStatement) {
-        this.visitStatement(element);
     }
 
     visitFunction(element: JsFunction) {
-
     }
 
     visitFunctionStatement(element: JsFunctionStatement) {
-        this.visitFunction(element);
     }
 
     visitFunctionExpr(element: JsFunctionExpr) {
-        this.visitFunction(element);
     }
 
     visitArrowFunction(element: JsArrowFunctionExpr) {
-        this.visitFunction(element);
     }
 
     visitCodeBlock(element: JsCodeBlock) {
-
     }
 }

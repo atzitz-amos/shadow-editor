@@ -3,7 +3,7 @@ import {KeybindContext} from "../../../core/keybinds/context/KeybindContext";
 import {Key, Keybind} from "../../../core/keybinds/Keybind";
 import {PopupUtilsCore} from "../../../core/ui/lib/popup/PopupUtilsCore";
 import {FaIcon} from "../../../core/ui/icons/FaIcon";
-import {SynSuiteEngine} from "../../../core/lang/suite/SynSuiteEngine";
+import {SynSuiteEngine} from "../../../app/testLib/lang/suite/SynSuiteEngine";
 
 /**
  *

@@ -1,11 +1,11 @@
-import {LanguageBase} from "../../../../core/lang/LanguageBase";
-import {AbstractSynTemplate} from "../../../../core/lang/syntax/writer/template/AbstractSynTemplate";
+import {LanguageBase} from "../../../../lang/LanguageBase";
+import {AbstractSynTemplate} from "../../../../lang/syntax/writer/template/AbstractSynTemplate";
 import JsLang from "../JsLang";
-import {SynNodeVisitor} from "../../../../core/lang/syntax/visitors/SynNodeVisitor";
+import {SynNodeVisitor} from "../../../../lang/syntax/visitors/SynNodeVisitor";
 import {JsSynVisitor} from "../syntax/visitors/JsSynVisitor";
 import {JsIdentifier} from "../syntax/literal/JsIdentifier";
 import {JsMemberAccessExpr} from "../syntax/expr/JsMemberAccessExpr";
-import {SynNode} from "../../../../core/lang/syntax/api/SynNode";
+import {SynNode} from "../../../../lang/syntax/api/SynNode";
 
 /**
  *
@@ -15,7 +15,7 @@ import {SynNode} from "../../../../core/lang/syntax/api/SynNode";
  */
 export class JsSynTemplate extends AbstractSynTemplate {
     public getLanguage(): LanguageBase {
-        return JsLang.class;
+        return JsLang.INSTANCE;
     }
 
     protected visitReplaceableNodes(callback: (node: SynNode, name: string) => void): SynNodeVisitor {

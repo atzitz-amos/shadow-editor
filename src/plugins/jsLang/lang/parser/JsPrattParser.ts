@@ -1,13 +1,13 @@
 import {JsParser} from "./JsParser";
 import {JsGrammar} from "./JsGrammar";
-import {TokenType} from "../../../../core/lang/syntax/builder/tokens/TokenType";
+import {TokenType} from "../../../../lang/syntax/builder/tokens/TokenType";
 import {JsLexicalGrammar} from "../lexer/JsLexicalGrammar";
-import {Token} from "../../../../core/lang/syntax/builder/tokens/Token";
+import {Token} from "../../../../lang/syntax/builder/tokens/Token";
 import {JsExprParser} from "./JsExprParser";
-import {ASTGrammar, ASTType} from "../../../../core/lang/syntax/builder/parser/nodes/ASTGrammar";
-import {ASTBuilder} from "../../../../core/lang/syntax/builder/parser/builder/ASTBuilder";
-import {Marker} from "../../../../core/lang/syntax/builder/parser/builder/Marker";
-import {SynScopeType} from "../../../../core/lang/syntax/api/scope/SynScopeType";
+import {ASTGrammar, ASTType} from "../../../../lang/syntax/builder/parser/nodes/ASTGrammar";
+import {ASTBuilder} from "../../../../lang/syntax/builder/parser/builder/ASTBuilder";
+import {Marker} from "../../../../lang/syntax/builder/parser/builder/Marker";
+import {SynScopeType} from "../../../../lang/syntax/api/scope/SynScopeType";
 
 export enum OperatorPrecedence {
     COMMA = 10,
@@ -391,6 +391,13 @@ export class JsPrattParser {
             marker.done(JsGrammar.AssignmentExpr);
             return;
         } else if (type === JsLexicalGrammar.DOT) {
+            if (this.builder.isNext(JsLexicalGrammar.KEYWORD)) {
+                const keywordToken = this.builder.advance();
+                if (keywordToken) {
+                    marker.done(JsGrammar.MemberAccessExpr);
+                    return;
+                }
+            }
             const propToken = this.builder.expect(JsLexicalGrammar.IDENTIFIER).orError("Expected property name");
             if (propToken) {
                 marker.done(JsGrammar.MemberAccessExpr);

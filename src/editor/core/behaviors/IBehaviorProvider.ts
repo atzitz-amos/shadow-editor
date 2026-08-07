@@ -8,7 +8,6 @@ import {CopyBehavior} from "./behavior/CopyBehavior";
 import {CutBehavior} from "./behavior/CutBehavior";
 import {PasteBehavior} from "./behavior/PasteBehavior";
 import {CtrlDeleteBehavior} from "./behavior/CtrlDeleteBehavior";
-import {BehaviorHandlingMode} from "./manager/BehaviorHandlingMode";
 
 /**
  *

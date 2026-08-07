@@ -5,6 +5,14 @@ import {WorkspaceFile} from "./tree/WorkspaceFile";
 import {FSImpl} from "./impl/FSImpl";
 import {MetadataStore} from "./metadata/MetadataStore";
 import {NodeMetadata} from "./metadata/NodeMetadata";
+import {GlobalState} from "../../global/GlobalState";
+import {EventBus} from "../../events/EventBus";
+import {FileRenamedEvent} from "../events/FileRenamedEvent";
+import {DirectoryRenamedEvent} from "../events/DirectoryRenamedEvent";
+import {DirectoryDeletedEvent} from "../events/DirectoryDeletedEvent";
+import {FileDeletedEvent} from "../events/FileDeletedEvent";
+import {FileCreatedEvent} from "../events/FileCreatedEvent";
+import {DirectoryCreatedEvent} from "../events/DirectoryCreatedEvent";
 
 /**
  *
@@ -18,10 +26,11 @@ export class WorkspaceFS {
     private readonly virtualHandle: FileSystemDirectoryHandle;
     private readonly metadataStore: MetadataStore;
 
+    private readonly eventBus: EventBus;
+
     private linkedHandle: FileSystemDirectoryHandle | null = null;
 
     private root: WorkspaceDirectory;
-
     /**
      * Cache of already materialized entries by parent directory handle + child name.
      *
@@ -32,6 +41,8 @@ export class WorkspaceFS {
 
     constructor(name: string, virtualHandle: FileSystemDirectoryHandle) {
         this.virtualHandle = virtualHandle;
+
+        this.eventBus = GlobalState.getMainEventBus();
 
         this.name = name;
         this.metadataStore = new MetadataStore(this);
@@ -62,7 +73,11 @@ export class WorkspaceFS {
             arg = await this.getDir(arg);
         }
         const handle = await FSImpl.createSubDir(arg.getHandle(), name);
-        return await this.getOrCreateChild(arg, name, handle) as WorkspaceDirectory;
+        const child = await this.getOrCreateChild(arg, name, handle) as WorkspaceDirectory;
+
+        this.eventBus.syncPublish(new DirectoryCreatedEvent(child));
+
+        return child;
     }
 
     async createFile(parent: WorkspaceDirectory, name: string): Promise<WorkspaceFile>;
@@ -74,7 +89,11 @@ export class WorkspaceFS {
             arg = await this.getDir(arg);
         }
         const handle = await FSImpl.createFile(arg.getHandle(), name);
-        return await this.getOrCreateChild(arg, name, handle) as WorkspaceFile;
+        const child = await this.getOrCreateChild(arg, name, handle) as WorkspaceFile;
+
+        this.eventBus.syncPublish(new FileCreatedEvent(child));
+
+        return child;
     }
 
     async getEntry(path: RelativePathInput): Promise<FSNodeEntry> {
@@ -284,6 +303,12 @@ export class WorkspaceFS {
 
         // Keep cache coherent.
         this.invalidateChild(parent.getHandle(), arg.getHandle().name);
+
+        if (arg instanceof WorkspaceDirectory) {
+            this.eventBus.syncPublish(new DirectoryDeletedEvent(arg));
+        } else if (arg instanceof WorkspaceFile) {
+            this.eventBus.syncPublish(new FileDeletedEvent(arg));
+        }
     }
 
     async renameEntry(entry: FSNodeEntry, newName: string): Promise<FSNodeEntry>;
@@ -312,26 +337,12 @@ export class WorkspaceFS {
         const isDirectory = arg instanceof WorkspaceDirectory;
 
         try {
-            if (isDirectory) {
-                const directory = arg as WorkspaceDirectory;
-                const newHandle = await FSImpl.createSubDir(parent.getHandle(), newName);
-                await this.copyDirectoryContents(directory.getHandle(), newHandle);
-                const renamed = await this.getOrCreateChild(parent, newName, newHandle) as WorkspaceDirectory;
-                await this.clearCacheSubtree(directory.getHandle());
-                await FSImpl.deleteEntryRecursive(parent.getHandle(), oldName);
-                this.invalidateChild(parent.getHandle(), oldName);
-                this.metadataStore.renamePath(oldPath, targetPath);
-                return renamed;
-            }
+            const entry = await this.doRename(isDirectory, arg, parent, newName, oldName, oldPath, targetPath);
 
-            const file = arg as WorkspaceFile;
-            const newHandle = await FSImpl.createFile(parent.getHandle(), newName);
-            await this.copyFileContent(file.getHandle(), newHandle);
-            const renamed = await this.getOrCreateChild(parent, newName, newHandle) as WorkspaceFile;
-            await FSImpl.deleteEntry(parent.getHandle(), oldName);
-            this.invalidateChild(parent.getHandle(), oldName);
-            this.metadataStore.renamePath(oldPath, targetPath);
-            return renamed;
+            if (isDirectory) this.eventBus.syncPublish(new DirectoryRenamedEvent(arg as WorkspaceDirectory, entry as WorkspaceDirectory, oldName, newName))
+            else this.eventBus.syncPublish(new FileRenamedEvent(arg as WorkspaceFile, entry as WorkspaceFile, oldName, newName));
+
+            return entry;
         } catch (e) {
             try {
                 if (isDirectory) {
@@ -372,6 +383,7 @@ export class WorkspaceFS {
     }
 
     async getMetadata(path: RelativePathInput): Promise<NodeMetadata>;
+
     async getMetadata(file: WorkspaceFile): Promise<NodeMetadata>;
 
     async getMetadata(arg: RelativePathInput | WorkspaceFile): Promise<NodeMetadata | null> {
@@ -388,6 +400,29 @@ export class WorkspaceFS {
             entries.push(await this.getOrCreateChild(parent, name, childHandle));
         }
         return entries;
+    }
+
+    private async doRename(isDirectory: boolean, arg: FSNodeEntry, parent: WorkspaceDirectory, newName: string, oldName: string, oldPath: RelativePath, targetPath: RelativePath) {
+        if (isDirectory) {
+            const directory = arg as WorkspaceDirectory;
+            const newHandle = await FSImpl.createSubDir(parent.getHandle(), newName);
+            await this.copyDirectoryContents(directory.getHandle(), newHandle);
+            const renamed = await this.getOrCreateChild(parent, newName, newHandle) as WorkspaceDirectory;
+            await this.clearCacheSubtree(directory.getHandle());
+            await FSImpl.deleteEntryRecursive(parent.getHandle(), oldName);
+            this.invalidateChild(parent.getHandle(), oldName);
+            this.metadataStore.renamePath(oldPath, targetPath);
+            return renamed;
+        }
+
+        const file = arg as WorkspaceFile;
+        const newHandle = await FSImpl.createFile(parent.getHandle(), newName);
+        await this.copyFileContent(file.getHandle(), newHandle);
+        const renamed = await this.getOrCreateChild(parent, newName, newHandle) as WorkspaceFile;
+        await FSImpl.deleteEntry(parent.getHandle(), oldName);
+        this.invalidateChild(parent.getHandle(), oldName);
+        this.metadataStore.renamePath(oldPath, targetPath);
+        return renamed;
     }
 
     private async getOrCreateChild(parent: WorkspaceDirectory, name: string, handle: FileSystemHandle): Promise<FSNodeEntry> {

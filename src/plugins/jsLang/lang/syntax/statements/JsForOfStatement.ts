@@ -3,9 +3,11 @@ import {JsIdentifier} from "../literal/JsIdentifier";
 import {JsVariableDeclaration} from "./JsVariableDeclaration";
 import {JsExpr} from "../expr/JsExpr";
 import {JsCodeBlock} from "../JsCodeBlock";
-import {ASTNode} from "../../../../../core/lang/syntax/builder/parser/nodes/ASTNode";
-import {SynNodeVisitor} from "../../../../../core/lang/syntax/visitors/SynNodeVisitor";
+import {ASTNode} from "../../../../../lang/syntax/builder/parser/nodes/ASTNode";
+import {SynNodeVisitor} from "../../../../../lang/syntax/visitors/SynNodeVisitor";
 import {JsSynVisitor} from "../visitors/JsSynVisitor";
+import {SynTokenNode} from "../../../../../lang/syntax/impl/SynTokenNode";
+import {JsLexicalGrammar} from "../../lexer/JsLexicalGrammar";
 
 /**
  *
@@ -14,12 +16,24 @@ import {JsSynVisitor} from "../visitors/JsSynVisitor";
  * @since 1.0.0
  */
 export class JsForOfStatement extends JsStatement {
+    private readonly awaitToken: SynTokenNode | undefined;
+
+    private readonly ofToken: SynTokenNode;
+
     private readonly declarator: JsIdentifier | JsVariableDeclaration;
     private readonly expr: JsExpr;
     private readonly body: JsCodeBlock;
 
     constructor(node: ASTNode) {
         super(node);
+
+        const allToken = this.getAllTokensOfType(JsLexicalGrammar.IDENTIFIER);
+        if (allToken[0].getValue() === "await") {
+            this.awaitToken = allToken[0]
+            this.ofToken = allToken[1];
+        } else {
+            this.ofToken = allToken[0];
+        }
 
         this.declarator = this.getElementChildren()[0] as JsIdentifier | JsVariableDeclaration;
 
@@ -47,5 +61,13 @@ export class JsForOfStatement extends JsStatement {
         }
 
         super.accept(visitor);
+    }
+
+    getOfToken() {
+        return this.ofToken;
+    }
+
+    getAwaitToken() {
+        return this.awaitToken;
     }
 }

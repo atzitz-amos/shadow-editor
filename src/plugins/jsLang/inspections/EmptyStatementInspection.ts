@@ -1,12 +1,12 @@
-import {InspectionSeverity} from "../../../core/lang/inspections/InspectionSeverity";
-import {LanguageBase} from "../../../core/lang/LanguageBase";
+import {InspectionSeverity} from "../../../lang/codeAnalysis/inspections/InspectionSeverity";
+import {LanguageBase} from "../../../lang/LanguageBase";
 import JsLang from "../lang/JsLang";
-import {ProblemsHolder} from "../../../core/lang/inspections/problems/ProblemsHolder";
-import {SynNodeVisitor} from "../../../core/lang/syntax/visitors/SynNodeVisitor";
+import {ProblemsHolder} from "../../../lang/codeAnalysis/inspections/problems/ProblemsHolder";
+import {SynNodeVisitor} from "../../../lang/syntax/visitors/SynNodeVisitor";
 import {JsSynVisitor} from "../lang/syntax/visitors/JsSynVisitor";
 import {JsEmptyStatement} from "../lang/syntax/statements/JsEmptyStatement";
-import {QuickFix} from "../../../core/lang/inspections/quickfix/QuickFix";
-import {SynModificationTree} from "../../../core/lang/syntax/writer/template/SynModificationTree";
+import {QuickFix} from "../../../lang/codeAnalysis/inspections/quickfix/QuickFix";
+import {SynModificationTree} from "../../../lang/syntax/writer/template/SynModificationTree";
 
 /**
  *
@@ -16,7 +16,7 @@ import {SynModificationTree} from "../../../core/lang/syntax/writer/template/Syn
  */
 export default class EmptyStatementInspection {
     getId(): string {
-        return "javascript.inspections.returnOutsideOfFunction";
+        return "javascript.inspections.emptyStatement";
     }
 
     getSeverity(): InspectionSeverity {
@@ -24,7 +24,7 @@ export default class EmptyStatementInspection {
     }
 
     getApplicableLanguages(): LanguageBase[] {
-        return [JsLang.class];
+        return [JsLang.INSTANCE];
     }
 
     buildVisitor(holder: ProblemsHolder): SynNodeVisitor {
@@ -34,11 +34,11 @@ export default class EmptyStatementInspection {
             visitEmptyStatement(element: JsEmptyStatement) {
                 holder.registerProblem(inspection, "Empty statement", element, [new class extends QuickFix {
                     getId(): string {
-                        throw new Error("Method not implemented.");
+                        return "javascript.quickFix.removeEmptyStatement"
                     }
 
                     getDescription(): string {
-                        throw new Error("Method not implemented.");
+                        return "Remove empty statement";
                     }
 
                     applyFix(node: JsEmptyStatement, synModTree: SynModificationTree): void {

@@ -1,5 +1,5 @@
 import {ILanguageLayer} from "../../../core/behaviors/lang/ILanguageLayer";
-import {LanguageBase} from "../../../../core/lang/LanguageBase";
+import {LanguageBase} from "../../../../lang/LanguageBase";
 import {CharTypedBehavior} from "../../../core/behaviors/behavior/CharTypedBehavior";
 import {CopyBehavior} from "../../../core/behaviors/behavior/CopyBehavior";
 import {CtrlDeleteBehavior} from "../../../core/behaviors/behavior/CtrlDeleteBehavior";
@@ -14,9 +14,9 @@ import {EditorBehavior} from "../../../core/behaviors/EditorBehavior";
 import {BehaviorHandlingMode} from "../../../core/behaviors/manager/BehaviorHandlingMode";
 import {GlobalState} from "../../../../core/global/GlobalState";
 import {KeyReleasedEvent, MouseMovedEvent} from "../../events/PhysicalEvents";
-import {LangSupport} from "../../../../core/lang/LangSupport";
-import {TokenHoverAction} from "../../../../core/lang/tokenhover/TokenHoverAction";
-import {Token} from "../../../../core/lang/syntax/builder/tokens/Token";
+import {LangSupport} from "../../../../lang/LangSupport";
+import {TokenHoverAction} from "../../../../lang/codeAnalysis/tokenhover/TokenHoverAction";
+import {Token} from "../../../../lang/syntax/builder/tokens/Token";
 import {EditorBehaviorContext} from "../../../core/behaviors/context/EditorBehaviorContext";
 
 /**

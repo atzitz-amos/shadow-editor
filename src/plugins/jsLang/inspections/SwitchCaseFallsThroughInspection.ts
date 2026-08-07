@@ -1,16 +1,16 @@
-import {InspectionBase} from "../../../core/lang/inspections/Inspection";
-import {InspectionSeverity} from "../../../core/lang/inspections/InspectionSeverity";
-import {ProblemsHolder} from "../../../core/lang/inspections/problems/ProblemsHolder";
-import {LanguageBase} from "../../../core/lang/LanguageBase";
-import {SynNodeVisitor} from "../../../core/lang/syntax/visitors/SynNodeVisitor";
+import {InspectionBase} from "../../../lang/codeAnalysis/inspections/Inspection";
+import {InspectionSeverity} from "../../../lang/codeAnalysis/inspections/InspectionSeverity";
+import {ProblemsHolder} from "../../../lang/codeAnalysis/inspections/problems/ProblemsHolder";
+import {LanguageBase} from "../../../lang/LanguageBase";
+import {SynNodeVisitor} from "../../../lang/syntax/visitors/SynNodeVisitor";
 import JsLang from "../lang/JsLang";
 import {JsSynVisitor} from "../lang/syntax/visitors/JsSynVisitor";
 import {JsSwitchStatement} from "../lang/syntax/statements/JsSwitchStatement";
 import {JsReturnStatement} from "../lang/syntax/statements/JsReturnStatement";
 import {JsBreakStatement} from "../lang/syntax/statements/JsBreakStatement";
-import {QuickFix} from "../../../core/lang/inspections/quickfix/QuickFix";
-import {SynModificationTree} from "../../../core/lang/syntax/writer/template/SynModificationTree";
-import {SynASTElement} from "../../../core/lang/syntax/api/tree/SynASTElement";
+import {QuickFix} from "../../../lang/codeAnalysis/inspections/quickfix/QuickFix";
+import {SynModificationTree} from "../../../lang/syntax/writer/template/SynModificationTree";
+import {SynASTElement} from "../../../lang/syntax/api/tree/SynASTElement";
 import {JsSynTemplate} from "../lang/template/JsSynTemplate";
 
 /**
@@ -29,7 +29,7 @@ export default class SwitchCaseFallsThroughInspection extends InspectionBase {
     }
 
     getApplicableLanguages(): LanguageBase[] {
-        return [JsLang.class];
+        return [JsLang.INSTANCE];
     }
 
     buildVisitor(holder: ProblemsHolder): SynNodeVisitor {
@@ -52,11 +52,11 @@ export default class SwitchCaseFallsThroughInspection extends InspectionBase {
 
 class SwitchCaseFallsThroughQuickFix extends QuickFix {
     getId(): string {
-        throw new Error("Method not implemented.");
+        return "javascript.quickFix.switchCaseFallsThrough";
     }
 
     getDescription(): string {
-        throw new Error("Method not implemented.");
+        return "Add 'break' statement to prevent fall-through";
     }
 
     applyFix(element: SynASTElement, synModTree: SynModificationTree): void {

@@ -16,7 +16,7 @@ export abstract class UIPaneComponent extends UIComponent {
     constructor(private readonly pane: IPane) {
         super(HTMLUtils.createElement(`div#pane-id-${pane.getId()}.pane-component.pane-component-${pane.getDockPosition()}`));
 
-        this.getUnderlyingElement().setAttribute("tabindex", "0")
+        this.getUnderlyingElement().setAttribute("tabindex", "-1")
     }
 
     protected onPaneShown(): void {

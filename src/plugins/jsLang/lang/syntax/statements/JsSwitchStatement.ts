@@ -1,9 +1,9 @@
-import {SynASTElementImpl} from "../../../../../core/lang/syntax/impl/tree/SynASTElementImpl";
-import {ASTNode} from "../../../../../core/lang/syntax/builder/parser/nodes/ASTNode";
-import {SynTokenNode} from "../../../../../core/lang/syntax/impl/SynTokenNode";
-import {SynNode} from "../../../../../core/lang/syntax/api/SynNode";
+import {SynASTElementImpl} from "../../../../../lang/syntax/impl/tree/SynASTElementImpl";
+import {ASTNode} from "../../../../../lang/syntax/builder/parser/nodes/ASTNode";
+import {SynTokenNode} from "../../../../../lang/syntax/impl/SynTokenNode";
+import {SynNode} from "../../../../../lang/syntax/api/SynNode";
 import {JsCodeBlock} from "../JsCodeBlock";
-import {SynNodeVisitor} from "../../../../../core/lang/syntax/visitors/SynNodeVisitor";
+import {SynNodeVisitor} from "../../../../../lang/syntax/visitors/SynNodeVisitor";
 import {JsSynVisitor} from "../visitors/JsSynVisitor";
 import {JsStatement} from "./JsStatement";
 

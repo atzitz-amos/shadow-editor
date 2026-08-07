@@ -1,5 +1,5 @@
 import {JsSynVisitor} from "../syntax/visitors/JsSynVisitor";
-import {SynNode} from "../../../../core/lang/syntax/api/SynNode";
+import {SynNode} from "../../../../lang/syntax/api/SynNode";
 import {JsExpr} from "../syntax/expr/JsExpr";
 import {JsGroupExpr} from "../syntax/expr/JsGroupExpr";
 import {JsArrayAccessExpr} from "../syntax/expr/JsArrayAccessExpr";
@@ -20,19 +20,19 @@ import {JsBooleanLiteral} from "../syntax/literal/JsBooleanLiteral";
 import {JsNullLiteral} from "../syntax/literal/JsNullLiteral";
 import {JsUndefinedLiteral} from "../syntax/literal/JsUndefinedLiteral";
 import {JsArrayLiteral} from "../syntax/literal/JsArrayLiteral";
-import {SynASTElement} from "../../../../core/lang/syntax/api/tree/SynASTElement";
+import {SynASTElement} from "../../../../lang/syntax/api/tree/SynASTElement";
 import {JsDeclarator} from "../syntax/statements/JsDeclarator";
 import {JsReturnStatement} from "../syntax/statements/JsReturnStatement";
 import {JsBreakStatement} from "../syntax/statements/JsBreakStatement";
 import {JsSwitchCase, JsSwitchStatement} from "../syntax/statements/JsSwitchStatement";
 import {JsEmptyStatement} from "../syntax/statements/JsEmptyStatement";
-import {SynFile} from "../../../../core/lang/syntax/api/filesystem/SynFile";
-import {AbstractSynTemplate} from "../../../../core/lang/syntax/writer/template/AbstractSynTemplate";
-import {SynTokenNode} from "../../../../core/lang/syntax/impl/SynTokenNode";
-import {SynErrorNode} from "../../../../core/lang/syntax/impl/SynErrorNode";
+import {SynFile} from "../../../../lang/syntax/api/filesystem/SynFile";
+import {AbstractSynTemplate} from "../../../../lang/syntax/writer/template/AbstractSynTemplate";
+import {SynTokenNode} from "../../../../lang/syntax/impl/SynTokenNode";
+import {SynErrorNode} from "../../../../lang/syntax/impl/SynErrorNode";
 import {JsVariableDeclaration} from "../syntax/statements/JsVariableDeclaration";
 import {JsCodeBlock} from "../syntax/JsCodeBlock";
-import {SynPrinter} from "../../../../core/lang/syntax/writer/SynPrinter";
+import {SynPrinter} from "../../../../lang/syntax/writer/SynPrinter";
 import {JsWhileStatement} from "../syntax/statements/JsWhileStatement";
 import {JsDoWhileStatement} from "../syntax/statements/JsDoWhileStatement";
 import {JsForOfStatement} from "../syntax/statements/JsForOfStatement";
@@ -40,7 +40,7 @@ import {JsForInStatement} from "../syntax/statements/JsForInStatement";
 import {JsForIStatement} from "../syntax/statements/JsForIStatement";
 import {JsStatement} from "../syntax/statements/JsStatement";
 import {JsIfStatement} from "../syntax/statements/JsIfStatement";
-import {SynTree} from "../../../../core/lang/syntax/api/tree/SynTree";
+import {SynTree} from "../../../../lang/syntax/api/tree/SynTree";
 
 /**
  *

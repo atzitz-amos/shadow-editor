@@ -1,5 +1,4 @@
 import {PopupBuilder} from "../builder/PopupBuilder";
-import {InlinePopup} from "../InlinePopup";
 import {SimpleTooltipPopup} from "./SimpleTooltipPopup";
 import {Editor} from "../../../Editor";
 import {EditorPopup} from "../EditorPopup";

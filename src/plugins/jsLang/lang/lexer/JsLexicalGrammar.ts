@@ -1,5 +1,5 @@
-import {LexicalGrammar} from "../../../../core/lang/syntax/builder/lexer/LexicalGrammar";
-import {LexicalBuilder} from "../../../../core/lang/syntax/builder/tokens/TokenType";
+import {LexicalGrammar} from "../../../../lang/syntax/builder/lexer/LexicalGrammar";
+import {LexicalBuilder} from "../../../../lang/syntax/builder/tokens/TokenType";
 
 
 export class JsLexicalGrammar implements LexicalGrammar {

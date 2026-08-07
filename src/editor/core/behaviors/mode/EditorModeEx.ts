@@ -1,6 +1,5 @@
 import {IEditorMode} from "./IEditorMode";
 import {EditorBehavior} from "../EditorBehavior";
-import {IBehaviorProvider} from "../IBehaviorProvider";
 import {CtrlDeleteBehavior} from "../behavior/CtrlDeleteBehavior";
 
 /**

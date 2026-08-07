@@ -1,10 +1,10 @@
 import {JsExpr} from "./JsExpr";
-import {ASTNode} from "../../../../../core/lang/syntax/builder/parser/nodes/ASTNode";
+import {ASTNode} from "../../../../../lang/syntax/builder/parser/nodes/ASTNode";
 import {JsFunction} from "../api/JsFunction";
 import {JsCodeBlock} from "../JsCodeBlock";
 import {JsFunctionParameters} from "../statements/JsFunctionParameters";
-import {SynTokenNode} from "../../../../../core/lang/syntax/impl/SynTokenNode";
-import {SynNodeVisitor} from "../../../../../core/lang/syntax/visitors/SynNodeVisitor";
+import {SynTokenNode} from "../../../../../lang/syntax/impl/SynTokenNode";
+import {SynNodeVisitor} from "../../../../../lang/syntax/visitors/SynNodeVisitor";
 import {JsSynVisitor} from "../visitors/JsSynVisitor";
 import {JsLexicalGrammar} from "../../lexer/JsLexicalGrammar";
 
@@ -18,8 +18,8 @@ export class JsFunctionExpr extends JsExpr implements JsFunction {
     private readonly name: SynTokenNode | null = null;
     private readonly parameters: JsFunctionParameters;
     private readonly body: JsCodeBlock;
-
     private readonly asyncToken?: SynTokenNode;
+
     private readonly generatorToken?: SynTokenNode;
 
     constructor(node: ASTNode) {
@@ -28,7 +28,7 @@ export class JsFunctionExpr extends JsExpr implements JsFunction {
         this.parameters = this.getNthChildOfType(JsFunctionParameters, 0)!;
         this.body = this.getNthChildOfType(JsCodeBlock, 0)!;
         this.generatorToken = this.getAllTokensOfType(JsLexicalGrammar.MATHEMATICAL_OPERATOR)[0];
-        
+
         let i = 0;
         const allToken = this.getAllToken().filter(x => x.token.getType() === JsLexicalGrammar.IDENTIFIER || x.token.getType() === JsLexicalGrammar.KEYWORD);
         if (allToken[i].getValue() === "async") {
@@ -39,8 +39,12 @@ export class JsFunctionExpr extends JsExpr implements JsFunction {
         this.name = allToken[i];
     }
 
-    getName(): string | null {
-        return this.name?.getValue() ?? null;
+    getAsyncToken(): SynTokenNode | undefined {
+        return this.asyncToken;
+    }
+
+    getName(): SynTokenNode | null {
+        return this.name ?? null;
     }
 
     getParameters(): JsFunctionParameters {
@@ -66,6 +70,7 @@ export class JsFunctionExpr extends JsExpr implements JsFunction {
     accept(visitor: SynNodeVisitor) {
         if (visitor instanceof JsSynVisitor) {
             visitor.visitFunctionExpr(this);
+            visitor.visitFunction(this);
         }
         super.accept(visitor);
     }

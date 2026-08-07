@@ -6,8 +6,6 @@ import {URINavigationManager} from "../../../../../../core/uri/URINavigationMana
 import {ProjectFilesTreeNode} from "./ProjectFilesTreeNode";
 import {FSNodeEntry} from "../../../../../../core/workspace/filesystem/tree/FSNodeEntry";
 import {WorkspaceFile} from "../../../../../../core/workspace/filesystem/tree/WorkspaceFile";
-import {UIHooks} from "../../../../../../core/ui/engine/listeners/hooks/UIHooks";
-import {WorkspaceHooks} from "../../../../../core/UICommonHooks";
 import {ProjectFilesPaneHelper} from "../ProjectFilesPaneHelper";
 
 /**
@@ -34,6 +32,10 @@ export class ProjectFilesTreeItem extends UIComponent implements ProjectFilesTre
         return this.depth;
     }
 
+    rename(newName: string) {
+        this.getUnderlyingElement().querySelector(".tree-name")!.textContent = newName;
+    }
+
     public open() {
         document.querySelector(".tree-item.active")?.classList.remove("active");
         this.getUnderlyingElement().classList.add("active");
@@ -44,6 +46,8 @@ export class ProjectFilesTreeItem extends UIComponent implements ProjectFilesTre
     public setSelected() {
         document.querySelector(".tree-item-file-header.selected, .tree-item-header.selected")?.classList.remove("selected");
         this.getUnderlyingElement().querySelector(".tree-item-file-header")?.classList.add("selected");
+
+        (this.getUnderlyingElement().querySelector(".tree-item-file-header") as HTMLElement).focus();
 
         ProjectFilesPaneHelper.setSelected(this);
     }
@@ -64,5 +68,7 @@ export class ProjectFilesTreeItem extends UIComponent implements ProjectFilesTre
         header.addEventListener("dblclick", () => {
             this.open();
         });
+
+        header.setAttribute("tabindex", "-1");
     }
 }

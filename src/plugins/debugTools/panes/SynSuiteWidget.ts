@@ -4,16 +4,16 @@
 
 import {UIComponent} from "../../../core/ui/engine/components/UIComponent";
 import {HTMLUtils} from "../../../editor/utils/HTMLUtils";
-import {SynSuiteEngine} from "../../../core/lang/suite/SynSuiteEngine";
-import {SynAutomatedTestResult} from "../../../core/lang/suite/SynAutomatedTestResult";
-import {NavPaneContainer} from "../../../core/ui/lib/menu/NavPaneContainer";
+import {SynSuiteEngine} from "../../../app/testLib/lang/suite/SynSuiteEngine";
+import {SynAutomatedTestResult} from "../../../app/testLib/lang/suite/SynAutomatedTestResult";
+import {NavPaneContainer} from "../../../core/ui/lib/nav/NavPaneContainer";
 import {PopupUtilsCore} from "../../../core/ui/lib/popup/PopupUtilsCore";
-import {SynDocument} from "../../../core/lang/syntax/api/document/SynDocument";
+import {SynDocument} from "../../../lang/syntax/api/document/SynDocument";
 import {WorkspaceFile} from "../../../core/workspace/filesystem/tree/WorkspaceFile";
 import {IdeActionButton} from "../../../core/ui/lib/buttons/IdeActionButton";
 import SynSuiteSnapshotAction from "../actions/SynSuiteSnapshotAction";
 import {UIVariant} from "../../../core/ui/lib/theme/UIVariant";
-import {SynSuiteWindowRenderer} from "../../../core/lang/suite/renderer/SynSuiteWindowRenderer";
+import {SynSuiteWindowRenderer} from "../../../app/testLib/lang/suite/renderer/SynSuiteWindowRenderer";
 
 export class SynSuiteWidget extends UIComponent {
     private synDocument: SynDocument | null = null;

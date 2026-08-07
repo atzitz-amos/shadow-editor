@@ -1,4 +1,4 @@
-import {LogLevel, LoggerConfig} from "./LoggerTypes";
+import {LoggerConfig, LogLevel} from "./LoggerTypes";
 
 let globalConfig: LoggerConfig = {
     minLevel: LogLevel.DEBUG,

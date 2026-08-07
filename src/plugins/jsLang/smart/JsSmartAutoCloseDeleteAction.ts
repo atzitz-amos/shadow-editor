@@ -1,5 +1,5 @@
-import {LanguageBase} from "../../../core/lang/LanguageBase";
-import {SmartAutoCloseDeleteAction} from "../../../core/lang/smart/delete/SmartAutoCloseDeleteAction";
+import {LanguageBase} from "../../../lang/LanguageBase";
+import {SmartAutoCloseDeleteAction} from "../../../lang/codeAnalysis/smart/delete/SmartAutoCloseDeleteAction";
 import JsLang from "../lang/JsLang";
 
 /**
@@ -21,7 +21,7 @@ export default class JsSmartAutoCloseDeleteAction extends SmartAutoCloseDeleteAc
     }
 
     getApplicableLanguages(): LanguageBase[] {
-        return [JsLang.class];
+        return [JsLang.INSTANCE];
     }
 
     shouldDelete(char: string, trailingChar: string): boolean {

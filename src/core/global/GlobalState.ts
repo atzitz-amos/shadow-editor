@@ -5,7 +5,7 @@ import {Workspace} from "../workspace/Workspace";
 import {ActiveWorkspaceHelper} from "./ActiveWorkspaceHelper";
 import {EventBus} from "../events/EventBus";
 import {PluginManager} from "../plugins/PluginManager";
-import {LangSupport} from "../lang/LangSupport";
+import {LangSupport} from "../../lang/LangSupport";
 import {SettingsManager} from "../settings/SettingsManager";
 import {ActionManager} from "../actions/ActionManager";
 import {ProcessManager} from "../threaded/process/manager/ProcessManager";
@@ -24,11 +24,11 @@ import {WorkspaceService} from "../workspace/WorkspaceService";
 import {SaveService} from "../sync/save/SaveService";
 import {EditorKeyContextManager} from "../../editor/core/keycontext/EditorKeyContextManager";
 import {PersistenceService} from "../persistence/service/PersistenceService";
-import {AnnotatorService} from "../lang/AnnotatorService";
-import {InspectionBase} from "../lang/inspections/Inspection";
-import {SynSuitePersister} from "../lang/suite/SynSuitePersister";
-import {SynSuiteEngine} from "../lang/suite/SynSuiteEngine";
+import {InspectionBase} from "../../lang/codeAnalysis/inspections/Inspection";
+import {SynSuitePersister} from "../../app/testLib/lang/suite/SynSuitePersister";
+import {SynSuiteEngine} from "../../app/testLib/lang/suite/SynSuiteEngine";
 import {ExtensionPoint} from "../plugins/extensionPoints/ExtensionPoint";
+import {CodeAnalysisService} from "../../lang/codeAnalysis/analysis/CodeAnalysisService";
 
 /**
  * Provides a single class that regroups all useful singletons and global services of the application
@@ -77,8 +77,8 @@ export class GlobalState {
         return LangSupport.getInstance();
     }
 
-    public static getAnnotatorService(): AnnotatorService {
-        return AnnotatorService.getInstance();
+    public static getCodeAnalysisService(): CodeAnalysisService {
+        return CodeAnalysisService.getInstance();
     }
 
     public static getSettingsManager() {

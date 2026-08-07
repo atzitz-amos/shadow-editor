@@ -3,9 +3,9 @@
  * Date: 10/5/2025
  */
 
-import {FileTypeHandler, SupportLevel} from "../../../core/lang/FileTypeHandler";
+import {FileTypeHandler, SupportLevel} from "../../../lang/FileTypeHandler";
 import JsLang from "./JsLang";
-import {LanguageBase} from "../../../core/lang/LanguageBase";
+import {LanguageBase} from "../../../lang/LanguageBase";
 import {WorkspaceFile} from "../../../core/workspace/filesystem/tree/WorkspaceFile";
 
 export default class JsFileTypeHandler extends FileTypeHandler {
@@ -15,6 +15,6 @@ export default class JsFileTypeHandler extends FileTypeHandler {
     }
 
     public getLanguageForFile(file: WorkspaceFile): LanguageBase | null {
-        return JsLang.class;
+        return JsLang.INSTANCE;
     }
 }

@@ -3,7 +3,7 @@ import {GlobalState} from "../../../../../../core/global/GlobalState";
 import {CaretMovedEvent} from "../../../../../../editor/core/caret/events/CaretMovedEvent";
 import {UIComponent} from "../../../../../../core/ui/engine/components/UIComponent";
 import {CaretAddedEvent} from "../../../../../../editor/core/caret/events/CaretAddedEvent";
-import {LanguageBase} from "../../../../../../core/lang/LanguageBase";
+import {LanguageBase} from "../../../../../../lang/LanguageBase";
 import {EditorLanguageChanged} from "../../../../../../editor/core/lang/events/EditorLanguageChanged";
 
 export class SMetaRowView extends UIComponent {
