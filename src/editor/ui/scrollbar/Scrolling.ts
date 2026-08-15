@@ -1,11 +1,12 @@
 import {View} from "../view/View";
+import {Document} from "../../core/document/Document";
 
 export class Scrolling {
-    view: View;
-    scrollX: number;
-    scrollY: number;
+    private static readonly scrollListeners: ((doc: Document, x: number, y: number) => void)[] = [];
 
     // Eased scroll-to state — used ONLY for discrete jumps (caret follow, goto-line).
+    scrollX: number;
+    scrollY: number;
     // Wheel/trackpad input never touches this — it's applied instantly, like every editor does.
     private animStartX: number = 0;
     private animStartY: number = 0;
@@ -14,9 +15,10 @@ export class Scrolling {
     private animStartTime: number = 0;
     private animDuration: number = 0;
     private animRafHandle: number | null = null;
-
     private readonly MAX_DELTA = 120; // clamp a single wheel event's contribution
     private readonly MAX_DURATION_MS = 100;
+
+    private readonly view: View;
 
     constructor(view: View, scrollX: number, scrollY: number) {
         this.view = view;
@@ -48,6 +50,17 @@ export class Scrolling {
         return this.scrollX % this.view.getCharSize();
     }
 
+    public static addScrollListener(listener: (doc: Document, x: number, y: number) => void) {
+        this.scrollListeners.push(listener);
+    }
+
+    public static removeScrollListener(listener: (doc: Document, x: number, y: number) => void) {
+        const index = this.scrollListeners.indexOf(listener);
+        if (index !== -1) {
+            this.scrollListeners.splice(index, 1);
+        }
+    }
+
     /**
      * Applies a wheel delta immediately — no animation. Matches how every real
      * editor (including IntelliJ, see ScrollingModelImpl#scroll) handles wheel input:
@@ -60,6 +73,8 @@ export class Scrolling {
 
         this.scrollX = this.clampX(this.scrollX + dx);
         this.scrollY = this.clampY(this.scrollY + dy);
+
+        Scrolling.scrollListeners.forEach(l => l(this.view.getEditor().getOpenedDocument(), this.scrollX, this.scrollY));
 
         this.view.triggerRepaint();
     }
@@ -82,6 +97,8 @@ export class Scrolling {
         } else {
             this.startAnimation(targetX, targetY);
         }
+
+        Scrolling.scrollListeners.forEach(l => l(this.view.getEditor().getOpenedDocument(), x, y));
     }
 
     private clampX(x: number): number {

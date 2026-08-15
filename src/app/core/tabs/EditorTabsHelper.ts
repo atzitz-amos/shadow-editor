@@ -1,10 +1,11 @@
-import {WorkspaceFile} from "../../../core/workspace/filesystem/tree/WorkspaceFile";
+import {ProjectFile} from "../../../core/project/filesystem/tree/ProjectFile";
 import {ITab} from "./ITab";
 import {TabsManager} from "./TabsManager";
 import {EditorTab} from "./EditorTab";
 import {EditorDocumentManager} from "../../../editor/core/document/EditorDocumentManager";
-import {ActiveWorkspaceHelper} from "../../../core/global/ActiveWorkspaceHelper";
+import {ActiveProjectHelper} from "../../../core/global/ActiveProjectHelper";
 import {EditorURI} from "../../../core/uri/EditorURI";
+import {DocumentViewManager} from "../../../editor/core/document/view/DocumentViewManager";
 
 /**
  *
@@ -13,7 +14,7 @@ import {EditorURI} from "../../../core/uri/EditorURI";
  * @since 1.0.0
  */
 export class EditorTabsHelper {
-    public static getTabsForFile(file: WorkspaceFile): ITab[] {
+    public static getTabsForFile(file: ProjectFile): ITab[] {
         const result: ITab[] = [];
         for (const tab of TabsManager.getInstance().getAllTabs()) {
             if (!(tab instanceof EditorTab)) continue;
@@ -26,7 +27,7 @@ export class EditorTabsHelper {
     }
 
     public static async makeVisible(uri: EditorURI): Promise<void> {
-        const file = await ActiveWorkspaceHelper.getInstance()?.getFS().getFile(uri.getPath());
+        const file = ActiveProjectHelper.getInstance()?.getFS().getFile(uri.getPath());
         if (!file) {
             throw new Error(`File not found for URI: ${uri.toString()}`);
         }
@@ -35,12 +36,18 @@ export class EditorTabsHelper {
         if (tabs.length > 0) {
             TabsManager.getInstance().open(tabs[0]);
         } else {
-            EditorTabsHelper.newTab(file);
+            const tab = await EditorTabsHelper.newTab(file);
+            TabsManager.getInstance().setActive(tab);
         }
     }
 
-    public static newTab(file: WorkspaceFile) {
+    public static async newTab(file: ProjectFile) {
+        await file.ensureCacheUpToDate();
+
         const document = EditorDocumentManager.getDocumentForFile(file);
-        TabsManager.getInstance().open(new EditorTab(file.getName(), document));
+        const tab = new EditorTab(file.getName(), DocumentViewManager.getSavedDocumentView(document));
+        TabsManager.getInstance().open(tab, false);
+
+        return tab;
     }
 }

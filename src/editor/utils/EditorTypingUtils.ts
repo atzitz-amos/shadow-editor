@@ -1,5 +1,5 @@
 import {Editor} from "../Editor";
-import {Caret} from "../core/caret/Caret";
+import {Caret, CaretMovementFlags} from "../core/caret/Caret";
 
 /**
  *
@@ -11,9 +11,9 @@ export class EditorTypingUtils {
     public static deleteWithCaret(editor: Editor, caret: Caret, at: Offset, n: number) {
         const offset = caret.getOffset();
         editor.deleteAt(at, n);
-        console.log(offset, at)
+
         if (offset >= at) {
-            caret.moveToOffset(offset - n, false);
+            caret.moveToOffset(offset - n, CaretMovementFlags.IGNORE_SELECTION);
             caret.refresh();
         }
     }

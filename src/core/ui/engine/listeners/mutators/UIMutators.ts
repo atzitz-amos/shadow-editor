@@ -119,7 +119,7 @@ export class UIMutators {
         };
     }
 
-    public static on<This extends object, MutatedObject extends object>(mutator: UIMutator<Class<MutatedObject>>, type: MutatationType) {
+    public static when<This extends object, MutatedObject extends object>(mutator: UIMutator<Class<MutatedObject>>, is: MutatationType) {
         return (
             original: (this: This, ...args: [MutatationType, MutatedObject, any, any]) => unknown,
             context: ClassMethodDecoratorContext<This, (this: This, ...args: [MutatationType, MutatedObject, any, any]) => unknown>
@@ -130,7 +130,7 @@ export class UIMutators {
 
             context.addInitializer(function (this: This) {
                 UIHooks.on(UIMutatorsHooks.MUTATE, this, (m: UIMutator<MutatedObject>, mutationType: MutatationType, mutatedObject: MutatedObject, newValue: any, oldValue: any) => {
-                    if (m == mutator && (mutationType & type) !== 0) {
+                    if (m == mutator && (mutationType & is) !== 0) {
                         original.call(this, mutationType, mutatedObject, newValue, oldValue);
                     }
                 });

@@ -2,6 +2,7 @@ import {Document} from "../../../editor/core/document/Document";
 import {ITab} from "./ITab";
 import {Registry} from "../../../editor/core/Registry";
 import {UIComponent} from "../../../core/ui/engine/components/UIComponent";
+import {DocumentView} from "../../../editor/core/document/view/DocumentView";
 
 /**
  *
@@ -15,7 +16,7 @@ export class EditorTab implements ITab {
 
     private readonly id: string;
 
-    constructor(private readonly title: string, private readonly document: Document) {
+    constructor(private readonly title: string, private readonly documentView: DocumentView) {
         this.id = Registry.getTabId(this);
     }
 
@@ -48,7 +49,10 @@ export class EditorTab implements ITab {
     }
 
     getDocument(): Document {
-        return this.document;
+        return this.documentView.getDocument();
     }
 
+    getDocumentView(): DocumentView {
+        return this.documentView;
+    }
 }

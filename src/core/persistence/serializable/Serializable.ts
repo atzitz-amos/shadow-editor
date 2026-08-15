@@ -1,8 +1,11 @@
+import {Deserializer} from "./Deserializer";
+
 export interface Serializable {
     serialize(): SerializableType;
 }
 
-export type SerializableType = number
+export type SerializableType =
+    | number
     | string
     | boolean
     | null
@@ -13,7 +16,11 @@ export type SerializableType = number
     | Map<string, SerializableType>;
 
 
-export type JSONSerializedObject = string
+export type DeserializerFunc = (deserializer: Deserializer) => void;
+
+
+export type JSONSerializedObject =
+    | string
     | number
     | boolean
     | null

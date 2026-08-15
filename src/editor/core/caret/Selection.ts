@@ -68,8 +68,9 @@ export class SelectionModel {
             this.trackedRange = this.editor.getOpenedDocument().createTracked(this.actualStartOffset, this.actualEndOffset);
     }
 
-    onCaretMove(): void {
-        // TODO: introduce parameter `shouldEnableSelection` to indicate whether shift is pressed
+    onCaretMove(updateSelection: boolean): void {
+        if (!updateSelection) return;
+
         if (!ModifierKeyHolder.isShiftPressed() && !ModifierKeyHolder.isDragging()) {
             return this.clear();
         }

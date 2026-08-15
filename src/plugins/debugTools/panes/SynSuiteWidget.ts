@@ -9,7 +9,7 @@ import {SynAutomatedTestResult} from "../../../app/testLib/lang/suite/SynAutomat
 import {NavPaneContainer} from "../../../core/ui/lib/nav/NavPaneContainer";
 import {PopupUtilsCore} from "../../../core/ui/lib/popup/PopupUtilsCore";
 import {SynDocument} from "../../../lang/syntax/api/document/SynDocument";
-import {WorkspaceFile} from "../../../core/workspace/filesystem/tree/WorkspaceFile";
+import {ProjectFile} from "../../../core/project/filesystem/tree/ProjectFile";
 import {IdeActionButton} from "../../../core/ui/lib/buttons/IdeActionButton";
 import SynSuiteSnapshotAction from "../actions/SynSuiteSnapshotAction";
 import {UIVariant} from "../../../core/ui/lib/theme/UIVariant";
@@ -42,7 +42,7 @@ export class SynSuiteWidget extends UIComponent {
         return this.navPane;
     }
 
-    public getActiveFile(): WorkspaceFile | null {
+    public getActiveFile(): ProjectFile | null {
         return this.synDocument?.getAssociatedFile() ?? null;
     }
 

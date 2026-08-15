@@ -46,6 +46,16 @@ export class TabsManager {
 
     close(tab: ITab) {
         this.tabs.delete(tab.getId());
+        if (this.activeTab?.getId() === tab.getId()) {
+            this.activeTab = this.tabs.size > 0 ? Array.from(this.tabs.values())[0] : null;
+            UIHooks.trigger(TabHooks.TAB_HIDE, tab);
+        }
+        UIHooks.trigger(TabHooks.TAB_CLOSE, tab);
+
+        if (this.activeTab) {
+            this.activeTab.setActive(true);
+            UIHooks.trigger(TabHooks.TAB_ACTIVE, this.activeTab);
+        }
     }
 
     setActive(tab: ITab) {
@@ -66,5 +76,9 @@ export class TabsManager {
 
     getAllTabs(): ITab[] {
         return Array.from(this.tabs.values()).sort((a, b) => a.getPosition() - b.getPosition());
+    }
+
+    getById(id: string) {
+        return this.tabs.get(id) || null;
     }
 }

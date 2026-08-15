@@ -66,9 +66,9 @@ export class SMainEditorView extends UIComponent {
             this.noOpenedEditorsView.dispose();
 
             if (!this.currentEditor) {
-                this.currentEditor = new Editor(this.currentTab.getDocument());
+                this.currentEditor = new Editor(this.currentTab.getDocumentView());
             } else {
-                this.currentEditor.changeDocument(this.currentTab.getDocument());
+                this.currentEditor.changeDocument(this.currentTab.getDocumentView());
             }
             this.currentEditor.getView().focus();
 

@@ -5,7 +5,7 @@
 
 import {LanguageBase} from "./LanguageBase";
 import {FileTypeHandler} from "./FileTypeHandler";
-import {WorkspaceFile} from "../core/workspace/filesystem/tree/WorkspaceFile";
+import {ProjectFile} from "../core/project/filesystem/tree/ProjectFile";
 import {InspectionBase} from "./codeAnalysis/inspections/Inspection";
 import {ExtensionPoint} from "../core/plugins/extensionPoints/ExtensionPoint";
 import {SmartInlineInsertAction} from "./codeAnalysis/smart/insert/SmartInlineInsertAction";
@@ -79,7 +79,7 @@ export class LangSupport {
         return LangSupport.tokenHoverEP.getAll().filter(action => action.getApplicableLanguages().includes(language));
     }
 
-    getFileTypeHandler(file: WorkspaceFile): FileTypeHandler | null {
+    getFileTypeHandler(file: ProjectFile): FileTypeHandler | null {
         let bestHandler: FileTypeHandler | null = null;
         let bestSupportLevel = 0;
         for (const handler of this.getAllFileTypeHandlers()) {
@@ -94,7 +94,7 @@ export class LangSupport {
         return bestHandler;
     }
 
-    getAssociatedLanguage(file: WorkspaceFile) {
+    getAssociatedLanguage(file: ProjectFile) {
         let handler = this.getFileTypeHandler(file);
         return handler ? handler.getLanguageForFile(file) : null;
     }

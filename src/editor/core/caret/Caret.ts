@@ -6,6 +6,15 @@ import {CaretMovedEvent} from "./events/CaretMovedEvent";
 import {CaretRemovedEvent} from "./events/CaretRemovedEvent";
 import {CaretAddedEvent} from "./events/CaretAddedEvent";
 
+export enum CaretMovementFlags {
+    NONE = 0,
+    IGNORE_INLAYS = 1,
+    IGNORE_SELECTION = 2,
+    NO_SCROLL = 4,
+
+    JUMP = IGNORE_SELECTION | NO_SCROLL,
+    DEFAULT = NONE,
+}
 
 export class Caret {
     id: number = 0;
@@ -60,74 +69,74 @@ export class Caret {
         this.myVertMovementPos = Math.max(this.myVertMovementPos, this.myLogical.col);
     }
 
-    onCaretMove(old: LogicalPosition) {
-        this.editor.getEventBus().syncPublish(new CaretMovedEvent(this, old, this.myLogical));
+    onCaretMove(old: LogicalPosition, flags: number) {
+        this.editor.getEventBus().syncPublish(new CaretMovedEvent(this, old, this.myLogical, flags));
 
-        this.selectionModel.onCaretMove();
+        this.selectionModel.onCaretMove((flags & CaretMovementFlags.IGNORE_SELECTION) === 0);
     }
 
-    moveToOffset(offset: Offset): void {
+    moveToOffset(offset: Offset, flags = CaretMovementFlags.DEFAULT): void {
         const document = this.editor.getOpenedDocument();
 
         if (offset < 0) offset = 0;
         else if (offset > document.getTotalDocumentLength()) offset = document.getTotalDocumentLength();
 
-        this.moveToLogical(this.editor.offsetToLogical(offset));
+        this.moveToLogical(this.editor.offsetToLogical(offset), flags);
     }
 
     moveToInlayAwareOffset(offset: Offset): void {
     }
 
-    moveToLogical(logical: LogicalPosition): void {
+    moveToLogical(logical: LogicalPosition, flags = CaretMovementFlags.DEFAULT): void {
         let old = this.myLogical;
 
         this.myLogical = logical;
         this.myVisual = this.editor.logicalToVisual(logical);
 
-        this.onCaretMove(old);
+        this.onCaretMove(old, flags);
     }
 
 
-    moveToVisual(visual: VisualPosition) {
+    moveToVisual(visual: VisualPosition, flags = CaretMovementFlags.DEFAULT) {
         this.myVisual = visual;
         let old = this.myLogical;
         this.myLogical = this.editor.visualToLogical(visual);
 
-        this.onCaretMove(old);
+        this.onCaretMove(old, flags);
     }
 
-    shiftRight(withInlays: boolean = true): void {
+    shiftRight(flags: CaretMovementFlags = CaretMovementFlags.DEFAULT): void {
         this.myVertMovementPos = 0;
 
         let currentOffset = this.getOffset();
 
-        if (withInlays) {
+        if (!(flags & CaretMovementFlags.IGNORE_INLAYS)) {
             const document = this.editor.getOpenedDocument();
             const inlay = this.editor.getInlayManager().getInlayAt(currentOffset)
             if (currentOffset !== document.getLineEnd(currentOffset) || inlay) {
                 this.myVisual.col++;
-                this.moveToVisual(this.myVisual);
+                this.moveToVisual(this.myVisual, flags);
                 return;
             }
         }
-        this.moveToOffset(currentOffset + 1);
+        this.moveToOffset(currentOffset + 1, flags);
     }
 
-    shiftLeft(withInlays: boolean = true): void {
+    shiftLeft(flags: CaretMovementFlags = CaretMovementFlags.DEFAULT): void {
         this.myVertMovementPos = 0;
 
         let currentOffset = this.getOffset();
 
-        if (withInlays) {
+        if (!(flags & CaretMovementFlags.IGNORE_INLAYS)) {
             const inlay = this.editor.getInlayManager().getInlayAt(currentOffset - 1)
             if (currentOffset !== this.editor.getOpenedDocument().getLineStart(currentOffset) || inlay) {
                 this.myVisual.col--;
-                this.moveToVisual(this.myVisual);
+                this.moveToVisual(this.myVisual, flags);
                 return;
             }
         }
 
-        this.moveToOffset(currentOffset - 1);
+        this.moveToOffset(currentOffset - 1, flags);
     }
 
     remove() {

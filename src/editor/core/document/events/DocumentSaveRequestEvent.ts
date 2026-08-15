@@ -1,5 +1,5 @@
 import {EventSubscriber} from "../../../../core/events/EventSubscriber";
-import {WorkspaceFile} from "../../../../core/workspace/filesystem/tree/WorkspaceFile";
+import {ProjectFile} from "../../../../core/project/filesystem/tree/ProjectFile";
 import {BubbleDirection} from "../../../../core/events/BubbleDirection";
 import {EventBase} from "../../../../core/events/EventBase";
 import {Document} from "../Document";
@@ -13,7 +13,7 @@ import {Document} from "../Document";
 export class DocumentSaveRequestEvent implements EventBase {
     public static readonly SUBSCRIBER = EventSubscriber.create(this);
 
-    constructor(private document: Document, private file: WorkspaceFile, private timestamp: number) {
+    constructor(private document: Document, private file: ProjectFile, private timestamp: number) {
     }
 
     getDocument(): Document {
@@ -24,7 +24,7 @@ export class DocumentSaveRequestEvent implements EventBase {
         return this.timestamp;
     }
 
-    getFile(): WorkspaceFile {
+    getFile(): ProjectFile {
         return this.file;
     }
 

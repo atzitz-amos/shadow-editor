@@ -1,5 +1,5 @@
 import {UIMutator} from "../../core/ui/engine/listeners/mutators/UIMutator";
-import {WorkspaceService} from "../../core/workspace/WorkspaceService";
+import {ProjectService} from "../../core/project/ProjectService";
 
 /**
  *
@@ -8,5 +8,5 @@ import {WorkspaceService} from "../../core/workspace/WorkspaceService";
  * @since 1.0.0
  */
 export class UICommonMutators {
-    public static readonly WORKSPACE_LIST = new UIMutator<WorkspaceService>(UICommonMutators, "workspaceList");
+    public static readonly PROJECT_LIST = new UIMutator<ProjectService>(UICommonMutators, "projectList");
 }

@@ -13,8 +13,12 @@ import {LogicalPosition} from "../../coordinate/LogicalPosition";
 export class CaretMovedEvent extends EditorEventBase {
     public static readonly SUBSCRIBER = EventSubscriber.create(this);
 
-    constructor(private caret: Caret, private oldPos: LogicalPosition, private newPos: LogicalPosition) {
+    constructor(private caret: Caret, private oldPos: LogicalPosition, private newPos: LogicalPosition, private readonly flags: number) {
         super(caret.editor);
+    }
+
+    getMovementFlags(): number {
+        return this.flags;
     }
 
     getCaret(): Caret {

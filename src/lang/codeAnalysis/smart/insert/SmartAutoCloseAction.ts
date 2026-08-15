@@ -33,7 +33,7 @@ export abstract class SmartAutoCloseInsertAction extends SmartInlineInsertAction
             editor.insertText(ctx.getSelection().getActualStart(), ctx.getContent());
             editor.insertText(ctx.getSelection().getActualEnd(), this.closeables[ctx.getContent()]);
 
-            ctx.getCaret().shiftRight(true);
+            ctx.getCaret().shiftRight();
             ctx.getCaret().refresh();
             return BehaviorHandlingMode.HANDLED;
         }

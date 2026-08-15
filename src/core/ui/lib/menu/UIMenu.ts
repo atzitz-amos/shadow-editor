@@ -29,6 +29,4 @@ export abstract class UIMenu {
     abstract open(): void;
 
     abstract close(): void;
-
-    abstract registerKeybind(keybind: Keybind, command: () => void): void;
 }

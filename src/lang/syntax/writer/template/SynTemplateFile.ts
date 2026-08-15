@@ -1,7 +1,7 @@
 import {TextRange} from "../../../../editor/core/coordinate/range/TextRange";
 import {EditorURI} from "../../../../core/uri/EditorURI";
-import {RelativePath} from "../../../../core/workspace/filesystem/path/RelativePath";
-import {WorkspaceFile} from "../../../../core/workspace/filesystem/tree/WorkspaceFile";
+import {RelativePath} from "../../../../core/project/filesystem/path/RelativePath";
+import {ProjectFile} from "../../../../core/project/filesystem/tree/ProjectFile";
 import {SynASTElement} from "../../api/tree/SynASTElement";
 import {SynFile} from "../../api/filesystem/SynFile";
 import {SynModifiableFile} from "../../api/filesystem/SynModifiableFile";
@@ -21,7 +21,7 @@ export class SynTemplateFile implements SynModifiableFile {
         this.children.push(node);
     }
 
-    getWorkspaceFile(): WorkspaceFile | null {
+    getWorkspaceFile(): ProjectFile | null {
         return null;
     }
 

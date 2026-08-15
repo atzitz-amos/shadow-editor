@@ -6,13 +6,13 @@ for the editor.
 
 
 ## Core concepts
-### Workspace
-The workspace is an essential component of the Shadow Editor. It is responsible for handling the project structure
-as well as persisting the project. The user can create and manage workspaces directly in the UI, but it is also possible to create one programmatically:
+### Project
+The project is an essential component of the Shadow Editor. It is responsible for handling the project structure
+as well as persisting the project. The user can create and manage projects directly in the UI, but it is also possible to create one programmatically:
 
 ```typescript
-const workspace = new Workspace("My workspace name");
-app.openProject(workspace);
+const project = new Project("My project name");
+app.openProject(project);
 ```
 
 ### Document

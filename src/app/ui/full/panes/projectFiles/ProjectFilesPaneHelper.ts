@@ -1,13 +1,12 @@
 import {ProjectFilesPane} from "./ProjectFilesPane";
 import {GlobalState} from "../../../../../core/global/GlobalState";
 import {ProjectFilesPaneComponent} from "./ProjectFilesPaneComponent";
-import {ProjectFilesTreeNode} from "./tree/ProjectFilesTreeNode";
-import {UIComponent} from "../../../../../core/ui/engine/components/UIComponent";
 import {UIHooks} from "../../../../../core/ui/engine/listeners/hooks/UIHooks";
-import {WorkspaceHooks} from "../../../../core/UICommonHooks";
-import {WorkspaceFile} from "../../../../../core/workspace/filesystem/tree/WorkspaceFile";
+import {ProjectHooks} from "../../../../core/UICommonHooks";
+import {ProjectFile} from "../../../../../core/project/filesystem/tree/ProjectFile";
 import {PopupUtilsCore} from "../../../../../core/ui/lib/popup/PopupUtilsCore";
-import {WorkspaceDirectory} from "../../../../../core/workspace/filesystem/tree/WorkspaceDirectory";
+import {ProjectDirectory} from "../../../../../core/project/filesystem/tree/ProjectDirectory";
+import {FileSystemEntry} from "../../../../../core/project/filesystem/tree/FileSystemEntry";
 
 /**
  *
@@ -16,14 +15,14 @@ import {WorkspaceDirectory} from "../../../../../core/workspace/filesystem/tree/
  * @since 1.0.0
  */
 export class ProjectFilesPaneHelper {
-    private static selectedTreeEntry: (ProjectFilesTreeNode & UIComponent) | null = null;
+    private static selectedTreeEntry: FileSystemEntry | null = null;
 
-    public static setSelected(treeEntry: (ProjectFilesTreeNode & UIComponent) | null): void {
+    public static setSelected(treeEntry: FileSystemEntry | null): void {
         this.selectedTreeEntry = treeEntry;
-        UIHooks.trigger(WorkspaceHooks.PROJECT_FILES_SELECTED_CHANGED, treeEntry);
+        UIHooks.trigger(ProjectHooks.PROJECT_FILES_SELECTED_CHANGED, treeEntry);
     }
 
-    public static getSelectedTreeEntry(): (ProjectFilesTreeNode & UIComponent) | null {
+    public static getSelectedTreeEntry(): FileSystemEntry | null {
         if (!this.isPresent()) return null;
         return this.selectedTreeEntry;
     }
@@ -33,18 +32,18 @@ export class ProjectFilesPaneHelper {
         return this.getProjectFilesComponent()!.hasFocus();
     }
 
-    static async renameFile(file: WorkspaceFile) {
+    static async renameFile(file: ProjectFile) {
         const newName = await PopupUtilsCore.askString(
             `Rename file '${file.getName()}' to:`,
             file.getName()
         )
 
         if (newName) {
-            await file.rename(newName);
+            file.rename(newName);
         }
     }
 
-    static async renameDir(directory: WorkspaceDirectory) {
+    static async renameDir(directory: ProjectDirectory) {
         const newName = await PopupUtilsCore.askString(
             `Rename directory '${directory.getName()}' to:`,
             directory.getName()

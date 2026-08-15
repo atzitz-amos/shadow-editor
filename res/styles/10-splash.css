@@ -57,14 +57,22 @@
 
 /* Splash screen error state */
 
-.shadow-splash-error {
+.shadow-splash-error, .shadow-splash-warning {
     margin-top: 20px;
     padding: 20px;
-    background: rgba(255, 107, 107, 0.1);
-    border: 1px solid #ff6b6b;
     border-radius: 8px;
     text-align: left;
     overflow: hidden;
+}
+
+.shadow-splash-error {
+    background: rgba(255, 107, 107, 0.1);
+    border: 1px solid #ff6b6b;
+}
+
+.shadow-splash-warning {
+    background: rgb(251 173 56 / 0.1);
+    border: 1px solid #eda012;
 }
 
 .shadow-splash-error-phase {
@@ -78,6 +86,22 @@
     font-size: 14px;
     margin-bottom: 12px;
     word-break: break-word;
+}
+
+.shadow-splash-warning-message {
+    color: #b6a76a;
+    font-size: 14px;
+    margin-bottom: 12px;
+    word-break: break-word;
+}
+
+.shadow-splash-warning a {
+    color: #c49439;
+    text-decoration: underline;
+}
+
+.shadow-splash-warning li {
+    margin-bottom: 5px;
 }
 
 .shadow-splash-error-hint {

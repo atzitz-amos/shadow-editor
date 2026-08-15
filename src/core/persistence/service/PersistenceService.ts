@@ -1,6 +1,5 @@
 import {Service} from "../../threaded/service/Service";
 import {Scheduler} from "../../scheduler/Scheduler";
-import {GlobalState} from "../../global/GlobalState";
 import {UnsafeFlagsService} from "../../sync/flags/UnsafeFlagsService";
 import {UnsafeFlags} from "../../sync/flags/UnsafeFlags";
 
@@ -28,8 +27,6 @@ export class PersistenceService {
             if (!UnsafeFlagsService.clear(UnsafeFlags.PERSISTENCE)) {
                 return;
             }
-
-            GlobalState.getLifecycle().triggerPersist();
         })
     }
 }

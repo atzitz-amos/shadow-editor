@@ -118,7 +118,7 @@ export class SynSuiteEngine {
         }
 
         // Overhead
-        const document = new Document(0, test.code, lang);
+        const document = new Document(test.code, lang);
         let synDocument: SynDocument = SynDocumentManager.createVirtualSynDocument(document);
 
         const lexStart = performance.now();

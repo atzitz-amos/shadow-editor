@@ -16,8 +16,7 @@ export class UIMenuAction extends UIMenuElement {
                        private readonly icon: Icon | null = null,
                        private readonly action: () => void,
                        private readonly shortcut: Keybind | null = null) {
-        super(HTMLUtils.createElement("button.ui-dropdown-action"));
-
+        super(HTMLUtils.createElement("button.ui-menu-action"));
     }
 
     draw(): void {
@@ -38,9 +37,6 @@ export class UIMenuAction extends UIMenuElement {
 
     init(menu: UIMenu) {
         super.init(menu);
-
-        if (this.shortcut)
-            this.menu.registerKeybind(this.shortcut, () => this.invoke());
     }
 
     invoke() {

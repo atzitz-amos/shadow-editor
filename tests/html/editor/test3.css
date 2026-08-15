@@ -356,7 +356,7 @@ body {
     min-height: 0;
 }
 
-.workspace-list-header {
+.project-list-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -371,7 +371,7 @@ body {
     color: #888fa1;
 }
 
-.workspace-count {
+.project-count {
     font-size: 11px;
     color: #6f7588;
 }
@@ -388,7 +388,7 @@ body {
     font-size: 11px;
 }
 
-.workspace-cards {
+.project-cards {
     padding: 8px 10px;
     display: flex;
     flex-direction: column;
@@ -651,7 +651,7 @@ body {
     background: #1d1318;
 }
 
-.workspace-card {
+.project-card {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -661,26 +661,26 @@ body {
     border: 1px solid #181d2c;
 }
 
-.workspace-card-active {
+.project-card-active {
     border-color: #3b4a70;
     background: #151b29;
 }
 
-.workspace-card-main {
+.project-card-main {
     display: flex;
     flex-direction: column;
 }
 
-.workspace-card-title {
+.project-card-title {
     font-size: 13px;
 }
 
-.workspace-card-sub {
+.project-card-sub {
     font-size: 11px;
     color: #8b92a3;
 }
 
-.workspace-card-meta {
+.project-card-meta {
     display: flex;
     flex-direction: column;
     gap: 4px;
@@ -699,19 +699,19 @@ body {
     background: #111520;
 }
 
-.workspace-footer {
+.project-footer {
     margin-top: auto;
     padding: 8px 10px 10px;
     border-top: 1px solid #181d2c;
 }
 
-.workspace-footer-label {
+.project-footer-label {
     font-size: 11px;
     color: #888fa1;
     margin-bottom: 4px;
 }
 
-.workspace-footer-items {
+.project-footer-items {
     display: flex;
     flex-wrap: wrap;
     gap: 4px;

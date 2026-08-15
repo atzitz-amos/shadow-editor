@@ -1,6 +1,6 @@
 import {TextRange} from "../../../../editor/core/coordinate/range/TextRange";
 import {EditorURI} from "../../../../core/uri/EditorURI";
-import {WorkspaceFile} from "../../../../core/workspace/filesystem/tree/WorkspaceFile";
+import {ProjectFile} from "../../../../core/project/filesystem/tree/ProjectFile";
 import {ProblemsHolder} from "../../../codeAnalysis/inspections/problems/ProblemsHolder";
 import {SynDocument} from "../../api/document/SynDocument";
 import {TokenStream} from "../../builder/tokens/TokenStream";
@@ -50,7 +50,7 @@ export class SynDocumentImpl implements SynDocument {
         this.modificationTimestamp = timestamp;
     }
 
-    getAssociatedFile(): WorkspaceFile | null {
+    getAssociatedFile(): ProjectFile | null {
         return this.document.getAssociatedFile();
     }
 

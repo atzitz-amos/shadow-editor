@@ -18,7 +18,7 @@ export class DefaultEnterPressedBehavior extends EnterPressedBehavior {
 
         if (ModifierKeyHolder.isShiftPressed()) {
             editor.insertText(line.getEnd(), "\n");
-            caret.moveToOffset(line.getEnd() + 1, false);
+            caret.moveToOffset(line.getEnd() + 1);
             return BehaviorHandlingMode.HANDLED;
         }
 

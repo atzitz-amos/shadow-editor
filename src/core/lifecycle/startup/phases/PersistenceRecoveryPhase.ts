@@ -21,10 +21,7 @@ export class PersistenceRecoveryPhase extends AbstractStartupPhase {
     }
 
     async run(): Promise<void> {
-        await PersistenceModel.getInstance().recover(
-            PersistenceStrategy.PERSIST,
-            this.persistedObjects
-        );
+        await PersistenceModel.getInstance().init();
     }
 }
 

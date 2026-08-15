@@ -1,6 +1,7 @@
 import {LangSupport} from "../../../lang/LangSupport";
-import {WorkspaceFile} from "../../../core/workspace/filesystem/tree/WorkspaceFile";
+import {ProjectFile} from "../../../core/project/filesystem/tree/ProjectFile";
 import {Document} from "./Document";
+import {UUIDHelper} from "../../utils/UUIDHelper";
 
 /**
  *
@@ -11,29 +12,48 @@ import {Document} from "./Document";
 export class EditorDocumentManager {
     private static readonly instance: EditorDocumentManager = new EditorDocumentManager();
 
-    private documents: WeakMap<WorkspaceFile, Document> = new WeakMap();
+    private readonly documents: Map<string, Document> = new Map();
 
     public static getInstance() {
         return this.instance;
     }
 
-    public static getDocumentForFile(file: WorkspaceFile): Document {
+    public static getDocumentForFile(file: ProjectFile): Document {
         return this.getInstance().getDocumentForFile(file);
     }
 
-    public getDocumentForFile(file: WorkspaceFile): Document {
-        if (this.documents.has(file)) return this.documents.get(file)!;
+    public static getDocumentById(id: string) {
+        return this.getInstance().getDocumentForId(id);
+    }
+
+    static getDocumentId(document: Document) {
+        for (const [id, doc] of this.getInstance().documents.entries()) {
+            if (doc === document) {
+                return id;
+            }
+        }
+        const uuid = UUIDHelper.newUUID();
+        this.getInstance().documents.set(uuid, document);
+        return uuid;
+    }
+
+    public getDocumentForId(id: string): Document | null {
+        if (this.documents.has(id)) return this.documents.get(id)!;
+        return null;
+    }
+
+    public getDocumentForFile(file: ProjectFile): Document {
+        if (this.documents.has(file.getId())) return this.documents.get(file.getId())!;
         return this.createDocumentForFile(file);
     }
 
-    public createDocumentForFile(file: WorkspaceFile): Document {
+    public createDocumentForFile(file: ProjectFile): Document {
         let fileTypeHandler = LangSupport.getInstance().getFileTypeHandler(file);
         const document = new Document(
-            0,
             file.getCachedContent() ?? "",
             fileTypeHandler ? fileTypeHandler.getLanguageForFile(file) : null);
         document.linkFile(file);
-        this.documents.set(file, document);
+        this.documents.set(file.getId(), document);
         return document;
     }
 }

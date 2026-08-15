@@ -1,6 +1,6 @@
 import {EditorURI} from "../../../../core/uri/EditorURI";
-import {WorkspaceFile} from "../../../../core/workspace/filesystem/tree/WorkspaceFile";
-import {RelativePath} from "../../../../core/workspace/filesystem/path/RelativePath";
+import {ProjectFile} from "../../../../core/project/filesystem/tree/ProjectFile";
+import {RelativePath} from "../../../../core/project/filesystem/path/RelativePath";
 import {SynNodeVisitor} from "../../visitors/SynNodeVisitor";
 import {SynDocument} from "../../api/document/SynDocument";
 import {SynFile} from "../../api/filesystem/SynFile";
@@ -16,7 +16,7 @@ import {EditorDocumentManager} from "../../../../editor/core/document/EditorDocu
 export class SynFileImpl implements SynFile {
     private synDocument: SynDocument | null;
 
-    constructor(private readonly file: WorkspaceFile) {
+    constructor(private readonly file: ProjectFile) {
 
     }
 
@@ -30,7 +30,7 @@ export class SynFileImpl implements SynFile {
         return this.synDocument;
     }
 
-    getWorkspaceFile(): WorkspaceFile | null {
+    getProjectFile(): ProjectFile | null {
         return this.file;
     }
 

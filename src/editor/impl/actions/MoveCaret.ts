@@ -1,7 +1,7 @@
 import {AbstractAction} from "../../../core/actions/AbstractAction";
 import {Key, ModifierKeyHolder} from "../../../core/keybinds/Keybind";
 import {SelectionDirection} from "../../core/caret/Selection";
-import {Caret} from "../../core/caret/Caret";
+import {Caret, CaretMovementFlags} from "../../core/caret/Caret";
 
 import {LogicalPosition} from "../../core/coordinate/LogicalPosition";
 import {CtrlMoveHelper} from "./utils/CtrlMoveHelper";
@@ -41,7 +41,7 @@ export class MoveCaretLeftAction extends AbstractAction {
             if (!ctx.getEvent().shiftKey && selectionDirection !== SelectionDirection.UNKNOWN) {
                 handleClearSelection(caret, selectionDirection === SelectionDirection.RIGHT);
             } else {
-                caret.shiftLeft(!ModifierKeyHolder.isShiftPressed());
+                caret.shiftLeft(ModifierKeyHolder.isShiftPressed() ? CaretMovementFlags.IGNORE_INLAYS : CaretMovementFlags.DEFAULT);
             }
         });
 
@@ -75,7 +75,7 @@ export class MoveCaretRightAction extends AbstractAction {
             if (!ctx.getEvent().shiftKey && selectionDirection !== SelectionDirection.UNKNOWN) {
                 handleClearSelection(caret, selectionDirection === SelectionDirection.LEFT);
             } else {
-                caret.shiftRight(!ModifierKeyHolder.isShiftPressed());
+                caret.shiftRight(ModifierKeyHolder.isShiftPressed() ? CaretMovementFlags.IGNORE_INLAYS : CaretMovementFlags.DEFAULT);
             }
         });
         editor.getView().resetBlink();

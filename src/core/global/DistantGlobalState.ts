@@ -1,5 +1,5 @@
 import {Lifecycle} from "../lifecycle/Lifecycle";
-import {Workspace} from "../workspace/Workspace";
+import {Project} from "../project/Project";
 import {PluginManager} from "../plugins/PluginManager";
 import {LangSupport} from "../../lang/LangSupport";
 import {SettingsManager} from "../settings/SettingsManager";
@@ -23,8 +23,8 @@ export class DistantGlobalState {
         return RefUtils.ofCallChain("GlobalState.getLifecycle", Lifecycle);
     }
 
-    public static getCurrentWorkspace(): Promise<Ref<Workspace>> {
-        return RefUtils.ofCallChain("GlobalState.getCurrentWorkspace", Workspace);
+    public static getCurrentProject(): Promise<Ref<Project>> {
+        return RefUtils.ofCallChain("GlobalState.getCurrentProject", Project);
     }
 
     public static getMainEventBus(): Promise<Ref<EventBus>> {

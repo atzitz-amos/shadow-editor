@@ -2,9 +2,8 @@ import {UIHook} from "../../core/ui/engine/listeners/hooks/UIHook";
 import {IPane} from "./panes/pane/IPane";
 import {PaneDockPosition} from "./panes/pane/PaneDockPosition";
 import {ITab} from "./tabs/ITab";
-import {Workspace} from "../../core/workspace/Workspace";
-import {ProjectFilesTreeNode} from "../ui/full/panes/projectFiles/tree/ProjectFilesTreeNode";
-import {UIComponent} from "../../core/ui/engine/components/UIComponent";
+import {Project} from "../../core/project/Project";
+import {FileSystemEntry} from "../../core/project/filesystem/tree/FileSystemEntry";
 
 /**
  *
@@ -32,7 +31,7 @@ export class TabHooks {
     public static readonly TAB_CLOSE = new UIHook<[ITab]>(this, "TAB_HIDE");
 }
 
-export class WorkspaceHooks {
-    public static readonly WORKSPACE_CHANGED = new UIHook<[Workspace]>(this, "WORKSPACE_CHANGED");
-    public static readonly PROJECT_FILES_SELECTED_CHANGED = new UIHook<[(ProjectFilesTreeNode & UIComponent)]>(this, "PROJECT_FILES_ACTIVE_CHANGED");
+export class ProjectHooks {
+    public static readonly PROJECT_CHANGED = new UIHook<[Project]>(this, "PROJECT_CHANGED");
+    public static readonly PROJECT_FILES_SELECTED_CHANGED = new UIHook<[FileSystemEntry]>(this, "PROJECT_FILES_ACTIVE_CHANGED");
 }

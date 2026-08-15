@@ -4,7 +4,6 @@ import {Deserializer} from "../../../../core/persistence/serializable/Deserializ
 import {Serialized} from "../../../../core/persistence/serializable/Serializable";
 import {Serializer} from "../../../../core/persistence/serializable/Serializer";
 import {SynSuiteParserTest} from "./SynSuiteParserTest";
-import {PersistenceService} from "../../../../core/persistence/service/PersistenceService";
 
 /**
  *
@@ -40,8 +39,6 @@ export class SynSuitePersister implements PersistedObject {
             this.tests.set(pluginId, []);
         }
         this.tests.get(pluginId)!.push(test);
-
-        PersistenceService.getInstance().requirePersistence();
     }
 
     getTests(pluginId: string): SynSuiteParserTest[] {
@@ -55,7 +52,6 @@ export class SynSuitePersister implements PersistedObject {
     clearTestsForPlugin(pluginId: string) {
         if (this.tests.has(pluginId)) {
             this.tests.delete(pluginId);
-            PersistenceService.getInstance().requirePersistence();
         }
     }
 
@@ -80,12 +76,9 @@ export class SynSuitePersister implements PersistedObject {
             // If patch is null, remove the test
             pluginTests.splice(testIndex, 1);
         }
-
-        PersistenceService.getInstance().requirePersistence();
     }
 
     clearAllTests() {
         this.tests.clear();
-        PersistenceService.getInstance().requirePersistence();
     }
 }

@@ -187,7 +187,7 @@ body {
     position: relative;
 }
 
-.workspace-list-header {
+.project-list-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -202,7 +202,7 @@ body {
     color: #8b92a6;
 }
 
-.workspace-count {
+.project-count {
     margin-top: 2px;
     font-size: 11px;
     color: #70778a;
@@ -283,14 +283,14 @@ body {
     display: none;
 }
 
-.workspace-cards {
+.project-cards {
     padding: 8px 10px;
     display: flex;
     flex-direction: column;
     gap: 6px;
 }
 
-.workspace-card {
+.project-card {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -301,23 +301,23 @@ body {
     background: #0f141f;
 }
 
-.workspace-card-active {
+.project-card-active {
     border-color: #3b4a70;
     background: #151b29;
 }
 
-.workspace-card-main {
+.project-card-main {
     min-width: 0;
     display: flex;
     flex-direction: column;
 }
 
-.workspace-card-title {
+.project-card-title {
     font-size: 13px;
     color: #edf1fd;
 }
 
-.workspace-card-sub {
+.project-card-sub {
     margin-top: 2px;
     font-size: 11px;
     color: #8b92a4;
@@ -334,7 +334,7 @@ body {
     padding: 0;
 }
 
-.workspace-card-meta {
+.project-card-meta {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
@@ -356,19 +356,19 @@ body {
     border-color: #20263a;
 }
 
-.workspace-footer {
+.project-footer {
     margin-top: auto;
     padding: 10px;
     border-top: 1px solid #1a2030;
 }
 
-.workspace-footer-label {
+.project-footer-label {
     margin-bottom: 5px;
     font-size: 11px;
     color: #8b92a6;
 }
 
-.workspace-footer-items {
+.project-footer-items {
     display: flex;
     flex-wrap: wrap;
     gap: 4px;

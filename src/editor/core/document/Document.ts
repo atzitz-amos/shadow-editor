@@ -6,7 +6,7 @@ import {LanguageBase} from "../../../lang/LanguageBase";
 import {DocumentInsertEvent} from "./events/DocumentInsertEvent";
 import {DocumentModificationEvent} from "./events/DocumentModificationEvent";
 import {DocumentDeleteEvent} from "./events/DocumentDeleteEvent";
-import {WorkspaceFile} from "../../../core/workspace/filesystem/tree/WorkspaceFile";
+import {ProjectFile} from "../../../core/project/filesystem/tree/ProjectFile";
 import {TokenCache} from "./TokenCache";
 import {Scheduler} from "../../../core/scheduler/Scheduler";
 import {GlobalState} from "../../../core/global/GlobalState";
@@ -27,7 +27,7 @@ export class Document {
     private modificationTimestamp: number = 0;
 
     private data: EditorRawData;
-    private file: WorkspaceFile | null = null;
+    private file: ProjectFile | null = null;
 
     private lines: LineData[];
     private lineBreaks: Offset[] = [];
@@ -40,7 +40,7 @@ export class Document {
 
     private trackedRanges: WeakRef<TrackedRange>[] = []
 
-    constructor(private caretOffset: Offset, content: string, private language: LanguageBase | null = null) {
+    constructor(content: string, private language: LanguageBase | null = null) {
         this.data = new EditorRawData(content);
 
         this.highlightsHolder = new HighlightHolder(this, 1);
@@ -59,16 +59,6 @@ export class Document {
 
     setAnnotations(holder: HighlightHolder) {
         this.annotationsHolder = holder;
-    }
-
-    public getSavedCaretOffset(): Offset {
-        return this.caretOffset;
-    }
-
-    public saveCaretOffset(): void {
-        if (this.editor) {
-            this.caretOffset = this.editor.getPrimaryCaret().getOffset();
-        }
     }
 
     public getEditor(): Editor {
@@ -91,7 +81,7 @@ export class Document {
         }
     }
 
-    public getAssociatedFile(): WorkspaceFile | null {
+    public getAssociatedFile(): ProjectFile | null {
         return this.file;
     }
 
@@ -99,7 +89,7 @@ export class Document {
         return this.getAssociatedFile() !== null;
     }
 
-    public linkFile(file: WorkspaceFile) {
+    public linkFile(file: ProjectFile) {
         this.file = file;
     }
 

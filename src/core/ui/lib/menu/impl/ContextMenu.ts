@@ -1,7 +1,5 @@
 import {HTMLUtils} from "../../../../../editor/utils/HTMLUtils";
 import {UIMenu} from "../UIMenu";
-import {Keybind} from "../../../../keybinds/Keybind";
-import {KeybindManager} from "../../../../keybinds/KeybindManager";
 
 /**
  *
@@ -9,23 +7,11 @@ import {KeybindManager} from "../../../../keybinds/KeybindManager";
  * @date 8/5/2026
  * @since 1.0.0
  */
-export class ContextMenu extends UIMenu {
-    private static readonly menuRoot: HTMLElement = HTMLUtils.createElement("div.ui-context-menu");
-    private static opened: boolean = false;
+export type ContextMenu<T> = (data: T, contextMenu: ContextMenuElement) => void;
 
-    private openCallback: null | (() => void) = null;
-    private keybindActions: [Keybind, () => void][] = [];
 
-    constructor(private readonly attachedElement: HTMLElement) {
-        super();
-
-        this.setup();
-    }
-
-    private static readonly closeHandler = () => {
-        this.menuRoot.style.display = "none";
-        this.opened = false;
-    }
+class ContextMenuSingleton {
+    public static readonly menuRoot: HTMLElement = HTMLUtils.createElement("div.ui-context-menu");
 
     static {
         window.addEventListener("load", () => {
@@ -37,25 +23,36 @@ export class ContextMenu extends UIMenu {
         }, false);
     }
 
-    private static readonly escapeListener = (e: KeyboardEvent) => {
+    public static readonly closeHandler = () => {
+        this.menuRoot.style.display = "none";
+    }
+
+    public static readonly escapeListener = (e: KeyboardEvent) => {
         if (e.key === "Escape") this.closeHandler();
     };
 
-    private static readonly clickListener = (e: MouseEvent) => this.closeHandler();
+    static getInstance() {
+        return this.menuRoot;
+    }
+}
 
-    registerKeybind(keybind: Keybind, command: () => void): void {
-        this.keybindActions.push([keybind, command]);
+export class ContextMenuElement extends UIMenu {
+    private opened: boolean = false;
+
+    constructor() {
+        super();
     }
 
-    setOpenCallback(callback: () => void): this {
-        this.openCallback = callback;
-        return this;
+    static open<T>(x: number, y: number, entry: T, contextMenu: ContextMenu<T>) {
+        const menu = new ContextMenuElement();
+        contextMenu(entry, menu);
+        menu.open(x, y);
     }
 
     open(x?: number, y?: number): void {
-        this.openCallback?.();
+        if (!this.elements.length) return;
 
-        const menuRoot = ContextMenu.menuRoot;
+        const menuRoot = ContextMenuSingleton.getInstance();
         menuRoot.innerHTML = "";
         menuRoot.style.display = "block";
 
@@ -64,36 +61,20 @@ export class ContextMenu extends UIMenu {
             element.draw();
         }
 
-        const bbox = this.attachedElement.getBoundingClientRect();
         if (x === undefined)
-            x = bbox.x + bbox.width / 2;
+            x = 0;
         if (y === undefined)
-            y = bbox.y + bbox.height / 2;
+            y = 0;
 
         const menuBBox = menuRoot.getBoundingClientRect();
         HTMLUtils.attachAt(menuRoot, x, y, menuBBox.width, menuBBox.height, "SE");
 
-        ContextMenu.opened = true;
+        this.opened = true;
     }
 
     close() {
-        ContextMenu.closeHandler();
-    }
-
-
-    private setup() {
-        this.attachedElement.addEventListener("contextmenu", (e) => {
-            e.preventDefault();
-            this.open(e.clientX, e.clientY);
-        });
-
-        this.attachedElement.addEventListener("keydown", e => {
-            for (const [keybind, command] of this.keybindActions) {
-                if (KeybindManager.eventMatchesKeybind(keybind, e)) {
-                    e.preventDefault();
-                    command();
-                }
-            }
-        });
+        if (!this.opened) return;
+        this.opened = false;
+        ContextMenuSingleton.closeHandler();
     }
 }

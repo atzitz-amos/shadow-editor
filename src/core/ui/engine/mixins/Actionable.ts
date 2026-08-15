@@ -1,5 +1,4 @@
 import {Focusable} from "./Focusable";
-import {ContextMenu} from "../../lib/menu/impl/ContextMenu";
 
 /**
  *
@@ -8,7 +7,4 @@ import {ContextMenu} from "../../lib/menu/impl/ContextMenu";
  * @since 1.0.0
  */
 export abstract class Actionable extends Focusable {
-    protected setContextMenu(contextMenu: ContextMenu) {
-        super.setContextMenu(contextMenu);
-    }
 }

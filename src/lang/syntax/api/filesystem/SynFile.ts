@@ -1,6 +1,6 @@
 import {URILocatedResource} from "../../../../core/uri/URILocatedResource";
-import {RelativePath} from "../../../../core/workspace/filesystem/path/RelativePath";
-import {WorkspaceFile} from "../../../../core/workspace/filesystem/tree/WorkspaceFile";
+import {RelativePath} from "../../../../core/project/filesystem/path/RelativePath";
+import {ProjectFile} from "../../../../core/project/filesystem/tree/ProjectFile";
 import {SynDocument} from "../document/SynDocument";
 
 /**
@@ -10,7 +10,7 @@ import {SynDocument} from "../document/SynDocument";
  * @since 1.0.0
  */
 export interface SynFile extends URILocatedResource {
-    getWorkspaceFile(): WorkspaceFile | null;
+    getProjectFile(): ProjectFile | null;
 
     getPath(): RelativePath | null;
 

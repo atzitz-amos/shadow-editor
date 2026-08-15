@@ -50,6 +50,20 @@ export class CriticalErrorRenderer {
         CriticalErrorRenderer.renderError(container, phase.name, error);
     }
 
+    static renderStartupWarning(parent: HTMLElement, source: string, message: string) {
+        return new Promise(resolve => {
+            const warnDiv = document.createElement('div');
+            warnDiv.className = 'shadow-splash-warning';
+            warnDiv.innerHTML = `
+            <div class="shadow-splash-error-phase">Source: ${source}</div>
+            <div class="shadow-splash-warning-message">${message}</div>
+            <div class="shadow-splash-error-hint">If you know what you're doing, <a href="#">ignore</a> the warning</div>`;
+            const link = warnDiv.querySelector("a")!;
+            link.onclick = resolve;
+            parent.appendChild(warnDiv);
+        });
+    }
+
     /**
      * Core rendering logic shared by both the startup splash and standalone overlay.
      *

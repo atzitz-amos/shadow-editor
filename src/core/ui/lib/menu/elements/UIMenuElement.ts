@@ -12,6 +12,8 @@ export abstract class UIMenuElement extends UIComponent {
 
     protected isDisabled: boolean = false;
 
+    abstract draw(data?: any): void;
+
     init(menu: UIMenu): void {
         this.menu = menu;
     }

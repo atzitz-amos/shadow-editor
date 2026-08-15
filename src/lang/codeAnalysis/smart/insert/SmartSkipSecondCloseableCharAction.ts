@@ -28,7 +28,7 @@ export abstract class SmartSkipSecondCloseableCharAction extends SmartInlineInse
 
         if (this.shouldSkip(ctx.getContent(), ctx.getLeadingChar() ?? '')) {
             const caret = ctx.getCaret();
-            caret.shiftRight(true);
+            caret.shiftRight();
             caret.refresh();
             return BehaviorHandlingMode.HANDLED;
         }

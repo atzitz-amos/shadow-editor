@@ -1,15 +1,15 @@
 import {UIComponentMixin} from "../../../../../../core/ui/engine/components/UIComponent";
 import {HTMLUtils} from "../../../../../../editor/utils/HTMLUtils";
-import {Workspace} from "../../../../../../core/workspace/Workspace";
-import {ActiveWorkspaceHelper} from "../../../../../../core/global/ActiveWorkspaceHelper";
-import {ProjectFilesTreeDirectory} from "./ProjectFilesTreeDirectory";
-import {FileCreatedEvent} from "../../../../../../core/workspace/events/FileCreatedEvent";
-import {DirectoryCreatedEvent} from "../../../../../../core/workspace/events/DirectoryCreatedEvent";
-import {FileDeletedEvent} from "../../../../../../core/workspace/events/FileDeletedEvent";
-import {DirectoryDeletedEvent} from "../../../../../../core/workspace/events/DirectoryDeletedEvent";
-import {FileRenamedEvent} from "../../../../../../core/workspace/events/FileRenamedEvent";
-import {DirectoryRenamedEvent} from "../../../../../../core/workspace/events/DirectoryRenamedEvent";
+import {Project} from "../../../../../../core/project/Project";
+import {ActiveProjectHelper} from "../../../../../../core/global/ActiveProjectHelper";
 import {Focusable} from "../../../../../../core/ui/engine/mixins/Focusable";
+import {FileSystemTree} from "../../../../../../core/ui/lib/filesystem/FileSystemTree";
+import {ProjectFile} from "../../../../../../core/project/filesystem/tree/ProjectFile";
+import {URINavigationManager} from "../../../../../../core/uri/URINavigationManager";
+import {ContextMenuElement} from "../../../../../../core/ui/lib/menu/impl/ContextMenu";
+import {ProjectDirectory} from "../../../../../../core/project/filesystem/tree/ProjectDirectory";
+import {Key} from "../../../../../../core/keybinds/Keybind";
+import {ProjectFilesPaneHelper} from "../ProjectFilesPaneHelper";
 
 /**
  *
@@ -18,22 +18,16 @@ import {Focusable} from "../../../../../../core/ui/engine/mixins/Focusable";
  * @since 1.0.0
  */
 export class ProjectFilesTree extends UIComponentMixin(Focusable) {
-    private currentWorkspace: Workspace | null = null;
-    private directory: ProjectFilesTreeDirectory;
+    private currentProject: Project | null = null;
+    private filesTree: FileSystemTree;
 
     constructor(root: HTMLElement) {
         super(HTMLUtils.createDiv("project-tree", root));
 
-        this.setWorkspace(ActiveWorkspaceHelper.getInstance());
-        ActiveWorkspaceHelper.onFilesystemReady(this, e => {
-            this.setWorkspace(ActiveWorkspaceHelper.getInstance());
+        this.setProject(ActiveProjectHelper.getInstance());
+        ActiveProjectHelper.onFilesystemReady(this, e => {
+            this.setProject(ActiveProjectHelper.getInstance());
         });
-
-        ActiveWorkspaceHelper.onWorkspaceChanges(
-            this,
-            this.createHandler,
-            this.deleteHandler,
-            this.renameHandler);
     }
 
     public draw(): void {
@@ -78,7 +72,7 @@ export class ProjectFilesTree extends UIComponentMixin(Focusable) {
         //     </div>
         // `);
 
-        if (!this.currentWorkspace || !this.currentWorkspace.getFS()) {
+        if (!this.currentProject || !this.currentProject.getFS()) {
             this.setInnerHTML(`
                 <div class="empty-state">
                     <i class="fa-solid fa-folder-open empty-icon"></i>
@@ -88,56 +82,42 @@ export class ProjectFilesTree extends UIComponentMixin(Focusable) {
         } else {
             this.setInnerHTML(``);
 
-            this.directory = new ProjectFilesTreeDirectory(this.getUnderlyingElement(), this.currentWorkspace.getFS().getRoot(), 0);
-            this.directory.load();
+            this.filesTree = new FileSystemTree(this.getUnderlyingElement(), this.currentProject.getFS().getRoot());
+            this.filesTree.setFileOpenedHandler(file => this.openFile(file));
+            this.filesTree.setEntrySelectedHandler(entry => ProjectFilesPaneHelper.setSelected(entry))
+            this.filesTree.setContextMenu((data, contextMenu) => {
+                if (data.isFile()) this.setupFileContextMenu(data as ProjectFile, contextMenu);
+                else this.setupDirContextMenu(data as ProjectDirectory, contextMenu);
+            })
 
-            this.addChild(this.directory);
+            this.addChild(this.filesTree);
             this.drawChildren();
         }
     }
 
-    private setWorkspace(workspace: Workspace | null) {
-        if (workspace && !workspace.getFS()) {
-            this.currentWorkspace = null;
+    private setProject(project: Project | null) {
+        if (project && !project.getFS()) {
+            this.currentProject = null;
             return;
         }
-        if (this.currentWorkspace === workspace && (this.currentWorkspace && this.currentWorkspace.getFS())) {
+        if (this.currentProject === project && (this.currentProject && this.currentProject.getFS())) {
             return;
         }
-        this.currentWorkspace = workspace;
+        this.currentProject = project;
         this.redraw();
     }
 
-    private createHandler(ev: FileCreatedEvent | DirectoryCreatedEvent) {
-        const entry = ev.getEntry();
-        const child = this.directory.recursivelyFind(entry.getParent()!);
-
-        if (!(child instanceof ProjectFilesTreeDirectory)) {
-            console.warn("Could not find parent for entry", entry);
-            return;
-        }
-
-        child.addEntry(entry);
+    private openFile(file: ProjectFile) {
+        URINavigationManager.navigateAsync(file.getURI());
     }
 
-    private deleteHandler(ev: FileDeletedEvent | DirectoryDeletedEvent) {
-        const entry = ev.getEntry();
-        const child = this.directory.recursivelyFind(entry.getParent()!);
-
-        if (!(child instanceof ProjectFilesTreeDirectory)) {
-            console.warn("Could not find parent for entry", entry);
-            return;
-        }
-
-        child?.deleteEntry(entry);
+    private setupFileContextMenu(data: ProjectFile, contextMenu: ContextMenuElement) {
+        contextMenu.addAction("Open", () => {
+            this.openFile(data);
+        }, null, {key: Key.ENTER});
     }
 
-    private renameHandler(ev: FileRenamedEvent | DirectoryRenamedEvent) {
-        const entry = ev.getEntry();
-        const child = this.directory.recursivelyFind(entry);
+    private setupDirContextMenu(directory: ProjectDirectory, contextMenu: ContextMenuElement) {
 
-        console.log(child);
-
-        child?.rename(ev.getNewName());
     }
 }

@@ -3,7 +3,7 @@ import {EditorURI} from "../../../../core/uri/EditorURI";
 import {TokenStream} from "../../builder/tokens/TokenStream";
 import {ProblemsHolder} from "../../../codeAnalysis/inspections/problems/ProblemsHolder";
 import {TextRange} from "../../../../editor/core/coordinate/range/TextRange";
-import {WorkspaceFile} from "../../../../core/workspace/filesystem/tree/WorkspaceFile";
+import {ProjectFile} from "../../../../core/project/filesystem/tree/ProjectFile";
 import {SynTree} from "../tree/SynTree";
 import {LanguageBase} from "../../../LanguageBase";
 import {SynFile} from "../filesystem/SynFile";
@@ -24,7 +24,7 @@ export interface SynDocument extends URILocatedResource {
 
     getModificationTimestamp(): number;
 
-    getAssociatedFile(): WorkspaceFile | null;
+    getAssociatedFile(): ProjectFile | null;
 
     getSynFile(): SynFile | null;
 

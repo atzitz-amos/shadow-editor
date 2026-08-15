@@ -20,7 +20,7 @@ export class SNoOpenedEditorView extends UIComponent {
                 </div>
                 <div style="font-size: 18px; font-weight: 600; color: #e3e6f0; margin-bottom: 8px;">No currently opened tab</div>
                 <div style="font-size: 13px; line-height: 1.5; color: #8b92a3;">
-                    Open a file from the workspace list to begin editing, or use
+                    Open a file from the project list to begin editing, or use
                     <strong style="color: #c7d2ff; font-weight: 600;">Ctrl+P</strong> to quickly jump to a file.
                 </div>
             </div>`);

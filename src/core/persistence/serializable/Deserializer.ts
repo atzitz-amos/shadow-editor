@@ -15,9 +15,9 @@ export class Deserializer {
 
     private readonly customDeserializers: Map<string, CustomDeserializer<any>> = new Map();
 
-    use(name: Class<any>, deserializer: CustomDeserializer<any>): void;
+    use(cls: Class, deserializer: CustomDeserializer<any>): void;
     use(name: string, deserializer: CustomDeserializer<any>): void;
-    use(name: string | Class<any>, deserializer: CustomDeserializer<any>): void {
+    use(name: string | Class, deserializer: CustomDeserializer<any>): void {
         if (typeof name !== "string") {
             name = SerializationUtils.getClassName(name);
         }
