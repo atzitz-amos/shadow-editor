@@ -4,6 +4,8 @@ import {UIHooks} from "../../../../../../core/ui/engine/listeners/hooks/UIHooks"
 import {ITab} from "../../../../../core/tabs/ITab";
 import {TabHooks} from "../../../../../core/UICommonHooks";
 import {TabsManager} from "../../../../../core/tabs/TabsManager";
+import {GlobalState} from "../../../../../../core/global/GlobalState";
+import {EntryRenamedEvent} from "../../../../../../core/project/events/EntryRenamedEvent";
 
 /**
  *
@@ -17,6 +19,8 @@ export class SEditorTabs extends UIComponent {
 
     constructor(root: HTMLElement) {
         super(HTMLUtils.createDiv("column-tabs", root));
+
+        GlobalState.getMainEventBus().subscribe(this, EntryRenamedEvent.SUBSCRIBER, () => this.redraw());
     }
 
     draw(): void {
@@ -24,7 +28,27 @@ export class SEditorTabs extends UIComponent {
         this.tabsElement.clear();
         for (const tab of this.tabs.values()) {
             let tabElement = HTMLUtils.createDiv("column-tab");
-            tabElement.textContent = tab.getTitle();
+            let iconDiv = HTMLUtils.createDiv("column-icon");
+
+            let fileIcon = HTMLUtils.createElement("i.fa-brands.fa-js.fileIcon");
+
+            let closeIcon = HTMLUtils.createElement("span.closeIcon");
+            closeIcon.innerHTML =
+                '<svg viewBox="0 0 24 24" width="9" height="9" fill="none" aria-hidden="true">' +
+                '<path d="M5 5L19 19M19 5L5 19" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>' +
+                '</svg>';
+
+            iconDiv.appendChild(fileIcon);
+            iconDiv.appendChild(closeIcon);
+
+            tabElement.appendChild(iconDiv);
+            tabElement.appendChild(document.createTextNode(" " + tab.getTitle()));
+
+            closeIcon.addEventListener("click", (e) => {
+                e.stopPropagation(); // don't also trigger tabElement's open()
+                TabsManager.getInstance().close(tab);
+            });
+
             if (tab.isActive()) {
                 tabElement.classList.add("column-tab-active");
             }

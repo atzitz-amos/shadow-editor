@@ -1,8 +1,8 @@
 import {ShadowUIFactory} from "./ui/ShadowUIFactory";
 import {GlobalState} from "../core/global/GlobalState";
 import {Lifecycle} from "../core/lifecycle/Lifecycle";
-import {Workspace} from "../core/workspace/Workspace";
-import {ActiveWorkspaceHelper} from "../core/global/ActiveWorkspaceHelper";
+import {Project} from "../core/project/Project";
+import {ActiveProjectHelper} from "../core/global/ActiveProjectHelper";
 import {EditorPlugin} from "../core/plugins/loader/Plugin";
 import {ShadowUI} from "./ui/ShadowUI";
 import {ShadowUILoadedEvent} from "./events/ShadowUILoadedEvent";
@@ -81,8 +81,8 @@ export class ShadowApp {
 
     /**
      * Open a project.*/
-    public openProject(project: Workspace): void {
-        ActiveWorkspaceHelper.open(project);
+    public openProject(project: Project): void {
+        ActiveProjectHelper.open(project);
     }
 
     getUI(): ShadowUI | undefined {

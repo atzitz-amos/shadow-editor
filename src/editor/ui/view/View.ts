@@ -11,6 +11,8 @@ import {Critical} from "../../../core/critical/Critical";
 import {XYPoint} from "../../core/coordinate/XYPoint";
 import {EditorKeyContextManager} from "../../core/keycontext/EditorKeyContextManager";
 import {TextRange} from "../../core/coordinate/range/TextRange";
+import {CaretMovementFlags} from "../../core/caret/Caret";
+import { DocumentView } from "../../core/document/view/DocumentView";
 
 
 export class View {
@@ -39,8 +41,8 @@ export class View {
         this.myPainter = new ViewPainter(this);
         this.myProperties = new ViewPropertiesManager(this);
 
-        this.editor.getEventBus().subscribe(this, CaretMovedEvent.SUBSCRIBER, () => {
-            this.ensureCaretVisible();
+        this.editor.getEventBus().subscribe(this, CaretMovedEvent.SUBSCRIBER, ev => {
+            if (!(ev.getMovementFlags() & CaretMovementFlags.NO_SCROLL)) this.ensureCaretVisible();
         });
     }
 
@@ -51,7 +53,9 @@ export class View {
 
     onAttached(root: HTMLElement) {
         this.view = HTMLUtils.createElement('div.editor-view', root) as HTMLDivElement;
-        this.scrolling = new Scrolling(this, 0, 0);
+
+        const documentView = this.editor.getDocumentView();
+        this.scrolling = new Scrolling(this, documentView.getScrollX(), documentView.getScrollY());
 
         this.initCSS();
 
@@ -339,5 +343,11 @@ export class View {
         });
 
         this.myPainter.getGutter().initCSS();
+    }
+
+    restoreFromDocumentView(view: DocumentView) {
+        if (this.scrolling) {
+            this.scrolling.scrollTo(view.getScrollX(), view.getScrollY(), ScrollMode.Instant);
+        }
     }
 }

@@ -1,13 +1,14 @@
 import {HTMLUtils} from "../../../../../../editor/utils/HTMLUtils";
 import {UIComponent} from "../../../../../../core/ui/engine/components/UIComponent";
-import {ActiveWorkspaceHelper} from "../../../../../../core/global/ActiveWorkspaceHelper";
+import {ActiveProjectHelper} from "../../../../../../core/global/ActiveProjectHelper";
 import {ProjectFilesPaneHelper} from "../../../panes/projectFiles/ProjectFilesPaneHelper";
-import {FSNodeEntry} from "../../../../../../core/workspace/filesystem/tree/FSNodeEntry";
+import {FileSystemEntry} from "../../../../../../core/project/filesystem/tree/FileSystemEntry";
 import {TabsManager} from "../../../../../core/tabs/TabsManager";
 import {UIHooks} from "../../../../../../core/ui/engine/listeners/hooks/UIHooks";
-import {TabHooks, UICommonHooks, WorkspaceHooks} from "../../../../../core/UICommonHooks";
+import {ProjectHooks, TabHooks, UICommonHooks} from "../../../../../core/UICommonHooks";
 import {EditorTab} from "../../../../../core/tabs/EditorTab";
 import {GlobalState} from "../../../../../../core/global/GlobalState";
+import {FileSystemEvent} from "../../../../../../core/project/events/FileSystemEvent";
 
 /**
  *
@@ -15,29 +16,33 @@ import {GlobalState} from "../../../../../../core/global/GlobalState";
  * @date 3/7/2026
  * @since 1.0.0
  */
-@UIHooks.redrawOn(WorkspaceHooks.WORKSPACE_CHANGED, WorkspaceHooks.PROJECT_FILES_SELECTED_CHANGED, TabHooks.TAB_ACTIVE)
+@UIHooks.redrawOn(ProjectHooks.PROJECT_CHANGED,
+    ProjectHooks.PROJECT_FILES_SELECTED_CHANGED,
+    TabHooks.TAB_ACTIVE,
+    TabHooks.TAB_HIDE)
 export class SEditorBreadcrumbs extends UIComponent {
 
     constructor(root: HTMLElement) {
         super(HTMLUtils.createDiv("column-breadcrumbs", root));
+
+        GlobalState.getMainEventBus().subscribe(this, FileSystemEvent.SUBSCRIBER, () => this.redraw());
     }
 
     draw(): void {
         this.setInnerHTML(``);
 
-        const workspace = ActiveWorkspaceHelper.getInstance();
-        if (!workspace) return;
+        const project = ActiveProjectHelper.getInstance();
+        if (!project) return;
 
         let activeTab = TabsManager.getInstance().getActiveTab();
         if (!activeTab || !(activeTab instanceof EditorTab)) return;
-        let entry: FSNodeEntry | undefined | null = activeTab.getDocument().getAssociatedFile();
+        let entry: FileSystemEntry | undefined | null = activeTab.getDocument().getAssociatedFile();
         if (!entry) return;
 
         let active = true;
         if (ProjectFilesPaneHelper.hasFocus()) {
-            const tree = ProjectFilesPaneHelper.getSelectedTreeEntry();
-            if (!tree) return;
-            entry = tree.getEntry();
+            entry = ProjectFilesPaneHelper.getSelectedTreeEntry();
+            if (!entry) return;
             active = false;
         }
 

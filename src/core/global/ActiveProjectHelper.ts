@@ -1,13 +1,7 @@
-import {Workspace} from "../workspace/Workspace";
-import {CurrentWorkspaceChangedEvent} from "../workspace/events/CurrentWorkspaceChangedEvent";
+import {Project} from "../project/Project";
+import {CurrentProjectChangedEvent} from "../project/events/CurrentProjectChangedEvent";
 import {GlobalState} from "./GlobalState";
-import {WorkspaceFileSystemLoadedEvent} from "../workspace/events/WorkspaceFileSystemLoadedEvent";
-import {DirectoryCreatedEvent} from "../workspace/events/DirectoryCreatedEvent";
-import {FileCreatedEvent} from "../workspace/events/FileCreatedEvent";
-import {DirectoryDeletedEvent} from "../workspace/events/DirectoryDeletedEvent";
-import {FileDeletedEvent} from "../workspace/events/FileDeletedEvent";
-import {DirectoryRenamedEvent} from "../workspace/events/DirectoryRenamedEvent";
-import {FileRenamedEvent} from "../workspace/events/FileRenamedEvent";
+import {ProjectFileSystemLoadedEvent} from "../project/events/ProjectFileSystemLoadedEvent";
 
 /**
  * Holds the current opened project
@@ -16,36 +10,24 @@ import {FileRenamedEvent} from "../workspace/events/FileRenamedEvent";
  * @date 11/14/2025
  * @since 1.0.0
  */
-export class ActiveWorkspaceHelper {
-    private static instance: Workspace | null = null;
+export class ActiveProjectHelper {
+    private static instance: Project | null = null;
 
-    public static getInstance(): Workspace | null {
+    public static getInstance(): Project | null {
         return this.instance;
     }
 
-    public static open(project: Workspace): void {
+    public static open(project: Project): void {
         this.instance = project;
 
-        GlobalState.getMainEventBus().syncPublish(new CurrentWorkspaceChangedEvent());
+        GlobalState.getMainEventBus().syncPublish(new CurrentProjectChangedEvent());
     }
 
-    static onChange(subscriber: any, callback: (ev: CurrentWorkspaceChangedEvent) => void) {
-        GlobalState.getMainEventBus().subscribe(subscriber, CurrentWorkspaceChangedEvent.SUBSCRIBER, callback);
+    static onChange(subscriber: any, callback: (ev: CurrentProjectChangedEvent) => void) {
+        GlobalState.getMainEventBus().subscribe(subscriber, CurrentProjectChangedEvent.SUBSCRIBER, callback);
     }
 
-    static onFilesystemReady(subscriber: any, callback: (ev: WorkspaceFileSystemLoadedEvent) => void) {
-        GlobalState.getMainEventBus().subscribe(subscriber, WorkspaceFileSystemLoadedEvent.SUBSCRIBER, callback);
-    }
-
-    static onWorkspaceChanges(subscriber: any,
-                              createHandler: (ev: DirectoryCreatedEvent | FileCreatedEvent) => void,
-                              deleteHandler: (ev: DirectoryDeletedEvent | FileDeletedEvent) => void,
-                              renameHandler: (ev: DirectoryRenamedEvent | FileRenamedEvent) => void) {
-        GlobalState.getMainEventBus().subscribe(subscriber, DirectoryCreatedEvent.SUBSCRIBER, createHandler);
-        GlobalState.getMainEventBus().subscribe(subscriber, FileCreatedEvent.SUBSCRIBER, createHandler);
-        GlobalState.getMainEventBus().subscribe(subscriber, DirectoryDeletedEvent.SUBSCRIBER, deleteHandler);
-        GlobalState.getMainEventBus().subscribe(subscriber, FileDeletedEvent.SUBSCRIBER, deleteHandler);
-        GlobalState.getMainEventBus().subscribe(subscriber, DirectoryRenamedEvent.SUBSCRIBER, renameHandler);
-        GlobalState.getMainEventBus().subscribe(subscriber, FileRenamedEvent.SUBSCRIBER, renameHandler);
+    static onFilesystemReady(subscriber: any, callback: (ev: ProjectFileSystemLoadedEvent) => void) {
+        GlobalState.getMainEventBus().subscribe(subscriber, ProjectFileSystemLoadedEvent.SUBSCRIBER, callback);
     }
 }

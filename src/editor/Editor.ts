@@ -1,6 +1,6 @@
 import {View} from "./ui/view/View";
 import {TextRange} from "./core/coordinate/range/TextRange";
-import {Caret, CaretModel} from "./core/caret/Caret";
+import {Caret, CaretModel, CaretMovementFlags} from "./core/caret/Caret";
 import {ModifierKeyHolder} from "../core/keybinds/Keybind";
 
 import {HTMLUtils} from "./utils/HTMLUtils";
@@ -34,6 +34,7 @@ import {UndoRedoManager} from "./core/undo/UndoRedoManager";
 import {BehaviorManager} from "./core/behaviors/manager/BehaviorManager";
 import {StandardBehaviorManagerProvider} from "./impl/behaviors/StandardBehaviorManagerProvider";
 import {EditorCharTypedContext} from "./core/behaviors/context/EditorCharTypedContext";
+import {DocumentView} from "./core/document/view/DocumentView";
 
 export class Editor {
     private static ID_COUNTER = 0;
@@ -56,11 +57,12 @@ export class Editor {
     private readonly eventBus: EventBus;
 
     private document: Document;
+    private documentView: DocumentView;
 
     private renderingProcess: any;
     private perfCheckRunning: boolean = false;
 
-    constructor(document: Document) {
+    constructor(documentView: DocumentView) {
         this.id = Editor.ID_COUNTER++;
 
         if (!GlobalState.isReady()) {
@@ -77,13 +79,13 @@ export class Editor {
 
         this.view = new View(this);
 
-        this.document = document;
-        this.document.linkEditor(this);
+        this.document = documentView.getDocument();
+        this.documentView = documentView;
 
         this.inlayManager = new InlayManager(this);
         this.coordinateMapper = new EditorCoordinateMapper(this.view);
 
-        this.caretModel = new CaretModel(this, this.offsetToLogical(document.getSavedCaretOffset()));
+        this.caretModel = new CaretModel(this, this.offsetToLogical(documentView.getCaretOffset()));
     }
 
     isAttached() {
@@ -95,6 +97,7 @@ export class Editor {
 
         Scheduler.defer(() => {
             this.view.onAttached(this.root);
+            this.restoreFromDocumentView()
         });
 
         this.eventBus.asyncPublish(new EditorAttachedEvent(this, this.root));
@@ -103,20 +106,19 @@ export class Editor {
         this._attached = true;
     }
 
-    changeDocument(document: Document) {
-        this.document.saveCaretOffset();
-
+    changeDocument(documentView: DocumentView) {
         this.caretModel.removeAllIncludingPrimary();
         this.widgetManager.clearAllOverlays();
-
         this.document.linkEditor(null);
-        this.document = document;
+
+        this.document = documentView.getDocument();
+        this.documentView = documentView;
 
         this.document.linkEditor(this);
-        this.caretModel.addCaret(this.offsetToLogical(document.getSavedCaretOffset()));
+        this.caretModel.addCaret(this.offsetToLogical(documentView.getCaretOffset()));
 
-        this.view.ensureCaretVisible();
 
+        this.restoreFromDocumentView()
         this.repaintView();
     }
 
@@ -157,6 +159,10 @@ export class Editor {
 
     getOpenedDocument(): Document {
         return this.document;
+    }
+
+    getDocumentView() {
+        return this.documentView;
     }
 
     getCurrentLanguage(): LanguageBase | null {
@@ -451,5 +457,10 @@ export class Editor {
 
     repaintView() {
         this.view.triggerRepaint();
+    }
+
+    private restoreFromDocumentView() {
+        this.caretModel.getPrimary().moveToOffset(this.documentView.getCaretOffset(), CaretMovementFlags.JUMP);
+        this.view.restoreFromDocumentView(this.documentView);
     }
 }
