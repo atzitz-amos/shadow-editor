@@ -13,6 +13,16 @@ export abstract class EditorModeEx implements IEditorMode {
         return null;
     }
 
+    getDisplayName(): string {
+        return "";
+    }
+
+    onEnter() {
+    }
+
+    onExit() {
+    }
+
     getCharTypedBehavior(): EditorBehavior {
         return EditorBehavior.FORWARD_ALL;
     }

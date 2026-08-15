@@ -71,7 +71,7 @@ export class Editor {
 
         this.eventBus = GlobalState.getMainEventBus().createSubBus(`editor-${this.id}.bus`);
 
-        this.behaviorManager = StandardBehaviorManagerProvider.createDefault();
+        this.behaviorManager = StandardBehaviorManagerProvider.createDefault(this);
 
         this.langService = new EditorLangService(this);
         this.widgetManager = new WidgetManager(this);

@@ -10,6 +10,8 @@ import {AstOverlayHighlight} from "../overlays/AstOverlayHighlight";
 import {Editor} from "../../../editor/Editor";
 import {SynDocument} from "../../../lang/syntax/api/document/SynDocument";
 import {SynTreeImpl} from "../../../lang/syntax/impl/tree/SynTreeImpl";
+import {SynParentElement} from "../../../lang/syntax/api/tree/SynParentElement";
+import {AbstractSynParentElement} from "../../../lang/syntax/impl/tree/AbstractSynParentElement";
 
 /**
  *

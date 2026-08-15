@@ -117,11 +117,15 @@ export class SynChildrenIterator {
     next(): SynNode | null {
         if (this.canRecurseInto()) {
             this.enter();
+            // The first child of the level we just entered is the next node,
+            // unless that level is empty (no children) — in which case we
+            // still need to climb/advance to find something.
+            if (this.getCurrent() === null) {
+                this.advance();
+            }
+        } else {
+            this.advance();
         }
-
-        // If we just entered an element with no children (or otherwise landed
-        // on an exhausted level), keep advancing until something is found.
-        this.advance();
 
         return this.getCurrent();
     }

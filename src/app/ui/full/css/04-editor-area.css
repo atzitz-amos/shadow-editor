@@ -181,10 +181,16 @@
 .editor-meta-row {
     display: flex;
     gap: 10px;
-    padding: 4px 12px 5px;
+    padding: 4px 12px 6px;
     font-size: 11px;
     color: #7b8190;
     border-bottom: 1px solid #181d2c;
+    justify-content: space-between;
+}
+
+.editor-meta-row > div {
+    display: flex;
+    gap: 10px;
 }
 
 .column-editor-body, .no-opened-editor-view {

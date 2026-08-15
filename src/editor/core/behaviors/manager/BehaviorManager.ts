@@ -7,6 +7,8 @@ import {ClipboardBehaviorContext} from "../context/ClipboardBehaviorContext";
 import {EditorDeleteContext} from "../context/EditorDeleteContext";
 import {EditorCharTypedContext} from "../context/EditorCharTypedContext";
 import {LanguageBase} from "../../../../lang/LanguageBase";
+import {Editor} from "../../../Editor";
+import {EditorModeChangedEvent} from "../events/EditorModeChangedEvent";
 
 /**
  *
@@ -21,17 +23,29 @@ export class BehaviorManager {
 
     private languageLayerDisabled: boolean = true;
 
-    constructor(languageLayer: ILanguageLayer, standardLayer: IBehaviorProvider) {
+    constructor(private readonly editor: Editor, languageLayer: ILanguageLayer, standardLayer: IBehaviorProvider) {
         this.languageLayer = languageLayer;
         this.standardLayer = standardLayer;
     }
 
     enterMode(mode: IEditorMode) {
+        const oldMode = this.modeStack[this.modeStack.length - 1] ?? null;
+
         this.modeStack.push(mode);
+
+        oldMode?.onExit();
+        mode.onEnter();
+        this.editor.getEventBus().syncPublish(new EditorModeChangedEvent(this.editor, oldMode, mode))
     }
 
     exitMode() {
-        if (this.modeStack.length !== 0) this.modeStack.pop();
+        if (this.modeStack.length !== 0) {
+            const oldMode = this.modeStack.pop()!;
+            const newMode = this.modeStack[this.modeStack.length - 1] ?? null;
+            oldMode.onExit();
+            newMode?.onEnter();
+            this.editor.getEventBus().syncPublish(new EditorModeChangedEvent(this.editor, oldMode, newMode))
+        }
     }
 
     setLanguage(language: LanguageBase | null) {

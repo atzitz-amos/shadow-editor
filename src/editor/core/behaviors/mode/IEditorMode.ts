@@ -8,4 +8,10 @@ import {IBehaviorProvider} from "../IBehaviorProvider";
  */
 export interface IEditorMode extends IBehaviorProvider {
     getCustomRenderer(): any | null;
+
+    getDisplayName(): string;
+
+    onEnter(): void;
+
+    onExit(): void;
 }

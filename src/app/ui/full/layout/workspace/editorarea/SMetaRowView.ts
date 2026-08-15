@@ -5,6 +5,8 @@ import {UIComponent} from "../../../../../../core/ui/engine/components/UICompone
 import {CaretAddedEvent} from "../../../../../../editor/core/caret/events/CaretAddedEvent";
 import {LanguageBase} from "../../../../../../lang/LanguageBase";
 import {EditorLanguageChanged} from "../../../../../../editor/core/lang/events/EditorLanguageChanged";
+import {EditorModeChangedEvent} from "../../../../../../editor/core/behaviors/events/EditorModeChangedEvent";
+import {IEditorMode} from "../../../../../../editor/core/behaviors/mode/IEditorMode";
 
 export class SMetaRowView extends UIComponent {
     private language: string = "Plain Text";
@@ -24,14 +26,23 @@ export class SMetaRowView extends UIComponent {
         GlobalState.getMainEventBus().subscribe(this, EditorLanguageChanged.SUBSCRIBER, (event: EditorLanguageChanged) => {
             this.updateLanguage(event.getLanguage());
         });
+
+        GlobalState.getMainEventBus().subscribe(this, EditorModeChangedEvent.SUBSCRIBER, (event: EditorModeChangedEvent) => {
+            this.updateMode(event.getNewMode());
+        });
     }
 
     draw(): void {
         this.getUnderlyingElement().innerHTML = `
+        <div>
             <span class="meta-lang-editor-info">${this.language}</span>
             <span>UTF-8</span>
             <span>LF</span>
-            <span class="meta-line-col-editor-info">${this.lineCol}</span>`;
+            <span class="meta-line-col-editor-info">${this.lineCol}</span>
+        </div>
+        <div>
+            <span class="meta-mode-editor-info"></span>
+        </div>`;
         this.drawChildren();
     }
 
@@ -43,6 +54,10 @@ export class SMetaRowView extends UIComponent {
     private updateLanguage(lang: LanguageBase | null) {
         this.language = lang ? lang.getDisplayName() : "Plain Text";
         this.redraw();
+    }
+
+    private updateMode(newMode: IEditorMode | null) {
+        this.getUnderlyingElement().querySelector(".meta-mode-editor-info")!.textContent = newMode ? newMode.getDisplayName() : "";
     }
 }
 
