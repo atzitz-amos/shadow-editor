@@ -3,7 +3,6 @@ import {JsLexicalGrammar} from "../lang/lexer/JsLexicalGrammar";
 import {JsGrammar} from "../lang/parser/JsGrammar";
 import {JsArrowFunctionExpr} from "../lang/syntax/expr/JsArrowFunctionExpr";
 import {JsFunction} from "../lang/syntax/api/JsFunction";
-import {SynCodeBlock} from "../../../lang/syntax/api/SynCodeBlock";
 import {JsCodeBlock} from "../lang/syntax/JsCodeBlock";
 
 /**
@@ -13,6 +12,10 @@ import {JsCodeBlock} from "../lang/syntax/JsCodeBlock";
  * @since 1.0.0
  */
 export class JsSpacingRules {
+    public static readonly SPACE_BEFORE_LINE_COMMENT = new SpacingRule("Space before line comment")
+        .before(JsLexicalGrammar.SINGLE_LINE_COMMENT)
+        .space();
+
     public static readonly SPACE_BEFORE_IF_PAREN = new SpacingRule("Space before '(' of if statements")
         .before(JsLexicalGrammar.LPAREN)
         .in(JsGrammar.IfClause)
@@ -32,7 +35,7 @@ export class JsSpacingRules {
         .space();
 
     public static readonly SPACE_BEFORE_DO_WHILE_PAREN = new SpacingRule("Space before '(' of do while statements")
-        .before(JsLexicalGrammar.LPAREN)
+        .after(JsLexicalGrammar.LPAREN)
         .in(JsGrammar.DoWhileStatement)
         .space();
 
@@ -76,6 +79,21 @@ export class JsSpacingRules {
         .in(JsGrammar.NewExpr)
         .noSpace();
 
+    public static readonly SPACE_BEFORE_ELSE = new SpacingRule("Space before 'else'")
+        .before(JsLexicalGrammar.KEYWORD)
+        .in(JsGrammar.ElseClause)
+        .space();
+
+    public static readonly SPACE_BEFORE_CATCH = new SpacingRule("Space before 'catch'")
+        .before(JsLexicalGrammar.KEYWORD)
+        .in(JsGrammar.CatchClause)
+        .space();
+
+    public static readonly SPACE_BEFORE_FINALLY = new SpacingRule("Space before 'finally'")
+        .before(JsLexicalGrammar.KEYWORD)
+        .in(JsGrammar.FinallyClause)
+        .space();
+
     public static readonly SPACE_AFTER_COMMA_IN_FUNCTION_CALL = new SpacingRule("Space after ',' in function calls")
         .after(JsLexicalGrammar.COMMA)
         .in(JsGrammar.CallExpr)
@@ -92,14 +110,20 @@ export class JsSpacingRules {
         .in(JsGrammar.ArrayLiteral)
         .space();
 
-    public static readonly SPACE_AFTER_COMMA_IN_COMMA_EXPR = new SpacingRule("Space after ',' in comma expressions")
+    public static readonly SPACE_AFTER_COMMA_IN_PATTERN_DESTRUCTURING = new SpacingRule("Space after ',' in pattern destructuring")
         .after(JsLexicalGrammar.COMMA)
-        .in(JsGrammar.CommaExpr)
+        .in(JsGrammar.DestructuringListPattern)
+        .in(JsGrammar.DestructuringObjectPattern)
         .space();
 
     public static readonly SPACE_AFTER_COMMA_IN_DECLARATION = new SpacingRule("Space after ',' in variable declarations")
         .after(JsLexicalGrammar.COMMA)
         .in(JsGrammar.VariableDeclaration)
+        .space();
+
+    public static readonly SPACE_AFTER_COMMA_IN_OBJECT_LITERAL = new SpacingRule("Space after ',' in object literals")
+        .after(JsLexicalGrammar.COMMA)
+        .in(JsGrammar.ObjectLiteral)
         .space();
 
     public static readonly SPACE_AFTER_SEMICOLON_IN_FOR = new SpacingRule("Space after ';' in for statements")
@@ -114,6 +138,7 @@ export class JsSpacingRules {
     public static readonly NO_SPACE_BEFORE_COMMA = new SpacingRule("No space before comma")
         .before(JsLexicalGrammar.COMMA)
         .noSpace();
+
 
     public static readonly SPACE_AROUND_MATH_OPERATOR = new SpacingRule("Space around math operator")
         .around(JsLexicalGrammar.MATHEMATICAL_OPERATOR)
@@ -136,10 +161,12 @@ export class JsSpacingRules {
         .space();
 
     public static readonly SPACE_AFTER_PREFIX_OPERATOR = new SpacingRule("Space after prefix operator")
+        .after(JsLexicalGrammar.POSTFIX_OPERATOR)
         .in(JsGrammar.PrefixOperator)
         .noSpace();
 
     public static readonly SPACE_BEFORE_POSTFIX_OPERATOR = new SpacingRule("Space around postfix operator")
+        .before(JsLexicalGrammar.POSTFIX_OPERATOR)
         .in(JsGrammar.PostfixOperator)
         .noSpace();
 
@@ -221,3 +248,4 @@ export class JsSpacingRules {
         .withPriority(-1)
         .noSpace();
 }
+

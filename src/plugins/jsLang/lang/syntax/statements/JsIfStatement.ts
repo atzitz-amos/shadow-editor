@@ -1,4 +1,6 @@
 import {JsStatement} from "./JsStatement";
+import {ASTNode} from "../../../../../lang/syntax/builder/parser/nodes/ASTNode";
+import {SynASTElement} from "../../../../../lang/syntax/api/tree/SynASTElement";
 
 /**
  *
@@ -8,4 +10,7 @@ import {JsStatement} from "./JsStatement";
  */
 export class JsIfStatement extends JsStatement {
 
+    constructor(node: ASTNode) {
+        super(node);
+    }
 }

@@ -63,6 +63,11 @@ export class SpacingRule {
         return this;
     }
 
+    public atLeastOneSpace(): this {
+        this.spacingResult = Spacing.AT_LEAST_ONE;
+        return this;
+    }
+
     public keepSpace(): this {
         this.spacingResult = Spacing.KEEP;
         return this;
@@ -101,6 +106,10 @@ export class SpacingRule {
     }
 
     public isApplicable(prevToken: Token | null, nextToken: Token, synNode: SynASTElement): boolean {
+        if (!synNode.getASTNode) {
+            console.log(synNode);
+        }
+
         if (this.inConditions.length > 0 && !this.inConditions.includes(synNode.getASTNode().type)) {
             return false;
         } else if (this.ifCondition && !this.ifCondition(prevToken, nextToken, synNode)) {
@@ -116,5 +125,6 @@ export class SpacingRule {
 export enum Spacing {
     NONE,
     ONE,
+    AT_LEAST_ONE,
     KEEP
 }

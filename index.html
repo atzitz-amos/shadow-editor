@@ -98,7 +98,7 @@
 
             window.GlobalState = GlobalState;
 
-            window.SpacingFormatter = SpacingFormatter.make(JsSpacingRules);
+            window.SpacingFormatter = SpacingFormatter.make(JsSpacingRules, [JsLexicalGrammar.WHITESPACE], [JsLexicalGrammar.EOL]);
             window.SynTreeOffsetJumper = SynTreeOffsetJumper;
 
             if (!app) {

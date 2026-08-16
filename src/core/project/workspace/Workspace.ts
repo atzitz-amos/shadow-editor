@@ -29,8 +29,6 @@ export class Workspace implements Serializable {
     }
 
     updateTab(tab: EditorTab) {
-        console.log("Updated tab:", tab);
-
         const file = tab.getDocument().getAssociatedFile();
         if (!file) return;
 
@@ -42,8 +40,6 @@ export class Workspace implements Serializable {
     }
 
     closeTab(tab: EditorTab) {
-        console.log("Closed tab:", tab, this.tabs)
-
         this.tabs.delete(tab.getId());
         if (tab.isActive()) {
             this.activeTab = null;

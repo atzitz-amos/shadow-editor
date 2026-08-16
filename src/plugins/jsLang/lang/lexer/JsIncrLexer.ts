@@ -256,6 +256,10 @@ export default class JsIncrLexer extends IncrementalLexer {
                 return new Token(JsLexicalGrammar.BITWISE_OPERATOR, double, input.getRange(start));
             case "**":
                 input.jump(1);
+                if (input.seek() === "=") {
+                    input.jump(1);
+                    return new Token(JsLexicalGrammar.ASSIGNMENT_OPERATOR, "**=", input.getRange(start));
+                }
                 return new Token(JsLexicalGrammar.MATHEMATICAL_OPERATOR, double, input.getRange(start));
             case "?.":
                 input.jump(1);

@@ -56,7 +56,6 @@ export class DocumentViewManager {
         Scrolling.addScrollListener((doc, x, y) => {
             Scheduler.debounce(() => {
                 const view = DocumentViewManager.getSavedDocumentView(doc);
-                console.log("Scroll", x, y);
                 view.setScrollX(x);
                 view.setScrollY(y);
             }, 1000);

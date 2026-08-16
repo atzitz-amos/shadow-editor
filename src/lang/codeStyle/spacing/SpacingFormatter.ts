@@ -5,9 +5,8 @@ import {TokenStream} from "../../syntax/builder/tokens/TokenStream";
 import {SynTree} from "../../syntax/api/tree/SynTree";
 import {SynTreeTokenJumper} from "../utils/SynTreeTokenJumper";
 import {Token} from "../../syntax/builder/tokens/Token";
-import {JsLexicalGrammar} from "../../../plugins/jsLang/lang/lexer/JsLexicalGrammar";
-import {SynASTElementImpl} from "../../syntax/impl/tree/SynASTElementImpl";
 import {SynASTElement} from "../../syntax/api/tree/SynASTElement";
+import {SynASTElementImpl} from "../../syntax/impl/tree/SynASTElementImpl";
 
 /**
  *
@@ -20,7 +19,7 @@ export class SpacingFormatter {
     private readonly beforeRules: DefaultRegistry<TokenType, SpacingRule> = new DefaultRegistry()
     private readonly afterRules: DefaultRegistry<TokenType, SpacingRule> = new DefaultRegistry();
 
-    constructor(rules: SpacingRule[]) {
+    constructor(rules: SpacingRule[], private readonly whitespaceGroup: TokenType[], private readonly newlineGroup: TokenType[]) {
         for (const rule of rules) {
             if (rule.isBlankRule()) {
                 this.blankRules.push(rule);
@@ -35,7 +34,7 @@ export class SpacingFormatter {
         }
     }
 
-    public static make(cls: Constructor): SpacingFormatter {
+    public static make(cls: Constructor, whitespaceGroup: TokenType[], newlineGroup: TokenType[]): SpacingFormatter {
         const rules: SpacingRule[] = [];
         for (const key of Object.getOwnPropertyNames(cls)) {
             const value = (cls as any)[key];
@@ -44,55 +43,58 @@ export class SpacingFormatter {
             }
         }
 
-        return new SpacingFormatter(rules);
+        return new SpacingFormatter(rules,whitespaceGroup, newlineGroup);
     }
 
-    public format(stream: TokenStream, tree: SynTree, ...whitespaceGroup: TokenType[]) {
+    public format(stream: TokenStream, tree: SynTree) {
         const jumper = new SynTreeTokenJumper(tree);
 
         let result = "";
 
+        let isLineBegin: boolean = true;
         let currentWhitespace: Token | null = null;
         let prevToken: Token | null = null;
         let prevNode: SynASTElement | null = null;
         let index = 0;
 
         for (const token of stream) {
-            if (token.shouldSkip() || token.isCommentToken()) {
-                if (whitespaceGroup.includes(token.getType())) currentWhitespace = token;
+            if (token.shouldSkip()) {
+                if (this.whitespaceGroup.includes(token.getType())) currentWhitespace = token;
                 else {
                     result += token.getValue();
                     currentWhitespace = null;
                     prevNode = null;
                     prevToken = null;
+                    isLineBegin = this.newlineGroup.includes(token.getType());
                 }
                 index++;
                 continue;
             }
 
-            const node = jumper.jumpToToken(token);
-            if (node === null) {
-                throw new Error(`Token ${token.getValue()} not found in syntax tree.`);
-            }
-
             let applicableRule: SpacingRule | null = null;
-            for (const rule of this.blankRules) {
-                if (rule.isApplicable(prevToken, token, node) && rule.getPriority() > (applicableRule?.getPriority() ?? -10)) {
-                    applicableRule = rule;
-                }
-            }
 
-            for (const rule of this.beforeRules.getAll(token.getType())) {
-                if (rule.isApplicable(prevToken, token, node) && rule.getPriority() > (applicableRule?.getPriority() ?? -10)) {
-                    applicableRule = rule;
-                }
-            }
-
-
-            if (prevToken) {
-                for (const rule of this.afterRules.getAll(prevToken.getType())) {
-                    if (rule.isApplicable(prevToken, token, prevNode!) && rule.getPriority() > (applicableRule?.getPriority() ?? -10)) {
+            const node = jumper.jumpToToken(token);
+            if (isLineBegin) {
+                isLineBegin = false; // never space line begin, that's up to indentation
+            } else if (node instanceof SynASTElementImpl) {
+                for (const rule of this.blankRules) {
+                    if (rule.isApplicable(prevToken, token, node) && rule.getPriority() > (applicableRule?.getPriority() ?? -10)) {
                         applicableRule = rule;
+                    }
+                }
+
+                for (const rule of this.beforeRules.getAll(token.getType())) {
+                    if (rule.isApplicable(prevToken, token, node) && rule.getPriority() > (applicableRule?.getPriority() ?? -10)) {
+                        applicableRule = rule;
+                    }
+                }
+
+
+                if (prevToken) {
+                    for (const rule of this.afterRules.getAll(prevToken.getType())) {
+                        if (rule.isApplicable(prevToken, token, prevNode!) && rule.getPriority() > (applicableRule?.getPriority() ?? -10)) {
+                            applicableRule = rule;
+                        }
                     }
                 }
             }
@@ -121,6 +123,8 @@ export class SpacingFormatter {
                 return " ";
             case Spacing.NONE:
                 return "";
+            case Spacing.AT_LEAST_ONE:
+                return current.length > 0 ? current : " ";
         }
     }
 }

@@ -113,8 +113,8 @@ export class JsGrammar {
     public static readonly ArrowFunctionExpression = ASTGrammar.create("ArrowFunctionExpression", JsArrowFunctionExpr.builder());
 
 
-    public static readonly CommaExpr = ASTGrammar.create("CommaExpr", JsExpr.builder());
-    public static readonly EmptyCommaExpr = ASTGrammar.create("EmptyCommaExpr", JsExpr.builder());
+    public static readonly CommaExpr = ASTGrammar.create("CommaExpr");
+    public static readonly EmptyCommaExpr = ASTGrammar.create("EmptyCommaExpr");
 
     public static readonly DestructuringListPattern = ASTGrammar.create("DestructuringListPattern", JsArrayDestructuringPatternExpr.builder());
     public static readonly DestructuringObjectPattern = ASTGrammar.create("DestructuringObjectPattern", JsExpr.builder());

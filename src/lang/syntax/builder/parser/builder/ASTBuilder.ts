@@ -90,6 +90,8 @@ export class ASTBuilder {
         const length = node.getTextRange().getLength();   // invariant: unchanged text ⇒ unchanged length
         const tokenCount = node.getTokenCount();
 
+        this.clearWhitespace();
+
         this.production.push(node);
 
         // Advance builder state exactly as if we'd parsed this span for real.
@@ -97,7 +99,7 @@ export class ASTBuilder {
         this.lastTokenOffset = newOffset;
         this.currentOffset = newOffset;
 
-        this.stream.jumpN(tokenCount + 1);
+        this.stream.jumpN(tokenCount);
 
         this.wasInErrorState = this.isErrorState;
         this.isErrorState = false;
