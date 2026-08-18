@@ -1,6 +1,7 @@
 import {DeleteForwardBehavior} from "../../../core/behaviors/behavior/DeleteForwardBehavior";
 import {EditorDeleteContext} from "../../../core/behaviors/context/EditorDeleteContext";
 import {BehaviorHandlingMode} from "../../../core/behaviors/manager/BehaviorHandlingMode";
+import {UndoStack} from "../../../core/undo/UndoStack";
 
 /**
  *
@@ -13,9 +14,11 @@ export class DefaultDeleteForwardBehavior extends DeleteForwardBehavior {
         const editor = context.getEditor();
         const caret = context.getCaret();
 
-        if (context.hasSelectionActive()) editor.deleteSelection(caret);
-        else if (!caret.isBeforeInlay()) editor.deleteAt(caret.getOffset());
-        else caret.shiftRight();
+        UndoStack.undoableAction(editor, "delete", () => {
+            if (context.hasSelectionActive()) editor.deleteSelection(caret);
+            else if (!caret.isBeforeInlay()) editor.deleteAt(caret.getOffset());
+            else caret.shiftRight();
+        });
 
         return BehaviorHandlingMode.HANDLED;
     }

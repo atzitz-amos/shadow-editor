@@ -2,6 +2,7 @@ import {EditorDeleteContext} from "../../../core/behaviors/context/EditorDeleteC
 import {BehaviorHandlingMode} from "../../../core/behaviors/manager/BehaviorHandlingMode";
 import {EnterPressedBehavior} from "../../../core/behaviors/behavior/EnterPressedBehavior";
 import {ModifierKeyHolder} from "../../../../core/keybinds/Keybind";
+import {UndoStack} from "../../../core/undo/UndoStack";
 
 /**
  *
@@ -28,7 +29,9 @@ export class DefaultEnterPressedBehavior extends EnterPressedBehavior {
             indent = Math.min(indent, caret.getLogical().col);
         }
 
-        editor.typeForCaret(caret, "\n" + " ".repeat(indent), !ModifierKeyHolder.isCtrlPressed());
+        UndoStack.undoableAction(editor, "enter", () => {
+            editor.typeForCaret(caret, "\n" + " ".repeat(indent), !ModifierKeyHolder.isCtrlPressed());
+        });
 
         return BehaviorHandlingMode.HANDLED;
     }

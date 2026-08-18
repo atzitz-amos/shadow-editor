@@ -26,6 +26,7 @@ import {SynSuiteEngine} from "../../app/testLib/lang/suite/SynSuiteEngine";
 import {CodeAnalysisService} from "../../lang/codeAnalysis/analysis/CodeAnalysisService";
 import {WorkspaceManager} from "../project/workspace/WorkspaceManager";
 import {WorkspaceRestorer} from "../project/WorkspaceRestorer";
+import {LatencyMonitor} from "../../editor/core/latency/LatencyMonitor";
 
 /**
  * Provides a single class that regroups all useful singletons and global services of the application
@@ -56,6 +57,10 @@ export class GlobalState {
 
     public static getLifecycle(): Lifecycle {
         return Lifecycle.getInstance();
+    }
+
+    public static getLatencyMonitor(): LatencyMonitor {
+        return LatencyMonitor.getInstance();
     }
 
     public static getCurrentProject(): Project {

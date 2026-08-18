@@ -42,7 +42,6 @@ export abstract class SmartAutoCloseInsertAction extends SmartInlineInsertAction
             const offset = caret.getOffset();
             const closeChar = this.closeables[ctx.getContent()];
             editor.insertText(offset, ctx.getContent() + closeChar);
-            editor.getOpenedDocument().getUndoRedoStack().onTyped(caret, offset, ctx.getContent() + closeChar);
             if (ctx.shouldMoveCaret()) {
                 caret.moveToOffset(offset + 1);
                 caret.refresh();

@@ -36,7 +36,7 @@ export class Document {
     private readonly highlightsHolder: HighlightHolder;
     private annotationsHolder: HighlightHolder;
 
-    private readonly myUndoRedoStack: UndoRedoActionStack = new UndoRedoActionStack();
+    private readonly myUndoRedoStack: UndoRedoActionStack = new UndoRedoActionStack(this);
 
     private trackedRanges: WeakRef<TrackedRange>[] = []
 
@@ -210,6 +210,7 @@ export class Document {
         }
 
         this.maybeSave();
+        this.myUndoRedoStack.addInsert(offset, text)
     }
 
     public deleteAt(at: Offset, n: number): string {
@@ -226,23 +227,13 @@ export class Document {
         }
 
         this.maybeSave();
+        this.myUndoRedoStack.addDelete(at, deleted);
         return deleted;
     }
 
     public replaceRange(range: TextRange, text: string): string {
-        let deleted = this.data.delete(range.start, range.getLength());
-        this.modificationTimestamp++;
-
-        this.recomputeLines(range.start, deleted, true);
-
-        if (this.isLinkedToEditor()) {
-            let affectedRange = new TextRange(range.start, range.end);
-            this.editor!.getEventBus().syncPublish(new DocumentModificationEvent(this, affectedRange, null, deleted));
-            this.editor!.getEventBus().asyncPublish(new DocumentDeleteEvent(this, affectedRange));
-        }
-
+        const deleted = this.deleteAt(range.start, range.getLength())
         this.insertText(range.start, text);
-
         return deleted;
     }
 

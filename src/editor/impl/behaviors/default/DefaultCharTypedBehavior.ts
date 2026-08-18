@@ -1,6 +1,7 @@
 import {BehaviorHandlingMode} from "../../../core/behaviors/manager/BehaviorHandlingMode";
 import {CharTypedBehavior} from "../../../core/behaviors/behavior/CharTypedBehavior";
 import {EditorCharTypedContext} from "../../../core/behaviors/context/EditorCharTypedContext";
+import {UndoStack} from "../../../core/undo/UndoStack";
 
 /**
  *
@@ -13,17 +14,20 @@ export class DefaultCharTypedBehavior extends CharTypedBehavior {
         const caret = context.getCaret();
         const editor = context.getEditor();
 
-        if (caret.getSelectionModel().isSelectionActive) {
-            editor.deleteSelection(caret);
-        }
+        UndoStack.undoableAction(editor, "type", () => {
+            if (caret.getSelectionModel().isSelectionActive) {
+                editor.deleteSelection(caret);
+            }
 
-        let offset = caret.getOffset();
-        editor.insertText(offset, context.getContent())
-        editor.getOpenedDocument().getUndoRedoStack().onTyped(caret, offset, context.getContent());
-        if (context.shouldMoveCaret()) {
-            caret.moveToOffset(offset + context.getContent().length);
-            caret.refresh();
-        }
+            let offset = caret.getOffset();
+            editor.insertText(offset, context.getContent())
+
+            if (context.shouldMoveCaret()) {
+                caret.moveToOffset(offset + context.getContent().length);
+                caret.refresh();
+            }
+        }, true);
+
         editor.getView().resetBlink();
 
         return BehaviorHandlingMode.HANDLED;

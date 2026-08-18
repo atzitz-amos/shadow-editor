@@ -1,158 +1,105 @@
-import {UndoableAction} from "./actions/UndoableAction";
-import {Caret} from "../caret/Caret";
-import {DeleteTextAction} from "./actions/text/DeleteTextAction";
-import {InsertTextAction} from "./actions/text/InsertTextAction";
-import {TextEditAction} from "./actions/text/TextEditAction";
-import {BulkTextEditAction} from "./actions/text/BulkTextEditAction";
-import {TextRange} from "../coordinate/range/TextRange";
-import {ReplaceTextAction} from "./actions/text/ReplaceTextAction";
+import {UndoStackFrame} from "./frame/UndoStackFrame";
+import {Document} from "../document/Document";
+import {UndoStack} from "./UndoStack";
+import {Editor} from "../../Editor";
 
 /**
  *
  * @author Atzitz Amos
- * @date 6/5/2026
+ * @date 8/17/2026
  * @since 1.0.0
  */
-class PartialEdit {
-    public constructor(public readonly type: "insert" | "delete", public readonly offset: number, public text: string) {
-    }
-
-    public getNewLocation(): number {
-        if (this.type === "insert") {
-            return this.offset + this.text.length;
-        } else {
-            return this.offset;
-        }
-    }
-
-    appendText(text: string) {
-        this.text += text;
-    }
-}
-
 export class UndoRedoActionStack {
-    private head: UndoableActionStackNode = UndoableActionStackNode.head();
-    private current: UndoableActionStackNode = this.head;
+    private readonly frameStack: UndoStackFrame[] = [];
+    private readonly redoStack: UndoStackFrame[] = [];
 
-    private partialEdits: Map<Caret, PartialEdit> = new Map();
+    private currentFrame: UndoStackFrame | null = null;
 
-    push(action: UndoableAction) {
-        const newNode = new UndoableActionStackNode(action);
-        if (this.current) {
-            this.current.linkNext(newNode);
+    constructor(private readonly document: Document) {
+    }
+
+    public startUndoableAction(editor: Editor, name: string, transparent: boolean = false): boolean {
+        if (this.currentFrame) return false;
+        this.currentFrame = new UndoStackFrame(name, transparent);
+        this.currentFrame.setOld(editor.getPrimaryCaret().getOffset(), editor.getPrimaryCaret().getSelectionModel().copyRange());
+
+        this.redoStack.length = 0;
+
+        console.log(`Starting undoable action '${name}': oldOffset=${editor.getPrimaryCaret().getOffset()}, oldSelection=${editor.getPrimaryCaret().getSelectionModel().copyRange()}`)
+        return true;
+    }
+
+    public finishUndoableAction(editor: Editor) {
+        if (!this.currentFrame) throw new Error("No undo frame to finish");
+        const last = this.top();
+
+        this.currentFrame.setNew(editor.getPrimaryCaret().getOffset(), editor.getPrimaryCaret().getSelectionModel().copyRange());
+        if (last && last.canMergeWith(this.currentFrame)) {
+            last.merge(this.currentFrame);
+            console.log("Merging undoable action:", last);
         } else {
-            this.head.linkNext(newNode);
-        }
-        this.current = newNode;
-    }
-
-    getCurrent(): UndoableAction | null {
-        return this.current.action;
-    }
-
-    getNext() {
-        return this.current.next ? this.current.next.action : null;
-    }
-
-    undo() {
-        if (this.current.prev) {
-            this.current = this.current.prev;
-        }
-    }
-
-    redo() {
-        if (this.current.next) {
-            this.current = this.current.next;
-        }
-    }
-
-    clear() {
-        this.current = this.head;
-        this.partialEdits.clear();
-    }
-
-    canUndo() {
-        return this.current !== this.head;
-    }
-
-    canRedo() {
-        return this.current.next !== null;
-    }
-
-    public onTyped(caret: Caret, offset: Offset, text: string) {
-        let existing = this.partialEdits.get(caret);
-        if (existing && (existing.type !== "insert" || existing.getNewLocation() !== offset)) {
-            this.commitPartialEdits();
-            existing = undefined;
+            this.frameStack.push(this.currentFrame);
+            console.log(`Finishing undoable action:`, this.currentFrame)
         }
 
-        if (!existing) {
-            this.partialEdits.set(caret, new PartialEdit("insert", offset, text));
-        } else {
-            existing.appendText(text);
+        this.currentFrame = null;
+    }
+
+    public top(): UndoStackFrame {
+        return this.frameStack[this.frameStack.length - 1];
+    }
+
+    public addInsert(offset: Offset, text: string) {
+        if (UndoStack.undoing || !this.currentFrame) return;
+        if (!this.currentFrame) {
+            console.error("Attempting document modification without an active UndoActionStack");
+            this.currentFrame = new UndoStackFrame("default", true);
         }
+        this.currentFrame.addAction('insert', offset, text);
     }
 
-    public onDeleted(caret: Caret, offset: Offset, text: string) {
-        let existing = this.partialEdits.get(caret);
-        if (existing && (existing.type !== "delete" || existing.getNewLocation() !== offset)) {
-            this.commitPartialEdits();
-            existing = undefined;
+    public addDelete(offset: Offset, text: string) {
+        if (UndoStack.undoing) return;
+        if (!this.currentFrame) {
+            console.warn("Attempting document modification without an active UndoActionStack");
+            this.currentFrame = new UndoStackFrame("default", true);
         }
+        this.currentFrame.addAction('delete', offset, text);
+    }
 
-        if (!existing) {
-            this.partialEdits.set(caret, new PartialEdit("delete", offset, text));
-        } else {
-            existing.appendText(text);
+    undo(editor: Editor) {
+        if (this.currentFrame) {
+            console.warn("Uncommited undo action frame on undo attempt");
+            this.finishUndoableAction(editor);
         }
+        UndoStack.whileUndoing(() => {
+            const frame = this.frameStack.pop();
+            if (!frame) return;
+
+            if (!frame.undo(editor, editor.getOpenedDocument()))
+                this.frameStack.push(frame);
+            else
+                this.redoStack.push(frame);
+        });
     }
 
-    public commitPartialEdits() {
-        if (this.partialEdits.size > 0) {
-            const edits: TextEditAction[] = [];
-            for (const [caret, edit] of this.partialEdits.entries()) {
-                if (edit.type === "insert") edits.push(new InsertTextAction(edit.offset, edit.text, caret.isPrimary));
-                else edits.push(new DeleteTextAction(edit.offset, edit.text, caret.isPrimary));
-            }
-
-            this.push(new BulkTextEditAction(edits));
+    redo(editor: Editor) {
+        if (this.currentFrame) {
+            console.warn("Uncommited undo action frame on undo attempt");
+            this.finishUndoableAction(editor);
         }
+        UndoStack.whileUndoing(() => {
+            const frame = this.redoStack.pop();
+            if (!frame) return;
 
-        this.partialEdits.clear();
+            if (!frame.redo(editor, editor.getOpenedDocument()))
+                this.redoStack.push(frame);
+            else
+                this.frameStack.push(frame);
+        });
     }
 
-    public printAll() {
-        let node: UndoableActionStackNode = this.current;
-        const actions: UndoableAction[] = [];
-        while (node !== this.head) {
-            if (node.action) actions.push(node.action);
-            node = node.prev;
-        }
-    }
-
-    onReplaced(caret: Caret, old: Offset, range: TextRange, oldText: string, newText: string) {
-        this.commitPartialEdits();
-        this.push(new BulkTextEditAction([new ReplaceTextAction(old, caret.getOffset(), range, oldText, newText)]));
-    }
-}
-
-class UndoableActionStackNode {
-    action: UndoableAction | null;
-    prev: UndoableActionStackNode;
-    next: UndoableActionStackNode | null = null;
-
-    constructor(action: UndoableAction | null) {
-        this.action = action;
-    }
-
-    static head() {
-        const head = new UndoableActionStackNode(null);
-        head.prev = head;
-        return head;
-    }
-
-    linkNext(node: UndoableActionStackNode) {
-        this.next = node;
-        node.prev = this; // so we can safely assume prev is always set
+    discardFrame() {
+        this.frameStack.pop();
     }
 }

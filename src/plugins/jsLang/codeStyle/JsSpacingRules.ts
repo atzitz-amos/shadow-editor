@@ -3,7 +3,6 @@ import {JsLexicalGrammar} from "../lang/lexer/JsLexicalGrammar";
 import {JsGrammar} from "../lang/parser/JsGrammar";
 import {JsArrowFunctionExpr} from "../lang/syntax/expr/JsArrowFunctionExpr";
 import {JsFunction} from "../lang/syntax/api/JsFunction";
-import {JsCodeBlock} from "../lang/syntax/JsCodeBlock";
 
 /**
  *
@@ -198,14 +197,15 @@ export class JsSpacingRules {
         .in(JsGrammar.TernaryExpr)
         .space();
 
+    public static readonly SPACE_AFTER_OBJECT_COLON = new SpacingRule("Space after ':' in object literals")
+        .after(JsLexicalGrammar.COLON)
+        .in(JsGrammar.ObjectPropertyKey)
+        .in(JsGrammar.DestructuringObjectPattern)
+        .space();
+
     public static readonly SPACE_BEFORE_CODEBLOCK = new SpacingRule("Space before code block")
         .before(JsLexicalGrammar.LBRACE)
         .in(JsGrammar.CodeBlock)
-        .space();
-
-    public static readonly SPACE_BEFORE_IMPLICIT_CODEBLOCK = new SpacingRule("Space before implicit code block")
-        .in(JsGrammar.CodeBlock)
-        .if((p, n, node) => (node as JsCodeBlock).isImplicit())
         .space();
 
     public static readonly DEFAULT_RULE_SPACE_AFTER_KEYWORD = new SpacingRule("Space after keyword")

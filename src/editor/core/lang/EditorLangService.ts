@@ -131,11 +131,11 @@ export class EditorLangService {
         this.currentLanguage.createParser(builder).parse();
         time0 = performance.now() - time0;
 
-        console.log("Successfully parsed "
-            + this.editor.getOpenedDocument().getLineCount()
-            + " lines (" + this.editor.getOpenedDocument().getTotalDocumentLength()
-            + " chars) in "
-            + time0 + "ms");
+        // console.log("Successfully parsed "
+        //     + this.editor.getOpenedDocument().getLineCount()
+        //     + " lines (" + this.editor.getOpenedDocument().getTotalDocumentLength()
+        //     + " chars) in "
+        //     + time0 + "ms");
         // if (!recoveryInfo || builder.getStatistics().recoveryMode === 'disabled') {
         //     console.log(`Recovery parser: disabled`);
         // } else {

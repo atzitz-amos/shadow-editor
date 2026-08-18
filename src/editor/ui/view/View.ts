@@ -12,7 +12,7 @@ import {XYPoint} from "../../core/coordinate/XYPoint";
 import {EditorKeyContextManager} from "../../core/keycontext/EditorKeyContextManager";
 import {TextRange} from "../../core/coordinate/range/TextRange";
 import {CaretMovementFlags} from "../../core/caret/Caret";
-import { DocumentView } from "../../core/document/view/DocumentView";
+import {DocumentView} from "../../core/document/view/DocumentView";
 
 
 export class View {
@@ -293,6 +293,12 @@ export class View {
         return !(endLine < this.scrolling.scrollYLines || startLine > this.scrolling.scrollYLines + this.getVisualLineCount());
     }
 
+    restoreFromDocumentView(view: DocumentView) {
+        if (this.scrolling) {
+            this.scrolling.scrollTo(view.getScrollX(), view.getScrollY(), ScrollMode.Instant);
+        }
+    }
+
     private scrollIntoViewAlongX(position: number, scrollStart: number, scrollEnd: number): number | null {
         if (position > scrollStart && position < scrollEnd) {
             return null;  // Already in view
@@ -343,11 +349,5 @@ export class View {
         });
 
         this.myPainter.getGutter().initCSS();
-    }
-
-    restoreFromDocumentView(view: DocumentView) {
-        if (this.scrolling) {
-            this.scrolling.scrollTo(view.getScrollX(), view.getScrollY(), ScrollMode.Instant);
-        }
     }
 }

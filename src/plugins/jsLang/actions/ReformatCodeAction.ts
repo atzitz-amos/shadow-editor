@@ -5,6 +5,7 @@ import {SpacingFormatter} from "../../../lang/codeStyle/spacing/SpacingFormatter
 import {JsSpacingRules} from "../codeStyle/JsSpacingRules";
 import {JsLexicalGrammar} from "../lang/lexer/JsLexicalGrammar";
 import {SynDocumentManager} from "../../../lang/syntax/manager/SynDocumentManager";
+import {UndoStack} from "../../../editor/core/undo/UndoStack";
 
 /**
  *
@@ -26,7 +27,10 @@ export default class ReformatCodeAction extends AbstractAction {
 
             const text = this.formatter.format(stream, synDocument.getTree());
             console.log(text);
-            editor.replaceRange(editor.getFullRange(), text);
+
+            UndoStack.undoableAction(editor, "reformatCode", () => {
+                editor.replaceRange(editor.getFullRange(), text);
+            });
         }
     }
 

@@ -3,6 +3,7 @@ import {KeybindContext} from "../../../core/keybinds/context/KeybindContext";
 import {Key} from "../../../core/keybinds/Keybind";
 import {KeybindContextDescriptor} from "../../../core/keybinds/context/KeybindContextDescriptor";
 import {ClipboardUtils} from "../../core/clipboard/ClipboardUtils";
+import {UndoStack} from "../../core/undo/UndoStack";
 
 /**
  *
@@ -73,15 +74,17 @@ export class CutAction extends AbstractAction {
         const editor = ctx.requireEditor();
         const caret = editor.getPrimaryCaret();
 
-        if (!caret.getSelectionModel().isSelectionActive) {
-            let line = editor.getOpenedDocument().getLineAt(caret.getOffset());
-            const text = editor.getOpenedDocument().substring(line.getStart(), line.getEnd());
-            editor.deleteWholeLine(caret);
-            ClipboardUtils.copyToClipboard(text);
-            return;
-        }
-        ClipboardUtils.copyToClipboard(caret.getSelectedText()!);
-        editor.deleteSelection(caret);
+        UndoStack.undoableAction(editor, "cut", () => {
+            if (!caret.getSelectionModel().isSelectionActive) {
+                let line = editor.getOpenedDocument().getLineAt(caret.getOffset());
+                const text = editor.getOpenedDocument().substring(line.getStart(), line.getEnd());
+                editor.deleteWholeLine(caret);
+                ClipboardUtils.copyToClipboard(text);
+                return;
+            }
+            ClipboardUtils.copyToClipboard(caret.getSelectedText()!);
+            editor.deleteSelection(caret);
+        });
     }
 }
 
@@ -114,7 +117,9 @@ export class PasteAction extends AbstractAction {
 
         ClipboardUtils.getClipboardText().then(text => {
             if (text) {
-                editor.type(text);
+                UndoStack.undoableAction(editor, "paste", () => {
+                    editor.type(text);
+                });
             }
         });
     }

@@ -1,6 +1,6 @@
 import {AbstractAction} from "../../../core/actions/AbstractAction";
 import {KeybindContext} from "../../../core/keybinds/context/KeybindContext";
-import {Key, ModifierKeyHolder} from "../../../core/keybinds/Keybind";
+import {Key} from "../../../core/keybinds/Keybind";
 import {KeybindContextDescriptor} from "../../../core/keybinds/context/KeybindContextDescriptor";
 
 /**
@@ -32,8 +32,9 @@ export class UndoAction extends AbstractAction {
     }
 
     run(ctx: KeybindContext): void {
-        ctx.requireEditor().getUndoRedo().undo();
-        ctx.requireEditor().getView().resetBlink();
+        const editor = ctx.requireEditor();
+        editor.getOpenedDocument().getUndoRedoStack().undo(editor);
+        editor.repaintView();
     }
 }
 
@@ -60,9 +61,9 @@ export class RedoAction extends AbstractAction {
     }
 
     run(ctx: KeybindContext): void {
-        ModifierKeyHolder.getInstance().clear();
-        ctx.requireEditor().getUndoRedo().redo();
-        ctx.requireEditor().getView().resetBlink();
+        const editor = ctx.requireEditor();
+        editor.getOpenedDocument().getUndoRedoStack().redo(editor);
+        editor.repaintView();
     }
 }
 

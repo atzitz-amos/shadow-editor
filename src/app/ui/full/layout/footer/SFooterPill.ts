@@ -8,7 +8,7 @@ import {UIComponent} from "../../../../../core/ui/engine/components/UIComponent"
  * @since 1.0.0
  */
 export class SFooterPill extends UIComponent {
-    private readonly text: string;
+    private text: string;
     private readonly icon: string | null = null;
 
     constructor(root: HTMLElement, text: string, icon: string | null = null, style: string | null = null) {
@@ -21,9 +21,14 @@ export class SFooterPill extends UIComponent {
 
     draw(): void {
         if (this.icon) {
-            this.getUnderlyingElement().innerHTML = `<i class="${this.icon}"></i> ${this.text}`;
+            this.getUnderlyingElement().innerHTML = `<i class="${this.icon}"></i> <span>${this.text}</span>`;
         } else {
-            this.getUnderlyingElement().textContent = this.text;
+            this.getUnderlyingElement().innerHTML = `<span>${this.text}</span>`;
         }
+    }
+
+    setText(text: string) {
+        this.text = text;
+        if (this.wasDrawn) this.getUnderlyingElement().querySelector("span")!.textContent = text;
     }
 }

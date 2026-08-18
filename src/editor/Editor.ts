@@ -30,7 +30,6 @@ import {InlayWidget} from "./ui/inline/widget/inlay/InlayWidget";
 import {KeybindContext} from "../core/keybinds/context/KeybindContext";
 import {GlobalState} from "../core/global/GlobalState";
 import {Scheduler} from "../core/scheduler/Scheduler";
-import {UndoRedoManager} from "./core/undo/UndoRedoManager";
 import {BehaviorManager} from "./core/behaviors/manager/BehaviorManager";
 import {StandardBehaviorManagerProvider} from "./impl/behaviors/StandardBehaviorManagerProvider";
 import {EditorCharTypedContext} from "./core/behaviors/context/EditorCharTypedContext";
@@ -52,7 +51,6 @@ export class Editor {
     private readonly inlayManager: InlayManager;
     private readonly caretModel: CaretModel;
     private readonly langService: EditorLangService;
-    private readonly undoRedo: UndoRedoManager;
 
     private readonly eventBus: EventBus;
 
@@ -75,7 +73,6 @@ export class Editor {
 
         this.langService = new EditorLangService(this);
         this.widgetManager = new WidgetManager(this);
-        this.undoRedo = new UndoRedoManager(this);
 
         this.view = new View(this);
 
@@ -171,10 +168,6 @@ export class Editor {
 
     getLangSupport() {
         return LangSupport.getInstance();
-    }
-
-    getUndoRedo() {
-        return this.undoRedo;
     }
 
     getLangService(): EditorLangService {
@@ -280,8 +273,6 @@ export class Editor {
         let [x, y] = this.view.getRelativePos(event);
         let visual = this.xyToNearestVisual(x, y);
 
-        if (!visual.is(this.getPrimaryCaret().getVisual()))
-            this.getUndoRedo().commitPartialEdits();
         this.getPrimaryCaret().moveToVisual(visual);
 
         this.view.resetBlink();
@@ -312,14 +303,12 @@ export class Editor {
     }
 
     replaceRange(range: TextRange, text: string) {
-        const deleted = this.document.replaceRange(range, text);
+        this.document.replaceRange(range, text);
 
         this.caretModel.forEachCaret(caret => {
-            const old = caret.getOffset();
             if (caret.getOffset() > this.document.getTotalDocumentLength()) {
                 caret.moveToOffset(this.document.getTotalDocumentLength());
             }
-            this.document.getUndoRedoStack().onReplaced(this.getPrimaryCaret(), old, range, deleted, text);
         });
 
 
@@ -342,7 +331,6 @@ export class Editor {
 
         // Delete the character at the specified offset
         const deleted = this.document.deleteAt(offset, n);
-        this.document.getUndoRedoStack().onDeleted(this.getPrimaryCaret(), offset, deleted);
 
         this.view.triggerRepaint();
     }

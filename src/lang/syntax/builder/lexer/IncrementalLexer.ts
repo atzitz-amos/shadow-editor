@@ -32,7 +32,6 @@ export abstract class IncrementalLexer implements ILexer {
             tokens.push(token);
 
             if (source.getOffset() === endOffset) {
-                console.log(`Aligned on boundary: stop! (${overshotCount} overshots, ${tokens.length} retokenized)`)
                 break;
             }
             if (source.getOffset() > endOffset) {

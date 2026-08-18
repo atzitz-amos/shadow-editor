@@ -117,7 +117,12 @@ export class SelectionModel {
     }
 
     getRange(): TextRange | null {
-        return this.trackedRange;
+        return this.isSelectionActive ? this.trackedRange : null;
+    }
+
+    copyRange(): TextRange | null {
+        if (this.isSelectionActive) return new TextRange(this.trackedRange!.start, this.trackedRange!.end);
+        return null;
     }
 
     getSelectionLength(): number {

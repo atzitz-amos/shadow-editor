@@ -18,6 +18,7 @@ import {LangSupport} from "../../../../lang/LangSupport";
 import {TokenHoverAction} from "../../../../lang/codeAnalysis/tokenhover/TokenHoverAction";
 import {Token} from "../../../../lang/syntax/builder/tokens/Token";
 import {EditorBehaviorContext} from "../../../core/behaviors/context/EditorBehaviorContext";
+import {UndoStack} from "../../../core/undo/UndoStack";
 
 /**
  *
@@ -41,7 +42,9 @@ export class StandardLanguageLayer implements ILanguageLayer {
         return CharTypedBehavior.wrapping(this, ctx => {
             for (const action of GlobalState.getLangSupport().getAllSmartInsertActions(this.language)) {
                 if (action.isApplicable(ctx)) {
-                    if (action.invoke(ctx) === BehaviorHandlingMode.HANDLED) return BehaviorHandlingMode.HANDLED;
+                    const handlingMode = UndoStack.undoableAction(ctx.getEditor(), "type", () => action.invoke(ctx), true);
+                    if (handlingMode === BehaviorHandlingMode.HANDLED) return BehaviorHandlingMode.HANDLED;
+                    else UndoStack.discardFrame(ctx.getEditor());
                 }
             }
 
@@ -53,7 +56,9 @@ export class StandardLanguageLayer implements ILanguageLayer {
         return DeleteBackwardBehavior.wrapping(this, ctx => {
             for (const action of GlobalState.getLangSupport().getAllSmartDeleteActions(this.language)) {
                 if (action.isApplicable(ctx)) {
-                    if (action.invoke(ctx) === BehaviorHandlingMode.HANDLED) return BehaviorHandlingMode.HANDLED;
+                    const handlingMode = UndoStack.undoableAction(ctx.getEditor(), "delete", () => action.invoke(ctx), true);
+                    if (handlingMode === BehaviorHandlingMode.HANDLED) return BehaviorHandlingMode.HANDLED;
+                    else UndoStack.discardFrame(ctx.getEditor());
                 }
             }
             return BehaviorHandlingMode.FORWARD;
@@ -64,7 +69,9 @@ export class StandardLanguageLayer implements ILanguageLayer {
         return DeleteForwardBehavior.wrapping(this, ctx => {
             for (const action of GlobalState.getLangSupport().getAllSmartDeleteActions(this.language)) {
                 if (action.isApplicable(ctx)) {
-                    if (action.invoke(ctx) === BehaviorHandlingMode.HANDLED) return BehaviorHandlingMode.HANDLED;
+                    const handlingMode = UndoStack.undoableAction(ctx.getEditor(), "delete", () => action.invoke(ctx), true);
+                    if (handlingMode === BehaviorHandlingMode.HANDLED) return BehaviorHandlingMode.HANDLED;
+                    else UndoStack.discardFrame(ctx.getEditor());
                 }
             }
             return BehaviorHandlingMode.FORWARD;
@@ -75,7 +82,9 @@ export class StandardLanguageLayer implements ILanguageLayer {
         return CtrlDeleteBehavior.wrapping(this, ctx => {
             for (const action of GlobalState.getLangSupport().getAllSmartDeleteActions(this.language)) {
                 if (action.isApplicable(ctx)) {
-                    if (action.invoke(ctx) === BehaviorHandlingMode.HANDLED) return BehaviorHandlingMode.HANDLED;
+                    const handlingMode = UndoStack.undoableAction(ctx.getEditor(), "delete", () => action.invoke(ctx), true);
+                    if (handlingMode === BehaviorHandlingMode.HANDLED) return BehaviorHandlingMode.HANDLED;
+                    else UndoStack.discardFrame(ctx.getEditor());
                 }
             }
             return BehaviorHandlingMode.FORWARD;
@@ -86,7 +95,9 @@ export class StandardLanguageLayer implements ILanguageLayer {
         return EnterPressedBehavior.wrapping(this, ctx => {
             for (const action of GlobalState.getLangSupport().getAllSmartEnterActions(this.language)) {
                 if (action.isApplicable(ctx)) {
-                    if (action.invoke(ctx) === BehaviorHandlingMode.HANDLED) return BehaviorHandlingMode.HANDLED;
+                    const handlingMode = UndoStack.undoableAction(ctx.getEditor(), "enter", () => action.invoke(ctx));
+                    if (handlingMode === BehaviorHandlingMode.HANDLED) return BehaviorHandlingMode.HANDLED;
+                    else UndoStack.discardFrame(ctx.getEditor());
                 }
             }
             return BehaviorHandlingMode.FORWARD;

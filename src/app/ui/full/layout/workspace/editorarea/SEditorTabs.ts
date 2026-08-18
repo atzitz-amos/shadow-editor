@@ -41,12 +41,28 @@ export class SEditorTabs extends UIComponent {
             iconDiv.appendChild(fileIcon);
             iconDiv.appendChild(closeIcon);
 
+            // wrapped in its own span so long titles can be truncated with
+            // text-overflow: ellipsis (doesn't work on a bare text node)
+            let titleSpan = HTMLUtils.createElement("span.tab-title");
+            titleSpan.textContent = " " + tab.getTitle();
+
+            // DOM order stays icon-then-title; the visual reorder to a
+            // trailing icon is handled by flex-direction: row-reverse in CSS
             tabElement.appendChild(iconDiv);
-            tabElement.appendChild(document.createTextNode(" " + tab.getTitle()));
+            tabElement.appendChild(titleSpan);
 
             closeIcon.addEventListener("click", (e) => {
                 e.stopPropagation(); // don't also trigger tabElement's open()
                 TabsManager.getInstance().close(tab);
+            });
+
+            // middle-click anywhere on the tab closes it, so closing doesn't
+            // rely on hitting the small icon target at all
+            tabElement.addEventListener("auxclick", (e) => {
+                if (e.button === 1) {
+                    e.preventDefault();
+                    TabsManager.getInstance().close(tab);
+                }
             });
 
             if (tab.isActive()) {
