@@ -1,6 +1,5 @@
 import {AbstractStartupPhase} from "../StartupPhase";
 import {PersistenceModel} from "../../../persistence/PersistenceModel";
-import {PersistenceStrategy} from "../../../persistence/PersistenceStrategy";
 import {PersistedObject} from "../../../persistence/objects/PersistedObject";
 
 /**

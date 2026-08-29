@@ -1,4 +1,3 @@
-import {Document} from "../Document";
 import {Serializable, SerializableType} from "../../../../core/persistence/serializable/Serializable";
 import {EditorDocumentManager} from "../EditorDocumentManager";
 

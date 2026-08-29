@@ -7,7 +7,6 @@ import {JsExprParser} from "./JsExprParser";
 import {ASTGrammar, ASTType} from "../../../../lang/syntax/builder/parser/nodes/ASTGrammar";
 import {ASTBuilder} from "../../../../lang/syntax/builder/parser/builder/ASTBuilder";
 import {Marker} from "../../../../lang/syntax/builder/parser/builder/Marker";
-import {SynScopeType} from "../../../../lang/syntax/api/scope/SynScopeType";
 
 export enum OperatorPrecedence {
     COMMA = 10,
@@ -238,7 +237,7 @@ export class JsPrattParser {
      * Applies `JsGrammar.CodeBlock` using your builder patterns.
      */
     private parseArrowFunctionBlockBody(isAsync: boolean) {
-        this.parser.parseBlock(true, true, isAsync, false, SynScopeType.Function)
+        this.parser.parseBlock(true, true, isAsync, false)
     }
 
     private nud(): ErrorHandlingMode {

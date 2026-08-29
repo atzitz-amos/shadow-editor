@@ -5,6 +5,8 @@ import {SynFile} from "../api/filesystem/SynFile";
 import {AbstractSynTemplate} from "../writer/template/AbstractSynTemplate";
 import {SynNode} from "../api/SynNode";
 import {SynTree} from "../api/tree/SynTree";
+import {SynCodeBlock} from "../api/SynCodeBlock";
+import {SynNamedElement} from "../impl/reference/SynNamedElement";
 
 /**
  *
@@ -18,6 +20,12 @@ export class SynNodeVisitor {
     }
 
     visitNode(node: SynNode): void {
+    }
+
+    visitCodeblock(node: SynCodeBlock): void {
+    }
+
+    visitNamedElement(node: SynNamedElement): void {
     }
 
     visitTree(tree: SynTree): void {

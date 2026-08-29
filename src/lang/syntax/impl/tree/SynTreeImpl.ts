@@ -1,11 +1,9 @@
 import {SynTree} from "../../api/tree/SynTree";
 import {AbstractSynParentElement} from "./AbstractSynParentElement";
-import {SynScope} from "../../api/scope/SynScope";
 import {TextRange} from "../../../../editor/core/coordinate/range/TextRange";
 import {EditorURI} from "../../../../core/uri/EditorURI";
 import {SynDocument} from "../../api/document/SynDocument";
 import {SynNode} from "../../api/SynNode";
-import {SynScopeImpl} from "../scope/SynScopeImpl";
 import {LanguageBase} from "../../../LanguageBase";
 import {SynNodeVisitor} from "../../visitors/SynNodeVisitor";
 
@@ -22,11 +20,6 @@ export class SynTreeImpl extends AbstractSynParentElement implements SynTree {
         super(children);
 
         this.range = TextRange.enclosing(children)
-    }
-
-    getParentScope(): SynScope {
-        if (this.children.length > 0 && this.children[0].getParentScope()) return this.children[0].getParentScope();
-        return SynScopeImpl.GLOBAL_SCOPE;
     }
 
     getSynDocument(): SynDocument {

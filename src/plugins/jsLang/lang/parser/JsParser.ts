@@ -4,7 +4,6 @@ import {JsExprParser} from "./JsExprParser";
 import {ASTBuilder} from "../../../../lang/syntax/builder/parser/builder/ASTBuilder";
 import {IParser} from "../../../../lang/syntax/builder/parser/IParser";
 import {Marker} from "../../../../lang/syntax/builder/parser/builder/Marker";
-import {SynScopeType} from "../../../../lang/syntax/api/scope/SynScopeType";
 import {TokenExpectation} from "../../../../lang/syntax/builder/parser/builder/TokenExpectation";
 import {IncrementalParser} from "../../../../lang/syntax/builder/parser/optimizer/api/IncrementalParser";
 import {ParserBoundaryNode} from "../../../../lang/syntax/builder/parser/optimizer/api/ParserBoundaryNode";
@@ -79,7 +78,7 @@ export class JsParser implements IParser {
     }
 
     parse(): void {
-        this.parseBlock(false, false, true, false, SynScopeType.Global);
+        this.parseBlock(false, false, true, false);
     }
 
     parseBlockStatement(): void {
@@ -93,7 +92,7 @@ export class JsParser implements IParser {
     }
 
     @ParserBoundaryNode
-    parseBlock(expectBrace = true, isFunction = true, isAsync = false, isGenerator = false, scopeType?: SynScopeType): void {
+    parseBlock(expectBrace = true, isFunction = true, isAsync = false, isGenerator = false): void {
         const prevIsInAsync = this.myIsInAsync;
         const prevIsInGenerator = this.myIsInGenerator;
         const prevIsInFunction = this.myIsInFunction;
@@ -102,7 +101,7 @@ export class JsParser implements IParser {
         this.setInGenerator(isGenerator);
 
         try {
-            const marker = this.builder.mark(scopeType ?? SynScopeType.Block);
+            const marker = this.builder.mark();
             if (expectBrace) {
                 const isValid = this.builder.expect(JsLexicalGrammar.LBRACE).failWith("Expected '{'").isValid();
                 if (!isValid) return marker.done(JsGrammar.CodeBlock);
@@ -487,7 +486,7 @@ export class JsParser implements IParser {
             .then(() => this.myExprParser.parseFunctionArgumentDeclaration())
             .then(JsLexicalGrammar.RPAREN).failWith("Expected ')'")
             .then(() => {
-                this.parseBlock(true, true, isAsync, isGenerator, SynScopeType.Function);
+                this.parseBlock(true, true, isAsync, isGenerator);
             });
 
         marker.done(JsGrammar.FunctionDeclaration);
@@ -660,7 +659,7 @@ export class JsParser implements IParser {
         this.builder.expect(JsLexicalGrammar.LPAREN).failWith("Expected '('")
             .then(() => this.myExprParser.parseFunctionArgumentDeclaration())
             .then(JsLexicalGrammar.RPAREN).failWith("Expected ')'")
-            .then(() => this.parseBlock(true, true, isAsync, isGenerator, SynScopeType.Function));
+            .then(() => this.parseBlock(true, true, isAsync, isGenerator));
 
         start.done(JsGrammar.ClassMethodDeclaration);
     }
@@ -688,7 +687,7 @@ export class JsParser implements IParser {
         if (this.builder.consumeIf(JsLexicalGrammar.LPAREN)) {
             this.myExprParser.parseFunctionArgumentDeclaration();
             this.builder.expect(JsLexicalGrammar.RPAREN).failWith("Expected ')'")
-                .then(() => this.parseBlock(true, true, isAsync, !!generatorToken, SynScopeType.Function));
+                .then(() => this.parseBlock(true, true, isAsync, !!generatorToken));
             start.done(JsGrammar.ClassMethodDeclaration);
         } else {
             if (generatorToken) {
@@ -720,7 +719,7 @@ export class JsParser implements IParser {
                 }
             })
             .then(JsLexicalGrammar.RPAREN).failWith("Expected ')'")
-            .then(() => this.parseBlock(true, false, false, false, SynScopeType.Function));
+            .then(() => this.parseBlock(true, false, false, false));
         start.done(JsGrammar.ClassMethodDeclaration);
     }
 

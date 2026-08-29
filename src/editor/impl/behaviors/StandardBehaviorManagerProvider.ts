@@ -11,6 +11,6 @@ import {Editor} from "../../Editor";
  */
 export class StandardBehaviorManagerProvider {
     public static createDefault(editor: Editor): BehaviorManager {
-        return new BehaviorManager(editor,new StandardLanguageLayer(), new StandardBehaviorsLayer());
+        return new BehaviorManager(editor, new StandardLanguageLayer(), new StandardBehaviorsLayer());
     }
 }

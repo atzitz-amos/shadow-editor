@@ -1,0 +1,122 @@
+.debug-popup {
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    top: 120px;
+    right: 56px;
+    width: min(520px, calc(100vw - 80px));
+    min-width: 420px;
+    height: 500px;
+    border: 1px solid #252d42;
+    border-radius: 7px;
+    background: linear-gradient(180deg, rgba(17, 23, 35, 0.95), rgba(12, 17, 27, 0.95));
+    backdrop-filter: blur(10px);
+    box-shadow: 0 22px 60px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(199, 210, 255, 0.04) inset;
+    overflow: hidden;
+    z-index: 30;
+}
+
+.debug-popup.dragging {
+    cursor: grabbing;
+    user-select: none;
+    box-shadow: 0 28px 70px rgba(0, 0, 0, 0.62), 0 0 0 1px rgba(199, 210, 255, 0.06) inset;
+}
+
+.debug-popup-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 12px 14px;
+    background: rgba(16, 22, 34, 0.85);
+    border-bottom: 1px solid #20283a;
+}
+
+.debug-popup-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #d9deee;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+.debug-popup-title-icon {
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+    color: #ccd4ea;
+    background: #1a2234;
+    border: 1px solid #2a3347;
+}
+
+.debug-popup-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.debug-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #6f7891;
+}
+
+.debug-dot.active {
+    background: #8e9bff;
+    box-shadow: 0 0 10px rgba(142, 155, 255, 0.65);
+}
+
+.debug-popup-tabs {
+    display: flex;
+    gap: 4px;
+    padding: 8px 10px;
+    border-bottom: 1px solid #1f2739;
+    background: rgba(13, 19, 29, 0.9);
+}
+
+.debug-tab {
+    border: 1px solid transparent;
+    background: transparent;
+    color: #8690a8;
+    border-radius: 9px;
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    cursor: pointer;
+    transition: 0.16s ease;
+}
+
+.debug-tab:hover {
+    color: #c8d0e7;
+    background: rgba(44, 56, 84, 0.32);
+}
+
+.debug-tab.active {
+    color: #dbe2f6;
+    background: rgba(47, 59, 91, 0.58);
+    border-color: #34405b;
+    box-shadow: 0 0 0 1px rgba(147, 162, 224, 0.15) inset;
+}
+
+.debug-popup-content {
+    display: flex;
+    flex-grow: 1;
+    align-items: center;
+    justify-content: center;
+    color: #8b95ad;
+    font-size: 13px;
+    letter-spacing: 0.01em;
+    background: rgba(11, 16, 25, 0.75);
+}
+
+.debug-popup-actions {
+    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+}

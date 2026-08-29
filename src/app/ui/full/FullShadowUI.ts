@@ -39,6 +39,23 @@ export class FullShadowUI implements ShadowUI {
         this.myFooter = new SFooter(root);
 
         this.myPopupLayer = HTMLUtils.createElement("div.ide-popup-layer.no-popup", root);
+        this.myPopupLayer.innerHTML = `<div class="debug-popup" id="debugPopup">
+      <div class="debug-popup-header" id="debugPopupHeader">
+        <div class="debug-popup-title">
+          Debug Tools
+        </div>
+        <div class="debug-popup-actions">
+          <i class="fa fa-close"></i>
+        </div>
+      </div>
+      <div class="debug-popup-tabs" id="debugTabs">
+        <button class="debug-tab active" data-tab="ast">AST Tree</button>
+        <button class="debug-tab" data-tab="formatter">Code Formatter</button>
+        <button class="debug-tab" data-tab="syn">Syn Suite</button>
+        <button class="debug-tab" data-tab="tokens">Token Lens</button>
+      </div>
+      <div class="debug-popup-content" id="debugPopupContent">No content</div>
+    </div>`
 
         this.myPopupLayer.addEventListener("mousedown", (event) => {
             if (this.activePopup && !this.activePopup.containsXY(event.x, event.y)) this.cancelPopup();

@@ -4,7 +4,6 @@ import {JsGrammar} from "./JsGrammar";
 import {ErrorHandlingMode, JsPrattParser, OperatorPrecedence} from "./JsPrattParser";
 import {ASTBuilder} from "../../../../lang/syntax/builder/parser/builder/ASTBuilder";
 import {Marker} from "../../../../lang/syntax/builder/parser/builder/Marker";
-import {SynScopeType} from "../../../../lang/syntax/api/scope/SynScopeType";
 
 export class JsExprParser {
     private myPrattParser: JsPrattParser;
@@ -187,7 +186,7 @@ export class JsExprParser {
         this.builder.expect(JsLexicalGrammar.LPAREN).failWith("Expected '('")
             .then(() => this.parseFunctionArgumentDeclaration())
             .then(JsLexicalGrammar.RPAREN).failWith("Expected ')'")
-            .then(() => this.parser.parseBlock(true, true, isAsync, isGenerator, SynScopeType.Function));
+            .then(() => this.parser.parseBlock(true, true, isAsync, isGenerator));
 
         start.done(JsGrammar.FunctionExpression);
     }

@@ -4,7 +4,6 @@ import {Key, Keybind} from "../../../core/keybinds/Keybind";
 import {SpacingFormatter} from "../../../lang/codeStyle/spacing/SpacingFormatter";
 import {JsSpacingRules} from "../codeStyle/JsSpacingRules";
 import {JsLexicalGrammar} from "../lang/lexer/JsLexicalGrammar";
-import {SynDocumentManager} from "../../../lang/syntax/manager/SynDocumentManager";
 import {UndoStack} from "../../../editor/core/undo/UndoStack";
 
 /**

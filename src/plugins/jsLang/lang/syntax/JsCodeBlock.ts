@@ -5,6 +5,8 @@ import {SynTokenNode} from "../../../../lang/syntax/impl/SynTokenNode";
 import {SynNodeVisitor} from "../../../../lang/syntax/visitors/SynNodeVisitor";
 import {JsSynVisitor} from "./visitors/JsSynVisitor";
 import {JsLexicalGrammar} from "../lexer/JsLexicalGrammar";
+import {SynScopeType} from "../../../../lang/indexes/scope/SynScopeType";
+import {JsSynUtils} from "./utils/JsSynUtils";
 
 /**
  *
@@ -32,9 +34,16 @@ export class JsCodeBlock extends SynCodeBlock {
         return this.statements;
     }
 
+    getAssociatedScopeType(): SynScopeType | null {
+        const parent = this.getParent();
+        if (!parent) return SynScopeType.GLOBAL;
+        else if (JsSynUtils.isFunction(parent)) return SynScopeType.FUNCTION;
+        else return SynScopeType.BLOCK;
+    }
+
     accept(visitor: SynNodeVisitor) {
         if (visitor instanceof JsSynVisitor) {
-            visitor.visitCodeBlock(this);
+            visitor.visitJsCodeBlock(this);
         }
 
         super.accept(visitor);

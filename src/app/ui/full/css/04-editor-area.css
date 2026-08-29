@@ -76,7 +76,6 @@
 .column-tab {
     font-size: 12px;
     padding: 6px 10px;
-    border-radius: 6px 6px 0 0;
     background: transparent;
     color: #8b92a3;
 
@@ -157,7 +156,7 @@
     position: absolute;
     top: 50%;
     left: 50%;
-    width: 14px;             /* was: inset: -4px on a 12px box = 20px circle */
+    width: 14px; /* was: inset: -4px on a 12px box = 20px circle */
     height: 14px;
     translate: -50% -50%;
     border-radius: 50%;

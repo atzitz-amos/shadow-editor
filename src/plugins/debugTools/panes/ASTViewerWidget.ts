@@ -6,12 +6,12 @@ import {SynFileImpl} from "../../../lang/syntax/impl/filesystem/SynFileImpl";
 import {SynTokenNode} from "../../../lang/syntax/impl/SynTokenNode";
 import {SynErrorNode} from "../../../lang/syntax/impl/SynErrorNode";
 import {SynRecursiveIterator} from "../../../lang/syntax/visitors/SynRecursiveIterator";
-import {AstOverlayHighlight} from "../overlays/AstOverlayHighlight";
 import {Editor} from "../../../editor/Editor";
 import {SynDocument} from "../../../lang/syntax/api/document/SynDocument";
 import {SynTreeImpl} from "../../../lang/syntax/impl/tree/SynTreeImpl";
-import {SynParentElement} from "../../../lang/syntax/api/tree/SynParentElement";
-import {AbstractSynParentElement} from "../../../lang/syntax/impl/tree/AbstractSynParentElement";
+import {EditorHighlighterUtils} from "../../../editor/ui/highlighter/overlay/EditorHighlighterUtils";
+import {TextAttributeKey} from "../../../editor/ui/highlighter/style/TextAttributeKey";
+import {TextBackground} from "../../../editor/ui/highlighter/style/TextBackground";
 
 /**
  *
@@ -20,6 +20,8 @@ import {AbstractSynParentElement} from "../../../lang/syntax/impl/tree/AbstractS
  * @since 1.0.0
  */
 export class ASTViewerWidget extends UIComponent {
+    private static readonly TEXT_HIGHLIGHT_KEY = TextAttributeKey.of(new TextBackground("rgb(200 96 232 / 0.25)"))
+
     private synDocument: SynDocument | null = null;
     private editor: Editor | null = null;
 
@@ -142,16 +144,19 @@ export class ASTViewerWidget extends UIComponent {
 
     mouseOverNode(node: SynNode) {
         if (!this.editor) return;
-        this.editor.getWidgetManager().removeByName("ast-viewer-hover-highlight");
 
-        const range = node.getTextRange();
-        this.editor.getWidgetManager().addOverlayWidget(new AstOverlayHighlight(range));
+        EditorHighlighterUtils.highlight(
+            this.editor,
+            "ast-viewer",
+            ASTViewerWidget.TEXT_HIGHLIGHT_KEY,
+            null,
+            node.getTextRange());
         this.editor.getView().triggerOverlaysRepaint();
     }
 
     mouseOutNode(node: SynNode) {
         if (!this.editor) return;
-        this.editor.getWidgetManager().removeByName("ast-viewer-hover-highlight");
+        EditorHighlighterUtils.clear("ast-viewer", this.editor);
         this.editor.getView().triggerOverlaysRepaint();
     }
 }

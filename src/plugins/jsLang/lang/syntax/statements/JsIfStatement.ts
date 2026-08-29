@@ -1,6 +1,5 @@
 import {JsStatement} from "./JsStatement";
 import {ASTNode} from "../../../../../lang/syntax/builder/parser/nodes/ASTNode";
-import {SynASTElement} from "../../../../../lang/syntax/api/tree/SynASTElement";
 
 /**
  *

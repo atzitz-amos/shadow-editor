@@ -8,7 +8,6 @@ import {SynNodeVisitor} from "../visitors/SynNodeVisitor";
 import {SynDocument} from "../api/document/SynDocument";
 import {SynParentElement} from "../api/tree/SynParentElement";
 import {SynLeafElement} from "../api/tree/SynLeafElement";
-import {SynScope} from "../api/scope/SynScope";
 
 
 export class SynErrorNode implements SynNode, SynLeafElement {
@@ -83,10 +82,6 @@ export class SynErrorNode implements SynNode, SynLeafElement {
 
     getParent(): SynParentElement | null {
         return this.parent;
-    }
-
-    getParentScope(): SynScope {
-        return this.parent!.getParentScope();
     }
 
     isSynthetic(): boolean {

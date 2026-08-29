@@ -10,6 +10,7 @@ import {InspectionsCodeAnalysisPassProvider} from "../inspections/analysis/Inspe
 import {AnnotatorsCodeAnalysisPassProvider} from "../annotators/AnnotatorsCodeAnalysisPassProvider";
 import {Scheduler} from "../../../core/scheduler/Scheduler";
 import {SynDocumentUtils} from "../../syntax/utils/SynDocumentUtils";
+import {ReferenceCollectorAnalysisPassProvider} from "../references/collector/ReferenceCollectorAnalysisPassProvider";
 
 /**
  *
@@ -23,8 +24,9 @@ export class CodeAnalysisService implements ServiceImpl {
 
     private static readonly codeAnalysisPassEP = new ExtensionPoint("codeAnalysis/pass", CodeAnalysisPassProvider)
         .withDefaultContributors(
-            AnnotatorsCodeAnalysisPassProvider.INSTANCE,
-            InspectionsCodeAnalysisPassProvider.INSTANCE
+            ReferenceCollectorAnalysisPassProvider.INSTANCE,
+            InspectionsCodeAnalysisPassProvider.INSTANCE,
+            AnnotatorsCodeAnalysisPassProvider.INSTANCE
         );
 
     public static getInstance(): CodeAnalysisService {

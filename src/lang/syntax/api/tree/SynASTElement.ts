@@ -1,6 +1,7 @@
 import {SynParentElement} from "./SynParentElement";
 import {ASTType} from "../../builder/parser/nodes/ASTGrammar";
 import {ASTNode} from "../../builder/parser/nodes/ASTNode";
+import {SynScope} from "../../../indexes/scope/SynScope";
 
 export interface SynASTElement extends SynParentElement {
     getRelativeOffset(): Offset;
@@ -12,4 +13,6 @@ export interface SynASTElement extends SynParentElement {
     getElementChildren(): SynASTElement[];
 
     findNthElementOfASTType(type: ASTType, n: number): SynParentElement | null;
+
+    getScope(): SynScope | null;
 }

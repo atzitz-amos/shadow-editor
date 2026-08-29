@@ -1,4 +1,4 @@
-import {SynDeclaration} from "../../../../../lang/syntax/impl/reference/SynDeclaration";
+import {SynNamedElement} from "../../../../../lang/syntax/impl/reference/SynNamedElement";
 import {ASTNode} from "../../../../../lang/syntax/builder/parser/nodes/ASTNode";
 import {SynTokenNode} from "../../../../../lang/syntax/impl/SynTokenNode";
 import {SynErrorNode} from "../../../../../lang/syntax/impl/SynErrorNode";
@@ -16,7 +16,7 @@ import {JsArrayDestructuringPatternExpr} from "../expr/JsArrayDestructuringPatte
  * @date 12/17/2025
  * @since 1.0.0
  */
-export class JsDeclarator extends SynDeclaration {
+export class JsDeclarator extends SynNamedElement {
     private readonly name: JsExpr | SynTokenNode | SynErrorNode;
     private readonly equToken: SynTokenNode | null;
     private readonly expr: JsExpr | null;

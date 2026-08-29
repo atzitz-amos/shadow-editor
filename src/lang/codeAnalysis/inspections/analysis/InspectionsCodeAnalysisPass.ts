@@ -13,11 +13,14 @@ import {SynDocument} from "../../../syntax/api/document/SynDocument";
  * @since 1.0.0
  */
 export class InspectionsCodeAnalysisPass implements CodeAnalysisPass<ProblemsHolder> {
-
     private readonly holder: ProblemsHolder;
 
     constructor(private readonly document: SynDocument, private readonly inspections: InspectionBase[]) {
         this.holder = new ProblemsHolder(document);
+    }
+
+    getPriority(): number {
+        return 1;
     }
 
     collectVisitors(): SynNodeVisitor[] {

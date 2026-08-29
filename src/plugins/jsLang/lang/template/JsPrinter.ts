@@ -325,7 +325,7 @@ export class JsPrinter extends JsSynVisitor implements SynPrinter {
         });
     }
 
-    visitCodeBlock(element: JsCodeBlock) {
+    visitJsCodeBlock(element: JsCodeBlock) {
         this.write("{");
         this.newline();
 

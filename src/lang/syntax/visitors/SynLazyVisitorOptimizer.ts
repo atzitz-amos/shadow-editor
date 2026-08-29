@@ -15,7 +15,6 @@ export class SynLazyVisitorOptimizer {
     public visitNode(node: SynNode) {
         for (const visitor of this.visitors) {
             try {
-
                 node.accept(visitor);
             } catch (e) {
                 console.warn(`Visitor ${visitor.constructor.name} threw an error while visiting node ${node.constructor.name}: ${e}`);
@@ -24,6 +23,16 @@ export class SynLazyVisitorOptimizer {
 
         for (const child of node.getChildren()) {
             this.visitNode(child);
+        }
+
+        for (const visitor of this.visitors) {
+            if ("visitExitNode" in visitor && typeof visitor.visitExitNode === "function") {
+                try {
+                    visitor.visitExitNode(node);
+                } catch (e) {
+                    console.warn(`Visitor ${visitor.constructor.name} threw an error while exiting node ${node.constructor.name}: ${e}`);
+                }
+            }
         }
     }
 }

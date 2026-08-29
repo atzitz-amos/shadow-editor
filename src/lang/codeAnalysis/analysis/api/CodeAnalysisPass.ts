@@ -15,4 +15,6 @@ export interface CodeAnalysisPass<T> {
     getHolder(): T;
 
     runOnlyOnVisibleNodes(): boolean;
+
+    getPriority(): number;
 }

@@ -193,6 +193,6 @@ export class JsSynVisitor extends SynNodeVisitor {
     visitArrowFunction(element: JsArrowFunctionExpr) {
     }
 
-    visitCodeBlock(element: JsCodeBlock) {
+    visitJsCodeBlock(element: JsCodeBlock) {
     }
 }

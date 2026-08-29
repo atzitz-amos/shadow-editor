@@ -19,11 +19,7 @@ export class EditorHighlighterUtils {
                             effects: HighlightTextEffects | null,
                             ...ranges: TextRange[]): HighlightOverlay[] {
 
-        if (this.overlayMap.has(key)) {
-            for (const overlay of this.overlayMap.get(key)!) {
-                overlay.destroy(editor);
-            }
-        }
+        this.clear(key, editor);
 
         const overlays: HighlightOverlay[] = [];
         for (const range of ranges) {
@@ -35,5 +31,13 @@ export class EditorHighlighterUtils {
         this.overlayMap.set(key, overlays);
         editor.getView().triggerOverlaysRepaint();
         return overlays;
+    }
+
+    public static clear(key: string, editor: Editor) {
+        if (this.overlayMap.has(key)) {
+            for (const overlay of this.overlayMap.get(key)!) {
+                overlay.destroy(editor);
+            }
+        }
     }
 }

@@ -1,6 +1,10 @@
 import {Token} from "../../../../../lang/syntax/builder/tokens/Token";
 import {SynASTElement} from "../../../../../lang/syntax/api/tree/SynASTElement";
 import {SynTokenNode} from "../../../../../lang/syntax/impl/SynTokenNode";
+import {JsFunctionExpr} from "../expr/JsFunctionExpr";
+import {JsArrowFunctionExpr} from "../expr/JsArrowFunctionExpr";
+import {JsFunctionStatement} from "../statements/JsFunctionStatement";
+import {SynNode} from "../../../../../lang/syntax/api/SynNode";
 
 /**
  *
@@ -35,5 +39,9 @@ export class JsSynUtils {
         }
 
         return result;
+    }
+
+    static isFunction(element: SynNode) {
+        return (element instanceof JsFunctionStatement) || (element instanceof JsFunctionExpr) || (element instanceof JsArrowFunctionExpr);
     }
 }

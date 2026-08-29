@@ -26,9 +26,9 @@ export class CodeStyleManager {
  .,.
 
  if.(.x.==.1.).{
-   d.(.1.,.function w.(..).{
-    return.1;
-   }.).;
+ d.(.1.,.function w.(..).{
+ return.1;
+ }.).;
  }
 
  */

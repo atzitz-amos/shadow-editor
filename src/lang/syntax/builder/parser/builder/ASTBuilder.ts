@@ -10,10 +10,6 @@ import {TokenExpectation} from "./TokenExpectation";
 import {SynNode} from "../../../api/SynNode";
 import {ASTNode} from "../nodes/ASTNode";
 import {DefaultSynElement} from "../../../impl/DefaultSynElement";
-import {SynScopeTree} from "../../../impl/scope/SynScopeTree";
-import {SynScopeType} from "../../../api/scope/SynScopeType";
-import {SynCodeBlock} from "../../../api/SynCodeBlock";
-import {SynDeclaration} from "../../../impl/reference/SynDeclaration";
 import {KillSignal} from "../../../../../core/utils/KillSignal";
 import {SynDocument} from "../../../api/document/SynDocument";
 import {SynTree} from "../../../api/tree/SynTree";
@@ -25,7 +21,6 @@ export class ASTBuilder {
     protected readonly stream: TokenStream;
 
     protected readonly production: SynNode[] = [];
-    protected readonly scopeTree: SynScopeTree;
 
     private currentOffset: number = 0;
     private lastTokenOffset: number = 0;
@@ -35,7 +30,6 @@ export class ASTBuilder {
 
     constructor(private readonly document: SynDocument, private readonly language: LanguageBase, private signal: KillSignal) {
         this.stream = document.makeTokenStream();
-        this.scopeTree = new SynScopeTree();
     }
 
     done(): boolean {
@@ -78,11 +72,8 @@ export class ASTBuilder {
         return token;
     }
 
-    mark(scopeType?: SynScopeType): Marker {
+    mark(): Marker {
         this.clearWhitespace();
-        if (scopeType) {
-            this.scopeTree.enterScope(scopeType);
-        }
         return new TokenStreamMarker(this, this.currentOffset, this.lastTokenOffset, this.stream.getIndex(), this.production.length, this.isErrorState)
     }
 
@@ -235,10 +226,6 @@ export class ASTBuilder {
     }
 
     getTree(): SynTree {
-        if (this.scopeTree.getCurrentScope()?.getType() !== SynScopeType.Global) {
-            console.warn("Unclosed scopes detected at end of file: " + this.scopeTree.getCurrentScope());
-        }
-
         return new SynTreeImpl(this.language, this.production, this.document);
     }
 
@@ -293,16 +280,14 @@ export class ASTBuilder {
                 this.document,
                 children,
                 range.getLength(),
-                tokenCount,
-                this.scopeTree.getCurrentScope()!.getParent());
+                tokenCount);
         else
             node = new ASTNode(
                 type,
                 this.document,
                 children,
                 range.getLength(),
-                tokenCount,
-                this.scopeTree.getCurrentScope()!);
+                tokenCount);
 
         node.setGlobalOffset(range.start);
         for (const child of children) {
@@ -311,13 +296,7 @@ export class ASTBuilder {
         }
 
         if (type.treeBuilder) {
-            let synElement = type.treeBuilder(node);
-            if (synElement instanceof SynCodeBlock) {
-                this.scopeTree.exitScope(synElement);
-            } else if (synElement instanceof SynDeclaration) {
-                this.scopeTree.getCurrentScope()?.addDeclaration(synElement);
-            }
-            this.production.push(synElement);
+            this.production.push(type.treeBuilder(node));
         } else {
             this.production.push(new DefaultSynElement(node));
         }

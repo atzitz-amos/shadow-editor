@@ -1,5 +1,4 @@
 import {SynASTElement} from "../../api/tree/SynASTElement";
-import {SynDeclaration} from "./SynDeclaration";
 
 /**
  *
@@ -9,6 +8,4 @@ import {SynDeclaration} from "./SynDeclaration";
  */
 export interface SynSymbol extends SynASTElement {
     getName(): string;
-
-    resolve(): SynDeclaration | null;
 }

@@ -1,7 +1,6 @@
 import {SynSymbol} from "../../../../../lang/syntax/impl/reference/SynSymbol";
 import {ASTNode} from "../../../../../lang/syntax/builder/parser/nodes/ASTNode";
 import {SynTokenNode} from "../../../../../lang/syntax/impl/SynTokenNode";
-import {SynDeclaration} from "../../../../../lang/syntax/impl/reference/SynDeclaration";
 import {SynNodeVisitor} from "../../../../../lang/syntax/visitors/SynNodeVisitor";
 import {JsSynVisitor} from "../visitors/JsSynVisitor";
 import {JsExpr} from "../expr/JsExpr";
@@ -18,10 +17,6 @@ export class JsIdentifier extends JsExpr implements SynSymbol {
     constructor(node: ASTNode) {
         super(node);
         this.name = (this.getNthChild(0) as SynTokenNode).getValue();
-    }
-
-    resolve(): SynDeclaration | null {
-        return this.getParentScope().resolve(this.getName());
     }
 
     getName(): string {

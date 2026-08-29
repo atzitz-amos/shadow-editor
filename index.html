@@ -66,8 +66,21 @@
             import {SynTreeOffsetJumper} from "./src/lang/codeStyle/utils/SynTreeOffsetJumper";
             import {SynASTElementImpl} from "./src/lang/syntax/impl/tree/SynASTElementImpl";
             import {JsSpacingRules} from "./src/plugins/jsLang/codeStyle/JsSpacingRules";
+            import {EditorHighlighterUtils} from "./src/editor/ui/highlighter/overlay/EditorHighlighterUtils";
+            import {TextAttributeKey} from "./src/editor/ui/highlighter/style/TextAttributeKey";
+            import {TextBackground} from "./src/editor/ui/highlighter/style/TextBackground";
 
             window.VNodeStore = VNodeStore;
+
+            window.highlight = (start, end) => {
+                EditorHighlighterUtils.highlight(
+                    GlobalState.getMainEditor(),
+                    "debug-highlight",
+                    TextAttributeKey.of(new TextBackground("rgb(69 77 73 / 50%)")),
+                    null,
+                    new TextRange(start, end)
+                )
+            }
 
             window.disableTimebomb = () => {
                 window["isParseTimeBombDisabled"] = true;

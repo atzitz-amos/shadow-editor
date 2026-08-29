@@ -1,6 +1,5 @@
 import {Service, ServiceImpl} from "../../../core/threaded/service/Service";
 import {GlobalState} from "../../../core/global/GlobalState";
-import {KeyPressedEvent} from "../../impl/events/PhysicalEvents";
 import {LatencyUpdatedEvent} from "./LatencyUpdatedEvent";
 
 @Service

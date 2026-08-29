@@ -43,7 +43,7 @@ export class SpacingFormatter {
             }
         }
 
-        return new SpacingFormatter(rules,whitespaceGroup, newlineGroup);
+        return new SpacingFormatter(rules, whitespaceGroup, newlineGroup);
     }
 
     public format(stream: TokenStream, tree: SynTree) {

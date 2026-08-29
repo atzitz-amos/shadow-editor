@@ -2,7 +2,6 @@ import {SynASTElement} from "./tree/SynASTElement";
 import {URILocatedResource} from "../../../core/uri/URILocatedResource";
 import {SynDocument} from "./document/SynDocument";
 import {SynParentElement} from "./tree/SynParentElement";
-import {SynScope} from "./scope/SynScope";
 import {SynBase} from "./SynBase";
 
 /**
@@ -17,8 +16,6 @@ export interface SynNode extends SynBase, URILocatedResource {
     getSynDocument(): SynDocument;
 
     getChildren(): SynNode[];
-
-    getParentScope(): SynScope;
 
     getParent(): SynParentElement | null;
 

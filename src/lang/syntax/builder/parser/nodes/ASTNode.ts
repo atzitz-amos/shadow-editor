@@ -1,7 +1,6 @@
 import {ASTType} from "./ASTGrammar";
 import {SynNode} from "../../../api/SynNode";
 import {SynDocument} from "../../../api/document/SynDocument";
-import {SynScope} from "../../../api/scope/SynScope";
 
 export class ASTNode {
     private relativeOffset: Offset | null = null;
@@ -11,8 +10,7 @@ export class ASTNode {
                 public document: SynDocument,
                 public children: SynNode[],
                 public textLength: number,
-                public tokenCount: number,
-                public scope: SynScope) {
+                public tokenCount: number) {
     }
 
     getTokenCount() {
@@ -36,6 +34,4 @@ export class ASTNode {
     getGlobalOffset(): Offset | null {
         return this.globalOffset;
     }
-
-
 }

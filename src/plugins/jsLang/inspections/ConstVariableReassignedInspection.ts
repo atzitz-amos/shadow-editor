@@ -6,12 +6,9 @@ import {SynNodeVisitor} from "../../../lang/syntax/visitors/SynNodeVisitor";
 import JsLang from "../lang/JsLang";
 import {JsSynVisitor} from "../lang/syntax/visitors/JsSynVisitor";
 import {JsAssignmentExpr} from "../lang/syntax/expr/JsAssignmentExpr";
-import {JsDeclarator} from "../lang/syntax/statements/JsDeclarator";
 import {QuickFix} from "../../../lang/codeAnalysis/inspections/quickfix/QuickFix";
 import {SynModificationTree} from "../../../lang/syntax/writer/template/SynModificationTree";
 import {SynSymbol} from "../../../lang/syntax/impl/reference/SynSymbol";
-import {JsVariableDeclaration} from "../lang/syntax/statements/JsVariableDeclaration";
-import {JsLexicalGrammar} from "../lang/lexer/JsLexicalGrammar";
 
 /**
  *
@@ -38,10 +35,10 @@ export default class ConstVariableReassignedInspection extends InspectionBase {
         return new class extends JsSynVisitor {
             visitAssignmentExpr(element: JsAssignmentExpr) {
                 for (const identifier of element.getAllModifiedIdentifiers()) {
-                    let decl = identifier.resolve();
+                    /*let decl = identifier.resolve();
                     if (decl && decl instanceof JsDeclarator && decl.isConst()) {
                         holder.registerProblem(inspection, "Cannot reassign a const variable", identifier, [new ConstVariableReassignedQuickFix()]);
-                    }
+                    }*/
                 }
             }
         }
@@ -50,9 +47,9 @@ export default class ConstVariableReassignedInspection extends InspectionBase {
 
 export class ConstVariableReassignedQuickFix extends QuickFix {
     applyFix(element: SynSymbol, synModTree: SynModificationTree): void {
-        const decl = element.resolve()?.getParent();
+        /*const decl = element.resolve()?.getParent();
         if (!decl || !(decl instanceof JsVariableDeclaration)) return;
-        synModTree.replaceToken(decl, decl.getKindToken(), JsLexicalGrammar.KEYWORD, "let");
+        synModTree.replaceToken(decl, decl.getKindToken(), JsLexicalGrammar.KEYWORD, "let");*/
     }
 
     getId(): string {

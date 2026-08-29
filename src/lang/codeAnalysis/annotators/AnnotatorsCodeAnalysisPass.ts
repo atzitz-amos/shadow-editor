@@ -18,6 +18,9 @@ export class AnnotatorsCodeAnalysisPass implements CodeAnalysisPass<HighlightHol
         this.holder = new HighlightHolder(document.getDocument(), 2, true);
     }
 
+    getPriority(): number {
+        return 2;
+    }
 
     getHolder(): HighlightHolder {
         return this.holder;

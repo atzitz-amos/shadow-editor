@@ -1,7 +1,6 @@
 import {TextRange} from "../../../../editor/core/coordinate/range/TextRange";
 import {EditorURI} from "../../../../core/uri/EditorURI";
 import {SynDocument} from "../../api/document/SynDocument";
-import {SynScope} from "../../api/scope/SynScope";
 import {SynNode} from "../../api/SynNode";
 import {SynParentElement} from "../../api/tree/SynParentElement";
 import {TokenType} from "../../builder/tokens/TokenType";
@@ -24,8 +23,6 @@ export abstract class AbstractSynParentElement implements SynParentElement {
     }
 
     abstract getTokenCount(): number;
-
-    abstract getParentScope(): SynScope;
 
     abstract getSynDocument(): SynDocument;
 

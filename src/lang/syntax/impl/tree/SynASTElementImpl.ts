@@ -5,8 +5,10 @@ import {EditorURI} from "../../../../core/uri/EditorURI";
 import {SynNodeVisitor} from "../../visitors/SynNodeVisitor";
 import {ASTType} from "../../builder/parser/nodes/ASTGrammar";
 import {SynDocument} from "../../api/document/SynDocument";
-import {SynScope} from "../../api/scope/SynScope";
 import {AbstractSynParentElement} from "./AbstractSynParentElement";
+import {SynScope} from "../../../indexes/scope/SynScope";
+import {SynCodeBlock} from "../../api/SynCodeBlock";
+import {SynParentElement} from "../../api/tree/SynParentElement";
 
 /**
  * Provides a lot of standard functionality for syntax elements.
@@ -17,16 +19,12 @@ import {AbstractSynParentElement} from "./AbstractSynParentElement";
  */
 export abstract class SynASTElementImpl extends AbstractSynParentElement implements SynASTElement {
     protected readonly node: ASTNode;
-
     protected readonly document: SynDocument;
-    protected readonly scope: SynScope;
-
     private readonly elementChildren: SynASTElement[];
 
     protected constructor(node: ASTNode) {
         super(node.children);
         this.node = node;
-        this.scope = node.scope;
         this.document = node.document;
 
         this.elementChildren = this.children.filter(child => child instanceof SynASTElementImpl) as SynASTElement[];
@@ -40,16 +38,18 @@ export abstract class SynASTElementImpl extends AbstractSynParentElement impleme
         return (node: ASTNode) => new this(node);
     }
 
+    getScope(): SynScope | null {
+        let element: SynParentElement | null = this;
+        while (element && !(element instanceof SynCodeBlock)) element = element.getParent();
+        return element ? element.getAssociatedScope() : null;
+    }
+
     getURI(): EditorURI {
         return this.document.getURI().selectedRegion(this.getTextRange());
     }
 
     getSynDocument(): SynDocument {
         return this.document;
-    }
-
-    getParentScope(): SynScope {
-        return this.scope;
     }
 
     findNthElementOfASTType(type: ASTType, n: number): SynASTElement | null {
