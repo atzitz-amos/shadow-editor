@@ -44,6 +44,15 @@ its view only on an on-demand basis. To force-update the editor, you can use the
 editor.refreshView();
 ```
 
+> [!WARNING]
+> Editing the document like that is highly discouraged as it does not handle undo/redo nor caret positioning. The preferred way is to use `DocumentModificationUtils.modifyWithCaret`:
+> ```ts
+> DocumentModificationUtils.modifyWithCaret(document, caret, "insertHelloWorld", () => {
+>    document.insertText(0, "this action can now be undone!")
+>    document.deleteAt(0, 30); // Safely moves the caret out of the deleted range
+> });
+> ```
+
 ### Plugins
 #### Creating a plugin
 The ShadowApp loads plugins dynamically without needing to explicitly register them.
@@ -74,16 +83,18 @@ export default class MyPlugin extends EditorPlugin {
 #### Extension Points
 The editor functionalities can be extended using extension points. Here is a table of some of the most common extension points:
 
-| Extension Point | Description                                                          |
-|:----------------|:---------------------------------------------------------------------|
-| `lang`          | Add support for a new language                                       |
-| `inspections`   | Adds inline inspections                                              |
-| `smart`         | Adds SmartInlineActions, as for instance auto close open parenthesis |
-| `tokenhover`    | Adds an action when the user hovers a specific token in the editor   |
-| `action`        | Add a new action to the editor                                       |
-| `pane`          | Adds a new pane to the editor                                        |
-| `styles`        | Adds a custom stylesheet to the editor                               |
-| `startupPhase`  | Add a new startup phase to the loading cycle                         |
+| Extension Point     | Description                                                                                                                                                                             |
+|:--------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `lang`              | Add support for a new language (e.g. [JsLang](../src/plugins/jsLang/lang/JsLang.ts))                                                                                                    |
+| `codeAnalysis/pass` | Adds another codeAnalysisPass (e.g. [AnnotatorsCodeAnalysisPassProvider](../src/lang/codeAnalysis/annotators/AnnotatorsCodeAnalysisPassProvider.ts))                                    |
+| `annotators`        | Adds annotators (e.g. [JsContextualKeywordsAnnotator](../src/plugins/jsLang/annotators/JsContextualKeywordsAnnotator.ts))                                                               |
+| `inspections`       | Adds inline inspections (e.g. [EmptyStatementInspection](../src/plugins/jsLang/inspections/EmptyStatementInspection.ts))                                                                |
+| `smart`             | Adds SmartInlineActions, as for instance auto close open parenthesis (e.g. [JsSmartEnterInLiteralOrCommentAction](../src/plugins/jsLang/smart/JsSmartEnterInLiteralOrCommentAction.ts)) |
+| `tokenhover`        | Adds an action when the user hovers a specific token in the editor (e.g. [JsShowOperatorPrecedenceOnHover](../src/plugins/jsLang/tokenhover/JsShowOperatorPrecedenceOnHover.ts))        |
+| `action`            | Add a new action to the editor (e.g. [JsCommentOutCodeAction](../src/plugins/jsLang/actions/JsCommentOutCodeAction.ts))                                                                 |
+| `pane`              | Adds a new pane to the editor (e.g. [DebugToolsPane](../src/plugins/debugTools/panes/DebugToolsPane.ts))                                                                                |
+| `styles`            | Adds a custom stylesheet to the editor (e.g. [popup.css](../src/plugins/debugTools/styles/popup.css))                                                                                   |
+| `startupPhase`      | Add a new startup phase to the loading cycle                                                                                                                                            |
 
 To register an extension points, just create a folder with the name of the extension point in your plugin directory.
 Each extension point has its own format for the extension definition. 
