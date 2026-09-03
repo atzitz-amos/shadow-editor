@@ -7,6 +7,9 @@ import JsIncrLexer from "./lexer/JsIncrLexer";
 import {ASTBuilder} from "../../../lang/syntax/builder/parser/builder/ASTBuilder";
 import {IParser} from "../../../lang/syntax/builder/parser/IParser";
 import {JsPrinter} from "./template/JsPrinter";
+import {SpacingFormatter} from "../../../lang/codeStyle/spacing/SpacingFormatter";
+import {JsSpacingRules} from "../codeStyle/JsSpacingRules";
+import {JsLexicalGrammar} from "./lexer/JsLexicalGrammar";
 
 
 export default class JsLang extends LanguageBase {
@@ -21,6 +24,10 @@ export default class JsLang extends LanguageBase {
     public static get INSTANCE(): JsLang {
         if (!JsLang._instance) throw new Error("No instance of JsLang was found");
         return JsLang._instance;
+    }
+
+    getSpacingFormatter(): SpacingFormatter {
+        return SpacingFormatter.make(JsSpacingRules, [JsLexicalGrammar.WHITESPACE], [JsLexicalGrammar.EOL]);
     }
 
     public getKey(): string {

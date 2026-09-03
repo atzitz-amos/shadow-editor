@@ -7,6 +7,7 @@ import {JsFunction} from "../api/JsFunction";
 import {SynNodeVisitor} from "../../../../../lang/syntax/visitors/SynNodeVisitor";
 import {JsSynVisitor} from "../visitors/JsSynVisitor";
 import {JsLexicalGrammar} from "../../lexer/JsLexicalGrammar";
+import {SynNamedElement} from "../../../../../lang/syntax/impl/reference/SynNamedElement";
 
 /**
  *
@@ -14,7 +15,7 @@ import {JsLexicalGrammar} from "../../lexer/JsLexicalGrammar";
  * @date 12/25/2025
  * @since 1.0.0
  */
-export class JsFunctionStatement extends JsStatement implements JsFunction {
+export class JsFunctionStatement extends JsStatement implements JsFunction, SynNamedElement {
     private readonly name: SynTokenNode;
     private readonly parameters: JsFunctionParameters;
     private readonly body: JsCodeBlock;
@@ -62,8 +63,12 @@ export class JsFunctionStatement extends JsStatement implements JsFunction {
         return this.asyncToken;
     }
 
-    getName(): SynTokenNode {
-        return this.name;
+    getNameToken(): SynTokenNode | null {
+        return this.name || null;
+    }
+
+    getName(): string {
+        return this.name ? this.name.getValue() : "";
     }
 
     getParameters(): JsFunctionParameters {
@@ -83,6 +88,7 @@ export class JsFunctionStatement extends JsStatement implements JsFunction {
             visitor.visitFunctionStatement(this);
             visitor.visitFunction(this);
         }
+        visitor.visitNamedElement(this);
         super.accept(visitor);
     }
 }

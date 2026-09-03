@@ -17,6 +17,10 @@ export class DocumentModificationEvent extends EditorEventBase {
         super(document.getEditor());
     }
 
+    getLanguage() {
+        return this.document.getLanguage();
+    }
+
     getDocument(): Document {
         return this.document;
     }

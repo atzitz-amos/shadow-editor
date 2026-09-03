@@ -5,7 +5,7 @@ import {Project} from "../project/Project";
 import {ActiveProjectHelper} from "./ActiveProjectHelper";
 import {EventBus} from "../events/EventBus";
 import {PluginManager} from "../plugins/PluginManager";
-import {LangSupport} from "../../lang/LangSupport";
+import {LangRegistry} from "../../lang/LangRegistry";
 import {SettingsManager} from "../settings/SettingsManager";
 import {ActionManager} from "../actions/ActionManager";
 import {ProcessManager} from "../threaded/process/manager/ProcessManager";
@@ -23,10 +23,11 @@ import {ProjectService} from "../project/ProjectService";
 import {SaveService} from "../sync/save/SaveService";
 import {EditorKeyContextManager} from "../../editor/core/keycontext/EditorKeyContextManager";
 import {SynSuiteEngine} from "../../app/testLib/lang/suite/SynSuiteEngine";
-import {CodeAnalysisService} from "../../lang/codeAnalysis/analysis/CodeAnalysisService";
 import {WorkspaceManager} from "../project/workspace/WorkspaceManager";
 import {WorkspaceRestorer} from "../project/WorkspaceRestorer";
 import {LatencyMonitor} from "../../editor/core/latency/LatencyMonitor";
+import {SynDocumentManager} from "../../lang/syntax/manager/SynDocumentManager";
+import {KeybindManager} from "../keybinds/KeybindManager";
 
 /**
  * Provides a single class that regroups all useful singletons and global services of the application
@@ -83,12 +84,8 @@ export class GlobalState {
         return PluginManager.getInstance();
     }
 
-    public static getLangSupport(): LangSupport {
-        return LangSupport.getInstance();
-    }
-
-    public static getCodeAnalysisService(): CodeAnalysisService {
-        return CodeAnalysisService.getInstance();
+    public static getLangRegistry(): LangRegistry {
+        return LangRegistry.getInstance();
     }
 
     public static getSettingsManager() {
@@ -107,7 +104,6 @@ export class GlobalState {
         return WCPService.getInstance();
     }
 
-
     public static getPaneManager(): PaneManager {
         return PaneManager.getInstance();
     }
@@ -120,12 +116,20 @@ export class GlobalState {
         return GlobalState.getUI().getMainEditor();
     }
 
+    public static getSynDocumentManager(): SynDocumentManager {
+        return SynDocumentManager.getInstance();
+    }
+
     public static getProjectsService(): ProjectService {
         return ProjectService.getInstance();
     }
 
     public static getSaveService(): SaveService {
         return SaveService.getInstance();
+    }
+
+    public static getKeybindManager(): KeybindManager {
+        return KeybindManager.getInstance();
     }
 
     public static getEditorKeyContextManager() {

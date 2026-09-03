@@ -132,7 +132,7 @@ bus.subscribe(this, DocumentModificationEvent.SUBSCRIBER, (event: DocumentModifi
 
 Although the code for this project was entirely written by me, some of its core concepts are inspired by those
 of [JetBrains intellij-community](https://github.com/JetBrains/intellij-community) *(logical/visual position,
-ASTBuilder, Actions, etc...).*
+ASTBuilder, Actions, etc...)*. Moreover, the design of the UI draws a lot of inspiration from their editors.
 
 This project also uses [JetBrains Mono](https://www.jetbrains.com/lp/mono/), licensed under
 the [Apache 2.0 License](https://www.apache.org/licenses/LICENSE-2.0).

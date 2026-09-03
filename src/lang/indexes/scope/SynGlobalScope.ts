@@ -1,5 +1,6 @@
 import {SynScope} from "./SynScope";
 import {SynScopeType} from "./SynScopeType";
+import {SynCodeBlock} from "../../syntax/api/SynCodeBlock";
 
 /**
  *
@@ -8,6 +9,14 @@ import {SynScopeType} from "./SynScopeType";
  * @since 1.0.0
  */
 export class SynGlobalScope extends SynScope {
+    constructor(associatedCodeblock: SynCodeBlock) {
+        super(associatedCodeblock);
+    }
+
+    setAssociatedCodeblock(codeblock: SynCodeBlock) {
+        this.associatedCodeblock = codeblock;
+    }
+
     getScopeType(): SynScopeType {
         return SynScopeType.GLOBAL;
     }

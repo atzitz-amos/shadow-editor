@@ -1,5 +1,4 @@
 import {SynASTElementImpl} from "../tree/SynASTElementImpl";
-import {EditorURI} from "../../../../core/uri/EditorURI";
 import {SynNodeVisitor} from "../../visitors/SynNodeVisitor";
 
 /**
@@ -10,10 +9,6 @@ import {SynNodeVisitor} from "../../visitors/SynNodeVisitor";
  */
 export abstract class SynNamedElement extends SynASTElementImpl {
     abstract getName(): string;
-
-    getURI(): EditorURI {
-        return null as unknown as EditorURI; // TODO
-    }
 
     accept(visitor: SynNodeVisitor) {
         visitor.visitNamedElement(this);

@@ -138,4 +138,13 @@ export class HTMLUtils {
         component.style.left = `${left}px`;
         component.style.top = `${top}px`;
     }
+
+    public static html(content: string, className?: string) {
+        const div = document.createElement('div');
+        if (className) {
+            div.className = className;
+        }
+        div.innerHTML = content;
+        return div;
+    }
 }

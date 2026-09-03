@@ -1,5 +1,6 @@
 import {Document} from "./Document";
 import {TextRange} from "../coordinate/range/TextRange";
+import {IndentUtils} from "../../../lang/syntax/utils/IndentUtils";
 
 export class LineData {
 
@@ -32,5 +33,9 @@ export class LineData {
 
     public charAt(i: number) {
         return this.document.getTextBetween(this.lineStart + i, this.lineStart + i + 1);
+    }
+
+    getIndentationSize() {
+        return IndentUtils.getIndentationSize(this.getText());
     }
 }

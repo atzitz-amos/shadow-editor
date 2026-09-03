@@ -11,6 +11,8 @@ export interface IdePopup {
 
     isOpen(): boolean;
 
+    isTransparent(): boolean;
+
     onClose(callback: (wasCancelled: boolean) => void): void;
 
     containsXY(x: number, y: number): boolean;
@@ -63,7 +65,15 @@ export abstract class AbstractPopup implements IdePopup {
         return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
     }
 
+    isTransparent(): boolean {
+        return false;
+    }
+
     protected abstract getPopupElement(): HTMLElement;
+
+    protected onDrag(newX: number, newY: number): void {
+
+    }
 
     private setupDragging(element: HTMLElement) {
         let isDragging: boolean = false;
@@ -90,11 +100,14 @@ export abstract class AbstractPopup implements IdePopup {
 
             element.style.left = `${clientX}px`;
             element.style.top = `${clientY}px`;
+
+            this.onDrag(clientX, clientY);
         };
 
         const onMouseDown = (e) => {
             e.preventDefault();
             e.stopPropagation();
+            element.focus();
 
             isDragging = true;
 

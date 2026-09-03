@@ -8,6 +8,8 @@ import {SynTree} from "../tree/SynTree";
 import {LanguageBase} from "../../../LanguageBase";
 import {SynFile} from "../filesystem/SynFile";
 import {Document} from "../../../../editor/core/document/Document";
+import {IndexFile} from "../../../indexes/IndexFile";
+import {ASTCheckpoint} from "../../builder/parser/optimizer/recovery/ASTCheckpoint";
 
 /**
  *
@@ -18,15 +20,13 @@ import {Document} from "../../../../editor/core/document/Document";
 export interface SynDocument extends URILocatedResource {
     getURI(): EditorURI;
 
-    getText(): string;
-
-    commit(tree: SynTree, timestamp: number): void;
-
-    getModificationTimestamp(): number;
+    getSynFile(): SynFile | null;
 
     getAssociatedFile(): ProjectFile | null;
 
-    getSynFile(): SynFile | null;
+    getModificationTimestamp(): number;
+
+    getText(): string;
 
     makeTokenStream(): TokenStream;
 
@@ -34,13 +34,19 @@ export interface SynDocument extends URILocatedResource {
 
     isDirty(): boolean;
 
-    getProblemsHolder(): ProblemsHolder;
+    commit(tree: SynTree, checkpoints: ASTCheckpoint[], timestamp: number): void;
+
+    getCheckpoints(): ASTCheckpoint[] | null;
 
     getFullRange(): TextRange;
 
-    getTree(): SynTree;
-
     getLanguage(): LanguageBase;
 
+    getTree(): SynTree;
+
     getDocument(): Document;
+
+    getProblemsHolder(): ProblemsHolder;
+
+    getIndexFile(): IndexFile;
 }

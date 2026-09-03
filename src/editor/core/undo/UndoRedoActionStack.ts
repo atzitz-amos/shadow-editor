@@ -25,7 +25,6 @@ export class UndoRedoActionStack {
 
         this.redoStack.length = 0;
 
-        console.log(`Starting undoable action '${name}': oldOffset=${editor.getPrimaryCaret().getOffset()}, oldSelection=${editor.getPrimaryCaret().getSelectionModel().copyRange()}`)
         return true;
     }
 
@@ -36,10 +35,8 @@ export class UndoRedoActionStack {
         this.currentFrame.setNew(editor.getPrimaryCaret().getOffset(), editor.getPrimaryCaret().getSelectionModel().copyRange());
         if (last && last.canMergeWith(this.currentFrame)) {
             last.merge(this.currentFrame);
-            console.log("Merging undoable action:", last);
         } else {
             this.frameStack.push(this.currentFrame);
-            console.log(`Finishing undoable action:`, this.currentFrame)
         }
 
         this.currentFrame = null;

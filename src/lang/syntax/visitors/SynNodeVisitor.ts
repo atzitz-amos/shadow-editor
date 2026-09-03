@@ -50,4 +50,8 @@ export class SynNodeVisitor {
     visitError(error: SynErrorNode): void {
         this.visitNode(error);
     }
+
+    visitExitNode(node: SynNode): void {
+
+    }
 }

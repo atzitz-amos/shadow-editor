@@ -15,4 +15,6 @@ export interface ShadowUI {
     showPopup(popup: IdePopup): void;
 
     cancelPopup(): void;
+
+    getActivePopup(): IdePopup | null;
 }

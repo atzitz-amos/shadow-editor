@@ -2,7 +2,7 @@ import {SynSuitePersister} from "./SynSuitePersister";
 import {GlobalState} from "../../../../core/global/GlobalState";
 import {SynSuiteParserTest} from "./SynSuiteParserTest";
 import {SynAutomatedTestResult} from "./SynAutomatedTestResult";
-import {LangSupport} from "../../../../lang/LangSupport";
+import {LangRegistry} from "../../../../lang/LangRegistry";
 import {Document} from "../../../../editor/core/document/Document";
 import {LanguageBase} from "../../../../lang/LanguageBase";
 import {ASTBuilder} from "../../../../lang/syntax/builder/parser/builder/ASTBuilder";
@@ -43,7 +43,7 @@ export class SynSuiteEngine {
             return;
         }
 
-        const document = editor.getLangService().getSynFile().getSynDocument();
+        const document = editor.getCodeAnalysisService().getSynFile().getSynDocument();
         const content = editor.getOpenedDocument().getTextContent();
 
         const holder = CodeAnalysisUtils.runCodeAnalysisPass(document, new InspectionsCodeAnalysisPass(
@@ -90,7 +90,7 @@ export class SynSuiteEngine {
 
         if (profile) console.profile("Running SynSuite tests for plugin " + pluginId);
         for (const test of tests) {
-            let result = this.runTest(pluginId, test, LangSupport.getInstance().getLanguageByKey(test.language));
+            let result = this.runTest(pluginId, test, LangRegistry.getInstance().getLanguageByKey(test.language));
             results.set(test.key, result);
         }
 

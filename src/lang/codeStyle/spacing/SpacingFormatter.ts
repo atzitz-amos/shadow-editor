@@ -115,6 +115,80 @@ export class SpacingFormatter {
         return result;
     }
 
+    getAllApplicableRules(prev: Token | null, current: Token, node: SynASTElement): SpacingRule[] {
+        const applicableRules: SpacingRule[] = [];
+
+        for (const rule of this.blankRules) {
+            if (rule.isApplicable(prev, current, node)) {
+                applicableRules.push(rule);
+            }
+        }
+
+        for (const rule of this.beforeRules.getAll(current.getType())) {
+            if (rule.isApplicable(prev, current, node)) {
+                applicableRules.push(rule);
+            }
+        }
+
+        if (prev) {
+            for (const rule of this.afterRules.getAll(prev.getType())) {
+                if (rule.isApplicable(prev, current, node)) {
+                    applicableRules.push(rule);
+                }
+            }
+        }
+
+        return applicableRules;
+    }
+
+    public collectFormattingInfo(stream: TokenStream, tree: SynTree): SpacingFormattingInfo[] {
+        const jumper = new SynTreeTokenJumper(tree);
+
+        const formattingInfo: SpacingFormattingInfo[] = [];
+
+        let isLineBegin: boolean = true;
+        let currentWhitespace: Token | null = null;
+        let prevToken: Token | null = null;
+        let prevNode: SynASTElement | null = null;
+
+        for (const token of stream) {
+            if (token.shouldSkip()) {
+                if (this.whitespaceGroup.includes(token.getType())) currentWhitespace = token;
+                else {
+                    currentWhitespace = null;
+                    prevNode = null;
+                    prevToken = null;
+                    isLineBegin = this.newlineGroup.includes(token.getType());
+                }
+                continue;
+            }
+
+            const node = jumper.jumpToToken(token);
+            const applicableRules = (node instanceof SynASTElementImpl) ? this.getAllApplicableRules(prevToken, token, node) : [];
+
+            let decision: Spacing | null = null;
+            if (applicableRules.length > 0) {
+                // Choose the rule with the highest priority
+                const highestPriorityRule = applicableRules.reduce((prev, curr) => (curr.getPriority() > prev.getPriority() ? curr : prev));
+                decision = highestPriorityRule.getResult();
+            }
+
+            formattingInfo.push({
+                offset: token.getRange().start,
+                type: isLineBegin ? "line-begin" : (applicableRules.length > 0 ? "space" : "default"),
+                applicableRules: applicableRules,
+                decision: decision
+            });
+
+            currentWhitespace = null;
+            prevNode = node;
+            prevToken = token;
+            isLineBegin = false;
+        }
+
+        return formattingInfo;
+    }
+
     private apply(applicableRule: SpacingRule, current: string) {
         switch (applicableRule.getResult()) {
             case Spacing.KEEP:
@@ -127,4 +201,11 @@ export class SpacingFormatter {
                 return current.length > 0 ? current : " ";
         }
     }
+}
+
+export type SpacingFormattingInfo = {
+    offset: Offset,
+    type: "line-begin" | "space" | "default",
+    applicableRules: SpacingRule[],
+    decision: Spacing | null
 }

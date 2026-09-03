@@ -12,6 +12,7 @@ import {SNoOpenedEditorView} from "./SNoOpenedEditorView";
 import {SMetaRowView} from "./SMetaRowView";
 import {ITab} from "../../../../../core/tabs/ITab";
 import {EditorTab} from "../../../../../core/tabs/EditorTab";
+import {MainEditorChangedEvent} from "../../../../events/MainEditorChangedEvent";
 
 /**
  *
@@ -86,6 +87,8 @@ export class SMainEditorView extends UIComponent {
             this.metaRowView.dispose();
             this.addChild(component)
         }
+
+        GlobalState.getMainEventBus().syncPublish(new MainEditorChangedEvent(this.currentTab instanceof EditorTab ? this.currentEditor : null));
 
         this.drawChildren();
     }

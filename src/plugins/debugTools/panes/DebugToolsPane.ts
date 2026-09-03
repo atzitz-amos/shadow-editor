@@ -7,6 +7,8 @@ import {GlobalState} from "../../../core/global/GlobalState";
 import {SynTreeChangedEvent} from "../../../editor/core/lang/events/SynTreeChangedEvent";
 import {DebugToolsPaneComponent} from "./DebugToolsPaneComponent";
 import {CaretMovedEvent} from "../../../editor/core/caret/events/CaretMovedEvent";
+import {SynDocumentManager} from "../../../lang/syntax/manager/SynDocumentManager";
+import {SynEditorTreeChangedEvent} from "../../../editor/core/lang/events/SynEditorTreeChangedEvent";
 
 /**
  *
@@ -36,10 +38,10 @@ export default class DebugToolsPane extends AbstractPane {
         if (GlobalState.getMainEditor() !== null) {
             (this.getComponent() as DebugToolsPaneComponent).onSynTreeChanged(
                 GlobalState.getMainEditor(),
-                GlobalState.getMainEditor().getLangService().getSynFile().getSynDocument());
+                SynDocumentManager.getSynDocument(GlobalState.getMainEditor().getOpenedDocument()));
         }
 
-        GlobalState.getMainEventBus().subscribe(this, SynTreeChangedEvent.SUBSCRIBER, e => {
+        GlobalState.getMainEventBus().subscribe(this, SynEditorTreeChangedEvent.SUBSCRIBER, e => {
             (this.getComponent() as DebugToolsPaneComponent).onSynTreeChanged(e.getEditor(), e.getSynDocument());
         });
 

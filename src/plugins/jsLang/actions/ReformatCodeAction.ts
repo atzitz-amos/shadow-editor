@@ -5,6 +5,7 @@ import {SpacingFormatter} from "../../../lang/codeStyle/spacing/SpacingFormatter
 import {JsSpacingRules} from "../codeStyle/JsSpacingRules";
 import {JsLexicalGrammar} from "../lang/lexer/JsLexicalGrammar";
 import {UndoStack} from "../../../editor/core/undo/UndoStack";
+import {SynDocumentManager} from "../../../lang/syntax/manager/SynDocumentManager";
 
 /**
  *
@@ -21,7 +22,7 @@ export default class ReformatCodeAction extends AbstractAction {
         } else {
             const editor = ctx.requireEditor();
             const stream = editor.getOpenedDocument().getTokenCache().createTokenStream();
-            const synDocument = editor.getLangService().getSynFile().getSynDocument();
+            const synDocument = SynDocumentManager.getOpenedSynDocument(editor);
             console.log(synDocument)
 
             const text = this.formatter.format(stream, synDocument.getTree());

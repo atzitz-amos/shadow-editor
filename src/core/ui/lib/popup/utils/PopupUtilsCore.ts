@@ -1,8 +1,8 @@
-import {IdePopup, IdeResultPopup} from "./IdePopup";
-import {GlobalState} from "../../../global/GlobalState";
-import {SimpleTextInputPopup} from "./SimpleTextInputPopup";
-import {Icon} from "../../icons/Icon";
-import {SimpleConfirmPopup} from "./SimpleConfirmPopup";
+import {IdePopup, IdeResultPopup} from "../IdePopup";
+import {GlobalState} from "../../../../global/GlobalState";
+import {SimpleTextInputPopup} from "../simple/SimpleTextInputPopup";
+import {Icon} from "../../../icons/Icon";
+import {SimpleConfirmPopup} from "../simple/SimpleConfirmPopup";
 
 /**
  *
@@ -26,5 +26,16 @@ export class PopupUtilsCore {
 
     public static async confirm(title: string, message: string): Promise<boolean> {
         return await PopupUtilsCore.awaitPopup(new SimpleConfirmPopup(title, message)) ?? false;
+    }
+
+    public static isOpen(popup: Class<IdePopup>): boolean {
+        return GlobalState.getUI().getActivePopup() instanceof popup;
+    }
+
+    public static closePopup(popup: Class<IdePopup>, wasCancelled: boolean = true): void {
+        const activePopup = GlobalState.getUI().getActivePopup();
+        if (activePopup instanceof popup) {
+            activePopup.close(wasCancelled);
+        }
     }
 }

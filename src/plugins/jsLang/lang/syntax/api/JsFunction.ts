@@ -9,7 +9,7 @@ import {SynTokenNode} from "../../../../../lang/syntax/impl/SynTokenNode";
  * @since 1.0.0
  */
 export interface JsFunction {
-    getName(): SynTokenNode | null;
+    getNameToken(): SynTokenNode | null;
 
     getAsyncToken(): SynTokenNode | undefined;
 

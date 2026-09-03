@@ -1,7 +1,7 @@
 import {Lifecycle} from "../lifecycle/Lifecycle";
 import {Project} from "../project/Project";
 import {PluginManager} from "../plugins/PluginManager";
-import {LangSupport} from "../../lang/LangSupport";
+import {LangRegistry} from "../../lang/LangRegistry";
 import {SettingsManager} from "../settings/SettingsManager";
 import {ProcessManager} from "../threaded/process/manager/ProcessManager";
 import {ActionManager} from "../actions/ActionManager";
@@ -35,8 +35,8 @@ export class DistantGlobalState {
         return RefUtils.ofCallChain("GlobalState.getPluginManager", PluginManager);
     }
 
-    public static getLangSupport(): Promise<Ref<LangSupport>> {
-        return RefUtils.ofCallChain("GlobalState.getLangSupport", LangSupport);
+    public static getLangSupport(): Promise<Ref<LangRegistry>> {
+        return RefUtils.ofCallChain("GlobalState.getLangRegistry", LangRegistry);
     }
 
     public static getSettingsManager(): Promise<Ref<SettingsManager>> {

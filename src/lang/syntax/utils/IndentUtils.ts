@@ -34,4 +34,12 @@ export class IndentUtils {
     static makeIndentString(n: number) {
         return " ".repeat(n);
     }
+
+    static startsWith(text: string, char: string) {
+        return text.trimStart().startsWith(char);
+    }
+
+    static getAlignIndent(lines: string[]) {
+        return Math.min(...lines.map(line => IndentUtils.getIndentationSize(line)));
+    }
 }

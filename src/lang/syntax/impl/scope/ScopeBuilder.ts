@@ -25,8 +25,8 @@ export class ScopeBuilder {
         this.currentScope = new SynLocalScope(type, codeblock, this.currentScope!);
     }
 
-    public enterGlobalScope(codeblock: SynCodeBlock): void {
-        this.currentScope = new SynGlobalScope(codeblock);
+    public enterGlobalScope(scope: SynGlobalScope): void {
+        this.currentScope = scope;
     }
 
     public exitScope(): void {

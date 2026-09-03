@@ -55,7 +55,7 @@
             import {SynModificationTree} from "./src/lang/syntax/writer/template/SynModificationTree";
             import {JsSynTemplate} from "./src/plugins/jsLang/lang/template/JsSynTemplate";
             import {SynSuiteWindowRenderer} from "./src/app/testLib/lang/suite/renderer/SynSuiteWindowRenderer";
-            import {PopupUtilsCore} from "./src/core/ui/lib/popup/PopupUtilsCore";
+            import {PopupUtilsCore} from "./src/core/ui/lib/popup/utils/PopupUtilsCore";
             import {FaIcon} from "./src/core/ui/icons/FaIcon";
             import {ProjectFilesPaneHelper} from "./src/app/ui/full/panes/projectFiles/ProjectFilesPaneHelper";
             import {ActiveProjectHelper} from "./src/core/global/ActiveProjectHelper";
@@ -69,8 +69,19 @@
             import {EditorHighlighterUtils} from "./src/editor/ui/highlighter/overlay/EditorHighlighterUtils";
             import {TextAttributeKey} from "./src/editor/ui/highlighter/style/TextAttributeKey";
             import {TextBackground} from "./src/editor/ui/highlighter/style/TextBackground";
+            import {ActionPopup} from "./src/core/ui/lib/popup/action/ActionPopup";
+            import {DebugToolsPopup} from "./src/plugins/debugTools/popup/DebugToolsPopup";
+            import {MainEditorChangedEvent} from "./src/app/ui/events/MainEditorChangedEvent";
+            import {SynDocumentManager} from "./src/lang/syntax/manager/SynDocumentManager";
 
             window.VNodeStore = VNodeStore;
+
+            window.ActionPopup = ActionPopup;
+            window.DebugTools = DebugToolsPopup;
+
+            GlobalState.getMainEventBus().subscribe(window, MainEditorChangedEvent.SUBSCRIBER, e => console.log(e));
+
+            window.getSynDocument = () => SynDocumentManager.getOpenedSynDocument(GlobalState.getMainEditor());
 
             window.highlight = (start, end) => {
                 EditorHighlighterUtils.highlight(

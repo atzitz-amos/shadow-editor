@@ -156,7 +156,7 @@ export class ASTViewerWidget extends UIComponent {
 
     mouseOutNode(node: SynNode) {
         if (!this.editor) return;
-        EditorHighlighterUtils.clear("ast-viewer", this.editor);
+        EditorHighlighterUtils.clear(this.editor, "ast-viewer");
         this.editor.getView().triggerOverlaysRepaint();
     }
 }

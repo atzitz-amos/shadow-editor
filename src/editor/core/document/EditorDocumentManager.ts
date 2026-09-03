@@ -1,7 +1,11 @@
-import {LangSupport} from "../../../lang/LangSupport";
+import {LangRegistry} from "../../../lang/LangRegistry";
 import {ProjectFile} from "../../../core/project/filesystem/tree/ProjectFile";
 import {Document} from "./Document";
 import {UUIDHelper} from "../../utils/UUIDHelper";
+import {Service} from "../../../core/threaded/service/Service";
+import {GlobalState} from "../../../core/global/GlobalState";
+import {DocumentModificationEvent} from "./events/DocumentModificationEvent";
+import {SynDocumentManager} from "../../../lang/syntax/manager/SynDocumentManager";
 
 /**
  *
@@ -9,6 +13,7 @@ import {UUIDHelper} from "../../utils/UUIDHelper";
  * @date 7/2/2026
  * @since 1.0.0
  */
+@Service
 export class EditorDocumentManager {
     private static readonly instance: EditorDocumentManager = new EditorDocumentManager();
 
@@ -48,12 +53,46 @@ export class EditorDocumentManager {
     }
 
     public createDocumentForFile(file: ProjectFile): Document {
-        let fileTypeHandler = LangSupport.getInstance().getFileTypeHandler(file);
+        let fileTypeHandler = LangRegistry.getInstance().getFileTypeHandler(file);
         const document = new Document(
             file.getCachedContent() ?? "",
             fileTypeHandler ? fileTypeHandler.getLanguageForFile(file) : null);
         document.linkFile(file);
+
+        this.prepare(document);
         this.documents.set(file.getId(), document);
         return document;
+    }
+
+    public begin() {
+        GlobalState.getMainEventBus().subscribe(this, DocumentModificationEvent.SUBSCRIBER, e => {
+            this.onDocumentChange(e);
+        });
+    }
+
+    private onDocumentChange(event: DocumentModificationEvent) {
+        const language = event.getLanguage();
+        if (!language) return;
+
+        const lexer = LangRegistry.getLexer(language);
+        const modifiedRange = lexer.relex(event);
+
+        const highlighter = LangRegistry.getHighlighter(language);
+        const holder = event.getDocument().getHighlightsHolder();
+        holder.clear();
+        highlighter.highlight(event.getDocument().getTokenCache().createTokenStream(), holder);
+
+        SynDocumentManager.getInstance().notifyModified(event.getDocument(), event, modifiedRange);
+    }
+
+    private prepare(document: Document) {
+        const language = document.getLanguage();
+        if (!language) return;
+
+        const lexer = LangRegistry.getLexer(language);
+        lexer.lexAll(document);
+
+        const highlighter = LangRegistry.getHighlighter(language);
+        highlighter.highlight(document.getTokenCache().createTokenStream(), document.getHighlightsHolder());
     }
 }

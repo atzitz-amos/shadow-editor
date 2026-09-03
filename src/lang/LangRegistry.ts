@@ -13,9 +13,14 @@ import {SmartInlineDeleteAction} from "./codeAnalysis/smart/delete/SmartInlineDe
 import {SmartInlineHighlight} from "./codeAnalysis/smart/highlight/SmartInlineHighlight";
 import {TokenHoverAction} from "./codeAnalysis/tokenhover/TokenHoverAction";
 import {SmartInlineEnterAction} from "./codeAnalysis/smart/enter/SmartInlineEnterAction";
+import {ILexer} from "./syntax/builder/lexer/ILexer";
+import {HighlighterBase} from "./highlighter/HighlighterBase";
+import {CollectionUtils} from "../editor/utils/collection/CollectionUtils";
+import {IncrementalHighlighter} from "./highlighter/IncrementalHighlighter";
+import {ASTBuilder} from "./syntax/builder/parser/builder/ASTBuilder";
 
-export class LangSupport {
-    private static instance: LangSupport;
+export class LangRegistry {
+    private static instance: LangRegistry;
 
     private static readonly languageEP: ExtensionPoint<LanguageBase> = new ExtensionPoint("lang", LanguageBase);
     private static readonly fileTypeEP: ExtensionPoint<FileTypeHandler> = new ExtensionPoint("lang", FileTypeHandler);
@@ -27,12 +32,15 @@ export class LangSupport {
 
     private static readonly tokenHoverEP: ExtensionPoint<TokenHoverAction> = new ExtensionPoint("tokenhover", TokenHoverAction);
 
+    private static readonly lexerByLanguage: Map<string, ILexer> = new Map();
+    private static readonly highlighterByLanguage: Map<string, HighlighterBase> = new Map();
+
     constructor() {
     }
 
-    public static getInstance(): LangSupport {
+    public static getInstance(): LangRegistry {
         if (!this.instance) {
-            this.instance = new LangSupport();
+            this.instance = new LangRegistry();
         }
         return this.instance;
     }
@@ -45,38 +53,59 @@ export class LangSupport {
         }
     }
 
-    getSupportedLanguages(): LanguageBase[] {
-        return LangSupport.languageEP.getAll();
+    static getLanguageByKey(key: string): LanguageBase | null {
+        return this.getInstance().getLanguageByKey(key);
     }
 
-    getAllFileTypeHandlers(): FileTypeHandler[] {
-        return LangSupport.fileTypeEP.getAll();
+    static getHighlighter(language: LanguageBase) {
+        const highlighterBase = CollectionUtils.getOrSet(this.highlighterByLanguage, language.getKey(), () => language.createHighlighter());
+        return new IncrementalHighlighter(highlighterBase);
+    }
+
+    static getLexer(language: LanguageBase) {
+        return CollectionUtils.getOrSet(this.lexerByLanguage, language.getKey(), () => language.createLexer());
+    }
+
+    static createParser(language: LanguageBase, builder: ASTBuilder) {
+        return language.createParser(builder);
+    }
+
+    getSupportedLanguages(): LanguageBase[] {
+        return LangRegistry.languageEP.getAll();
+    }
+
+    getLanguageByKey(language: string) {
+        return this.getSupportedLanguages().find(lang => lang.getKey() === language) ?? null;
     }
 
     getAllSmartInsertActions(language: LanguageBase): SmartInlineInsertAction[] {
-        return LangSupport.smartInsertEP.getAll()
+        return LangRegistry.smartInsertEP.getAll()
             .filter(action => action.getApplicableLanguages().includes(language))
             .toSorted((a, b) => b.getPriority() - a.getPriority());
     }
 
     getAllSmartDeleteActions(language: LanguageBase): SmartInlineDeleteAction[] {
-        return LangSupport.smartDeleteEP.getAll()
+        return LangRegistry.smartDeleteEP.getAll()
             .filter(action => action.getApplicableLanguages().includes(language))
             .toSorted((a, b) => b.getPriority() - a.getPriority());
     }
 
     getAllSmartEnterActions(language: LanguageBase): SmartInlineEnterAction[] {
-        return LangSupport.smartEnterEP.getAll().filter(action => action.getApplicableLanguages().includes(language))
+        return LangRegistry.smartEnterEP.getAll().filter(action => action.getApplicableLanguages().includes(language))
             .toSorted((a, b) => b.getPriority() - a.getPriority());
     }
 
     getAllSmartHighlights(language: LanguageBase): SmartInlineHighlight[] {
-        return LangSupport.smartHighlightEP.getAll().filter(action => action.getApplicableLanguages().includes(language))
+        return LangRegistry.smartHighlightEP.getAll().filter(action => action.getApplicableLanguages().includes(language))
             .toSorted((a, b) => b.getPriority() - a.getPriority());
     }
 
     getAllTokenHoverActions(language: LanguageBase): TokenHoverAction[] {
-        return LangSupport.tokenHoverEP.getAll().filter(action => action.getApplicableLanguages().includes(language));
+        return LangRegistry.tokenHoverEP.getAll().filter(action => action.getApplicableLanguages().includes(language));
+    }
+
+    getAllFileTypeHandlers(): FileTypeHandler[] {
+        return LangRegistry.fileTypeEP.getAll();
     }
 
     getFileTypeHandler(file: ProjectFile): FileTypeHandler | null {
@@ -97,9 +126,5 @@ export class LangSupport {
     getAssociatedLanguage(file: ProjectFile) {
         let handler = this.getFileTypeHandler(file);
         return handler ? handler.getLanguageForFile(file) : null;
-    }
-
-    getLanguageByKey(language: string) {
-        return this.getSupportedLanguages().find(lang => lang.getKey() === language) ?? null;
     }
 }

@@ -6,6 +6,8 @@ import {SynDocument} from "../../api/document/SynDocument";
 import {SynNode} from "../../api/SynNode";
 import {LanguageBase} from "../../../LanguageBase";
 import {SynNodeVisitor} from "../../visitors/SynNodeVisitor";
+import {SynGlobalScope} from "../../../indexes/scope/SynGlobalScope";
+import {SynCodeBlock} from "../../api/SynCodeBlock";
 
 /**
  *
@@ -15,11 +17,21 @@ import {SynNodeVisitor} from "../../visitors/SynNodeVisitor";
  */
 export class SynTreeImpl extends AbstractSynParentElement implements SynTree {
     private readonly range: TextRange;
+    private readonly codeblock: SynCodeBlock;
+    private readonly globalScope: SynGlobalScope;
 
     constructor(private readonly language: LanguageBase, children: SynNode[], private readonly document: SynDocument) {
         super(children);
 
         this.range = TextRange.enclosing(children)
+
+        const codeblock = this.children.find(child => child instanceof SynCodeBlock);
+        this.codeblock = codeblock as SynCodeBlock;
+        this.globalScope = new SynGlobalScope(this.codeblock);
+    }
+
+    getGlobalScope(): SynGlobalScope {
+        return this.globalScope;
     }
 
     getSynDocument(): SynDocument {

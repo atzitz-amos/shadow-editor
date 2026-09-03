@@ -43,7 +43,7 @@ export class JsArrowFunctionExpr extends JsExpr implements JsFunction {
         return this.generatorToken !== undefined;
     }
 
-    getName(): SynTokenNode | null {
+    getNameToken(): SynTokenNode | null {
         return null;
     }
 

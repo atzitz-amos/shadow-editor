@@ -28,7 +28,7 @@ export default class JsDeclarationTypeAnnotator extends AnnotatorBase {
             }
 
             visitFunction(element: JsFunction) {
-                const name = element.getName();
+                const name = element.getNameToken();
                 if (name) holder.highlightRange(name.getTextRange(), JsHighlighter.TEXT_FUNCTION_KEY);
             }
 

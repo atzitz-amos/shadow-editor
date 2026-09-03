@@ -26,12 +26,10 @@ export class SynLazyVisitorOptimizer {
         }
 
         for (const visitor of this.visitors) {
-            if ("visitExitNode" in visitor && typeof visitor.visitExitNode === "function") {
-                try {
-                    visitor.visitExitNode(node);
-                } catch (e) {
-                    console.warn(`Visitor ${visitor.constructor.name} threw an error while exiting node ${node.constructor.name}: ${e}`);
-                }
+            try {
+                visitor.visitExitNode(node);
+            } catch (e) {
+                console.warn(`Visitor ${visitor.constructor.name} threw an error while exiting node ${node.constructor.name}: ${e}`);
             }
         }
     }

@@ -201,7 +201,7 @@ export class Document {
         this.data.insert(offset, text);
         this.modificationTimestamp++;
 
-        this.updateTrackedRanges(offset, text.length);
+        this.updateTrackedRanges(offset, offset, text.length);
         this.recomputeLines(offset, text, false);
 
         if (this.isLinkedToEditor()) {
@@ -217,7 +217,7 @@ export class Document {
         let deleted = this.data.delete(at, n);
         this.modificationTimestamp++;
 
-        this.updateTrackedRanges(at, -n);
+        this.updateTrackedRanges(at, at + n, 0);
         this.recomputeLines(at, deleted, true);
 
         if (this.isLinkedToEditor()) {
@@ -345,7 +345,7 @@ export class Document {
         }, 1000)
     }
 
-    private updateTrackedRanges(offset: Offset, delta: number) {
+    private updateTrackedRanges(from: Offset, to: Offset, insertedLength: number) {
         for (let i = 0; i < this.trackedRanges.length; i++) {
             const range = this.trackedRanges[i].deref();
             if (!range || !range.isValid()) {
@@ -353,20 +353,22 @@ export class Document {
                 i--;
                 continue;
             }
+            const oldStart = range.getStart();
+            const oldEnd = range.getEnd();
 
-            if (offset < range.getStart()) {
-                range.moveBy(delta);
-            } else if (offset === range.getStart()) {
-                if (delta > 0 && range.isGreedyLeft())
-                    range.setEnd(range.getEnd() + delta);
-                else
-                    range.moveBy(delta);
-            } else if (offset < range.getEnd()) {
-                range.setEnd(range.getEnd() + delta);
-            } else if (offset === range.getEnd()) {
-                if (delta > 0 && range.isGreedyRight())
-                    range.setEnd(range.getEnd() + delta);
-            }
+            let newStart = this.mapPos(oldStart, from, to, insertedLength, range.isGreedyLeft(), true);
+            let newEnd = this.mapPos(oldEnd, from, to, insertedLength, range.isGreedyRight(), false);
+
+            range.moveTo(newStart, newEnd);
         }
     }
+
+    private mapPos(pos: number, from: number, to: number, insertedLength: number, greedy: boolean, isStart: boolean): number {
+        if (pos < from) return pos;
+        if (pos > to) return pos + insertedLength - (to - from);
+
+        const stickToRight = isStart ? !greedy : greedy;
+        return stickToRight ? from + insertedLength : from;
+    }
 }
+

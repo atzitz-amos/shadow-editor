@@ -16,7 +16,7 @@ export abstract class SynScope implements IndexFile {
     protected readonly parents: IndexFile[] = [];
     protected readonly declarations: Map<string, SynNamedElement> = new Map();
 
-    constructor(private readonly associatedCodeblock: SynCodeBlock) {
+    constructor(protected associatedCodeblock: SynCodeBlock) {
     }
 
     getParent(): SynScope {
@@ -32,7 +32,8 @@ export abstract class SynScope implements IndexFile {
     }
 
     makeAvailable(file: IndexFile): void {
-        this.parents.push(file);
+        if (!this.parents.includes(file))
+            this.parents.push(file);
     }
 
     acceptChildrenResolveRequest(scope: ResolveScope): boolean {

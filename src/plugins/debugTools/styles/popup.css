@@ -1,6 +1,6 @@
 .debug-popup {
-    position: fixed;
     display: flex;
+    transform: none;
     flex-direction: column;
     top: 120px;
     right: 56px;
@@ -14,6 +14,18 @@
     box-shadow: 0 22px 60px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(199, 210, 255, 0.04) inset;
     overflow: hidden;
     z-index: 30;
+
+    padding: 0;
+}
+
+.debug-popup-content {
+    overflow: auto;
+}
+
+
+.debug-popup-inner {
+    width: 100%;
+    height: 100%;
 }
 
 .debug-popup.dragging {
@@ -54,6 +66,7 @@
 }
 
 .debug-popup-actions {
+    cursor: pointer;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -119,4 +132,169 @@
     font-size: 12px;
     display: inline-flex;
     align-items: center;
+}
+
+/* AST Viewer */
+
+.debug-popup-inner.ast-tree-inner {
+    padding: 10px;
+}
+
+.ast-tree-inner summary::marker {
+    content: "";
+}
+
+.ast-tree-inner summary::before {
+    content: "\f054";
+    font-family: "Font Awesome 7 Free";
+    font-size: 8px;
+    font-weight: 900;
+    display: inline-block;
+    margin-right: 6px;
+    translate: 0 -1px;
+    transition: transform 0.2s ease;
+}
+
+
+.ast-tree-inner details[open] > summary::before {
+    transform: rotate(90deg);
+}
+
+.ast-tree-inner ::details-content {
+    padding-left: 10px;
+    padding-top: 4px;
+}
+
+.ast-tree-inner summary {
+    font-weight: bold;
+}
+
+.ast-tree-inner .ast-tree-actions {
+    display: inline-flex;
+    position: absolute;
+    right: 20px;
+    font-size: 12px;
+
+    translate: 0 3px;
+    cursor: pointer;
+}
+
+.ast-tree-inner .ast-refresh-button {
+    position: relative;
+}
+
+.ast-tree-inner .ast-refresh-button.needs-refresh::after {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: red;
+    position: absolute;
+    top: 6px;
+    left: 9px;
+}
+
+
+.ast-tree-inner .node-title {
+    font-family: "JetBrains", monospace;
+}
+
+.ast-tree-inner .node-data {
+    color: #34c2c4;
+    font-style: italic;
+    font-weight: normal;
+    font-family: JetBrains;
+    font-size: 11px;
+    padding: 0 2px;
+    margin-left: 3px;
+}
+
+.ast-tree-inner .node-range {
+    color: #888888;
+    font-weight: normal;
+    font-family: monospace;
+}
+
+.ast-tree-inner .leaf-node {
+    opacity: 70%;
+}
+
+.ast-tree-inner .leaf-node summary::before {
+    display: none;
+}
+
+.ast-tree-inner .leaf-node .node-title {
+    color: #888888;
+}
+
+.ast-tree-inner .error-node .node-title {
+    color: #ee5e5e;
+}
+
+.ast-tree-inner .error-node .node-data {
+    color: #ffbeac;
+}
+
+/* Code Style */
+
+.debug-popup-inner.code-style-inner {
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.code-style-inner .file-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.code-style-inner .language-info {
+    color: #84cbff;
+}
+
+.code-style-inner .no-formatter-message {
+    display: none;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid #252d42;
+
+    width: 100%;
+    height: 100%;
+}
+
+.code-style-inner .main-info {
+    padding: 0 5px;
+    gap: 10px;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.code-style-inner.no-formatter .no-formatter-message {
+    display: flex;
+}
+
+.code-style-inner.no-formatter .main-info {
+    display: none;
+}
+
+.code-style-inner details {
+    padding: 5px 10px;
+    width: 100%;
+    border: 1px solid #252d42;
+}
+
+.code-style-inner details > div {
+    width: 100%;
+    height: 100%;
+    padding-top: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.code-style-inner .spacing-rules-info ul {
+    margin-top: 5px;
 }

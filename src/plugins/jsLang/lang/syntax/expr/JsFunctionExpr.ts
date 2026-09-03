@@ -43,7 +43,7 @@ export class JsFunctionExpr extends JsExpr implements JsFunction {
         return this.asyncToken;
     }
 
-    getName(): SynTokenNode | null {
+    getNameToken(): SynTokenNode | null {
         return this.name ?? null;
     }
 

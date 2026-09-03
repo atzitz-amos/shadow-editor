@@ -13,8 +13,7 @@ import {EditorCoordinateMapper} from "./core/coordinate/EditorCoordinateMapper";
 import {InlayManager} from "./core/inlay/InlayManager";
 import {PluginManager} from "../core/plugins/PluginManager";
 import {LanguageBase} from "../lang/LanguageBase";
-import {LangSupport} from "../lang/LangSupport";
-import {EditorLangService} from "./core/lang/EditorLangService";
+import {LangRegistry} from "../lang/LangRegistry";
 import {EventBus} from "../core/events/EventBus";
 import {KeybindManager} from "../core/keybinds/KeybindManager";
 import {EditorAttachedEvent} from "./impl/events/EditorAttachedEvent";
@@ -34,6 +33,8 @@ import {BehaviorManager} from "./core/behaviors/manager/BehaviorManager";
 import {StandardBehaviorManagerProvider} from "./impl/behaviors/StandardBehaviorManagerProvider";
 import {EditorCharTypedContext} from "./core/behaviors/context/EditorCharTypedContext";
 import {DocumentView} from "./core/document/view/DocumentView";
+import {EditorDocumentChangedEvent} from "./impl/events/EditorDocumentChangedEvent";
+import {CodeAnalysisService} from "../lang/codeAnalysis/analysis/CodeAnalysisService";
 
 export class Editor {
     private static ID_COUNTER = 0;
@@ -50,7 +51,7 @@ export class Editor {
     private readonly widgetManager: WidgetManager;
     private readonly inlayManager: InlayManager;
     private readonly caretModel: CaretModel;
-    private readonly langService: EditorLangService;
+    private readonly codeAnalysisService: CodeAnalysisService;
 
     private readonly eventBus: EventBus;
 
@@ -71,7 +72,7 @@ export class Editor {
 
         this.behaviorManager = StandardBehaviorManagerProvider.createDefault(this);
 
-        this.langService = new EditorLangService(this);
+        this.codeAnalysisService = new CodeAnalysisService(this);
         this.widgetManager = new WidgetManager(this);
 
         this.view = new View(this);
@@ -108,22 +109,23 @@ export class Editor {
         this.widgetManager.clearAllOverlays();
         this.document.linkEditor(null);
 
+        const oldDocument = this.document;
         this.document = documentView.getDocument();
         this.documentView = documentView;
 
         this.document.linkEditor(this);
         this.caretModel.addCaret(this.offsetToLogical(documentView.getCaretOffset()));
 
-
         this.restoreFromDocumentView()
         this.repaintView();
+
+        this.eventBus.syncPublish(new EditorDocumentChangedEvent(this, oldDocument, this.documentView));
     }
 
     overrideLanguage(language: LanguageBase | null) {
         this.behaviorManager.setLanguage(language);
 
-        this.langService.setCurrentLanguage(language);
-        this.langService.forceUpdate(this.document);
+        this.codeAnalysisService.restart();
     }
 
     /**
@@ -166,12 +168,12 @@ export class Editor {
         return this.document.getLanguage();
     }
 
-    getLangSupport() {
-        return LangSupport.getInstance();
+    getLangRegistry(): LangRegistry {
+        return LangRegistry.getInstance();
     }
 
-    getLangService(): EditorLangService {
-        return this.langService;
+    getCodeAnalysisService(): CodeAnalysisService {
+        return this.codeAnalysisService;
     }
 
     getWidgetManager(): WidgetManager {

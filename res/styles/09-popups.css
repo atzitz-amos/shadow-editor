@@ -29,3 +29,7 @@
 .ide-popup-layer.no-popup {
     display: none;
 }
+
+.ide-popup-layer.transparent {
+    pointer-events: none;
+}

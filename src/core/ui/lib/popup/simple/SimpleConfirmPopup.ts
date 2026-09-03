@@ -1,5 +1,5 @@
-import {AbstractPopup, IdeResultPopup} from "./IdePopup";
-import {HTMLUtils} from "../../../../editor/utils/HTMLUtils";
+import {AbstractPopup, IdeResultPopup} from "../IdePopup";
+import {HTMLUtils} from "../../../../../editor/utils/HTMLUtils";
 
 /**
  *

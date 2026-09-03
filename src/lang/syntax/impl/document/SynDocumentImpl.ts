@@ -7,8 +7,12 @@ import {TokenStream} from "../../builder/tokens/TokenStream";
 import {Document} from "../../../../editor/core/document/Document";
 import {SynTree} from "../../api/tree/SynTree";
 import {LanguageBase} from "../../../LanguageBase";
-import {SynTreeImpl} from "../tree/SynTreeImpl";
 import {SynFile} from "../../api/filesystem/SynFile";
+import {IndexFile} from "../../../indexes/IndexFile";
+import {DocumentLevelIndexFile} from "../../../indexes/impl/DocumentLevelIndexFile";
+import {ASTCheckpoint} from "../../builder/parser/optimizer/recovery/ASTCheckpoint";
+import {GlobalState} from "../../../../core/global/GlobalState";
+import {SynTreeChangedEvent} from "../../../../editor/core/lang/events/SynTreeChangedEvent";
 
 /**
  *
@@ -21,9 +25,11 @@ export class SynDocumentImpl implements SynDocument {
     private readonly id: number;
 
     private modificationTimestamp: number = 0;
-
     private dirty: boolean = true;
+
     private tree: SynTree;
+    private checkpoints: ASTCheckpoint[] | null = null;
+    private indexFile: DocumentLevelIndexFile;
 
     private readonly language: LanguageBase;
     private readonly problemsHolder: ProblemsHolder;
@@ -31,10 +37,8 @@ export class SynDocumentImpl implements SynDocument {
     constructor(private readonly document: Document, private readonly synFile: SynFile | null) {
         this.id = SynDocumentImpl.DOCUMENT_ID++;
 
-        this.problemsHolder = new ProblemsHolder(this);
-
         this.language = document.getLanguage()!;
-        this.tree = new SynTreeImpl(this.language, [], this);
+        this.problemsHolder = new ProblemsHolder(this);
     }
 
     isDirty(): boolean {
@@ -45,9 +49,18 @@ export class SynDocumentImpl implements SynDocument {
         this.dirty = flag;
     }
 
-    commit(synTree: SynTree, timestamp: number) {
+    commit(synTree: SynTree, checkpoints: ASTCheckpoint[], timestamp: number) {
         this.tree = synTree;
+        this.checkpoints = checkpoints;
+        if (this.indexFile) this.indexFile.override(synTree);
+        else this.indexFile = new DocumentLevelIndexFile(this.tree.getGlobalScope());
         this.modificationTimestamp = timestamp;
+
+        GlobalState.getMainEventBus().syncPublish(new SynTreeChangedEvent(this, this.language));
+    }
+
+    getCheckpoints(): ASTCheckpoint[] | null {
+        return this.checkpoints;
     }
 
     getAssociatedFile(): ProjectFile | null {
@@ -92,5 +105,9 @@ export class SynDocumentImpl implements SynDocument {
 
     getLanguage(): LanguageBase {
         return this.language;
+    }
+
+    getIndexFile(): IndexFile {
+        return this.indexFile;
     }
 }

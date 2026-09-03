@@ -21,6 +21,16 @@ export class TextRange implements Serializable {
         return new TextRange(v, v + 1);
     }
 
+    static enclosing(items: HasRange[]) {
+        let start = 0, end = 0;
+        for (const item of items) {
+            if (item.getTextRange().start < start) start = item.getTextRange().start;
+            if (item.getTextRange().end > end) end = item.getTextRange().end;
+        }
+
+        return new TextRange(start, end);
+    }
+
     getStart() {
         return this.start;
     }
@@ -80,17 +90,7 @@ export class TextRange implements Serializable {
     }
 
     toString() {
-        return `[${this.start}, ${this.end}]`;
-    }
-
-    static enclosing(items: HasRange[]) {
-        let start = 0, end = 0;
-        for (const item of items) {
-            if (item.getTextRange().start < start) start = item.getTextRange().start;
-            if (item.getTextRange().end > end) end = item.getTextRange().end;
-        }
-
-        return new TextRange(start, end);
+        return `[${this.start}:${this.end}]`;
     }
 
     shiftedBy(delta: number) {

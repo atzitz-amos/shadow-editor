@@ -4,7 +4,7 @@ import {ProjectFilesPaneComponent} from "./ProjectFilesPaneComponent";
 import {UIHooks} from "../../../../../core/ui/engine/listeners/hooks/UIHooks";
 import {ProjectHooks} from "../../../../core/UICommonHooks";
 import {ProjectFile} from "../../../../../core/project/filesystem/tree/ProjectFile";
-import {PopupUtilsCore} from "../../../../../core/ui/lib/popup/PopupUtilsCore";
+import {PopupUtilsCore} from "../../../../../core/ui/lib/popup/utils/PopupUtilsCore";
 import {ProjectDirectory} from "../../../../../core/project/filesystem/tree/ProjectDirectory";
 import {FileSystemEntry} from "../../../../../core/project/filesystem/tree/FileSystemEntry";
 

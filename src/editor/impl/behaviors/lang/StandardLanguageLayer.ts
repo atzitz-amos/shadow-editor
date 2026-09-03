@@ -14,11 +14,12 @@ import {EditorBehavior} from "../../../core/behaviors/EditorBehavior";
 import {BehaviorHandlingMode} from "../../../core/behaviors/manager/BehaviorHandlingMode";
 import {GlobalState} from "../../../../core/global/GlobalState";
 import {KeyReleasedEvent, MouseMovedEvent} from "../../events/PhysicalEvents";
-import {LangSupport} from "../../../../lang/LangSupport";
+import {LangRegistry} from "../../../../lang/LangRegistry";
 import {TokenHoverAction} from "../../../../lang/codeAnalysis/tokenhover/TokenHoverAction";
 import {Token} from "../../../../lang/syntax/builder/tokens/Token";
 import {EditorBehaviorContext} from "../../../core/behaviors/context/EditorBehaviorContext";
 import {UndoStack} from "../../../core/undo/UndoStack";
+import {SynDocumentManager} from "../../../../lang/syntax/manager/SynDocumentManager";
 
 /**
  *
@@ -40,7 +41,7 @@ export class StandardLanguageLayer implements ILanguageLayer {
 
     getCharTypedBehavior(): CharTypedBehavior {
         return CharTypedBehavior.wrapping(this, ctx => {
-            for (const action of GlobalState.getLangSupport().getAllSmartInsertActions(this.language)) {
+            for (const action of GlobalState.getLangRegistry().getAllSmartInsertActions(this.language)) {
                 if (action.isApplicable(ctx)) {
                     const handlingMode = UndoStack.undoableAction(ctx.getEditor(), "type", () => action.invoke(ctx), true);
                     if (handlingMode === BehaviorHandlingMode.HANDLED) return BehaviorHandlingMode.HANDLED;
@@ -54,7 +55,7 @@ export class StandardLanguageLayer implements ILanguageLayer {
 
     getDeleteBackwardBehavior(): DeleteBackwardBehavior {
         return DeleteBackwardBehavior.wrapping(this, ctx => {
-            for (const action of GlobalState.getLangSupport().getAllSmartDeleteActions(this.language)) {
+            for (const action of GlobalState.getLangRegistry().getAllSmartDeleteActions(this.language)) {
                 if (action.isApplicable(ctx)) {
                     const handlingMode = UndoStack.undoableAction(ctx.getEditor(), "delete", () => action.invoke(ctx), true);
                     if (handlingMode === BehaviorHandlingMode.HANDLED) return BehaviorHandlingMode.HANDLED;
@@ -67,7 +68,7 @@ export class StandardLanguageLayer implements ILanguageLayer {
 
     getDeleteForwardBehavior(): DeleteForwardBehavior {
         return DeleteForwardBehavior.wrapping(this, ctx => {
-            for (const action of GlobalState.getLangSupport().getAllSmartDeleteActions(this.language)) {
+            for (const action of GlobalState.getLangRegistry().getAllSmartDeleteActions(this.language)) {
                 if (action.isApplicable(ctx)) {
                     const handlingMode = UndoStack.undoableAction(ctx.getEditor(), "delete", () => action.invoke(ctx), true);
                     if (handlingMode === BehaviorHandlingMode.HANDLED) return BehaviorHandlingMode.HANDLED;
@@ -80,7 +81,7 @@ export class StandardLanguageLayer implements ILanguageLayer {
 
     getCtrlDeleteBehavior(): CtrlDeleteBehavior {
         return CtrlDeleteBehavior.wrapping(this, ctx => {
-            for (const action of GlobalState.getLangSupport().getAllSmartDeleteActions(this.language)) {
+            for (const action of GlobalState.getLangRegistry().getAllSmartDeleteActions(this.language)) {
                 if (action.isApplicable(ctx)) {
                     const handlingMode = UndoStack.undoableAction(ctx.getEditor(), "delete", () => action.invoke(ctx), true);
                     if (handlingMode === BehaviorHandlingMode.HANDLED) return BehaviorHandlingMode.HANDLED;
@@ -93,7 +94,7 @@ export class StandardLanguageLayer implements ILanguageLayer {
 
     getEnterPressedBehavior(): EnterPressedBehavior {
         return EnterPressedBehavior.wrapping(this, ctx => {
-            for (const action of GlobalState.getLangSupport().getAllSmartEnterActions(this.language)) {
+            for (const action of GlobalState.getLangRegistry().getAllSmartEnterActions(this.language)) {
                 if (action.isApplicable(ctx)) {
                     const handlingMode = UndoStack.undoableAction(ctx.getEditor(), "enter", () => action.invoke(ctx));
                     if (handlingMode === BehaviorHandlingMode.HANDLED) return BehaviorHandlingMode.HANDLED;
@@ -151,7 +152,8 @@ export class StandardLanguageLayer implements ILanguageLayer {
         if (!tokenAt) return;
 
 
-        const tokenHovers = LangSupport.getInstance().getAllTokenHoverActions(this.language);
+        const tokenHovers = LangRegistry.getInstance().getAllTokenHoverActions(this.language);
+        const synDocument = SynDocumentManager.getSynDocument(editor.getOpenedDocument());
 
         for (const tokenHover of tokenHovers) {
             if (!this.hoverRequirementsSatisfied(tokenHover, tokenAt, event.getEvent())) continue;
@@ -159,7 +161,7 @@ export class StandardLanguageLayer implements ILanguageLayer {
             if (tokenHover.isApplicable(ctx, tokenAt)) {
                 this.tokenHoverTimeouts.push(setTimeout(() => {
                     this.activeTokenHovers.push(tokenHover);
-                    tokenHover.execute(ctx, editor.getLangService().getSynFile().getSynDocument().getTree(), tokenAt);
+                    tokenHover.execute(ctx, synDocument.getTree(), tokenAt);
                 }, tokenHover.getDelay()));
             }
         }

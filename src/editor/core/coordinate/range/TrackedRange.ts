@@ -54,4 +54,11 @@ export class TrackedRange extends TextRange {
             this.invalidate();
         }
     }
+
+    moveTo(newStart: number, newEnd: number) {
+        if (!this.isValid()) return;
+        this.start = newStart;
+        this.end = newEnd;
+        if (this.start > this.end) this.invalidate();
+    }
 }

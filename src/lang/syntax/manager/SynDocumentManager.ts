@@ -4,9 +4,14 @@ import {CollectionUtils} from "../../../editor/utils/collection/CollectionUtils"
 import {SynDocumentImpl} from "../impl/document/SynDocumentImpl";
 import {SynFile} from "../api/filesystem/SynFile";
 import {Service, ServiceImpl} from "../../../core/threaded/service/Service";
-import {GlobalState} from "../../../core/global/GlobalState";
-import {SynParseRequestEvent} from "../../../editor/core/lang/events/SynParseRequestEvent";
 import {SynFileImpl} from "../impl/filesystem/SynFileImpl";
+import {DocumentModificationEvent} from "../../../editor/core/document/events/DocumentModificationEvent";
+import {TextRange} from "../../../editor/core/coordinate/range/TextRange";
+import {ASTRecoveryInfo} from "../builder/parser/optimizer/recovery/ASTRecoveryInfo";
+import {ASTRecoveryBuilder} from "../builder/parser/optimizer/recovery/ASTRecoveryBuilder";
+import {EmptyKillSignal, TimeoutKillSignal} from "../../../core/utils/KillSignal";
+import {Editor} from "../../../editor/Editor";
+import {LangRegistry} from "../../LangRegistry";
 
 /**
  *
@@ -27,11 +32,35 @@ export class SynDocumentManager implements ServiceImpl {
         if (!file && document.getAssociatedFile()) {
             file = new SynFileImpl(document.getAssociatedFile()!);
         }
-        return new SynDocumentImpl(document, file ?? null);
+        const synDocument = new SynDocumentImpl(document, file ?? null);
+        this.getInstance().parse(synDocument);
+        return synDocument;
     }
 
     public static createVirtualSynDocument(document: Document): SynDocument {
-        return new SynDocumentImpl(document, null);
+        const synDocument = new SynDocumentImpl(document, null);
+        this.getInstance().parse(synDocument);
+        return synDocument;
+    }
+
+    public static getSynDocument(document: Document): SynDocument {
+        return this.getInstance().getSynDocument(document);
+    }
+
+    public static getOpenedSynDocument(editor: Editor): SynDocument {
+        return this.getInstance().getOpenedSynDocument(editor);
+    }
+
+    public getOpenedSynDocument(editor: Editor) {
+        return this.getSynDocument(editor.getOpenedDocument());
+    }
+
+    public isCached(document: Document): boolean {
+        return this.documents.has(document);
+    }
+
+    public getCachedSynDocument(document: Document): SynDocument | null {
+        return this.documents.get(document) ?? null;
     }
 
     public getSynDocument(document: Document): SynDocument {
@@ -42,17 +71,39 @@ export class SynDocumentManager implements ServiceImpl {
     }
 
     begin(): void {
-        GlobalState.getMainEventBus().subscribe(this, SynParseRequestEvent.SUBSCRIBER, event => {
-            const document = event.getDocument()
-            const synDocument = this.getSynDocument(document);
-
-            synDocument.markDirty(true);
-
-            // TODO: INCREMENTAL PARSING
-        });
     }
 
-    private reparse(synDocument: SynDocument) {
+    parse(synDocument: SynDocument, recoveryInfo?: ASTRecoveryInfo): void {
+        let builder = new ASTRecoveryBuilder(
+            synDocument,
+            synDocument.getLanguage()!,
+            !!window["isParseTimeBombDisabled"] ? new EmptyKillSignal() : new TimeoutKillSignal(1000),
+        );
 
+        if (recoveryInfo) {
+            builder.setRecoveryMode(recoveryInfo);
+        }
+
+        const parser = LangRegistry.createParser(synDocument.getLanguage()!, builder);
+        parser.parse();
+
+        const tree = builder.getTree();
+        synDocument.commit(tree, builder.getCheckpoints(), synDocument.getDocument().getModificationTimestamp());
+    }
+
+    notifyModified(document: Document, event: DocumentModificationEvent, lexerInvalidRange: TextRange) {
+        const synDocument = this.getSynDocument(document);
+
+        const checkpoints = synDocument.getCheckpoints();
+        if (!checkpoints) {
+            this.parse(synDocument);
+        } else {
+            this.parse(synDocument, new ASTRecoveryInfo(
+                checkpoints,
+                event.getOffset(),
+                event.getTextDelta(),
+                lexerInvalidRange
+            ));
+        }
     }
 }

@@ -52,14 +52,14 @@ export class JsSpacingRules {
         .before(JsLexicalGrammar.LPAREN)
         .in(JsGrammar.FunctionDeclaration)
         .in(JsGrammar.FunctionExpression)
-        .if((p, n, node) => (node as unknown as JsFunction).getName() !== null)
+        .if((p, n, node) => (node as unknown as JsFunction).getNameToken() !== null)
         .noSpace();
 
     public static readonly SPACE_BEFORE_FUNCTION_EXPRESSION_PAREN = new SpacingRule("Space before '(' of function expressions")
         .before(JsLexicalGrammar.LPAREN)
         .in(JsGrammar.FunctionDeclaration)
         .in(JsGrammar.FunctionExpression)
-        .if((p, n, node) => (node as unknown as JsFunction).getName() === null)
+        .if((p, n, node) => (node as unknown as JsFunction).getNameToken() === null)
         .space();
 
     public static readonly SPACE_BEFORE_ASYNC_ARROW_FUNCTION_PAREN = new SpacingRule("Space before '(' of async arrow functions")
@@ -213,14 +213,14 @@ export class JsSpacingRules {
         .withPriority(-1)
         .space();
 
-    public static readonly DEFAULT_RULE_NO_SPACE_AROUND_OPEN_PAREN = new SpacingRule("No space after opening parenthesis")
+    public static readonly DEFAULT_RULE_NO_SPACE_AROUND_OPEN_PAREN = new SpacingRule("No space around opening parenthesis")
         .around(JsLexicalGrammar.LPAREN)
-        .withPriority(-1)
+        .withPriority(-2)
         .noSpace();
 
-    public static readonly DEFAULT_RULE_NO_SPACE_AROUND_CLOSE_PAREN = new SpacingRule("No space before closing parenthesis")
+    public static readonly DEFAULT_RULE_NO_SPACE_AROUND_CLOSE_PAREN = new SpacingRule("No space around closing parenthesis")
         .around(JsLexicalGrammar.RPAREN)
-        .withPriority(-1)
+        .withPriority(-2)
         .noSpace();
 
     public static readonly DEFAULT_RULE_NO_SPACE_AROUND_OPEN_BRACKET = new SpacingRule("No space after opening bracket")

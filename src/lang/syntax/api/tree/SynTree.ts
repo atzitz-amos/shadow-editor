@@ -1,5 +1,6 @@
 import {SynParentElement} from "./SynParentElement";
 import {LanguageBase} from "../../../LanguageBase";
+import {SynGlobalScope} from "../../../indexes/scope/SynGlobalScope";
 
 /**
  * Represents a syntax tree in the language processing system. It acts as the root node of possibly multiple nodes.
@@ -11,4 +12,6 @@ import {LanguageBase} from "../../../LanguageBase";
  */
 export interface SynTree extends SynParentElement {
     getLanguage(): LanguageBase;
+
+    getGlobalScope(): SynGlobalScope;
 }

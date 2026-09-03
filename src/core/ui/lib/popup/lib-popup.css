@@ -1,13 +1,14 @@
 
 .ide-popup {
     position: absolute;
+    pointer-events: all;
     z-index: 1000;
-    background: #202429;
+    background: #0d111b;
     padding: 8px 10px 6px;
     border-radius: 6px;
     color: #bfbfbf;
     font-size: 0.8em;
-    border: 1px solid #91919180;
+    border: 1px solid #262d43;
     box-shadow: 3px 3px 12px 5px rgba(0, 0, 0, 0.5);
     top: 50%;
     left: 50%;
@@ -16,8 +17,9 @@
     user-select: none;
 }
 
-.simple-tooltip-popup {
-    border: 1px solid #ffffff1c;
+.simple-tooltip-popup, .action-popup {
+    border: 1px solid #262d43;
+    min-width: 150px;
     border-radius: 4px;
     padding: 4px 6px;
     font-size: 0.78em;
@@ -50,7 +52,7 @@
     color: #e7e7e7;
 }
 
-.simple-text-input-popup .popup-title {
+.simple-text-input-popup .popup-title, .action-popup .popup-title {
     display: flex;
     justify-content: center;
 
@@ -58,7 +60,7 @@
     font-family: "Inter", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.simple-text-input-popup .popup-body {
+.simple-text-input-popup .popup-body, .action-popup .popup-body {
     display: flex;
     align-items: center;
     margin-top: 10px;

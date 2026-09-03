@@ -1,5 +1,3 @@
-import {Service, ServiceImpl} from "../../../core/threaded/service/Service";
-import {GlobalState} from "../../../core/global/GlobalState";
 import {SynTreeChangedEvent} from "../../../editor/core/lang/events/SynTreeChangedEvent";
 import {ExtensionPoint} from "../../../core/plugins/extensionPoints/ExtensionPoint";
 import {CodeAnalysisPass} from "./api/CodeAnalysisPass";
@@ -11,6 +9,11 @@ import {AnnotatorsCodeAnalysisPassProvider} from "../annotators/AnnotatorsCodeAn
 import {Scheduler} from "../../../core/scheduler/Scheduler";
 import {SynDocumentUtils} from "../../syntax/utils/SynDocumentUtils";
 import {ReferenceCollectorAnalysisPassProvider} from "../references/collector/ReferenceCollectorAnalysisPassProvider";
+import {Editor} from "../../../editor/Editor";
+import {GlobalState} from "../../../core/global/GlobalState";
+import {SynEditorTreeChangedEvent} from "../../../editor/core/lang/events/SynEditorTreeChangedEvent";
+import {SynDocumentManager} from "../../syntax/manager/SynDocumentManager";
+import {SynDocument} from "../../syntax/api/document/SynDocument";
 
 /**
  *
@@ -18,10 +21,7 @@ import {ReferenceCollectorAnalysisPassProvider} from "../references/collector/Re
  * @date 8/3/2026
  * @since 1.0.0
  */
-@Service
-export class CodeAnalysisService implements ServiceImpl {
-    private static readonly INSTANCE = new CodeAnalysisService();
-
+export class CodeAnalysisService {
     private static readonly codeAnalysisPassEP = new ExtensionPoint("codeAnalysis/pass", CodeAnalysisPassProvider)
         .withDefaultContributors(
             ReferenceCollectorAnalysisPassProvider.INSTANCE,
@@ -29,32 +29,51 @@ export class CodeAnalysisService implements ServiceImpl {
             AnnotatorsCodeAnalysisPassProvider.INSTANCE
         );
 
-    public static getInstance(): CodeAnalysisService {
-        return this.INSTANCE;
+    private lastUpdatedTimestamp: number = -1;
+
+    constructor(private readonly editor: Editor) {
+        GlobalState.getMainEventBus().subscribe(this, SynTreeChangedEvent.SUBSCRIBER, e => {
+            if (e.getSynDocument().getDocument() == editor.getOpenedDocument()) {
+                this.onSynTreeChanged(e);
+                editor.getEventBus().asyncPublish(new SynEditorTreeChangedEvent(editor, e.getSynDocument()));
+            }
+        });
     }
 
-    begin(): void {
-        GlobalState.getMainEventBus().subscribe(this, SynTreeChangedEvent.SUBSCRIBER, this.onSynTreeChanged)
+    restart() {
+        if (!this.editor.getCurrentLanguage()) return;
+        const synDocument = SynDocumentManager.getOpenedSynDocument(this.editor);
+        this.invokePasses(synDocument);
     }
 
     private onSynTreeChanged(event: SynTreeChangedEvent) {
         Scheduler.debounce(() => {
-            const providers = CodeAnalysisService.codeAnalysisPassEP.getAll();
-
-            const visitors: SynNodeVisitor[] = [];
-            const passes: CodeAnalysisPass<any>[] = [];
-
-            for (const provider of providers) {
-                const pass = provider.createPass(event.getEditor(), event.getSynDocument());
-                visitors.push(...pass.collectVisitors());
-                passes.push(pass);
-            }
-
-            new SynLazyVisitorOptimizer(visitors).visitNode(event.getSynDocument().getTree());
-
-            for (const pass of passes) {
-                pass.processResults(event.getEditor());
-            }
+            this.invokePasses(event.getSynDocument());
         }, 100 * SynDocumentUtils.getDocumentLengthTier(event.getSynDocument().getDocument()));
+    }
+
+    private invokePasses(synDocument: SynDocument) {
+        if (this.lastUpdatedTimestamp >= synDocument.getModificationTimestamp()) {
+            return;
+        }
+
+        const providers = CodeAnalysisService.codeAnalysisPassEP.getAll();
+
+        const visitors: SynNodeVisitor[] = [];
+        const passes: CodeAnalysisPass<any>[] = [];
+
+        for (const provider of providers) {
+            const pass = provider.createPass(this.editor, synDocument);
+            visitors.push(...pass.collectVisitors());
+            passes.push(pass);
+        }
+
+        new SynLazyVisitorOptimizer(visitors).visitNode(synDocument.getTree());
+
+        for (const pass of passes) {
+            pass.processResults(this.editor);
+        }
+
+        this.lastUpdatedTimestamp = synDocument.getModificationTimestamp();
     }
 }

@@ -6,6 +6,7 @@ import {SynCodeBlock} from "../../../syntax/api/SynCodeBlock";
 import {ScopeBuilder} from "../../../syntax/impl/scope/ScopeBuilder";
 import {SynNamedElement} from "../../../syntax/impl/reference/SynNamedElement";
 import {SynNode} from "../../../syntax/api/SynNode";
+import {SynTree} from "../../../syntax/api/tree/SynTree";
 
 /**
  *
@@ -19,15 +20,20 @@ export class ReferenceCollectorAnalysisPass implements CodeAnalysisPass<null> {
 
     collectVisitors(): SynNodeVisitor[] {
         const builder = new ScopeBuilder();
+        let synTree: SynTree;
 
         return [
             new class extends SynNodeVisitor {
-                visitCodeblock(codeblock: SynCodeBlock) {
-                    if (!builder.getCurrentScope())
-                        builder.enterGlobalScope(codeblock);
-                    else if (codeblock.getAssociatedScopeType())
-                        builder.enterScope(codeblock.getAssociatedScopeType()!, codeblock);
+                visitTree(tree: SynTree) {
+                    synTree = tree;
+                }
 
+                visitCodeblock(codeblock: SynCodeBlock) {
+                    if (!builder.getCurrentScope()) {
+                        builder.enterGlobalScope(synTree.getGlobalScope());
+                    } else {
+                        builder.enterScope(codeblock.getAssociatedScopeType()!, codeblock);
+                    }
                     codeblock.setAssociatedScope(builder.getCurrentScope());
                 }
 
