@@ -1,1 +1,0 @@
-import{w as e}from"./Workspace-CEUmOYjU.js";import{i as t}from"./PersistenceModel-BoB04IEw.js";var n=class extends t{name=`Loading Plugins`;priority=10;critical=!0;async run(){await e.getInstance().beginAsync()}};export{n as PluginLoadPhase};

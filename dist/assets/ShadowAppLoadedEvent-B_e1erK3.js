@@ -1,0 +1,1 @@
+import{v as e,y as t}from"./PersistenceModel-Cf5zPM7-.js";var n=class{shadow;static SUBSCRIBER=e.create(this);constructor(e){this.shadow=e}getShadowApp(){return this.shadow}getBubbleDirection(){return t.BUBBLE_BOTH}};export{n as t};

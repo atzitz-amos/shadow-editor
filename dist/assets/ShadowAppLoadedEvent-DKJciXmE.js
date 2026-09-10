@@ -1,1 +1,0 @@
-import{Mt as e,Pt as t}from"./Workspace-CEUmOYjU.js";var n=class{shadow;static SUBSCRIBER=e.create(this);constructor(e){this.shadow=e}getShadowApp(){return this.shadow}getBubbleDirection(){return t.BUBBLE_BOTH}};export{n as t};

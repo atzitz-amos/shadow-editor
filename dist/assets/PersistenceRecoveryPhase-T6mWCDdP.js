@@ -1,0 +1,1 @@
+import{h as e,t}from"./PersistenceModel-Cf5zPM7-.js";var n=class extends e{persistedObjects;name=`Recovering Data`;priority=20;critical=!0;constructor(e){super(),this.persistedObjects=e}async run(){await t.getInstance().init()}};export{n as PersistenceRecoveryPhase};

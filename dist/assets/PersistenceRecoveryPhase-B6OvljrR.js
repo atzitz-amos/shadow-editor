@@ -1,1 +1,0 @@
-import{i as e,r as t,t as n}from"./PersistenceModel-BoB04IEw.js";var r=class extends e{persistedObjects;name=`Recovering Data`;priority=20;critical=!0;constructor(e){super(),this.persistedObjects=e}async run(){await n.getInstance().recover(t.PERSIST,this.persistedObjects)}};export{r as PersistenceRecoveryPhase};

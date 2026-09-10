@@ -5,16 +5,16 @@
  * Each module handles a specific concern of the editor UI.
  */
 
-@import url("styles/00-fonts.css?v=1");
-@import url("styles/01-editor-core.css?v=1");
-@import url("styles/02-gutter.css?v=1");
-@import url("styles/03-scrollbar.css?v=1");
-@import url("styles/04-layers.css?v=1");
-@import url("styles/05-caret.css?v=1");
-@import url("styles/06-selection.css?v=1");
-@import url("styles/07-text.css?v=1");
-@import url("styles/08-overlays.css?v=1");
-@import url("styles/09-popups.css?v=1");
-@import url("styles/10-splash.css?v=1");
-@import url("styles/11-full.css?v=1");
+@import url("styles/00-fonts.css");
+@import url("styles/01-editor-core.css");
+@import url("styles/02-gutter.css");
+@import url("styles/03-scrollbar.css");
+@import url("styles/04-layers.css");
+@import url("styles/05-caret.css");
+@import url("styles/06-selection.css");
+@import url("styles/07-text.css");
+@import url("styles/08-overlays.css");
+@import url("styles/09-popups.css");
+@import url("styles/10-splash.css");
+@import url("styles/11-full.css");
 @import url("../src/core/ui/lib/lib.css");

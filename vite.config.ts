@@ -1,7 +1,8 @@
-import { defineConfig } from "vite";
+import {defineConfig} from "vite";
 import swc from "unplugin-swc";
 
 export default defineConfig({
+    base: "/shadow-editor/dist/",
     root: ".",
     plugins: [
         swc.vite({
