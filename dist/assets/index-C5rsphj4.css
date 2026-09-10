@@ -1,15 +1,15 @@
-@import "styles/00-fonts.css?v=1";
-@import "styles/01-editor-core.css?v=1";
-@import "styles/02-gutter.css?v=1";
-@import "styles/03-scrollbar.css?v=1";
-@import "styles/04-layers.css?v=1";
-@import "styles/05-caret.css?v=1";
-@import "styles/06-selection.css?v=1";
-@import "styles/07-text.css?v=1";
-@import "styles/08-overlays.css?v=1";
-@import "styles/09-popups.css?v=1";
-@import "styles/10-splash.css?v=1";
-@import "styles/11-full.css?v=1";
+@import "../../res/styles/00-fonts.css?v=1";
+@import "../../res/styles/01-editor-core.css?v=1";
+@import "../../res/styles/02-gutter.css?v=1";
+@import "../../res/styles/03-scrollbar.css?v=1";
+@import "../../res/styles/04-layers.css?v=1";
+@import "../../res/styles/05-caret.css?v=1";
+@import "../../res/styles/06-selection.css?v=1";
+@import "../../res/styles/07-text.css?v=1";
+@import "../../res/styles/08-overlays.css?v=1";
+@import "../../res/styles/09-popups.css?v=1";
+@import "../../res/styles/10-splash.css?v=1";
+@import "../../res/styles/11-full.css?v=1";
 
 :root {
     --ide-btn-primary-bg: #4a76bc;
