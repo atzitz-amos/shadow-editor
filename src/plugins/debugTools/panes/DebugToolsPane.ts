@@ -4,7 +4,7 @@ import {UIPaneComponent} from "../../../app/core/panes/ui/UIPaneComponent";
 import {Icon} from "../../../core/ui/icons/Icon";
 import {FaIcon} from "../../../core/ui/icons/FaIcon";
 import {GlobalState} from "../../../core/global/GlobalState";
-import {SynTreeChangedEvent} from "../../../editor/core/lang/events/SynTreeChangedEvent";
+import {SynTreeChangedEvent} from "../../../lang/events/SynTreeChangedEvent";
 import {DebugToolsPaneComponent} from "./DebugToolsPaneComponent";
 import {CaretMovedEvent} from "../../../editor/core/caret/events/CaretMovedEvent";
 import {SynDocumentManager} from "../../../lang/syntax/manager/SynDocumentManager";

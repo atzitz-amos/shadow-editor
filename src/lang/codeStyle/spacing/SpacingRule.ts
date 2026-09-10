@@ -121,7 +121,6 @@ export class SpacingRule {
     }
 }
 
-
 export enum Spacing {
     NONE,
     ONE,

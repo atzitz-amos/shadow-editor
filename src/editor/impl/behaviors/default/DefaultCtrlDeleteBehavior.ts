@@ -2,6 +2,7 @@ import {CtrlDeleteBehavior} from "../../../core/behaviors/behavior/CtrlDeleteBeh
 import {EditorDeleteContext} from "../../../core/behaviors/context/EditorDeleteContext";
 import {BehaviorHandlingMode} from "../../../core/behaviors/manager/BehaviorHandlingMode";
 import {CtrlMoveHelper} from "../../actions/utils/CtrlMoveHelper";
+import {DocumentModificationUtils} from "../../../core/document/utils/DocumentModificationUtils";
 
 /**
  *
@@ -17,8 +18,12 @@ export class DefaultCtrlDeleteBehavior extends CtrlDeleteBehavior {
         if (context.hasSelectionActive()) editor.deleteSelection(caret);
         else {
             const offset = CtrlMoveHelper.getOffsetToPreviousWord(editor.getOpenedDocument(), caret.getOffset(), CtrlMoveHelper.DELIMITER);
-            caret.moveToOffset(caret.getOffset() + offset);
-            editor.deleteAt(caret.getOffset(), -offset);
+            DocumentModificationUtils.modifyWithCaret(editor.getOpenedDocument(), caret, "delete", () => {
+                caret.moveToOffset(caret.getOffset() + offset);
+                editor.getOpenedDocument().deleteAt(caret.getOffset(), -offset);
+            }, true);
+
+            editor.repaintView();
         }
 
         return BehaviorHandlingMode.HANDLED;

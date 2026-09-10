@@ -1,12 +1,13 @@
 import {SynCodeBlock} from "../../../../lang/syntax/api/SynCodeBlock";
 import {ASTNode} from "../../../../lang/syntax/builder/parser/nodes/ASTNode";
-import {SynNode} from "../../../../lang/syntax/api/SynNode";
-import {SynTokenNode} from "../../../../lang/syntax/impl/SynTokenNode";
 import {SynNodeVisitor} from "../../../../lang/syntax/visitors/SynNodeVisitor";
 import {JsSynVisitor} from "./visitors/JsSynVisitor";
 import {JsLexicalGrammar} from "../lexer/JsLexicalGrammar";
 import {SynScopeType} from "../../../../lang/indexes/scope/SynScopeType";
 import {JsSynUtils} from "./utils/JsSynUtils";
+import {SynASTElementImpl} from "../../../../lang/syntax/impl/tree/SynASTElementImpl";
+import {JsStatement} from "./statements/JsStatement";
+import {SynTokenNode} from "../../../../lang/syntax/impl/SynTokenNode";
 
 /**
  *
@@ -15,22 +16,19 @@ import {JsSynUtils} from "./utils/JsSynUtils";
  * @since 1.0.0
  */
 export class JsCodeBlock extends SynCodeBlock {
-    private readonly statements: SynNode[] = [];
+    private readonly statements: SynASTElementImpl[];
 
     constructor(node: ASTNode) {
         super(node);
 
-        for (let child of this.getChildren()) {
-            if (!(child instanceof SynTokenNode))
-                this.statements.push(child);
-        }
+        this.statements = this.getAllChildrenOfType(JsStatement);
     }
 
     isImplicit(): boolean {
-        return this.getAllToken()[0]?.token.getType() !== JsLexicalGrammar.LBRACE;
+        return this.getOpeningBrace() === undefined && this.getClosingBrace() === undefined;
     }
 
-    getStatements(): SynNode[] {
+    getStatements(): SynASTElementImpl[] {
         return this.statements;
     }
 
@@ -45,7 +43,14 @@ export class JsCodeBlock extends SynCodeBlock {
         if (visitor instanceof JsSynVisitor) {
             visitor.visitJsCodeBlock(this);
         }
-
         super.accept(visitor);
+    }
+
+    getSemicolon(statement: JsStatement): SynTokenNode | null {
+        let node = statement.nextSibling();
+        if (node instanceof SynTokenNode && node.getTokenType() === JsLexicalGrammar.SEMICOLON) {
+            return node;
+        }
+        return null;
     }
 }

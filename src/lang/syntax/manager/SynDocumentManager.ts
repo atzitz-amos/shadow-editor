@@ -11,7 +11,11 @@ import {ASTRecoveryInfo} from "../builder/parser/optimizer/recovery/ASTRecoveryI
 import {ASTRecoveryBuilder} from "../builder/parser/optimizer/recovery/ASTRecoveryBuilder";
 import {EmptyKillSignal, TimeoutKillSignal} from "../../../core/utils/KillSignal";
 import {Editor} from "../../../editor/Editor";
-import {LangRegistry} from "../../LangRegistry";
+import {LanguageParserDefinition} from "../../definitions/LanguageParserDefinition";
+import {UseLogger} from "../../../core/logging/logger/LoggerDecorators";
+import {Logger} from "../../../core/logging/logger/LoggerCore";
+import {LanguageBase} from "../../LanguageBase";
+import {EditorDocumentManager} from "../../../editor/core/document/EditorDocumentManager";
 
 /**
  *
@@ -20,8 +24,10 @@ import {LangRegistry} from "../../LangRegistry";
  * @since 1.0.0
  */
 @Service
+@UseLogger("SynDocumentManager")
 export class SynDocumentManager implements ServiceImpl {
     private static instance: SynDocumentManager = new SynDocumentManager();
+    private declare readonly logger: Logger;
     private readonly documents: Map<Document, SynDocument> = new Map();
 
     public static getInstance() {
@@ -84,7 +90,12 @@ export class SynDocumentManager implements ServiceImpl {
             builder.setRecoveryMode(recoveryInfo);
         }
 
-        const parser = LangRegistry.createParser(synDocument.getLanguage()!, builder);
+        const definition = LanguageParserDefinition.getParserDefinition(synDocument.getLanguage()!);
+        if (!definition) {
+            this.logger.warn(`No parser definition found for language ${synDocument.getLanguage()?.getKey()}`);
+            return;
+        }
+        const parser = definition.createParser(builder);
         parser.parse();
 
         const tree = builder.getTree();
@@ -105,5 +116,9 @@ export class SynDocumentManager implements ServiceImpl {
                 lexerInvalidRange
             ));
         }
+    }
+
+    static createVirtualSynDocumentForText(text: string, language: LanguageBase) {
+        return this.createVirtualSynDocument(EditorDocumentManager.createVirtualDocument(text, language));
     }
 }

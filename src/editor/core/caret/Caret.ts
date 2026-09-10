@@ -58,7 +58,7 @@ export class Caret {
     }
 
     getOffset() {
-        return this.editor.logicalToOffset(this.myLogical);
+        return this.editor.logicalToOffset(this.myLogical)
     }
 
     getXY() {

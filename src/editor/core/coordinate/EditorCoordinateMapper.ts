@@ -43,7 +43,7 @@ export class EditorCoordinateMapper {
     logicalToOffset(pos: LogicalPosition): Offset {
         const document = this.editor.getOpenedDocument();
         const line = document.getLineData(pos.row);
-        return line.getStart() + pos.col;
+        return (line?.getStart() ?? 0) + pos.col;
     }
 
     logicalToVisual(pos: LogicalPosition): VisualPosition {

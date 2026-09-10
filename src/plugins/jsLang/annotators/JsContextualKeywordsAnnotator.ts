@@ -40,7 +40,7 @@ export default class JsContextualKeywordsAnnotator extends AnnotatorBase {
     }
 
     getId(): string {
-        return "javascript.annotators.functionNameAnnotator"
+        return "javascript.annotators.contextualKeywordsAnnotator"
     }
 
     getApplicableLanguages(): LanguageBase[] {

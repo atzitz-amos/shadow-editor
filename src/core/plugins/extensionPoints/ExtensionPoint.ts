@@ -9,7 +9,7 @@ export class ExtensionPoint<T> {
     private withdrawHandler: (p: EditorPlugin) => void;
 
     constructor(public readonly name: string, private readonly ctor: Class<T>) {
-        ExtensionPoint.define(name, this);
+        ExtensionPoint.define(name.replaceAll("/", "."), this);
     }
 
     static forName(name: string): ExtensionPoint<any>[] {

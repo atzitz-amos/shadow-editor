@@ -9,6 +9,22 @@ import {Scheduler} from "../../../../core/scheduler/Scheduler";
 import {Spacing} from "../../../../lang/codeStyle/spacing/SpacingRule";
 import {MainEditorChangedEvent} from "../../../../app/ui/events/MainEditorChangedEvent";
 import {SynDocumentManager} from "../../../../lang/syntax/manager/SynDocumentManager";
+import {CodeStyleManager} from "../../../../lang/codeStyle/manager/CodeStyleManager";
+import JsLang from "../../../jsLang/lang/JsLang";
+import {DocumentModificationUtils} from "../../../../editor/core/document/utils/DocumentModificationUtils";
+import {JsWhitespaceScrambler} from "./JsWhitespaceScrambler";
+import {TextRange} from "../../../../editor/core/coordinate/range/TextRange";
+import {EditorHighlighterUtils} from "../../../../editor/ui/highlighter/overlay/EditorHighlighterUtils";
+import {TextAttributeKey} from "../../../../editor/ui/highlighter/style/TextAttributeKey";
+import {TextBackground} from "../../../../editor/ui/highlighter/style/TextBackground";
+import {FormattingBlock, FormattingIndent} from "../../../../lang/codeStyle/formatter/nodes/FormattingBlock";
+import {FormattingNode} from "../../../../lang/codeStyle/formatter/nodes/FormattingNode";
+import {FormattingSourceNewline} from "../../../../lang/codeStyle/formatter/nodes/FormattingSourceNewline";
+import {FormattingSourceWhitespace} from "../../../../lang/codeStyle/formatter/nodes/FormattingSourceWhitespace";
+import {FormattingSoftwrap} from "../../../../lang/codeStyle/formatter/nodes/FormattingSoftwrap";
+import {FormattingBreak} from "../../../../lang/codeStyle/formatter/nodes/FormattingBreak";
+import {FormattingText} from "../../../../lang/codeStyle/formatter/nodes/FormattingText";
+import {DocumentModificationEvent} from "../../../../editor/core/document/events/DocumentModificationEvent";
 
 /**
  *
@@ -17,6 +33,8 @@ import {SynDocumentManager} from "../../../../lang/syntax/manager/SynDocumentMan
  * @since 1.0.0
  */
 export class CodeStyleTab extends DebugToolTab {
+    private static readonly TEXT_HIGHLIGHT_KEY = TextAttributeKey.of(new TextBackground("rgb(200 96 232 / 0.25)"))
+
     private element: HTMLElement | null = null;
 
     constructor() {
@@ -43,6 +61,12 @@ export class CodeStyleTab extends DebugToolTab {
                 this.update(e.getNewEditor());
             }
         });
+
+        GlobalState.getMainEventBus().subscribe(this, DocumentModificationEvent.SUBSCRIBER, e => {
+            if (this.isSelected) {
+                this.update(e.getEditor());
+            }
+        });
     }
 
     dispose() {
@@ -63,11 +87,12 @@ export class CodeStyleTab extends DebugToolTab {
                 <div class="file-info">
                     <div>Language: <span class="language-info"></span></div>
                     <div>Caret Offset: <span class="caret-offset"></span></div>
+                    <button class="ide-btn scramble-btn" primary>Scramble file</button>
                 </div>
                 <div class="main-info">
                     <details class="formatting-blocks-info">
                         <summary>Formatting Blocks</summary>
-                        <div></div>
+                        <div class="popup-tree"></div>
                     </details>
                     <details class="spacing-rules-info">
                         <summary>Spacing Rules</summary>
@@ -83,6 +108,7 @@ export class CodeStyleTab extends DebugToolTab {
     getElement(): HTMLElement {
         if (!this.element) {
             this.element = this.buildElement();
+            this.setup();
         }
 
         const editor = GlobalState.getMainEditor();
@@ -101,16 +127,23 @@ export class CodeStyleTab extends DebugToolTab {
             return;
         } else if (!this.element) {
             this.element = this.buildElement();
+            this.setup();
         }
 
         const language = editor.getCurrentLanguage();
-        const formatter = language?.getSpacingFormatter();
+        const formatter = CodeStyleManager.getInstance(language);
         const offset = editor.getPrimaryCaret()?.getOffset();
 
         if (offset === undefined) return Scheduler.defer(() => this.update(editor));
 
         this.element!.querySelector(".file-info .language-info")!.textContent = language?.getDisplayName() ?? "Plain Text";
         this.element!.querySelector(".file-info .caret-offset")!.textContent = offset?.toString();
+
+        if (language === JsLang.INSTANCE) {
+            (<HTMLElement>this.element!.querySelector(".file-info .scramble-btn")).style.display = "block";
+        } else {
+            (<HTMLElement>this.element!.querySelector(".file-info .scramble-btn")).style.display = "none";
+        }
 
         if (!formatter) {
             this.element!.classList.add("no-formatter");
@@ -119,7 +152,8 @@ export class CodeStyleTab extends DebugToolTab {
             this.element!.classList.remove("no-formatter");
         }
 
-        this.updateSpacingRules(editor, formatter, this.element!.querySelector(".main-info .spacing-rules-info > div")!);
+        this.updateSpacingRules(editor, formatter.getSpacingFormatter(), this.element!.querySelector(".main-info .spacing-rules-info > div")!);
+        this.updateFormattingBlocks(editor, formatter, this.element!.querySelector(".main-info .formatting-blocks-info > div")!);
     }
 
     private updateSpacingRules(editor: Editor, formatter: SpacingFormatter, element: Element) {
@@ -166,6 +200,121 @@ export class CodeStyleTab extends DebugToolTab {
                     </ul>
                 </div>
             `;
+        }
+    }
+
+    private setup() {
+        (<HTMLElement>this.element!.querySelector(".file-info .scramble-btn")).addEventListener("click", () => {
+            const editor = GlobalState.getMainEditor();
+            DocumentModificationUtils.modifyWithCaret(editor.getOpenedDocument(), editor.getPrimaryCaret(), "scramble", () => {
+                editor.getOpenedDocument().replaceRange(editor.getFullRange(), new JsWhitespaceScrambler().scramble(editor.getOpenedDocument().getTextContent()));
+            });
+
+            editor.repaintView();
+        });
+    }
+
+    private buildFormattingNode(name: string, data?: string, range?: TextRange, parentEl?: HTMLElement) {
+        const details = document.createElement("details");
+        const summary = document.createElement("summary");
+
+        const titleSpan = HTMLUtils.createElement("span.node-title");
+        titleSpan.textContent = name;
+
+        summary.appendChild(titleSpan);
+        if (range && range.end) {
+            titleSpan.addEventListener("mouseover", e => {
+                EditorHighlighterUtils.highlight(
+                    GlobalState.getMainEditor(),
+                    "formatting-tree-viewer",
+                    CodeStyleTab.TEXT_HIGHLIGHT_KEY,
+                    null,
+                    range
+                )
+
+            });
+
+            titleSpan.addEventListener("mouseout", e => {
+                EditorHighlighterUtils.clear(GlobalState.getMainEditor(), "ast-viewer");
+            });
+        }
+
+        if (data) {
+            const dataSpan = document.createElement("span");
+            dataSpan.classList.add("node-data");
+            dataSpan.innerHTML = data;
+            summary.appendChild(dataSpan);
+        }
+
+        details.appendChild(summary);
+        details.setAttribute("open", "true");
+
+        if (parentEl)
+            parentEl.appendChild(details);
+
+        return details;
+    }
+
+    private updateFormattingBlocks(editor: Editor, manager: CodeStyleManager, element: Element) {
+        const visitor = manager.getFormattingBlockVisitor();
+        const block = visitor.format(SynDocumentManager.getOpenedSynDocument(editor).getTree(), editor.getOpenedDocument().getTokenCache().createTokenStream());
+
+        element.innerHTML = "";
+        this.buildFormattingTreeRecursive(block, element as HTMLElement).classList.add("popup-tree");
+    }
+
+    private buildFormattingTreeRecursive(block: FormattingBlock, element: HTMLElement) {
+        function getDataForFormattingBlock(block: FormattingBlock) {
+            let expanding = (() => {
+                if (block.isNeverExpanding()) {
+                    return "<span>NEVER_EXPAND</span>"
+                } else if (block.isForceExpanding()) {
+                    return "<span>FORCE_EXPAND</span>"
+                } else {
+                    return `<span>${block.isExpanded() ? 'EXPANDED' : 'COLLAPSED'}</span>`
+                }
+            })();
+            if (block.keepBlankLines()) {
+                expanding += " <span>KEEP_BLANK</span>"
+            }
+            if (block.getIndent() > 0) expanding += ` <span>${FormattingIndent[block.getIndent()]}</span>`
+            return expanding;
+        }
+
+        const nodeElement = this.buildFormattingNode("FormattingBlock", getDataForFormattingBlock(block), block.getRange(), element);
+
+        for (const child of block.getChildren()) {
+            if (child instanceof FormattingBlock) {
+                this.buildFormattingTreeRecursive(child, nodeElement);
+            } else {
+                this.buildFormattingLeaf(child, nodeElement);
+            }
+        }
+
+        return nodeElement;
+    }
+
+    private buildFormattingLeaf(node: FormattingNode, element: HTMLElement) {
+        let nodeElement: HTMLElement;
+
+        if (node instanceof FormattingSourceNewline) {
+            nodeElement = this.buildFormattingNode("FormattingSourceNewline", `"\\n"`, node.getNewlineToken().getRange(), element);
+            nodeElement.classList.add("leaf-node", "source-node");
+        } else if (node instanceof FormattingSourceWhitespace) {
+            let data = `"${node.getWhitespaceToken()?.getValue() ?? ''}"`;
+            if (node.isIndentationWhitespace()) {
+                data += " INDENT";
+            }
+            nodeElement = this.buildFormattingNode("FormattingSourceWhitespace", data, node.getWhitespaceToken()?.getRange(), element);
+            nodeElement.classList.add("leaf-node", "source-node");
+        } else if (node instanceof FormattingText) {
+            nodeElement = this.buildFormattingNode("FormattingText", `"${node.getToken().getValue()}"`, node.getToken().getRange(), element);
+            nodeElement.classList.add("leaf-node", "text-node");
+        } else if (node instanceof FormattingSoftwrap) {
+
+        } else if (node instanceof FormattingBreak) {
+            nodeElement = this.buildFormattingNode("FormattingBreak", `replaceWith="${node.getReplacementString()}"`, undefined, element);
+            nodeElement.classList.add("leaf-node", "break-node");
         }
     }
 }

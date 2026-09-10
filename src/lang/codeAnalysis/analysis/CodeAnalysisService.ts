@@ -1,4 +1,4 @@
-import {SynTreeChangedEvent} from "../../../editor/core/lang/events/SynTreeChangedEvent";
+import {SynTreeChangedEvent} from "../../events/SynTreeChangedEvent";
 import {ExtensionPoint} from "../../../core/plugins/extensionPoints/ExtensionPoint";
 import {CodeAnalysisPass} from "./api/CodeAnalysisPass";
 import {SynNodeVisitor} from "../../syntax/visitors/SynNodeVisitor";

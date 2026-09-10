@@ -22,8 +22,10 @@ export class IncrementalParserOptimizer {
 
     begin(cls: any, args: any[]): IncrementalParserOptimizer {
         this.builder = args[0];
-        if (!(this.builder instanceof ASTRecoveryBuilder))
+        if (!(this.builder instanceof ASTRecoveryBuilder)) {
             this.isValid = false;
+            return this;
+        }
 
         if (!this.builder.inRecoveryMode()) {
             this.isValid = false;
@@ -36,6 +38,7 @@ export class IncrementalParserOptimizer {
     }
 
     invoke(target: (...args: any[]) => void, cls: any, args: any[]) {
+        if (!this.isValid) return target.apply(cls, args);
         const checkpoint = this.builder.pushCheckpoint(target.name, args);
 
         const node = this.obtainNode(target, cls, args);

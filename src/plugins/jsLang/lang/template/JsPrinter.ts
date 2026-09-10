@@ -41,6 +41,7 @@ import {JsForIStatement} from "../syntax/statements/JsForIStatement";
 import {JsStatement} from "../syntax/statements/JsStatement";
 import {JsIfStatement} from "../syntax/statements/JsIfStatement";
 import {SynTree} from "../../../../lang/syntax/api/tree/SynTree";
+import {JsObjectLiteral} from "../syntax/literal/JsObjectLiteral";
 
 /**
  *
@@ -148,7 +149,8 @@ export class JsPrinter extends JsSynVisitor implements SynPrinter {
     }
 
     visitLiteral(element: JsLiteral) {
-        this.write(element.getValue());
+        if (!(element instanceof JsObjectLiteral) && !(element instanceof JsArrayLiteral))
+            this.write(element.getValue()!);
     }
 
     visitIdentifier(element: JsIdentifier) {

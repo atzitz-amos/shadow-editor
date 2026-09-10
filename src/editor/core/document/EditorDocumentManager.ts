@@ -6,6 +6,7 @@ import {Service} from "../../../core/threaded/service/Service";
 import {GlobalState} from "../../../core/global/GlobalState";
 import {DocumentModificationEvent} from "./events/DocumentModificationEvent";
 import {SynDocumentManager} from "../../../lang/syntax/manager/SynDocumentManager";
+import {LanguageBase} from "../../../lang/LanguageBase";
 
 /**
  *
@@ -45,6 +46,12 @@ export class EditorDocumentManager {
     public getDocumentForId(id: string): Document | null {
         if (this.documents.has(id)) return this.documents.get(id)!;
         return null;
+    }
+
+    static createVirtualDocument(text: string, language: LanguageBase) {
+        const document = new Document(text, language);
+        this.getInstance().prepare(document);
+        return document;
     }
 
     public getDocumentForFile(file: ProjectFile): Document {

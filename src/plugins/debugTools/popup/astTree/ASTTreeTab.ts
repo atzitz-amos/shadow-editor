@@ -77,7 +77,7 @@ export class ASTTreeTab extends DebugToolTab {
     }
 
     private buildElement(): HTMLElement {
-        return HTMLUtils.createDiv("debug-popup-inner ast-tree-inner")
+        return HTMLUtils.createDiv("debug-popup-inner ast-tree-inner popup-tree")
     }
 
     private update(editor: Editor | null) {
@@ -143,6 +143,7 @@ export class ASTTreeTab extends DebugToolTab {
     }
 
     private updateASTTree(file: SynFile | undefined) {
+        console.log(file);
         if (!this.element) return;
         if (!file) {
             this.element.innerHTML = "No AST available for this file";

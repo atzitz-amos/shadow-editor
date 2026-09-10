@@ -65,7 +65,7 @@
             import {SpacingFormatter} from "./src/lang/codeStyle/spacing/SpacingFormatter";
             import {SynTreeOffsetJumper} from "./src/lang/codeStyle/utils/SynTreeOffsetJumper";
             import {SynASTElementImpl} from "./src/lang/syntax/impl/tree/SynASTElementImpl";
-            import {JsSpacingRules} from "./src/plugins/jsLang/codeStyle/JsSpacingRules";
+            import {JsSpacingRules} from "./src/plugins/jsLang/codeStyle/spacing/JsSpacingRules";
             import {EditorHighlighterUtils} from "./src/editor/ui/highlighter/overlay/EditorHighlighterUtils";
             import {TextAttributeKey} from "./src/editor/ui/highlighter/style/TextAttributeKey";
             import {TextBackground} from "./src/editor/ui/highlighter/style/TextBackground";
@@ -73,15 +73,45 @@
             import {DebugToolsPopup} from "./src/plugins/debugTools/popup/DebugToolsPopup";
             import {MainEditorChangedEvent} from "./src/app/ui/events/MainEditorChangedEvent";
             import {SynDocumentManager} from "./src/lang/syntax/manager/SynDocumentManager";
+            import {LanguageParserDefinition} from "./src/lang/definitions/LanguageParserDefinition";
+            import {JsWhitespaceScrambler} from "./src/plugins/debugTools/popup/codeStyle/JsWhitespaceScrambler";
+            import {FormattingBlockBuilder} from "./src/lang/codeStyle/formatter/builder/FormattingBlockBuilder";
+            import {JsCodeStyleManager} from "./src/plugins/jsLang/codeStyle/JsCodeStyleManager";
+            import {AbstractSynParentElement} from "./src/lang/syntax/impl/tree/AbstractSynParentElement";
+            import {FormattingBreak} from "./src/lang/codeStyle/formatter/nodes/FormattingBreak";
+            import {FormattingBlock} from "./src/lang/codeStyle/formatter/nodes/FormattingBlock";
+            import {QuickParseUtils} from "./src/lang/syntax/utils/QuickParseUtils";
+
+            window.QuickParseUtils = QuickParseUtils;
+
+            window.format = () => {
+                const document = getSynDocument();
+                const visitor = JsCodeStyleManager.getInstance().getFormattingBlockVisitor();
+                const engine = JsCodeStyleManager.getInstance().getFormattingEngine();
+                const result1 = engine.format(visitor.format(document.getTree(), document.getDocument().getTokenCache().createTokenStream()))
+                const quickParse = QuickParseUtils.quickParse(document.getLanguage(), result1)
+                const result2 = JsCodeStyleManager.getInstance().getSpacingFormatter().format(quickParse.tokenStream, quickParse.tree);
+
+                return {
+                    partial: result1,
+                    final: result2
+                }
+            }
 
             window.VNodeStore = VNodeStore;
 
             window.ActionPopup = ActionPopup;
             window.DebugTools = DebugToolsPopup;
 
+            window.LanguageParserDefinition = LanguageParserDefinition;
+            window.jsScramble = new JsWhitespaceScrambler();
+
             GlobalState.getMainEventBus().subscribe(window, MainEditorChangedEvent.SUBSCRIBER, e => console.log(e));
 
+            window.setTimeout(() => window.JsCodeStyleManager = JsCodeStyleManager.getInstance(), 500);
+
             window.getSynDocument = () => SynDocumentManager.getOpenedSynDocument(GlobalState.getMainEditor());
+
 
             window.highlight = (start, end) => {
                 EditorHighlighterUtils.highlight(
@@ -122,7 +152,6 @@
 
             window.GlobalState = GlobalState;
 
-            window.SpacingFormatter = SpacingFormatter.make(JsSpacingRules, [JsLexicalGrammar.WHITESPACE], [JsLexicalGrammar.EOL]);
             window.SynTreeOffsetJumper = SynTreeOffsetJumper;
 
             if (!app) {

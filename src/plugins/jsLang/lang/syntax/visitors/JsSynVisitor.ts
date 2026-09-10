@@ -44,6 +44,11 @@ import {JsClassMember} from "../objects/JsClassMember";
 import {JsClassField} from "../objects/JsClassField";
 import {JsClassMethod} from "../objects/JsClassMethod";
 import {JsClass} from "../objects/JsClass";
+import {JsObjectLiteral} from "../literal/JsObjectLiteral";
+import {JsObjectLiteralKey} from "../literal/JsObjectLiteralKey";
+import {JsObjectLiteralValue} from "../literal/JsObjectLiteralValue";
+import {JsObjectLiteralPropertyShorthand} from "../literal/JsObjectLiteralPropertyShorthand";
+import {JsExprStatement} from "../statements/JsExprStatement";
 
 /**
  *
@@ -54,6 +59,10 @@ import {JsClass} from "../objects/JsClass";
 export class JsSynVisitor extends SynNodeVisitor {
     isRecursive(): boolean {
         return false;
+    }
+
+    visitExprStatement(element: JsExprStatement) {
+
     }
 
     visitExpr(element: JsExpr): void {
@@ -119,6 +128,18 @@ export class JsSynVisitor extends SynNodeVisitor {
     visitArrayLiteral(element: JsArrayLiteral): void {
     }
 
+    visitObjectLiteral(element: JsObjectLiteral): void {
+    }
+
+    visitObjectLiteralKey(element: JsObjectLiteralKey): void {
+    }
+
+    visitObjectLiteralValue(element: JsObjectLiteralValue): void {
+    }
+
+    visitObjectLiteralPropertyShorthand(element: JsObjectLiteralPropertyShorthand): void {
+    }
+
     visitStatement(element: JsStatement): void {
 
     }
@@ -143,6 +164,7 @@ export class JsSynVisitor extends SynNodeVisitor {
     }
 
     visitDeclarator(element: JsDeclarator): void {
+
     }
 
     visitReturnStatement(element: JsReturnStatement): void {

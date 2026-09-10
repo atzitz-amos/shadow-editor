@@ -12,7 +12,7 @@ import {IndexFile} from "../../../indexes/IndexFile";
 import {DocumentLevelIndexFile} from "../../../indexes/impl/DocumentLevelIndexFile";
 import {ASTCheckpoint} from "../../builder/parser/optimizer/recovery/ASTCheckpoint";
 import {GlobalState} from "../../../../core/global/GlobalState";
-import {SynTreeChangedEvent} from "../../../../editor/core/lang/events/SynTreeChangedEvent";
+import {SynTreeChangedEvent} from "../../../events/SynTreeChangedEvent";
 
 /**
  *

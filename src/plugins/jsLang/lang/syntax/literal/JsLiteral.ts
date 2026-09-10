@@ -19,7 +19,7 @@ export class JsLiteral extends JsExpr {
         this.value = (<SynTokenNode>this.getNthChild(0)).getValue();
     }
 
-    getValue(): string {
+    getValue(): string | undefined {
         return this.value;
     }
 

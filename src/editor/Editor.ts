@@ -306,15 +306,6 @@ export class Editor {
 
     replaceRange(range: TextRange, text: string) {
         this.document.replaceRange(range, text);
-
-        this.caretModel.forEachCaret(caret => {
-            if (caret.getOffset() > this.document.getTotalDocumentLength()) {
-                caret.moveToOffset(this.document.getTotalDocumentLength());
-            }
-        });
-
-
-        this.view.triggerRepaint();
     }
 
     deleteWholeLine(caret: Caret) {

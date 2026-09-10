@@ -17,7 +17,6 @@ import {ILexer} from "./syntax/builder/lexer/ILexer";
 import {HighlighterBase} from "./highlighter/HighlighterBase";
 import {CollectionUtils} from "../editor/utils/collection/CollectionUtils";
 import {IncrementalHighlighter} from "./highlighter/IncrementalHighlighter";
-import {ASTBuilder} from "./syntax/builder/parser/builder/ASTBuilder";
 
 export class LangRegistry {
     private static instance: LangRegistry;
@@ -64,10 +63,6 @@ export class LangRegistry {
 
     static getLexer(language: LanguageBase) {
         return CollectionUtils.getOrSet(this.lexerByLanguage, language.getKey(), () => language.createLexer());
-    }
-
-    static createParser(language: LanguageBase, builder: ASTBuilder) {
-        return language.createParser(builder);
     }
 
     getSupportedLanguages(): LanguageBase[] {

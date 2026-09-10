@@ -89,7 +89,7 @@ export class ViewPainter {
 
             if (range.start == range.end) {
                 // virtual overlay, render it as a single char wide element
-                let element = this.painVirtualOverlay(overlay, range.start, elementStart);
+                let element = this.paintVirtualOverlay(overlay, range.start, elementStart);
                 overlay.internalInit(this.view.getEditor(), [element]);
 
                 let line = document.getLineAt(range.start);
@@ -177,7 +177,7 @@ export class ViewPainter {
         return span;
     }
 
-    private painVirtualOverlay(overlay: OverlayWidget, offset: number, start: number): HTMLSpanElement {
+    private paintVirtualOverlay(overlay: OverlayWidget, offset: number, start: number): HTMLSpanElement {
         const span = HTMLUtils.createElement<HTMLSpanElement>("span.overlay-widget");
         span.classList.add(...overlay.getClassList());
         span.style.zIndex = overlay.getDrawPriority().toString();

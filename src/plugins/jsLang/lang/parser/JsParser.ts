@@ -19,6 +19,7 @@ export class JsParser implements IParser {
     private readonly myExprParser: JsExprParser;
 
     private isDoWhileASI: boolean = false;
+    private isAfterCodeBlock: boolean = false;
 
     constructor(private builder: ASTBuilder) {
         this.myExprParser = new JsExprParser(this, builder);
@@ -118,6 +119,8 @@ export class JsParser implements IParser {
             this.setInAsync(prevIsInAsync);
             this.setInGenerator(prevIsInGenerator);
         }
+
+        this.isAfterCodeBlock = true;
     }
 
     parseStatementOrExpr(): void {
@@ -133,10 +136,12 @@ export class JsParser implements IParser {
         } else if (this.builder.isNext(JsLexicalGrammar.IDENTIFIER) && this.builder.lookAhead(1)?.getType() === JsLexicalGrammar.COLON) {
             this.parseLabel();
         } else {
-            this.parseExpression();
+            this.parseStatementExpression();
         }
 
-        if (!this.insertSemicolonIfNeeded()) {
+        if (this.isAfterCodeBlock) {
+            this.isAfterCodeBlock = false;
+        } else if (!this.insertSemicolonIfNeeded()) {
             this.builder.errorVirtual("Expected ';'");
         }
     }
@@ -211,13 +216,13 @@ export class JsParser implements IParser {
             case "void":
             case "delete":
             case "new":
-                this.parseExpression(false);
+                this.parseStatementExpression(false);
                 break;
             case "yield":
-                this.parseExpression(false);
+                this.parseStatementExpression(false);
                 break;
             case "await":
-                this.parseExpression(false);
+                this.parseStatementExpression(false);
                 break;
 
             default:
@@ -764,6 +769,12 @@ export class JsParser implements IParser {
         this.builder.expect(JsLexicalGrammar.COLON).orError("Expected ':'");
         this.parseStatementOrExpr();
         marker.done(JsGrammar.LabelStatement);
+    }
+
+    private parseStatementExpression(allowComma: boolean = true): void {
+        const marker = this.builder.mark();
+        this.parseExpression(allowComma);
+        marker.done(JsGrammar.ExpressionStatement);
     }
 
     private parseExpression(allowComma: boolean = true): void {

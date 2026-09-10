@@ -25,7 +25,10 @@ export class DocumentModificationUtils {
 
         callback();
 
-        caret.moveToOffset(trackedRange.getEnd(), CaretMovementFlags.JUMP);
+        if (!trackedRange.isValid())
+            caret.moveToOffset(0, CaretMovementFlags.JUMP);
+        else
+            caret.moveToOffset(trackedRange.getEnd(), CaretMovementFlags.JUMP);
         trackedRange.invalidate();
 
         caret.editor.getView().resetBlink();

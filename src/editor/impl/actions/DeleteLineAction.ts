@@ -2,7 +2,7 @@ import {AbstractAction} from "../../../core/actions/AbstractAction";
 import {KeybindContext} from "../../../core/keybinds/context/KeybindContext";
 import {Key, Keybind} from "../../../core/keybinds/Keybind";
 import {SelectedLineOffsetUtils} from "./utils/SelectedLineOffsetUtils";
-import {DocumentModificationUtils} from "../../core/document/utils/DocumentModificationUtils";
+import {UndoStack} from "../../core/undo/UndoStack";
 
 /**
  *
@@ -17,7 +17,7 @@ export class DeleteLineAction extends AbstractAction {
         const start = SelectedLineOffsetUtils.getStart(editor.getPrimaryCaret())
         const end = SelectedLineOffsetUtils.getEnd(editor.getPrimaryCaret())
 
-        DocumentModificationUtils.modifyWithCaret(editor.getOpenedDocument(), editor.getPrimaryCaret(), "deleteLine", () => {
+        UndoStack.undoableAction(editor, "deleteLine", () => {
             editor.getPrimaryCaret().getSelectionModel().clear();
 
             let length = 0;
@@ -29,6 +29,15 @@ export class DeleteLineAction extends AbstractAction {
             editor.getOpenedDocument().deleteAt(offset, length);
         }, false);
 
+        for (let i = start; i >= 0; i--) {
+            const data = editor.getOpenedDocument().getLineData(i);
+            if (data) {
+                editor.getPrimaryCaret().moveToOffset(data.getStart());
+                break;
+            }
+        }
+
+        editor.getView().resetBlink();
         editor.repaintView();
     }
 

@@ -94,6 +94,10 @@ div.ast-viewer-toggle-follow.is-active {
     width: max-content;
 }
 
+.syn-whitespace-node {
+    color: gray;
+}
+
 
 .ast-viewer-overlay-highlight {
     background: rgb(200 96 232 / 0.25);

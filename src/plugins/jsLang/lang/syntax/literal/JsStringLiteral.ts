@@ -24,16 +24,16 @@ export class JsStringLiteral extends JsLiteral {
     }
 
     getQuote(): string {
-        return this.getValue().slice(0, 1);
+        return this.getValue()!.slice(0, 1);
     }
 
     getStringValue(): string {
-        const text = this.getValue().slice(1);
+        const text = this.getValue()!.slice(1);
         return this.isUnterminated() ? text : text.slice(0, -1);
     }
 
     isUnterminated(): boolean {
-        const value = this.getValue();
+        const value = this.getValue()!;
         if (value.length < 2) {
             return true;
         }

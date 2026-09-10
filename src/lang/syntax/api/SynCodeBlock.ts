@@ -3,6 +3,8 @@ import {ASTNode} from "../builder/parser/nodes/ASTNode";
 import {SynNodeVisitor} from "../visitors/SynNodeVisitor";
 import {SynScopeType} from "../../indexes/scope/SynScopeType";
 import {SynScope} from "../../indexes/scope/SynScope";
+import {SynTokenNode} from "../impl/SynTokenNode";
+import {JsLexicalGrammar} from "../../../plugins/jsLang/lang/lexer/JsLexicalGrammar";
 
 /**
  *
@@ -15,6 +17,14 @@ export abstract class SynCodeBlock extends SynASTElementImpl {
 
     protected constructor(node: ASTNode) {
         super(node);
+    }
+
+    getOpeningBrace(): SynTokenNode | undefined {
+        return this.getAllTokensOfType(JsLexicalGrammar.LBRACE)[0];
+    }
+
+    getClosingBrace(): SynTokenNode | undefined {
+        return this.getAllTokensOfType(JsLexicalGrammar.RBRACE)[0];
     }
 
     setSynthetic() {

@@ -42,6 +42,11 @@ import {JsClassMethod} from "../syntax/objects/JsClassMethod";
 import {JsClassField} from "../syntax/objects/JsClassField";
 import {JsClassExpr} from "../syntax/objects/JsClassExpr";
 import {JsArrayDestructuringPatternExpr} from "../syntax/expr/JsArrayDestructuringPatternExpr";
+import {JsObjectLiteral} from "../syntax/literal/JsObjectLiteral";
+import {JsObjectLiteralKey} from "../syntax/literal/JsObjectLiteralKey";
+import {JsObjectLiteralValue} from "../syntax/literal/JsObjectLiteralValue";
+import {JsObjectLiteralPropertyShorthand} from "../syntax/literal/JsObjectLiteralPropertyShorthand";
+import {JsExprStatement} from "../syntax/statements/JsExprStatement";
 
 export class JsGrammar {
     public static readonly CodeBlock = ASTGrammar.createCodeBlock("CodeBlock", JsCodeBlock.builder());
@@ -83,6 +88,8 @@ export class JsGrammar {
     public static readonly VariableDeclarator = ASTGrammar.create("VariableDeclarator", JsDeclarator.builder());
 
     /* EXPRESSIONS */
+    public static readonly ExpressionStatement = ASTGrammar.create("ExpressionStatement", JsExprStatement.builder());
+
     public static readonly NumberLiteral = ASTGrammar.create("NumberLiteral", JsNumberLiteral.builder());
     public static readonly StringLiteral = ASTGrammar.create("StringLiteral", JsStringLiteral.builder());
     public static readonly BooleanLiteral = ASTGrammar.create("BooleanLiteral", JsBooleanLiteral.builder());
@@ -91,7 +98,7 @@ export class JsGrammar {
     public static readonly Identifier = ASTGrammar.create("Identifier", JsIdentifier.builder());
     public static readonly ThisExpr = ASTGrammar.create("ThisExpression", JsLiteral.builder());
     public static readonly ArrayLiteral = ASTGrammar.create("ArrayLiteral", JsArrayLiteral.builder());
-    public static readonly ObjectLiteral = ASTGrammar.create("ObjectLiteral", JsLiteral.builder());
+    public static readonly ObjectLiteral = ASTGrammar.create("ObjectLiteral", JsObjectLiteral.builder());
     public static readonly TemplateLiteral = ASTGrammar.create("TemplateLiteral", JsLiteral.builder());
     public static readonly RegexLiteral = ASTGrammar.create("RegexLiteral", JsLiteral.builder());
 
@@ -118,7 +125,7 @@ export class JsGrammar {
 
     public static readonly DestructuringListPattern = ASTGrammar.create("DestructuringListPattern", JsArrayDestructuringPatternExpr.builder());
     public static readonly DestructuringObjectPattern = ASTGrammar.create("DestructuringObjectPattern", JsExpr.builder());
-    public static readonly ObjectPropertyKey = ASTGrammar.create("ObjectPropertyKey");
-    public static readonly ObjectPropertyValue = ASTGrammar.create("ObjectPropertyValue");
-    public static readonly ObjectPropertyShorthand = ASTGrammar.create("ObjectPropertyShorthand");
+    public static readonly ObjectPropertyKey = ASTGrammar.create("ObjectPropertyKey", JsObjectLiteralKey.builder());
+    public static readonly ObjectPropertyValue = ASTGrammar.create("ObjectPropertyValue", JsObjectLiteralValue.builder());
+    public static readonly ObjectPropertyShorthand = ASTGrammar.create("ObjectPropertyShorthand", JsObjectLiteralPropertyShorthand.builder());
 }

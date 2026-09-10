@@ -1,8 +1,8 @@
-import {EventSubscriber} from "../../../../core/events/EventSubscriber";
-import {LanguageBase} from "../../../../lang/LanguageBase";
-import {SynDocument} from "../../../../lang/syntax/api/document/SynDocument";
-import {EventBase} from "../../../../core/events/EventBase";
-import {BubbleDirection} from "../../../../core/events/BubbleDirection";
+import {EventSubscriber} from "../../core/events/EventSubscriber";
+import {LanguageBase} from "../LanguageBase";
+import {SynDocument} from "../syntax/api/document/SynDocument";
+import {EventBase} from "../../core/events/EventBase";
+import {BubbleDirection} from "../../core/events/BubbleDirection";
 
 /**
  *

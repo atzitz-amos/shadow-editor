@@ -26,7 +26,7 @@ export class SynFileImpl implements SynFile {
 
     getSynDocument(): SynDocument {
         if (!this.synDocument)
-            this.synDocument = SynDocumentManager.createSynDocument(EditorDocumentManager.getDocumentForFile(this.file), this);
+            this.synDocument = SynDocumentManager.getSynDocument(EditorDocumentManager.getDocumentForFile(this.file));
         return this.synDocument;
     }
 

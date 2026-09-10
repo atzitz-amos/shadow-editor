@@ -7,6 +7,7 @@ import {SynTreeTokenJumper} from "../utils/SynTreeTokenJumper";
 import {Token} from "../../syntax/builder/tokens/Token";
 import {SynASTElement} from "../../syntax/api/tree/SynASTElement";
 import {SynASTElementImpl} from "../../syntax/impl/tree/SynASTElementImpl";
+import {CodeStyleManager} from "../manager/CodeStyleManager";
 
 /**
  *
@@ -34,7 +35,7 @@ export class SpacingFormatter {
         }
     }
 
-    public static make(cls: Constructor, whitespaceGroup: TokenType[], newlineGroup: TokenType[]): SpacingFormatter {
+    public static make(manager: CodeStyleManager, cls: Constructor): SpacingFormatter {
         const rules: SpacingRule[] = [];
         for (const key of Object.getOwnPropertyNames(cls)) {
             const value = (cls as any)[key];
@@ -43,7 +44,7 @@ export class SpacingFormatter {
             }
         }
 
-        return new SpacingFormatter(rules, whitespaceGroup, newlineGroup);
+        return new SpacingFormatter(rules, manager.getWhitespaceTokenGroup(), manager.getNewlineTokenGroup());
     }
 
     public format(stream: TokenStream, tree: SynTree) {

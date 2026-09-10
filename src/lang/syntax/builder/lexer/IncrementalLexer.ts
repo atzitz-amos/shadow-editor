@@ -54,6 +54,17 @@ export abstract class IncrementalLexer implements ILexer {
         document.getTokenCache().setTokens(tokens);
     }
 
+    public lexAllToTokens(text: string): TokenStream {
+        const source = new Source(text, 0);
+        const tokens: Token[] = [];
+
+        while (!source.isEmpty()) {
+            tokens.push(this.tokenize(source));
+        }
+
+        return new StaticTokenStream(tokens);
+    }
+
     abstract tokenize(input: Source): Token;
 
     createTokenStream(src: string): TokenStream {

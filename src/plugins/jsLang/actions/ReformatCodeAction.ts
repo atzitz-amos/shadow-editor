@@ -1,11 +1,10 @@
 import {AbstractAction} from "../../../core/actions/AbstractAction";
 import {KeybindContext} from "../../../core/keybinds/context/KeybindContext";
 import {Key, Keybind} from "../../../core/keybinds/Keybind";
-import {SpacingFormatter} from "../../../lang/codeStyle/spacing/SpacingFormatter";
-import {JsSpacingRules} from "../codeStyle/JsSpacingRules";
-import {JsLexicalGrammar} from "../lang/lexer/JsLexicalGrammar";
-import {UndoStack} from "../../../editor/core/undo/UndoStack";
 import {SynDocumentManager} from "../../../lang/syntax/manager/SynDocumentManager";
+import {JsCodeStyleManager} from "../codeStyle/JsCodeStyleManager";
+import {QuickParseUtils} from "../../../lang/syntax/utils/QuickParseUtils";
+import {DocumentModificationUtils} from "../../../editor/core/document/utils/DocumentModificationUtils";
 
 /**
  *
@@ -14,8 +13,6 @@ import {SynDocumentManager} from "../../../lang/syntax/manager/SynDocumentManage
  * @since 1.0.0
  */
 export default class ReformatCodeAction extends AbstractAction {
-    private readonly formatter = SpacingFormatter.make(JsSpacingRules, [JsLexicalGrammar.WHITESPACE], [JsLexicalGrammar.EOL]);
-
     run(ctx: KeybindContext): void | Promise<void> {
         if (!ctx.isEditorEvent()) {
             // TODO
@@ -23,14 +20,21 @@ export default class ReformatCodeAction extends AbstractAction {
             const editor = ctx.requireEditor();
             const stream = editor.getOpenedDocument().getTokenCache().createTokenStream();
             const synDocument = SynDocumentManager.getOpenedSynDocument(editor);
-            console.log(synDocument)
 
-            const text = this.formatter.format(stream, synDocument.getTree());
-            console.log(text);
+            const visitor = JsCodeStyleManager.getInstance().getFormattingBlockVisitor();
+            const engine = JsCodeStyleManager.getInstance().getFormattingEngine();
+            const result1 = engine.format(visitor.format(synDocument.getTree(), stream))
+            const quickParse = QuickParseUtils.quickParse(synDocument.getLanguage(), result1)
+            const result2 = JsCodeStyleManager.getInstance().getSpacingFormatter().format(quickParse.tokenStream, quickParse.tree);
 
-            UndoStack.undoableAction(editor, "reformatCode", () => {
-                editor.replaceRange(editor.getFullRange(), text);
+            console.log(result1);
+
+            const document = synDocument.getDocument();
+            DocumentModificationUtils.modifyWithCaret(document, editor.getPrimaryCaret(), "reformat", () => {
+                document.replaceRange(document.getFullRange(), result2);
             });
+
+            editor.repaintView();
         }
     }
 
