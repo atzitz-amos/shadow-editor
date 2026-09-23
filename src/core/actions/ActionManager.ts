@@ -4,6 +4,7 @@ import {Service} from "../threaded/service/Service";
 import {Logger, UseLogger} from "../logging/Logger";
 import {ExtensionPoint} from "../plugins/extensionPoints/ExtensionPoint";
 import {EditorPlugin} from "../plugins/loader/Plugin";
+import {Scheduler} from "../scheduler/Scheduler";
 
 
 @Service
@@ -17,6 +18,8 @@ export class ActionManager {
 
     declare private readonly logger: Logger;
     private readonly actions: Map<string | null, AbstractAction[]> = new Map<string | null, AbstractAction[]>();
+
+    private readonly actionsToInitialize: AbstractAction[] = []
 
     public static getInstance() {
         if (!ActionManager.instance) {
@@ -36,8 +39,23 @@ export class ActionManager {
             this.actions.set(key, []);
         }
         this.actions.get(key)!.push(action);
-
         KeybindManager.getInstance().registerAction(action, action.getDefaultKeybinding())
+        
+        this.actionsToInitialize.push(action)
+        Scheduler.debounce(() => {
+            this.actionsToInitialize.forEach(action => action.addToGroups());
+            this.actionsToInitialize.length = 0;
+        }, 10);
+    }
+
+    /** Returns whether this action is still active or if it was disabled by removeActionsByPlugin*/
+    isActionActive(action: AbstractAction): boolean {
+        for (const actions of this.actions.values()) {
+            if (actions.includes(action)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     removeActionsByPlugin(plugin: EditorPlugin) {

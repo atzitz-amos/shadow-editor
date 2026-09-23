@@ -93,13 +93,15 @@ export class JsParser implements IParser {
     }
 
     @ParserBoundaryNode
-    parseBlock(expectBrace = true, isFunction = true, isAsync = false, isGenerator = false): void {
+    parseBlock(expectBrace = true, isFunction: boolean | null = null, isAsync: boolean | null = null, isGenerator: boolean | null = null): void {
+        this.isAfterCodeBlock = false;
+
         const prevIsInAsync = this.myIsInAsync;
         const prevIsInGenerator = this.myIsInGenerator;
         const prevIsInFunction = this.myIsInFunction;
-        this.setInFunction(isFunction);
-        this.setInAsync(isAsync);
-        this.setInGenerator(isGenerator);
+        if (isFunction) this.setInFunction(isFunction);
+        if (isAsync) this.setInAsync(isAsync);
+        if (isGenerator) this.setInGenerator(isGenerator);
 
         try {
             const marker = this.builder.mark();

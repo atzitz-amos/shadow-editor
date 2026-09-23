@@ -37,7 +37,10 @@ export class EditorKeysHelper {
     static notify(closeOn: CloseOn): void {
         for (const [flag, closeables] of EditorKeysHelper.registry) {
             if (closeOn & flag) {
-                closeables.forEach(c => c.close());
+                for (const closeable of [...closeables]) {
+                    closeables.delete(closeable);
+                    closeable.close();
+                }
             }
         }
     }

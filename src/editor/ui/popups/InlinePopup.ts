@@ -1,6 +1,6 @@
 import {Disposable} from "../../../core/ui/api/Disposable";
 import {Drawable} from "../../../core/ui/api/Drawable";
-import {Closeable} from "../../../core/ui/api/Closeable";
+import {Closeable, CloseOn} from "../../../core/ui/api/Closeable";
 
 /**
  *
@@ -9,7 +9,7 @@ import {Closeable} from "../../../core/ui/api/Closeable";
  * @since 1.0.0
  */
 export interface InlinePopup extends Closeable, Disposable, Drawable {
-    open(x: number, y: number): void;
+    open(x: number, y: number, closeOn?: CloseOn): void;
 
     move(x: number, y: number): void;
 

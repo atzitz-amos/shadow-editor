@@ -2,6 +2,7 @@ import {AbstractAction} from "../../../core/actions/AbstractAction";
 import {Key, Keybind} from "../../../core/keybinds/Keybind";
 import {KeybindContext} from "../../../core/keybinds/context/KeybindContext";
 import {DocumentModificationUtils} from "../../core/document/utils/DocumentModificationUtils";
+import {IndentUtils} from "../../../lang/syntax/utils/IndentUtils";
 
 
 export class TabAction extends AbstractAction {
@@ -28,16 +29,18 @@ export class TabAction extends AbstractAction {
         ctx.getEvent().preventDefault();
         const caret = editor.getPrimaryCaret();
 
+        const indent = IndentUtils.makeIndentString(IndentUtils.getLanguageSpecificIndentationSize(editor.getCurrentLanguage()));
+
         DocumentModificationUtils.modifyWithCaret(editor.getOpenedDocument(), caret, "tab", () => {
             if (caret.getSelectionModel().isSelectionActive) {
                 const start = caret.getSelectionModel().getStart().row;
                 const end = caret.getSelectionModel().getEnd().row;
 
                 for (let i = start; i <= end; i++) {
-                    editor.insertText(editor.getOpenedDocument().getLineData(i).getStart(), '    ');
+                    editor.insertText(editor.getOpenedDocument().getLineData(i).getStart(), indent);
                 }
             } else {
-                editor.insertText(caret.getOffset(), '    ');
+                editor.insertText(caret.getOffset(), indent);
             }
         });
 
@@ -60,7 +63,7 @@ export class ShiftTabAction extends AbstractAction {
             for (let i = start; i <= end; i++) {
                 const line = document.getLineData(i);
                 const indent = line.getIndentationSize();
-                const dedentSize = Math.min(indent, 4);
+                const dedentSize = Math.min(indent, IndentUtils.getLanguageSpecificIndentationSize(editor.getCurrentLanguage()));
                 document.deleteAt(line.getStart(), dedentSize);
             }
         }, false);

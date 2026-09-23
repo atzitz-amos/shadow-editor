@@ -34,7 +34,6 @@ export abstract class SimpleLayoutFormattingEngine extends FormattingEngineBase 
     private formatBlock(block: FormattingBlock) {
         if (block.getIndent() === FormattingIndent.INDENT) {
             this.indentLevel++;
-            console.log("entering:", this.indentLevel);
         }
         for (const child of block.getChildren()) {
             this.formatChild(child, block);
@@ -42,7 +41,6 @@ export abstract class SimpleLayoutFormattingEngine extends FormattingEngineBase 
 
         if (block.getIndent() === FormattingIndent.INDENT) {
             this.indentLevel--;
-            console.log("exiting:", this.indentLevel);
         }
     }
 
@@ -58,7 +56,7 @@ export abstract class SimpleLayoutFormattingEngine extends FormattingEngineBase 
             this.text += child.getText();
             this.lastToken = child.getToken();
             this.hasNewlineAtPos = false;
-            console.log("text:", child.getText());
+            this.hasIndentAtPos = false;
         } else if (child instanceof FormattingSourceWhitespace) {
             this.lastToken = child.getWhitespaceToken();
             if (this.hasIndentAtPos) {
@@ -80,22 +78,8 @@ export abstract class SimpleLayoutFormattingEngine extends FormattingEngineBase 
         }
     }
 
-    private formatIndentWhitespace(whitespace: FormattingSourceWhitespace, parent: FormattingBlock) {
-        const size = this.manager.getIndentationSize();
-
-        switch (parent.getIndent()) {
-            case FormattingIndent.ALIGN_TO_FIRST:
-                this.text += IndentUtils.makeIndentString(Math.max(this.indentLevel, Math.floor(whitespace.getLength() / size)) * size);
-                break;
-            default:
-                this.text += IndentUtils.makeIndentString(this.indentLevel * size);
-                break;
-        }
-    }
-
     private indent(parent: FormattingBlock) {
         this.text += IndentUtils.makeIndentString(this.indentLevel * this.manager.getIndentationSize());
-        console.log("indenting:", this.indentLevel);
         this.hasIndentAtPos = false;
     }
 }

@@ -22,9 +22,9 @@ export abstract class CodeStyleManager {
 
     public abstract getNewlineTokenGroup(): TokenType[];
 
-    public abstract getSpacingFormatter(): SpacingFormatter;
+    public abstract getSpacingFormatter(): SpacingFormatter | null;
 
-    public abstract getFormattingBlockVisitor(): FormattingBlockVisitor;
+    public abstract getFormattingBlockVisitor(): FormattingBlockVisitor | null;
 
-    public abstract getFormattingEngine(): FormattingEngineBase;
+    public abstract getFormattingEngine(): FormattingEngineBase | null;
 }

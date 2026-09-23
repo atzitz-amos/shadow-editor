@@ -1,4 +1,5 @@
 import {UIComponent} from "../../../core/ui/engine/components/UIComponent";
+import {SettingsPaneGroup} from "./SettingsPaneGroup";
 
 /**
  *
@@ -9,7 +10,7 @@ import {UIComponent} from "../../../core/ui/engine/components/UIComponent";
 export abstract class SettingsPaneBase {
     abstract getName(): string;
 
-    abstract getParentPane(): SettingsPaneBase | null;
+    abstract getParentGroup(): SettingsPaneGroup | null;
 
     abstract getPaneContent(): UIComponent;
 }

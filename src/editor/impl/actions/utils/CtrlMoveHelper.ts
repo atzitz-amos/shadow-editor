@@ -1,7 +1,7 @@
 import {Document} from "../../../core/document/Document";
 
 export class CtrlMoveHelper {
-    public static readonly DELIMITER = /[\s.,;:!?(){}\[\]<>/*-+%&]/;
+    public static readonly DELIMITER = /[\s.,;:!?(){}\[\]<>/*-+%&="']/;
 
     public static getOffsetToPreviousWord(doc: Document, pos: number, delimiter: RegExp): number {
         if (pos <= 0) return 0;

@@ -9,15 +9,18 @@ import {DirectoryCreatedEvent} from "../../../project/events/DirectoryCreatedEve
 import {GlobalState} from "../../../global/GlobalState";
 import {ProjectFile} from "../../../project/filesystem/tree/ProjectFile";
 import {ContextMenu, ContextMenuElement} from "../menu/impl/ContextMenu";
+import {ContextResolver} from "../../../keybinds/context/ContextResolver";
+import {CommonDataKeys} from "../../../keybinds/context/data/CommonDataKeys";
 import {EntryRenamedEvent} from "../../../project/events/EntryRenamedEvent";
 import {EntryDeletedEvent} from "../../../project/events/EntryDeletedEvent";
 
 type FileSystemTreeOptions = {
     comparer?: (a: FileSystemEntry, b: FileSystemEntry) => number;
+    onKeydown?: (event: KeyboardEvent, entry: FileSystemEntry) => void;
     onEntrySelect?: (file: FileSystemEntry) => void;
     onFileOpened?: (file: ProjectFile) => void;
 
-    contextMenu?: ContextMenu<FileSystemEntry>;
+    contextMenu?: ContextMenu;
 }
 
 const defaultCompare = (a: FileSystemEntry, b: FileSystemEntry): number => {
@@ -68,7 +71,7 @@ export class FileSystemTree extends UIComponentMixin(Focusable) {
 
         // Root starts expanded so there's something to look at.
         await this.expand(this.rootRecord);
-        this.select(this.rootRecord);
+        this.selectRecord(this.rootRecord);
 
         this.subscribeToFsEvents();
     }
@@ -90,6 +93,23 @@ export class FileSystemTree extends UIComponentMixin(Focusable) {
         }
     }
 
+    public isExpanded(directory: ProjectDirectory): boolean {
+        const record = this.records.get(directory.getId());
+        return record ? this.expandedRecords.has(record) : false;
+    }
+
+    public setExpanded(directory: ProjectDirectory): void {
+        const record = this.records.get(directory.getId());
+        if (!record || this.expandedRecords.has(record)) return;
+
+        void this.expand(record);
+    }
+
+    public select(entry: FileSystemEntry): void {
+        const record = this.records.get(entry.getId());
+        if (record) this.selectRecord(record);
+    }
+
     // ---- row construction ----------------------------------------------
     // Built once with createElement, never rebuilt via innerHTML -- every
     // later mutation (insert/delete/rename/expand) patches this exact DOM.
@@ -102,9 +122,18 @@ export class FileSystemTree extends UIComponentMixin(Focusable) {
         this.options.onEntrySelect = handler;
     }
 
-    setContextMenu(contextMenu: ContextMenu<FileSystemEntry>) {
+    setContextMenu(contextMenu: ContextMenu) {
         this.options.contextMenu = contextMenu;
     }
+
+    setKeydownHandler(callback: (event: KeyboardEvent, entry: FileSystemEntry) => void) {
+        this.options.onKeydown = callback;
+    }
+
+    // ---- expand / collapse ---------------------------------------------
+    // Collapsing is a pure CSS toggle (children stay in the DOM, just
+    // hidden) -- it never discards state. Expanding fetches children
+    // exactly once per folder, on first open.
 
     private subscribeToFsEvents(): void {
         this.eventBus.subscribe(this, FileCreatedEvent.SUBSCRIBER, (e) => this.handleEntryCreated(e.getEntry()));
@@ -112,11 +141,6 @@ export class FileSystemTree extends UIComponentMixin(Focusable) {
         this.eventBus.subscribe(this, EntryDeletedEvent.SUBSCRIBER, (e) => this.handleEntryDeleted(e.getEntry()));
         this.eventBus.subscribe(this, EntryRenamedEvent.SUBSCRIBER, (e) => this.handleEntryRenamed(e.getEntry()));
     }
-
-    // ---- expand / collapse ---------------------------------------------
-    // Collapsing is a pure CSS toggle (children stay in the DOM, just
-    // hidden) -- it never discards state. Expanding fetches children
-    // exactly once per folder, on first open.
 
     private buildRecord(entry: FileSystemEntry): NodeRecord {
         const isDir = entry.isDirectory();
@@ -157,15 +181,26 @@ export class FileSystemTree extends UIComponentMixin(Focusable) {
         li.appendChild(row);
 
         const record: NodeRecord = {entry, li, row, label};
+        ContextResolver.register(row, {
+            provide: key => key === CommonDataKeys.PROJECT_ENTRY
+                ? entry
+                : key === CommonDataKeys.PROJECT_FILE && entry.isFile()
+                    ? entry
+                    : key === CommonDataKeys.PROJECT_FILES && entry.isFile()
+                        ? [entry]
+                        : key === CommonDataKeys.FILES_TREE
+                            ? this
+                            : undefined
+        });
 
         row.addEventListener("click", (e) => {
             e.stopPropagation();
-            this.select(record);
+            this.selectRecord(record);
         })
 
         row.addEventListener("dblclick", (e) => {
             e.stopPropagation();
-            this.select(record);
+            this.selectRecord(record);
             if (record.entry.isDirectory()) {
                 void this.toggle(record);
             } else {
@@ -173,19 +208,34 @@ export class FileSystemTree extends UIComponentMixin(Focusable) {
             }
         });
         row.addEventListener("keydown", (e) => {
-            if (e.key !== "Enter" && e.key !== " ") return;
-            e.preventDefault();
-            this.select(record);
-            if (record.entry.isDirectory()) void this.toggle(record);
-            else this.options.onFileOpened?.(record.entry as ProjectFile);
+            if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                this.selectRecord(record);
+                if (record.entry.isDirectory()) void this.toggle(record);
+                else this.options.onFileOpened?.(record.entry as ProjectFile);
+            } else if (e.key === "ArrowUp") {
+                e.preventDefault();
+                this.selectRelative(record, -1);
+            } else if (e.key === "ArrowDown") {
+                e.preventDefault();
+                this.selectRelative(record, 1);
+            } else if (e.key === "ArrowLeft") {
+                e.preventDefault();
+                this.selectLeftBehavior(record);
+            } else if (e.key === "ArrowRight") {
+                e.preventDefault();
+                void this.selectRightBehavior(record);
+            } else {
+                this.options.onKeydown?.(e, record.entry);
+            }
         });
 
         row.addEventListener("contextmenu", (e) => {
             e.preventDefault();
-            this.select(record);
+            this.selectRecord(record);
 
             if (this.options.contextMenu)
-                ContextMenuElement.open(e.x, e.y, record.entry, this.options.contextMenu)
+                ContextMenuElement.open(e.x, e.y, this.options.contextMenu, e)
         })
 
         this.records.set(entry.getId(), record);
@@ -240,6 +290,12 @@ export class FileSystemTree extends UIComponentMixin(Focusable) {
         record.li.setAttribute("aria-expanded", "true");
     }
 
+    // ---- fs event handlers -----------------------------------------
+    // Each of these only ever touches a folder's DOM if that folder has
+    // already been expanded at least once (`childRecords` set) -- an
+    // unexpanded folder is left alone entirely, so a background change can
+    // never force it open. None of this ever touches `expandedRecords`.
+
     private showLoadingRow(childList: HTMLUListElement): void {
         const li = document.createElement("li");
         li.className = "tree-loading";
@@ -249,18 +305,83 @@ export class FileSystemTree extends UIComponentMixin(Focusable) {
         childList.appendChild(li);
     }
 
-    // ---- fs event handlers -----------------------------------------
-    // Each of these only ever touches a folder's DOM if that folder has
-    // already been expanded at least once (`childRecords` set) -- an
-    // unexpanded folder is left alone entirely, so a background change can
-    // never force it open. None of this ever touches `expandedRecords`.
-
-    private select(record: NodeRecord): void {
+    private selectRecord(record: NodeRecord): void {
         this.selectedRecord?.row.classList.remove("selected");
         this.selectedRecord = record;
         record.row.classList.add("selected");
+        record.row.focus();
 
         this.options.onEntrySelect?.(record.entry);
+    }
+
+    private flattenVisibleRecords(): NodeRecord[] {
+        const result: NodeRecord[] = [];
+
+        const visit = (record: NodeRecord) => {
+            result.push(record);
+            if (record.entry.isDirectory() && this.expandedRecords.has(record) && record.childRecords?.length) {
+                for (const child of record.childRecords) visit(child);
+            }
+        };
+
+        visit(this.rootRecord);
+        return result;
+    }
+
+    private selectRelative(record: NodeRecord, delta: number): void {
+        const visible = this.flattenVisibleRecords();
+        const current = visible.indexOf(record);
+        if (current === -1) return;
+
+        const target = current + delta;
+        if (target < 0 || target >= visible.length) return;
+
+        this.selectRecord(visible[target]);
+    }
+
+    private selectLeftBehavior(record: NodeRecord): void {
+        if (record.entry.isDirectory() && this.expandedRecords.has(record)) {
+            this.collapse(record);
+            return;
+        }
+
+        this.selectRelative(record, -1);
+    }
+
+    private async selectRightBehavior(record: NodeRecord): Promise<void> {
+        if (record.entry.isDirectory()) {
+            if (!this.expandedRecords.has(record)) {
+                await this.expand(record);
+                return;
+            }
+
+            if (record.childRecords && record.childRecords.length > 0) {
+                this.selectRecord(record.childRecords[0]);
+                return;
+            }
+        }
+
+        let current: NodeRecord | undefined = record;
+
+        while (current) {
+            const parent = current.entry.getParent();
+            if (!parent) return;
+
+            const parentRecord = this.records.get(parent.getId());
+            const siblings = parentRecord?.childRecords;
+            if (!siblings || siblings.length === 0) return;
+
+            const index = siblings.indexOf(current);
+            if (index === -1) return;
+
+            const nextSibling = siblings[index + 1];
+            if (nextSibling) {
+                this.selectRecord(nextSibling);
+                return;
+            }
+
+            current = parentRecord;
+        }
     }
 
     private handleEntryCreated(entry: FileSystemEntry): void {

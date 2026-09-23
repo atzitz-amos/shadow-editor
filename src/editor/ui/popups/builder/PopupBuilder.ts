@@ -1,5 +1,5 @@
 import {Editor} from "../../../Editor";
-import {EditorPopup} from "../EditorPopup";
+import {EditorInlinePopup} from "../EditorInlinePopup";
 
 /**
  *
@@ -8,5 +8,5 @@ import {EditorPopup} from "../EditorPopup";
  * @since 1.0.0
  */
 export interface PopupBuilder {
-    build(editor: Editor): EditorPopup;
+    build(editor: Editor): EditorInlinePopup;
 }

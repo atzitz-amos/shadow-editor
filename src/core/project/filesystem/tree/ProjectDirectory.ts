@@ -12,8 +12,13 @@ import {VNode} from "../metadata/VNode";
  * @since 1.0.0
  */
 export class ProjectDirectory implements FileSystemEntry {
+
     public constructor(private fs: FileSystem, private readonly vNode: VNode) {
 
+    }
+
+    delete(): void {
+        this.fs.deleteEntry(this);
     }
 
     createDir(name: string): ProjectDirectory {

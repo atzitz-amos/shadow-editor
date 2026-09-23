@@ -14,6 +14,7 @@ import {GlobalState} from "../../../core/global/GlobalState";
 import {SynEditorTreeChangedEvent} from "../../../editor/core/lang/events/SynEditorTreeChangedEvent";
 import {SynDocumentManager} from "../../syntax/manager/SynDocumentManager";
 import {SynDocument} from "../../syntax/api/document/SynDocument";
+import {LanguageParserDefinition} from "../../definitions/LanguageParserDefinition";
 
 /**
  *
@@ -41,7 +42,7 @@ export class CodeAnalysisService {
     }
 
     restart() {
-        if (!this.editor.getCurrentLanguage()) return;
+        if (!this.editor.getCurrentLanguage() || !LanguageParserDefinition.has(this.editor.getCurrentLanguage())) return;
         const synDocument = SynDocumentManager.getOpenedSynDocument(this.editor);
         this.invokePasses(synDocument);
     }

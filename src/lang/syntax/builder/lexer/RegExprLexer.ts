@@ -27,6 +27,7 @@ export class RegExpLexer {
     }
 
     public static _validate(tt: TokenType): TokenType {
+        if (!tt.matcher) throw new Error(`TokenType ${tt.debugName} has no matcher defined.`);
         if (!tt.matcher.source.startsWith('^')) {
             tt.matcher = new RegExp('^(' + tt.matcher.source + ')', tt.matcher.flags);
         }
@@ -53,6 +54,7 @@ export class RegExpLexer {
             return new Token(TokenType.EOF, '', new TextRange(source.index, source.index));
         }
         for (const tt of this.tokenTypes) {
+            if (!tt.matcher) throw new Error(`TokenType ${tt.debugName} has no matcher defined.`);
             const match = tt.matcher.exec(source.getRemaining());
             if (match) {
                 source.jump(match[0].length);

@@ -4,7 +4,7 @@
  */
 
 import {LanguageBase} from "./LanguageBase";
-import {FileTypeHandler} from "./FileTypeHandler";
+import {FileTypeProvider} from "./FileTypeProvider";
 import {ProjectFile} from "../core/project/filesystem/tree/ProjectFile";
 import {InspectionBase} from "./codeAnalysis/inspections/Inspection";
 import {ExtensionPoint} from "../core/plugins/extensionPoints/ExtensionPoint";
@@ -22,7 +22,7 @@ export class LangRegistry {
     private static instance: LangRegistry;
 
     private static readonly languageEP: ExtensionPoint<LanguageBase> = new ExtensionPoint("lang", LanguageBase);
-    private static readonly fileTypeEP: ExtensionPoint<FileTypeHandler> = new ExtensionPoint("lang", FileTypeHandler);
+    private static readonly fileTypeEP: ExtensionPoint<FileTypeProvider> = new ExtensionPoint("lang", FileTypeProvider);
 
     private static readonly smartInsertEP: ExtensionPoint<SmartInlineInsertAction> = new ExtensionPoint("smart", SmartInlineInsertAction);
     private static readonly smartDeleteEP: ExtensionPoint<SmartInlineDeleteAction> = new ExtensionPoint("smart", SmartInlineDeleteAction);
@@ -44,10 +44,10 @@ export class LangRegistry {
         return this.instance;
     }
 
-    static definingPlugin(cls: LanguageBase | FileTypeHandler | InspectionBase): string | undefined {
+    static definingPlugin(cls: LanguageBase | FileTypeProvider | InspectionBase): string | undefined {
         if (cls instanceof LanguageBase) {
             return this.languageEP.definingPlugin(cls)?.getId();
-        } else if (cls instanceof FileTypeHandler) {
+        } else if (cls instanceof FileTypeProvider) {
             return this.fileTypeEP.definingPlugin(cls)?.getId();
         }
     }
@@ -99,12 +99,12 @@ export class LangRegistry {
         return LangRegistry.tokenHoverEP.getAll().filter(action => action.getApplicableLanguages().includes(language));
     }
 
-    getAllFileTypeHandlers(): FileTypeHandler[] {
+    getAllFileTypeHandlers(): FileTypeProvider[] {
         return LangRegistry.fileTypeEP.getAll();
     }
 
-    getFileTypeHandler(file: ProjectFile): FileTypeHandler | null {
-        let bestHandler: FileTypeHandler | null = null;
+    getFileTypeHandler(file: ProjectFile): FileTypeProvider | null {
+        let bestHandler: FileTypeProvider | null = null;
         let bestSupportLevel = 0;
         for (const handler of this.getAllFileTypeHandlers()) {
             let supportLevel = handler.getSupportLevel(file);

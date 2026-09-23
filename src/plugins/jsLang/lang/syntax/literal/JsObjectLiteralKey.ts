@@ -2,6 +2,7 @@ import {SynASTElementImpl} from "../../../../../lang/syntax/impl/tree/SynASTElem
 import {ASTNode} from "../../../../../lang/syntax/builder/parser/nodes/ASTNode";
 import {SynNodeVisitor} from "../../../../../lang/syntax/visitors/SynNodeVisitor";
 import {JsSynVisitor} from "../visitors/JsSynVisitor";
+import {JsObjectLiteralValue} from "./JsObjectLiteralValue";
 
 /**
  *
@@ -19,5 +20,13 @@ export class JsObjectLiteralKey extends SynASTElementImpl {
             visitor.visitObjectLiteralKey(this);
         }
         super.accept(visitor);
+    }
+
+    getValue() {
+        const next = this.nextSibling();
+        if (next && next instanceof JsObjectLiteralValue) {
+            return next;
+        }
+        return null;
     }
 }

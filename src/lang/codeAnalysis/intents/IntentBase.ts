@@ -1,6 +1,5 @@
 import {LanguageBase} from "../../LanguageBase";
-import {SynNodeVisitor} from "../../syntax/visitors/SynNodeVisitor";
-import {IntentsHolder} from "./holder/IntentsHolder";
+import {SynNode} from "../../syntax/api/SynNode";
 
 /**
  *
@@ -13,7 +12,11 @@ export abstract class IntentBase {
 
     abstract getApplicableLanguage(): LanguageBase[];
 
+    abstract getTargetTypes(): Class<SynNode>[];
+
     abstract getId(): string;
 
-    abstract buildVisitor(holder: IntentsHolder): SynNodeVisitor;
+    abstract isApplicable(node: SynNode): boolean;
+
+    abstract execute(node: SynNode): void;
 }

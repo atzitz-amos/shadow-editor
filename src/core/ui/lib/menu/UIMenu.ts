@@ -2,6 +2,9 @@ import {UIMenuElement} from "./elements/UIMenuElement";
 import {UIMenuAction} from "./elements/UIMenuAction";
 import {Icon} from "../../icons/Icon";
 import {Keybind} from "../../../keybinds/Keybind";
+import {ActionGroup} from "../../../actions/group/ActionGroup";
+import {AbstractAction} from "../../../actions/AbstractAction";
+import {KeybindContext} from "../../../keybinds/context/KeybindContext";
 
 /**
  *
@@ -18,8 +21,24 @@ export abstract class UIMenu {
         return this;
     }
 
-    addAction(label: string, action: () => void, icon: Icon | null = null, shortcut: Keybind | null = null): this {
+    addAction(label: string, action: ((context?: KeybindContext | null) => void) | AbstractAction, icon: Icon | null = null, shortcut: Keybind | null = null): this {
         return this.addMenuElement(new UIMenuAction(label, icon, action, shortcut));
+    }
+
+    setGroup(group: ActionGroup | string): this {
+        if (typeof group === "string") {
+            const id = group;
+            group = ActionGroup.getInstance(group) as ActionGroup;
+            if (!group) throw new Error(`Action group with id '${id}' not found`);
+        }
+        for (const action of group.getActions()) {
+            this.addAction(action.getName(), action, null, action.getDefaultKeybinding());
+        }
+        return this;
+    }
+
+    getContext(): KeybindContext | null {
+        return null;
     }
 
     getElements(): UIMenuElement[] {

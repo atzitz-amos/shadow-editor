@@ -147,4 +147,13 @@ export class HTMLUtils {
         div.innerHTML = content;
         return div;
     }
+
+    static sanitize(text: string) {
+        return text
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#39;');
+    }
 }

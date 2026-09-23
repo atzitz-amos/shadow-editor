@@ -47,6 +47,7 @@ import {JsObjectLiteralKey} from "../syntax/literal/JsObjectLiteralKey";
 import {JsObjectLiteralValue} from "../syntax/literal/JsObjectLiteralValue";
 import {JsObjectLiteralPropertyShorthand} from "../syntax/literal/JsObjectLiteralPropertyShorthand";
 import {JsExprStatement} from "../syntax/statements/JsExprStatement";
+import {JsClassBody} from "../syntax/objects/JsClassBody";
 
 export class JsGrammar {
     public static readonly CodeBlock = ASTGrammar.createCodeBlock("CodeBlock", JsCodeBlock.builder());
@@ -80,7 +81,7 @@ export class JsGrammar {
     public static readonly FunctionArguments = ASTGrammar.create("FunctionArguments", JsFunctionParameters.builder());
     public static readonly FunctionArgument = ASTGrammar.create("FunctionArgument", JsFunctionParameter.builder());
     public static readonly ClassDeclaration = ASTGrammar.create("ClassDeclaration", JsClassDeclaration.builder());
-    public static readonly ClassBody = ASTGrammar.createCodeBlock("ClassBody", JsCodeBlock.builder());
+    public static readonly ClassBody = ASTGrammar.create("ClassBody", JsClassBody.builder());
     public static readonly ClassMethodDeclaration = ASTGrammar.create("ClassMethod", JsClassMethod.builder());
     public static readonly ClassField = ASTGrammar.create("ClassField", JsClassField.builder());
 

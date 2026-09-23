@@ -5,6 +5,7 @@ import {ProblemsHolder} from "../problems/ProblemsHolder";
 import {InspectionBase} from "../Inspection";
 import {InlineInspection} from "../../../../editor/ui/inline/inspection/InlineInspection";
 import {SynDocument} from "../../../syntax/api/document/SynDocument";
+import {HTMLUtils} from "../../../../editor/utils/HTMLUtils";
 
 /**
  *
@@ -40,7 +41,7 @@ export class InspectionsCodeAnalysisPass implements CodeAnalysisPass<ProblemsHol
             editor.getWidgetManager().addOverlayWidget(new InlineInspection(
                 problem.getRange(),
                 problem.getInspection().getSeverity(),
-                problem.getDescription()
+                HTMLUtils.sanitize(problem.getDescription())
             ));
         }
 
@@ -50,5 +51,4 @@ export class InspectionsCodeAnalysisPass implements CodeAnalysisPass<ProblemsHol
     runOnlyOnVisibleNodes(): boolean {
         return false;
     }
-
 }

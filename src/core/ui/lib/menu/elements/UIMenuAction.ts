@@ -4,6 +4,8 @@ import {HTMLUtils} from "../../../../../editor/utils/HTMLUtils";
 import {ShortcutBadge} from "../../keybind/ShortcutBadge";
 import {UIMenuElement} from "./UIMenuElement";
 import {UIMenu} from "../UIMenu";
+import {AbstractAction} from "../../../../actions/AbstractAction";
+import {KeybindContext} from "../../../../keybinds/context/KeybindContext";
 
 /**
  *
@@ -14,7 +16,7 @@ import {UIMenu} from "../UIMenu";
 export class UIMenuAction extends UIMenuElement {
     public constructor(private readonly label: string,
                        private readonly icon: Icon | null = null,
-                       private readonly action: () => void,
+                       private readonly action: ((context?: KeybindContext | null) => void) | AbstractAction,
                        private readonly shortcut: Keybind | null = null) {
         super(HTMLUtils.createElement("button.ui-menu-action"));
     }
@@ -39,8 +41,19 @@ export class UIMenuAction extends UIMenuElement {
         super.init(menu);
     }
 
+    isApplicable(): boolean {
+        const context = this.menu.getContext();
+        return !(this.action instanceof AbstractAction) || (context !== null && this.action.isApplicable(context));
+    }
+
     invoke() {
-        this.action();
+        const context = this.menu.getContext();
+        if (this.action instanceof AbstractAction) {
+            if (!context || !this.action.isApplicable(context)) return;
+            this.action.run(context);
+        } else {
+            this.action(context);
+        }
         this.menu.close();
     }
 }

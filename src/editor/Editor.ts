@@ -26,7 +26,8 @@ import {
     MouseReleasedEvent
 } from "./impl/events/PhysicalEvents";
 import {InlayWidget} from "./ui/inline/widget/inlay/InlayWidget";
-import {KeybindContext} from "../core/keybinds/context/KeybindContext";
+import {ContextResolver} from "../core/keybinds/context/ContextResolver";
+import {CommonDataKeys} from "../core/keybinds/context/data/CommonDataKeys";
 import {GlobalState} from "../core/global/GlobalState";
 import {Scheduler} from "../core/scheduler/Scheduler";
 import {BehaviorManager} from "./core/behaviors/manager/BehaviorManager";
@@ -92,6 +93,13 @@ export class Editor {
 
     attach(element: HTMLElement) {
         this.root = HTMLUtils.createElement('div.editor', element) as HTMLDivElement;
+        ContextResolver.register(this.root, {
+            provide: key => {
+                if (key === CommonDataKeys.EDITOR) return this;
+                if (key === CommonDataKeys.TEXT_AREA) return true;
+                return undefined;
+            }
+        });
 
         Scheduler.defer(() => {
             this.view.onAttached(this.root);
@@ -366,7 +374,7 @@ export class Editor {
     onKeyDown(event: KeyboardEvent) {
         ModifierKeyHolder.getInstance().set(event);
 
-        KeybindManager.getInstance().onKeydown(KeybindContext.fromEditor(this, event));
+        KeybindManager.getInstance().onKeydown(ContextResolver.fromEvent(event));
         this.eventBus.syncPublish(new KeyPressedEvent(this, event));
     }
 
@@ -376,7 +384,7 @@ export class Editor {
         this.caretModel.removeAll();
         this.moveCaretToMouseEvent(event);
 
-        KeybindManager.getInstance().onMousedown(KeybindContext.fromEditor(this, event));
+        KeybindManager.getInstance().onMousedown(ContextResolver.fromEvent(event));
         this.eventBus.syncPublish(new MousePressedEvent(this, event));
     }
 

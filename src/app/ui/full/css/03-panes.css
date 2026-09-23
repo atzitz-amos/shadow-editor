@@ -23,7 +23,7 @@
 
 .overline {
     font-size: 10px;
-    letter-spacing: 0.18em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
     color: #888fa1;
 }
@@ -391,7 +391,7 @@
 }
 
 .tree-item-header:hover, .tree-item-file-header:hover {
-    background: #ffffff08;
+    background: #4999ff12;
 }
 
 .tree-item-children {
@@ -416,7 +416,7 @@
 
 .tree-item-file-header.selected, .tree-item-header.selected {
     border-radius: 3px;
-    background: #00caff17;
+    background: #6793ff33;
 }
 
 /* ---- caret ------------------------------------------------------- */
@@ -492,3 +492,12 @@
     background: #1d1318;
 }
 
+
+.new-entry-type-chooser-title {
+    margin-bottom: 5px;
+    display: flex;
+    padding: 0px 5px 5px;
+    justify-content: center;
+    color: #9ba2ae;
+    border-bottom: 1px solid var(--editor-dialog-border-color);
+}

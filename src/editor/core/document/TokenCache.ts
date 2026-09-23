@@ -21,7 +21,7 @@ export class TokenCache {
     findPreviousWhitespaceToken(pos: Offset): Offset {
         const idx = this.findIndexContainingOrBefore(pos);
         for (let i = idx - 1; i >= 0; i--) {
-            if (this.tokens[i].getType().shouldSkip) return this.tokens[i].getRange().end;
+            if (this.tokens[i].getType().shouldSkip && !this.tokens[i].isType(TokenType.UNEXPECTED)) return this.tokens[i].getRange().end;
         }
         return 0;
     }

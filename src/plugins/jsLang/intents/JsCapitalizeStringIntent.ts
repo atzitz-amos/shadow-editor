@@ -1,8 +1,8 @@
-import {IntentsHolder} from "../../../lang/codeAnalysis/intents/holder/IntentsHolder";
 import {IntentBase} from "../../../lang/codeAnalysis/intents/IntentBase";
 import {LanguageBase} from "../../../lang/LanguageBase";
-import {SynNodeVisitor} from "../../../lang/syntax/visitors/SynNodeVisitor";
 import JsLang from "../lang/JsLang";
+import {JsStringLiteral} from "../lang/syntax/literal/JsStringLiteral";
+import {SynNode} from "../../../lang/syntax/api/SynNode";
 
 /**
  *
@@ -11,6 +11,17 @@ import JsLang from "../lang/JsLang";
  * @since 1.0.0
  */
 export default class JsCapitalizeStringIntent extends IntentBase {
+    isApplicable(node: SynNode): boolean {
+        return true;
+    }
+
+    execute(node: SynNode): void {
+        if (node instanceof JsStringLiteral) {
+            const value = node.getValue();
+            console.log(value);
+        }
+    }
+
     getDescription(): string {
         return "Capitalize string literals";
     }
@@ -23,19 +34,7 @@ export default class JsCapitalizeStringIntent extends IntentBase {
         return "js.capitalizeString";
     }
 
-    buildVisitor(holder: IntentsHolder): SynNodeVisitor {
-        const intent = this;
-
-        return new class extends SynNodeVisitor {
-            visitStringLiteral(node: any): void {
-                const value = node.getValue();
-                if (value && value.length > 0) {
-                    const capitalized = value.charAt(0).toUpperCase() + value.slice(1);
-                    holder.addIntent(node, intent, () => {
-                    });
-                }
-            }
-        }();
+    getTargetTypes(): Class<SynNode>[] {
+        return [JsStringLiteral];
     }
-
 }

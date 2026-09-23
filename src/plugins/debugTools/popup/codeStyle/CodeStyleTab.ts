@@ -70,6 +70,7 @@ export class CodeStyleTab extends DebugToolTab {
     }
 
     dispose() {
+        this.setSelected(false);
         GlobalState.getMainEventBus().unsubscribe(this, CaretMovedEvent.SUBSCRIBER);
         GlobalState.getMainEventBus().unsubscribe(this, EditorLanguageChanged.SUBSCRIBER);
     }
@@ -145,14 +146,14 @@ export class CodeStyleTab extends DebugToolTab {
             (<HTMLElement>this.element!.querySelector(".file-info .scramble-btn")).style.display = "none";
         }
 
-        if (!formatter) {
+        if (!formatter || !formatter.getSpacingFormatter() || !formatter.getFormattingBlockVisitor()) {
             this.element!.classList.add("no-formatter");
             return;
         } else {
             this.element!.classList.remove("no-formatter");
         }
 
-        this.updateSpacingRules(editor, formatter.getSpacingFormatter(), this.element!.querySelector(".main-info .spacing-rules-info > div")!);
+        this.updateSpacingRules(editor, formatter.getSpacingFormatter()!, this.element!.querySelector(".main-info .spacing-rules-info > div")!);
         this.updateFormattingBlocks(editor, formatter, this.element!.querySelector(".main-info .formatting-blocks-info > div")!);
     }
 
@@ -256,7 +257,7 @@ export class CodeStyleTab extends DebugToolTab {
     }
 
     private updateFormattingBlocks(editor: Editor, manager: CodeStyleManager, element: Element) {
-        const visitor = manager.getFormattingBlockVisitor();
+        const visitor = manager.getFormattingBlockVisitor()!;
         const block = visitor.format(SynDocumentManager.getOpenedSynDocument(editor).getTree(), editor.getOpenedDocument().getTokenCache().createTokenStream());
 
         element.innerHTML = "";

@@ -11,6 +11,8 @@ import {JsCodeBlock} from "../../lang/syntax/JsCodeBlock";
 import {FormattingBlockVisitor} from "../../../../lang/codeStyle/formatter/builder/FormattingBlockVisitor";
 import {TokenStream} from "../../../../lang/syntax/builder/tokens/TokenStream";
 import {SynCodeBlock} from "../../../../lang/syntax/api/SynCodeBlock";
+import {JsObjectLiteral} from "../../lang/syntax/literal/JsObjectLiteral";
+import {JsClassBody} from "../../lang/syntax/objects/JsClassBody";
 
 /**
  *
@@ -36,7 +38,6 @@ export class JsFormattingBlockVisitor extends JsSynVisitor implements Formatting
     visitTree(tree: SynTree) {
         this.visitNode(tree);
     }
-
 
     visitNode(node: SynNode) {
         if (node instanceof AbstractSynParentElement && !this.builder.wasHandled(node)) {
@@ -68,7 +69,6 @@ export class JsFormattingBlockVisitor extends JsSynVisitor implements Formatting
             block.setIndent(FormattingIndent.INDENT);
 
             for (const statement of node.getStatements()) {
-                console.log(statement);
                 this.builder.visit(statement);
 
                 const semicolon = node.getSemicolon(statement);
@@ -78,5 +78,48 @@ export class JsFormattingBlockVisitor extends JsSynVisitor implements Formatting
             }
         });
         if (node.getClosingBrace()) this.builder.advancePast(node.getClosingBrace()!);
+    }
+
+    visitObjectLiteral(element: JsObjectLiteral) {
+        this.builder.advancePast(element.getOpeningBrace());
+        this.builder.with(FormattingBlock.regular(), block => {
+            block.setExpanded(this.builder.isBeforeNewline());
+            block.keepBlankLines();
+            this.builder.break(FormattingBreak.ifParentExpanded(""));
+            block.setIndent(FormattingIndent.INDENT);
+
+            for (const [key, value] of element.getProperties()) {
+                this.builder.with(FormattingBlock.regular(), () => {
+                    this.builder.visit(key);
+                    if (value) this.builder.visit(value);
+                });
+
+                const comma = element.getComma(key);
+                if (comma) this.builder.advancePast(comma);
+
+                this.builder.break(FormattingBreak.ifParentExpanded(" "));
+            }
+        });
+        this.builder.advancePast(element.getClosingBrace());
+    }
+
+    visitClassBody(element: JsClassBody) {
+        this.builder.advancePast(element.getOpeningBrace()!);
+        this.builder.with(FormattingBlock.alwaysExpandingBlock(), block => {
+            block.keepBlankLines();
+            this.builder.break(FormattingBreak.forced());
+            block.setIndent(FormattingIndent.INDENT);
+
+            const members = element.getMembers();
+            for (let i = 0; i < members.length; i++) {
+                const member = members[i];
+                this.builder.visit(member);
+                this.builder.break(FormattingBreak.forced());
+                if (i !== members.length - 1) {
+                    this.builder.break(FormattingBreak.forced());
+                }
+            }
+        });
+        this.builder.advancePast(element.getClosingBrace()!);
     }
 }

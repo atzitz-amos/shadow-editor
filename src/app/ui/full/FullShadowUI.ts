@@ -8,7 +8,7 @@ import {GlobalState} from "../../../core/global/GlobalState";
 import {UIResizeEvent} from "../../core/events/UIResizeEvent";
 import {Editor} from "../../../editor/Editor";
 import {UICommonKeys} from "../../core/UICommonKeys";
-import {IdePopup} from "../../../core/ui/lib/popup/IdePopup";
+import {IdeDialog} from "../../../core/ui/lib/dialog/IdeDialog";
 import {UIHooks} from "../../../core/ui/engine/listeners/hooks/UIHooks";
 import {UICommonHooks} from "../../core/UICommonHooks";
 
@@ -25,8 +25,8 @@ export class FullShadowUI implements ShadowUI {
     private readonly myWorkspace: SEditorWorkspace;
     private readonly myFooter: SFooter;
     private readonly root: HTMLElement;
-    private readonly myPopupLayer: HTMLElement;
-    private activePopup: IdePopup | null = null;
+    private readonly myDialogLayer: HTMLElement;
+    private activeDialog: IdeDialog | null = null;
 
     constructor(root: HTMLElement) {
         this.root = root;
@@ -38,15 +38,15 @@ export class FullShadowUI implements ShadowUI {
         this.myWorkspace = new SEditorWorkspace(mainContent);
         this.myFooter = new SFooter(root);
 
-        this.myPopupLayer = HTMLUtils.createElement("div.ide-popup-layer.no-popup", root);
+        this.myDialogLayer = HTMLUtils.createElement("div.ide-popup-layer.no-popup", root);
 
-        this.myPopupLayer.addEventListener("mousedown", (event) => {
-            if (this.activePopup && !this.activePopup.containsXY(event.x, event.y)) this.cancelPopup();
+        this.myDialogLayer.addEventListener("mousedown", (event) => {
+            if (this.activeDialog && !this.activeDialog.containsXY(event.x, event.y)) this.cancelDialog();
         });
 
-        this.myPopupLayer.addEventListener("keydown", (event) => {
+        this.myDialogLayer.addEventListener("keydown", (event) => {
             if (event.key === "Escape") {
-                this.cancelPopup();
+                this.cancelDialog();
             }
         });
 
@@ -88,40 +88,40 @@ export class FullShadowUI implements ShadowUI {
         });
     }
 
-    showPopup(popup: IdePopup) {
-        if (this.activePopup) {
-            this.activePopup.close(true);
+    showDialog(dialog: IdeDialog) {
+        if (this.activeDialog) {
+            this.activeDialog.close(true);
         }
 
-        this.activePopup = popup;
+        this.activeDialog = dialog;
 
-        this.myPopupLayer.classList.remove("no-popup");
-        if (popup.isTransparent()) {
-            this.myPopupLayer.classList.add("transparent");
+        this.myDialogLayer.classList.remove("no-popup");
+        if (dialog.isTransparent()) {
+            this.myDialogLayer.classList.add("transparent");
         } else {
-            this.myPopupLayer.classList.remove("transparent");
+            this.myDialogLayer.classList.remove("transparent");
         }
 
-        popup.open(this.myPopupLayer);
+        dialog.open(this.myDialogLayer);
 
-        popup.onClose(() => {
-            if (this.activePopup === popup) {
-                this.activePopup = null;
-                this.myPopupLayer.classList.add("no-popup");
+        dialog.onClose(() => {
+            if (this.activeDialog === dialog) {
+                this.activeDialog = null;
+                this.myDialogLayer.classList.add("no-popup");
             }
         });
     }
 
-    cancelPopup() {
-        if (this.activePopup) {
-            this.activePopup.close(true);
-            this.activePopup = null;
+    cancelDialog() {
+        if (this.activeDialog) {
+            this.activeDialog.close(true);
+            this.activeDialog = null;
         }
 
-        this.myPopupLayer.classList.add("no-popup");
+        this.myDialogLayer.classList.add("no-popup");
     }
 
-    getActivePopup(): IdePopup | null {
-        return this.activePopup;
+    getActiveDialog(): IdeDialog | null {
+        return this.activeDialog;
     }
 }

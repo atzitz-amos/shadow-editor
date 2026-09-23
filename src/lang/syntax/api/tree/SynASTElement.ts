@@ -15,4 +15,6 @@ export interface SynASTElement extends SynParentElement {
     findNthElementOfASTType(type: ASTType, n: number): SynParentElement | null;
 
     getScope(): SynScope | null;
+
+    getText(): string;
 }

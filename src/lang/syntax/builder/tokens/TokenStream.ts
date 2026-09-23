@@ -32,6 +32,10 @@ export class Source {
         return this.src[this.index + 1] || null;
     }
 
+    seek2() {
+        return this.src[this.index + 2] || null;
+    }
+
     find(char: string): Offset {
         return this.src.indexOf(char, this.index + 1);
     }
@@ -68,6 +72,10 @@ export class Source {
 
     getRange(start: Offset): TextRange {
         return new TextRange(start, this.getOffset());
+    }
+
+    startsWith(sub: string) {
+        return this.src.startsWith(sub, this.index);
     }
 }
 

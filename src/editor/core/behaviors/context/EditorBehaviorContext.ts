@@ -6,6 +6,8 @@ import {LogicalPosition} from "../../coordinate/LogicalPosition";
 import {VisualPosition} from "../../coordinate/VisualPosition";
 import {Token} from "../../../../lang/syntax/builder/tokens/Token";
 import {LineData} from "../../document/LineData";
+import {SynNode} from "../../../../lang/syntax/api/SynNode";
+import {SynDocumentManager} from "../../../../lang/syntax/manager/SynDocumentManager";
 
 /**
  *
@@ -70,12 +72,38 @@ export class EditorBehaviorContext implements IBehaviorContext {
         return this.leadingChar;
     }
 
+    getLeadingNonWhitespaceChar(): string | null {
+        if (!this.leadingChar) return null;
+        if (this.leadingChar.trim() === "") {
+            const document = this.editor.getOpenedDocument();
+            const offset = this.caret.getOffset();
+            let leadingOffset = offset - 1;
+            while (leadingOffset >= 0) {
+                const char = document.getTextBetween(leadingOffset, leadingOffset + 1);
+                if (char.trim() !== "") {
+                    return char;
+                }
+                leadingOffset--;
+            }
+            return null;
+        }
+        return this.leadingChar;
+    }
+
     getTrailingChar(): string | null {
         return this.trailingChar;
     }
 
     getTokenAtCaret(): Token | null {
         return this.tokenAt;
+    }
+
+    getNodeAt(): SynNode | null {
+        const tree = SynDocumentManager.getOpenedSynDocument(this.editor).getTree();
+        if (this.getCaretOffset() == this.editor.getOpenedDocument().getTotalDocumentLength()) {
+            return tree.getDeepestChildAt(this.getCaretOffset() - 1);
+        }
+        return tree.getDeepestChildAt(this.getCaretOffset());
     }
 
     getLineData(): LineData {

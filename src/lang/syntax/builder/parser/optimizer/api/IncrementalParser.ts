@@ -1,6 +1,7 @@
 import {IncrementalParserOptimizer} from "../impl/IncrementalParserOptimizer";
 import {getAllStatefulFields} from "./Stateful";
 
+
 export const IncrementalParser =
     function <T extends Constructor>(
         target: T,

@@ -1,5 +1,5 @@
 import {Editor} from "../../editor/Editor";
-import {IdePopup} from "../../core/ui/lib/popup/IdePopup";
+import {IdeDialog} from "../../core/ui/lib/dialog/IdeDialog";
 
 /**
  *
@@ -12,9 +12,9 @@ export interface ShadowUI {
 
     getMainEditor(): Editor;
 
-    showPopup(popup: IdePopup): void;
+    showDialog(popup: IdeDialog): void;
 
-    cancelPopup(): void;
+    cancelDialog(): void;
 
-    getActivePopup(): IdePopup | null;
+    getActiveDialog(): IdeDialog | null;
 }

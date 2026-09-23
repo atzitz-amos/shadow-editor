@@ -49,6 +49,7 @@ import {JsObjectLiteralKey} from "../literal/JsObjectLiteralKey";
 import {JsObjectLiteralValue} from "../literal/JsObjectLiteralValue";
 import {JsObjectLiteralPropertyShorthand} from "../literal/JsObjectLiteralPropertyShorthand";
 import {JsExprStatement} from "../statements/JsExprStatement";
+import {JsClassBody} from "../objects/JsClassBody";
 
 /**
  *
@@ -145,6 +146,10 @@ export class JsSynVisitor extends SynNodeVisitor {
     }
 
     visitClass(element: JsClass): void {
+
+    }
+
+    visitClassBody(element: JsClassBody) {
 
     }
 

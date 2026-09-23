@@ -15,8 +15,10 @@
 
         <script crossorigin="anonymous" src="https://kit.fontawesome.com/cb36336f7b.js"></script>
     </head>
+
     <body>
         <div class="editor-c" style="display: flex; flex-direction: row"></div>
+
         <div class="editor-c2"></div>
         <script type="module">
             import {TextRange} from "./src/editor/core/coordinate/range/TextRange";
@@ -55,7 +57,7 @@
             import {SynModificationTree} from "./src/lang/syntax/writer/template/SynModificationTree";
             import {JsSynTemplate} from "./src/plugins/jsLang/lang/template/JsSynTemplate";
             import {SynSuiteWindowRenderer} from "./src/app/testLib/lang/suite/renderer/SynSuiteWindowRenderer";
-            import {PopupUtilsCore} from "./src/core/ui/lib/popup/utils/PopupUtilsCore";
+            import {IdeDialogUtilsCore} from "./src/core/ui/lib/dialog/utils/IdeDialogUtilsCore";
             import {FaIcon} from "./src/core/ui/icons/FaIcon";
             import {ProjectFilesPaneHelper} from "./src/app/ui/full/panes/projectFiles/ProjectFilesPaneHelper";
             import {ActiveProjectHelper} from "./src/core/global/ActiveProjectHelper";
@@ -69,20 +71,20 @@
             import {EditorHighlighterUtils} from "./src/editor/ui/highlighter/overlay/EditorHighlighterUtils";
             import {TextAttributeKey} from "./src/editor/ui/highlighter/style/TextAttributeKey";
             import {TextBackground} from "./src/editor/ui/highlighter/style/TextBackground";
-            import {ActionPopup} from "./src/core/ui/lib/popup/action/ActionPopup";
+            import {ActionPopup} from "./src/core/ui/lib/dialog/action/ActionPopup";
             import {DebugToolsPopup} from "./src/plugins/debugTools/popup/DebugToolsPopup";
             import {MainEditorChangedEvent} from "./src/app/ui/events/MainEditorChangedEvent";
             import {SynDocumentManager} from "./src/lang/syntax/manager/SynDocumentManager";
             import {LanguageParserDefinition} from "./src/lang/definitions/LanguageParserDefinition";
             import {JsWhitespaceScrambler} from "./src/plugins/debugTools/popup/codeStyle/JsWhitespaceScrambler";
-            import {FormattingBlockBuilder} from "./src/lang/codeStyle/formatter/builder/FormattingBlockBuilder";
             import {JsCodeStyleManager} from "./src/plugins/jsLang/codeStyle/JsCodeStyleManager";
-            import {AbstractSynParentElement} from "./src/lang/syntax/impl/tree/AbstractSynParentElement";
-            import {FormattingBreak} from "./src/lang/codeStyle/formatter/nodes/FormattingBreak";
-            import {FormattingBlock} from "./src/lang/codeStyle/formatter/nodes/FormattingBlock";
             import {QuickParseUtils} from "./src/lang/syntax/utils/QuickParseUtils";
+            import {SettingsDialog} from "./src/app/ui/full/settings/dialog/SettingsDialog";
+            import HTMLLangPlugin from "./src/plugins/htmlLang/HTMLLangPlugin";
 
             window.QuickParseUtils = QuickParseUtils;
+
+            window.SettingsDialog = SettingsDialog;
 
             window.format = () => {
                 const document = getSynDocument();
@@ -136,7 +138,7 @@
             window.FaIcon = FaIcon;
             window.SynASTElementImpl = SynASTElementImpl
             window.SimpleTooltipPopup = SimpleTooltipPopup;
-            window.PopupUtilsCore = PopupUtilsCore;
+            window.IdeDialogUtilsCore = IdeDialogUtilsCore;
             window.SourceRewriter = SourceRewriter;
             window.AbstractSynTemplate = JsSynTemplate;
             window.SynSuiteRender = SynSuiteWindowRenderer;
@@ -165,6 +167,7 @@
                 window.ui = await ShadowUIFactory.fullAppUI();
 
                 app.enable(JSLangPlugin.class);
+                app.enable(HTMLLangPlugin.class);
                 app.enable(DebugToolsPlugin.class);
 
                 window.CommonKeyImpl = CommonKeyImpl;

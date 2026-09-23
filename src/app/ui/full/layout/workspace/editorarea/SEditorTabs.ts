@@ -6,6 +6,10 @@ import {TabHooks} from "../../../../../core/UICommonHooks";
 import {TabsManager} from "../../../../../core/tabs/TabsManager";
 import {GlobalState} from "../../../../../../core/global/GlobalState";
 import {EntryRenamedEvent} from "../../../../../../core/project/events/EntryRenamedEvent";
+import {ContextResolver} from "../../../../../../core/keybinds/context/ContextResolver";
+import {CommonDataKeys} from "../../../../../../core/keybinds/context/data/CommonDataKeys";
+import {ContextMenuElement} from "../../../../../../core/ui/lib/menu/impl/ContextMenu";
+import {EditorTabContextMenuActionGroup} from "../../../../../core/tabs/actions/EditorTabContextMenuActionGroup";
 
 /**
  *
@@ -14,16 +18,25 @@ import {EntryRenamedEvent} from "../../../../../../core/project/events/EntryRena
  * @since 1.0.0
  */
 export class SEditorTabs extends UIComponent {
+    private activeTab: ITab | null = null;
+
     private readonly tabs: Map<string, ITab> = new Map();
     private readonly tabsElement: Map<string, HTMLElement> = new Map();
 
     constructor(root: HTMLElement) {
         super(HTMLUtils.createDiv("column-tabs", root));
 
+        ContextResolver.registerGlobal({
+            provide: key => key == CommonDataKeys.OPENED_EDITOR_TAB
+                ? this.activeTab
+                : undefined
+        });
+
         GlobalState.getMainEventBus().subscribe(this, EntryRenamedEvent.SUBSCRIBER, () => this.redraw());
     }
 
     draw(): void {
+        this.activeTab = null;
         this.setInnerHTML("");
         this.tabsElement.clear();
         for (const tab of this.tabs.values()) {
@@ -61,14 +74,26 @@ export class SEditorTabs extends UIComponent {
 
             if (tab.isActive()) {
                 tabElement.classList.add("column-tab-active");
+                this.activeTab = tab;
             }
 
             tabElement.addEventListener("click", () => {
                 TabsManager.getInstance().open(tab);
             });
 
+            tabElement.addEventListener("contextmenu", e => {
+                e.preventDefault();
+                ContextMenuElement.open(e.x, e.y, contextMenu => contextMenu.setGroup(EditorTabContextMenuActionGroup.INSTANCE), e);
+            });
+
             this.addHtmlElement(tabElement);
             this.tabsElement.set(tab.getId(), tabElement);
+
+            ContextResolver.register(tabElement, {
+                provide: key => key == CommonDataKeys.SELECTED_EDITOR_TAB
+                    ? tab
+                    : undefined
+            });
         }
     }
 

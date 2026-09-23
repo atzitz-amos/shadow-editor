@@ -128,6 +128,78 @@ bus.subscribe(this, DocumentModificationEvent.SUBSCRIBER, (event: DocumentModifi
 
 ```
 
+### Actions and contextual data
+
+Actions extend `AbstractAction` and receive a `KeybindContext` when they run. The
+context contains the trigger event and typed contextual data. Use
+`CommonDataKeys` instead of relying on closures or manually constructing
+editor/pane state:
+
+```typescript
+import {AbstractAction} from "./src/core/actions/AbstractAction";
+import {CommonDataKeys} from "./src/core/keybinds/context/data/CommonDataKeys";
+import {Keybind} from "./src/core/keybinds/Keybind";
+import {KeybindContext} from "./src/core/keybinds/context/KeybindContext";
+
+export class OpenFileAction extends AbstractAction {
+    getName(): string {
+        return "Open File";
+    }
+
+    getDescription(): string {
+        return "Open the file selected in the project tree.";
+    }
+
+    getDefaultKeybinding(): Keybind | null {
+        return null;
+    }
+
+    getRequiredKeys() {
+        return [CommonDataKeys.PROJECT_FILE];
+    }
+
+    run(ctx: KeybindContext): void {
+        const file = ctx.require(CommonDataKeys.PROJECT_FILE);
+        // Use file.getURI(), navigate to it, or perform another file action.
+    }
+}
+```
+
+`getRequiredKeys()` is used by keybinds and menus to determine whether an
+action is applicable. `ctx.require(key)` is typed and throws the normal
+not-applicable error when a required value is missing. For editor actions, the
+built-in keys include `EDITOR`, `PANE`, `PROJECT_FILE`, `PROJECT_FILES`, and
+`TEXT_AREA`. Legacy `requireEditor()`, `requirePane()`, and
+`getKeybindContext()` remain available while existing actions are migrated.
+
+Menus can use registered actions directly. Context-menu data is captured when
+the menu opens, so the action receives the file or editor that initiated the
+menu even if focus changes before the item is clicked:
+
+```typescript
+contextMenu.addAction("Open", new OpenFileAction());
+```
+
+For small one-off operations, the callback form is still supported and
+receives the same context:
+
+```typescript
+contextMenu.addAction("Delete", ctx => {
+    const file = ctx?.require(CommonDataKeys.PROJECT_FILE);
+    file?.delete();
+});
+```
+
+Related actions can be placed in an `ActionGroup` and added to a menu with
+`setGroup()`:
+
+```typescript
+contextMenu.setGroup(projectActions);
+```
+
+Only active group actions are added, and their applicability is evaluated
+against the menu's captured context.
+
 ## Acknowledgments
 
 Although the code for this project was entirely written by me, some of its core concepts are inspired by those

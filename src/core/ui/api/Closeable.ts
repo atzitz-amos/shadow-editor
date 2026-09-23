@@ -8,5 +8,5 @@ export enum CloseOn {
     KEY_TYPED = 4,
     KEY_PRESS = 8,
     MOUSE_CLICK = 16,
-    DEFAULT = CloseOn.ESCAPE | CloseOn.KEY_TYPED | CloseOn.KEY_PRESS | CloseOn.MOUSE_CLICK,
+    DEFAULT = CloseOn.ESCAPE | CloseOn.KEY_TYPED | CloseOn.KEY_PRESS | CloseOn.MOUSE_CLICK | CloseOn.BLUR,
 }

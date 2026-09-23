@@ -168,7 +168,7 @@ export class PluginLoader {
      * Auto-discovers CSS files from each plugin's styles/ directory.
      * Convention: /src/plugins/{pluginName}/styles/*.css
      */
-    private resolveStylesheets(): { pluginName: string, url: string }[] {
+    private resolveStylesheets(): { pluginName: string, url: () => Promise<string> }[] {
         this.logger.debug("Scanning for plugin stylesheets...");
 
         const imports = import.meta.glob("/src/plugins/*/styles/*.css", {
@@ -176,14 +176,15 @@ export class PluginLoader {
             query: "?url",
             import: "default"
         });
-        const stylesheets: { pluginName: string, url: string }[] = [];
+        const stylesheets: { pluginName: string, url: () => Promise<string> }[] = [];
 
         for (const path in imports) {
             const split = path.split('/');
             // path = /src/plugins/{pluginName}/styles/{file}.css
             const pluginName = split[split.length - 3];
 
-            stylesheets.push({pluginName, url: path});
+            const stylesheetUrlLoader = imports[path] as () => Promise<string>;
+            stylesheets.push({pluginName, url: stylesheetUrlLoader});
             this.logger.debug("Found stylesheet: " + path + " for plugin: " + pluginName);
         }
 

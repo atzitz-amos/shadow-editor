@@ -19,6 +19,8 @@ export interface SynNode extends SynBase, URILocatedResource {
 
     getParent(): SynParentElement | null;
 
+    getEnclosingOfType<T extends SynParentElement>(type: Class<T>): T | null;
+
     nextSibling(): SynNode | null;
 
     previousSibling(): SynNode | null;

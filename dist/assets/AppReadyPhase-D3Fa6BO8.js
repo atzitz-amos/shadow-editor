@@ -1,0 +1,1 @@
+import{d as e}from"./Project-BNYsBGEb.js";import{h as t}from"./PersistenceModel-kFxYvHjt.js";import{t as n}from"./ShadowAppLoadedEvent-CDfAVux8.js";var r=class extends t{app;name=`Finalizing`;priority=100;critical=!1;constructor(e){super(),this.app=e}async run(){e.setReady(!0),e.getMainEventBus().syncPublish(new n(this.app))}};export{r as AppReadyPhase};

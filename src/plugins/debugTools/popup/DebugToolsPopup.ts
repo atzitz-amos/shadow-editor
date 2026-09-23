@@ -1,4 +1,4 @@
-import {AbstractPopup} from "../../../core/ui/lib/popup/IdePopup";
+import {AbstractDialog} from "../../../core/ui/lib/dialog/IdeDialog";
 import {HTMLUtils} from "../../../editor/utils/HTMLUtils";
 import {Persisted} from "../../../core/persistence/objects/Persisted";
 import {DebugToolTab} from "./DebugToolTab";
@@ -7,6 +7,7 @@ import {Scheduler} from "../../../core/scheduler/Scheduler";
 import {CodeStyleTab} from "./codeStyle/CodeStyleTab";
 import {GlobalState} from "../../../core/global/GlobalState";
 import {KeyPressedEvent} from "../../../editor/impl/events/PhysicalEvents";
+import {EditorHighlighterUtils} from "../../../editor/ui/highlighter/overlay/EditorHighlighterUtils";
 
 /**
  *
@@ -14,7 +15,7 @@ import {KeyPressedEvent} from "../../../editor/impl/events/PhysicalEvents";
  * @date 8/29/2026
  * @since 1.0.0
  */
-export class DebugToolsPopup extends AbstractPopup {
+export class DebugToolsPopup extends AbstractDialog {
     @Persisted
     private static accessor xPosition: number = 600;
 
@@ -34,6 +35,10 @@ export class DebugToolsPopup extends AbstractPopup {
 
     constructor() {
         super();
+
+        this.onClose(() => {
+            this.tabs.forEach(tab => tab.dispose());
+        })
 
         GlobalState.getMainEventBus().subscribe(this, KeyPressedEvent.SUBSCRIBER, e => {
             if (e.getEvent().key === "Escape") {

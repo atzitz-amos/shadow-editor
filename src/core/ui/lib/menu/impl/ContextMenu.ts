@@ -1,5 +1,9 @@
 import {HTMLUtils} from "../../../../../editor/utils/HTMLUtils";
 import {UIMenu} from "../UIMenu";
+import {KeybindContext} from "../../../../keybinds/context/KeybindContext";
+import {ContextResolver} from "../../../../keybinds/context/ContextResolver";
+import {KeybindEventLike} from "../../../../keybinds/context/KeybindEventLike";
+import {UIMenuAction} from "../elements/UIMenuAction";
 
 /**
  *
@@ -7,17 +11,22 @@ import {UIMenu} from "../UIMenu";
  * @date 8/5/2026
  * @since 1.0.0
  */
-export type ContextMenu<T> = (data: T, contextMenu: ContextMenuElement) => void;
+export type ContextMenu = (contextMenu: ContextMenuElement) => void;
 
 
 class ContextMenuSingleton {
     public static readonly menuRoot: HTMLElement = HTMLUtils.createElement("div.ui-context-menu");
+    private static readonly outsidePointerDownListener = (e: PointerEvent) => {
+        if (this.menuRoot.style.display === "none") return;
+        if (!this.menuRoot.contains(e.target as Node)) this.closeHandler();
+    };
 
     static {
         window.addEventListener("load", () => {
             document.body.appendChild(this.menuRoot)
             document.body.addEventListener("keydown", this.escapeListener)
             document.body.addEventListener("click", this.closeHandler)
+            document.addEventListener("pointerdown", this.outsidePointerDownListener, true);
 
             this.menuRoot.style.display = "none";
         }, false);
@@ -38,15 +47,21 @@ class ContextMenuSingleton {
 
 export class ContextMenuElement extends UIMenu {
     private opened: boolean = false;
+    private context: KeybindContext | null = null;
 
     constructor() {
         super();
     }
 
-    static open<T>(x: number, y: number, entry: T, contextMenu: ContextMenu<T>) {
+    static open<T>(x: number, y: number, contextMenu: ContextMenu, event?: KeybindEventLike & {target?: EventTarget | null}) {
         const menu = new ContextMenuElement();
-        contextMenu(entry, menu);
+        menu.context = event ? ContextResolver.fromEvent(event) : null;
+        contextMenu(menu);
         menu.open(x, y);
+    }
+
+    getContext(): KeybindContext | null {
+        return this.context;
     }
 
     open(x?: number, y?: number): void {
@@ -57,6 +72,7 @@ export class ContextMenuElement extends UIMenu {
         menuRoot.style.display = "block";
 
         for (const element of this.elements) {
+            if (element instanceof UIMenuAction && !element.isApplicable()) continue;
             menuRoot.appendChild(element.getUnderlyingElement());
             element.draw();
         }

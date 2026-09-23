@@ -47,6 +47,8 @@ export type SupportedFaIconName = typeof SUPPORTED_FA_ICON_NAMES[number];
 
 
 export class FaIcon extends Icon {
+    private color: string | null = null;
+
     private constructor(private readonly name: string, private readonly type: FaIconFamily) {
         super(HTMLUtils.createElement(`i.${type}.${name}`));
     }
@@ -493,6 +495,12 @@ export class FaIcon extends Icon {
         return name.startsWith("fa-") ? name : `fa-${name}`;
     }
 
+    colored(color: string): FaIcon {
+        this.color = color;
+        this.getUnderlyingElement().style.color = color;
+        return this;
+    }
+
     draw(): void {
         // No need to draw anything, as the icon is represented by its CSS classes
     }
@@ -510,6 +518,10 @@ export class FaIcon extends Icon {
     }
 
     toHTML() {
-        return HTMLUtils.createElement(`i.${this.type}.${this.name}`);
+        const element = HTMLUtils.createElement(`i.${this.type}.${this.name}`);
+        if (this.color) {
+            element.style.color = this.color;
+        }
+        return element;
     }
 }

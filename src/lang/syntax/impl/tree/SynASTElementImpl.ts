@@ -48,6 +48,11 @@ export abstract class SynASTElementImpl extends AbstractSynParentElement impleme
         return this.document.getURI().selectedRegion(this.getTextRange());
     }
 
+    getText(): string {
+        const textRange = this.getTextRange();
+        return this.document.getText().substring(textRange.start, textRange.end);
+    }
+
     getSynDocument(): SynDocument {
         return this.document;
     }

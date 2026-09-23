@@ -10,6 +10,12 @@ import {ContextMenuElement} from "../../../../../../core/ui/lib/menu/impl/Contex
 import {ProjectDirectory} from "../../../../../../core/project/filesystem/tree/ProjectDirectory";
 import {Key} from "../../../../../../core/keybinds/Keybind";
 import {ProjectFilesPaneHelper} from "../ProjectFilesPaneHelper";
+import {KeybindManager} from "../../../../../../core/keybinds/KeybindManager";
+import {NewEntryChooseTypeDialog} from "../dialog/NewEntryChooseTypeDialog";
+import {IdeDialogUtilsCore} from "../../../../../../core/ui/lib/dialog/utils/IdeDialogUtilsCore";
+import {FileSystemEntry} from "../../../../../../core/project/filesystem/tree/FileSystemEntry";
+import {CommonDataKeys} from "../../../../../../core/keybinds/context/data/CommonDataKeys";
+import {ProjectFilesContextMenuActionGroup} from "../actions/ProjectFilesContextMenuActionGroup";
 
 /**
  *
@@ -18,6 +24,9 @@ import {ProjectFilesPaneHelper} from "../ProjectFilesPaneHelper";
  * @since 1.0.0
  */
 export class ProjectFilesTree extends UIComponentMixin(Focusable) {
+    private static readonly NEW_ACTION_SHORTCUT = {key: Key.INSERT, alt: true};
+    private static readonly DELETE_ACTION_SHORTCUT = {key: Key.DELETE};
+
     private currentProject: Project | null = null;
     private filesTree: FileSystemTree;
 
@@ -85,10 +94,19 @@ export class ProjectFilesTree extends UIComponentMixin(Focusable) {
             this.filesTree = new FileSystemTree(this.getUnderlyingElement(), this.currentProject.getFS().getRoot());
             this.filesTree.setFileOpenedHandler(file => this.openFile(file));
             this.filesTree.setEntrySelectedHandler(entry => ProjectFilesPaneHelper.setSelected(entry))
-            this.filesTree.setContextMenu((data, contextMenu) => {
-                if (data.isFile()) this.setupFileContextMenu(data as ProjectFile, contextMenu);
-                else this.setupDirContextMenu(data as ProjectDirectory, contextMenu);
-            })
+            this.filesTree.setKeydownHandler((event, entry) => {
+                if (KeybindManager.eventMatchesKeybind(ProjectFilesTree.NEW_ACTION_SHORTCUT, event)) {
+                    if (!(entry instanceof ProjectDirectory)) {
+                        entry = entry.getParent()!;
+                    }
+                    this.handleNew(entry as ProjectDirectory);
+                } else if (KeybindManager.eventMatchesKeybind(ProjectFilesTree.DELETE_ACTION_SHORTCUT, event)) {
+                    this.deleteEntry(entry);
+                }
+            });
+            this.filesTree.setContextMenu((contextMenu) => {
+                contextMenu.setGroup(ProjectFilesContextMenuActionGroup.INSTANCE);
+            });
 
             this.addChild(this.filesTree);
             this.drawChildren();
@@ -112,12 +130,47 @@ export class ProjectFilesTree extends UIComponentMixin(Focusable) {
     }
 
     private setupFileContextMenu(data: ProjectFile, contextMenu: ContextMenuElement) {
-        contextMenu.addAction("Open", () => {
-            this.openFile(data);
+        contextMenu.addAction("Open", context => {
+            this.openFile(context?.require(CommonDataKeys.PROJECT_FILE) ?? data);
         }, null, {key: Key.ENTER});
+
+        contextMenu.addAction("New", context => {
+            const file = context?.get(CommonDataKeys.PROJECT_FILE) ?? data;
+            this.handleNew(file.getParent());
+        }, null, ProjectFilesTree.NEW_ACTION_SHORTCUT);
+
+        contextMenu.addAction("Delete", context => {
+            this.deleteEntry(context?.get(CommonDataKeys.PROJECT_FILE) ?? data);
+        }, null, {key: Key.DELETE});
     }
 
     private setupDirContextMenu(directory: ProjectDirectory, contextMenu: ContextMenuElement) {
+        contextMenu.setGroup(ProjectFilesContextMenuActionGroup.INSTANCE);
 
+        // contextMenu.addAction("Delete", () => {
+        //     this.deleteEntry(directory);
+        // }, null, ProjectFilesTree.DELETE_ACTION_SHORTCUT);
+    }
+
+    private async handleNew(entry: ProjectDirectory) {
+        const result = await IdeDialogUtilsCore.awaitDialog(new NewEntryChooseTypeDialog());
+        if (!result) return;
+
+        const name = await IdeDialogUtilsCore.askString("Enter name", "Name");
+        if (!name) return;
+
+        const child = result.createEntry(entry, name);
+
+        if (!this.filesTree.isExpanded(entry)) {
+            this.filesTree.setExpanded(entry);
+        }
+
+        setTimeout(() => this.filesTree.select(child));
+    }
+
+    private async deleteEntry(entry: FileSystemEntry) {
+        if (!await IdeDialogUtilsCore.confirm("Delete", "Are you sure you want to delete: " + entry.getName() + "?")) return;
+
+        entry.delete();
     }
 }

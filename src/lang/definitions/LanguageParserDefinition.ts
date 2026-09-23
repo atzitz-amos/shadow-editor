@@ -33,4 +33,9 @@ export abstract class LanguageParserDefinition {
     public abstract createParser(builder: ASTBuilder): IParser;
 
     public abstract createPrinter(): SynPrinter;
+
+    static has(language: LanguageBase | null) {
+        if (!language) return false;
+        return this.getParserDefinition(language) !== null;
+    }
 }

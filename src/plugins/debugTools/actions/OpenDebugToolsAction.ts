@@ -2,8 +2,9 @@ import {AbstractAction} from "../../../core/actions/AbstractAction";
 import {Key, Keybind} from "../../../core/keybinds/Keybind";
 import {KeybindContext} from "../../../core/keybinds/context/KeybindContext";
 import {KeybindContextDescriptor} from "../../../core/keybinds/context/KeybindContextDescriptor";
-import {PopupUtilsCore} from "../../../core/ui/lib/popup/utils/PopupUtilsCore";
+import {IdeDialogUtilsCore} from "../../../core/ui/lib/dialog/utils/IdeDialogUtilsCore";
 import {DebugToolsPopup} from "../popup/DebugToolsPopup";
+import {DataKey} from "../../../core/keybinds/context/data/DataKey";
 
 /**
  *
@@ -33,11 +34,15 @@ export default class OpenDebugToolsAction extends AbstractAction {
         return "Open debug tools";
     }
 
+    getRequiredKeys(): DataKey<unknown>[] {
+        return [];
+    }
+
     run(ctx: KeybindContext): void | Promise<void> {
-        if (PopupUtilsCore.isOpen(DebugToolsPopup)) {
-            PopupUtilsCore.closePopup(DebugToolsPopup);
+        if (IdeDialogUtilsCore.isOpen(DebugToolsPopup)) {
+            IdeDialogUtilsCore.closeDialog(DebugToolsPopup);
         } else {
-            PopupUtilsCore.showPopup(new DebugToolsPopup());
+            IdeDialogUtilsCore.showDialog(new DebugToolsPopup());
         }
     }
 }

@@ -1,0 +1,140 @@
+.settings-dialog {
+    width: 700px;
+    height: 600px;
+    display: flex;
+    flex-direction: column;
+    font-family: 'JetBrains', monospace;
+    padding: 0 !important;
+}
+
+.settings-dialog-topbar {
+    display: flex;
+    align-items: baseline;
+    padding: 15px 15px 10px;
+    justify-content: space-between;
+    gap: 10px;
+    border-bottom: 1px solid var(--editor-dialog-border-color);
+}
+
+.settings-dialog .breadcrumbs {
+    font-size: 12px;
+    display: flex;
+    gap: 5px;
+    font-family: monospace;
+}
+
+.settings-dialog .breadcrumbs span {
+    color: #859fb3;
+    cursor: pointer;
+    font-family: 'JetBrains', monospace;
+}
+
+.settings-dialog .close-actions {
+    width: 30px;
+}
+
+.settings-dialog-main {
+    flex-grow: 1;
+    display: flex;
+}
+
+.settings-dialog-main .left-content {
+    flex: 0 0 150px;
+    border-right: 1px solid var(--editor-dialog-border-color);
+}
+
+.settings-dialog-main .right-content {
+    min-width: 0;
+    flex-grow: 1;
+}
+
+.settings-dialog .left-content {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.settings-dialog .left-content-header {
+    width: 100%;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-bottom: 1px var(--editor-dialog-border-color) solid;
+    font-size: 14px;
+    letter-spacing: 0.18em;
+    margin-bottom: 5px;
+}
+
+.settings-left-group {
+    font-size: 13px;
+}
+
+.settings-left-group summary,
+.settings-left-nav-element {
+    display: block;
+    cursor: pointer;
+    box-sizing: border-box;
+    width: 100%;
+    padding: 3px 5px 3px calc(13px + var(--depth, 0) * 20px);
+}
+
+.settings-left-group summary:hover,
+.settings-left-nav-element:hover {
+    background-color: #859fb321;
+}
+
+.settings-left-group.active summary,
+.settings-left-nav-element.active,
+.settings-group-child.active {
+    background-color: #202b48;
+}
+
+.settings-group-children {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 15px;
+    width: 100%;
+}
+
+.settings-group-description {
+    margin: 0 0 10px;
+    color: #859fb3;
+    line-height: 1.5;
+}
+
+.settings-group-child {
+    box-sizing: border-box;
+    cursor: pointer;
+    padding: 6px 10px;
+    width: 100%;
+    text-decoration: underline;
+}
+
+.settings-group-child:hover {
+    background-color: #859fb321;
+}
+
+.settings-dialog summary::marker {
+    content: "";
+}
+
+.settings-left-group-arrow {
+    display: inline-block;
+    margin-right: 6px;
+    translate: 0 -1px;
+    transition: transform 0.2s ease;
+}
+
+.settings-left-group-arrow::before {
+    content: "\f054";
+    font-family: "Font Awesome 7 Free";
+    font-size: 8px;
+    font-weight: 900;
+}
+
+.settings-dialog details[open] > summary > .settings-left-group-arrow {
+    transform: rotate(90deg);
+}

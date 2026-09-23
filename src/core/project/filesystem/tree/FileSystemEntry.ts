@@ -20,4 +20,8 @@ export interface FileSystemEntry {
     isDirectory(): this is ProjectDirectory;
 
     isFile(): this is ProjectFile;
+
+    delete(): void;
+
+    rename(name: string): void;
 }

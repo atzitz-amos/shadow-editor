@@ -98,7 +98,7 @@ The editor functionalities can be extended using extension points. Here is a tab
 
 To register an extension points, just create a folder with the name of the extension point in your plugin directory.
 Each extension point has its own format for the extension definition. 
-For instance, to add support for a new language, you will need to provide a class that extends `Language` and one that implements `FileTypeHandler`:
+For instance, to add support for a new language, you will need to provide a class that extends `Language` and one that implements `FileTypeProvider`:
 
 ``` 
 myPlugin

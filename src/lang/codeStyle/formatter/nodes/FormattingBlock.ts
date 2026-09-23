@@ -32,6 +32,12 @@ export class FormattingBlock extends FormattingNode {
         return block;
     }
 
+    static alwaysExpandingBlock() {
+        const block = new FormattingBlock();
+        block.forceExpand();
+        return block;
+    }
+
     static regular(indent: FormattingIndent = FormattingIndent.NONE) {
         return new FormattingBlock();
     }

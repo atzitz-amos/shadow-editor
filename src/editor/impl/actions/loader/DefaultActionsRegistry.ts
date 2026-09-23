@@ -14,7 +14,10 @@ export class DefaultActionsRegistry {
         }
         this.isLoaded = true;
 
-        const modules = import.meta.glob('../*.ts', {eager: true});
+        const modules = import.meta.glob([
+            '../*.ts',
+            '../../../../app/**/actions/**/*.ts'
+        ], {eager: true});
         let registeredCount = 0;
 
         for (const path in modules) {

@@ -41,7 +41,7 @@ export class InlineInspection extends OverlayWidget {
             this.overlay.cleanupEvents();
         }
         if (this.hoverPopup) {
-            this.hoverPopup.dispose(editor);
+            this.hoverPopup.dispose();
         }
     }
 
@@ -50,7 +50,6 @@ export class InlineInspection extends OverlayWidget {
 
         this.hoverPopup = new HoverPopup(new SimpleTooltipBuilder(this.message))
             .delayed(500)
-            .setFocusCapture()
             .attachToOverlay(overlay);
     }
 }

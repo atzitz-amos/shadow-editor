@@ -1,4 +1,4 @@
-import {EditorPopup} from "../EditorPopup";
+import {EditorInlinePopup} from "../EditorInlinePopup";
 import {Editor} from "../../../Editor";
 import {CloseOn} from "../../../../core/ui/api/Closeable";
 import {UIComponent} from "../../../../core/ui/engine/components/UIComponent";
@@ -10,7 +10,7 @@ import {UIComponent} from "../../../../core/ui/engine/components/UIComponent";
  * @date 6/1/2026
  * @since 1.0.0
  */
-export class SimpleTooltipPopup extends EditorPopup {
+export class SimpleTooltipPopup extends EditorInlinePopup {
     public constructor(editor: Editor, private message: string) {
         super(editor, "simple-tooltip-popup", CloseOn.DEFAULT);
     }

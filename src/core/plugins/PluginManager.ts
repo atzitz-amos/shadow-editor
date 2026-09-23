@@ -47,7 +47,7 @@ export class PluginManager {
         await loader.loadAllAsync();
     }
 
-    registerPlugin(plugin: EditorPlugin, name: string, extensionPoints?: Record<string, LoadedExtensionPoint[]>, stylesheets?: string[]): void {
+    registerPlugin(plugin: EditorPlugin, name: string, extensionPoints?: Record<string, LoadedExtensionPoint[]>, stylesheets?: (() => Promise<string>)[]): void {
         let loadedPlugin = new LoadedPlugin(plugin, name, extensionPoints || {}, stylesheets || []);
         this.plugins.push(loadedPlugin);
 

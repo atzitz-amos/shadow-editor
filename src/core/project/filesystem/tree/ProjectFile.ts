@@ -19,6 +19,10 @@ export class ProjectFile implements FileSystemEntry {
     public constructor(private readonly fs: FileSystem, private readonly vNode: VFileNode) {
     }
 
+    delete(): void {
+        this.fs.deleteEntry(this);
+    }
+
     getId(): string {
         return this.vNode.id;
     }

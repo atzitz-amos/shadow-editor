@@ -4,7 +4,7 @@ export class TokenType {
 
     constructor(
         public debugName: string,
-        public matcher: RegExp,
+        public matcher: RegExp | undefined,
         public getValue: ((match: RegExpExecArray) => string) | null,
         public priority: number = 0,
         public shouldSkip: boolean = false,
@@ -14,7 +14,7 @@ export class TokenType {
 }
 
 export class LexicalBuilder {
-    public static make(name: string, matcher: RegExp, getValue: ((match: RegExpExecArray) => string) | null = null): TokenType {
+    public static make(name: string, matcher?: RegExp, getValue: ((match: RegExpExecArray) => string) | null = null): TokenType {
         return new TokenType(name, matcher, getValue);
     }
 
@@ -22,7 +22,7 @@ export class LexicalBuilder {
         return new TokenType(name ?? "WHITESPACE", matcher, null, 0, true, false);
     }
 
-    public static makeComment(name: string, matcher: RegExp, getValue: ((match: RegExpExecArray) => string) | null = null): TokenType {
+    public static makeComment(name: string, matcher?: RegExp, getValue: ((match: RegExpExecArray) => string) | null = null): TokenType {
         return new TokenType(name, matcher, getValue, 0, false, true);
     }
 }

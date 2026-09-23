@@ -34,11 +34,11 @@ export abstract class EditorPlugin {
 export class LoadedPlugin {
     private readonly plugin: EditorPlugin;
     private readonly extensionPoints: Record<string, LoadedExtensionPoint[]>;
-    private readonly stylesheets: string[];
+    private readonly stylesheets: Array<() => Promise<string>>;
     private readonly name: string;
     private isEnabled: boolean = false;
 
-    constructor(plugin: EditorPlugin, name: string, extensionPoints: Record<string, LoadedExtensionPoint[]>, stylesheets: string[] = []) {
+    constructor(plugin: EditorPlugin, name: string, extensionPoints: Record<string, LoadedExtensionPoint[]>, stylesheets: Array<() => Promise<string>> = []) {
         this.name = name;
         this.plugin = plugin;
         this.extensionPoints = extensionPoints;
@@ -61,7 +61,7 @@ export class LoadedPlugin {
 
     enable() {
         this.isEnabled = true;
-        this.loadStylesheets();
+        void this.loadStylesheets();
         this.plugin.onEnable();
     }
 
@@ -75,14 +75,17 @@ export class LoadedPlugin {
         return this.name;
     }
 
-    private loadStylesheets(): void {
-        if (this.stylesheets.length === 0) return;
+    private loadStylesheets(): Promise<void> {
+        if (this.stylesheets.length === 0) return Promise.resolve();
 
         const styleManager = StyleManager.getInstance();
+        const loads: Promise<void>[] = [];
         for (let i = 0; i < this.stylesheets.length; i++) {
             const id = `plugin-${this.name}-css-${i}`;
-            styleManager.registerStylesheet(id, this.stylesheets[i]);
+            const urlPromise = this.stylesheets[i]();
+            loads.push(urlPromise.then(url => styleManager.registerStylesheet(id, url)));
         }
+        return Promise.all(loads).then(() => undefined);
     }
 
     private unloadStylesheets(): void {
@@ -95,4 +98,3 @@ export class LoadedPlugin {
         }
     }
 }
-

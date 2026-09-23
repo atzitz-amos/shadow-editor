@@ -34,6 +34,16 @@ export abstract class SynLeafElement implements SynNode {
         return this.parent;
     }
 
+    getEnclosingOfType<T extends SynParentElement>(type: Class<T>): T | null {
+        const parent = this.getParent();
+        if (parent instanceof type) {
+            return parent as T;
+        } else if (parent) {
+            return parent.getEnclosingOfType(type);
+        }
+        return null;
+    }
+
     nextSibling(): SynNode | null {
         if (!this.parent) return null;
 

@@ -3,6 +3,10 @@ import {Editor} from "../../../editor/Editor";
 import {IPane} from "../../../app/core/panes/pane/IPane";
 import {KeybindNotApplicableAbortError} from "./KeybindNotApplicableAbortError";
 import {KeybindEventLike} from "./KeybindEventLike";
+import {DataContext} from "./data/DataContext";
+import {DataKey} from "./data/DataKey";
+import {DataProvider} from "./data/DataProvider";
+import {CommonDataKeys} from "./data/CommonDataKeys";
 
 /**
  *
@@ -13,10 +17,17 @@ import {KeybindEventLike} from "./KeybindEventLike";
 export class KeybindContext {
     private readonly editor: Editor | null;
     private readonly pane: IPane | null;
+    private readonly data: DataContext;
 
-    constructor(private readonly ctx: KeybindContextDescriptor, private readonly event: KeybindEventLike, editor: Editor | null = null, pane: IPane | null = null) {
+    constructor(private readonly ctx: KeybindContextDescriptor, private readonly event: KeybindEventLike, editor: Editor | null = null, pane: IPane | null = null, data: DataContext = DataContext.EMPTY) {
         this.editor = editor;
         this.pane = pane;
+        let contextData = data;
+        if (editor && !contextData.has(CommonDataKeys.EDITOR)) contextData = contextData.with(CommonDataKeys.EDITOR, editor);
+        if (pane && !contextData.has(CommonDataKeys.PANE)) contextData = contextData.with(CommonDataKeys.PANE, pane);
+        const file = editor?.getOpenedFile();
+        if (file && !contextData.has(CommonDataKeys.PROJECT_FILE)) contextData = contextData.with(CommonDataKeys.PROJECT_FILE, file);
+        this.data = contextData;
 
         if (!editor && ctx & KeybindContextDescriptor.IN_MAIN_EDITOR) {
             throw new Error(`KeybindContextDescriptor.IN_MAIN_EDITOR requires an editor, but none was provided.`);
@@ -31,9 +42,7 @@ export class KeybindContext {
     }
 
     public requireEditor(): Editor {
-        if (!this.editor)
-            throw new Error(`No editor associated with this KeybindContext.`);
-        return this.editor;
+        return this.require(CommonDataKeys.EDITOR);
     }
 
     public isTextAreaEvent(): boolean {
@@ -53,9 +62,7 @@ export class KeybindContext {
     }
 
     public requirePane(): IPane {
-        if (!this.pane)
-            throw new Error(`No pane associated with this KeybindContext.`);
-        return this.pane;
+        return this.require(CommonDataKeys.PANE);
     }
 
     public applies(descriptor: KeybindContextDescriptor) {
@@ -68,5 +75,25 @@ export class KeybindContext {
 
     public abort(): void {
         throw new KeybindNotApplicableAbortError();
+    }
+
+    public get<T>(key: DataKey<T>): T | undefined {
+        return this.data.get(key);
+    }
+
+    public has<T>(key: DataKey<T>): boolean {
+        return this.data.has(key);
+    }
+
+    public require<T>(key: DataKey<T>): T {
+        return this.data.require(key);
+    }
+
+    public with<T>(key: DataKey<T>, value: T): KeybindContext {
+        return new KeybindContext(this.ctx, this.event, this.editor, this.pane, this.data.with(key, value));
+    }
+
+    public withLazy<T>(key: DataKey<T>, provider: DataProvider<T> | (() => T)): KeybindContext {
+        return new KeybindContext(this.ctx, this.event, this.editor, this.pane, this.data.withLazy(key, provider));
     }
 }

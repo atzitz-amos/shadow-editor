@@ -5,6 +5,8 @@ import {JsFunctionExpr} from "../expr/JsFunctionExpr";
 import {JsArrowFunctionExpr} from "../expr/JsArrowFunctionExpr";
 import {JsFunctionStatement} from "../statements/JsFunctionStatement";
 import {SynNode} from "../../../../../lang/syntax/api/SynNode";
+import {JsClassDeclaration} from "../objects/JsClassDeclaration";
+import {JsClassExpr} from "../objects/JsClassExpr";
 
 /**
  *
@@ -43,5 +45,9 @@ export class JsSynUtils {
 
     static isFunction(element: SynNode) {
         return (element instanceof JsFunctionStatement) || (element instanceof JsFunctionExpr) || (element instanceof JsArrowFunctionExpr);
+    }
+
+    static isClass(element: SynNode) {
+        return (element instanceof JsClassDeclaration) || (element instanceof JsClassExpr);
     }
 }

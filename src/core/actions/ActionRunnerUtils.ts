@@ -25,6 +25,7 @@ export class ActionRunnerUtils {
 
         const ctx = new KeybindContext(ctxDescriptor, event, editor, pane);
         if (!ctx.applies(action.getKeybindContext())) return null;
+        if (!action.isApplicable(ctx)) return null;
 
         return ctx;
     }

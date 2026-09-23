@@ -154,7 +154,7 @@ export class View {
 
     getMaxWidth() {
         const maxLineLength = Math.max(this.editor.getOpenedDocument().getMaxLengthLine(), this.getVisualCharCount());
-        return maxLineLength * this.getCharSize();
+        return (maxLineLength * this.getCharSize()) - (this.myPainter.getGutter().nDigits - 1) * this.getCharSize();
     }
 
     getMaxHeight() {

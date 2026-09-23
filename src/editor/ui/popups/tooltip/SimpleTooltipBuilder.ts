@@ -1,7 +1,7 @@
 import {PopupBuilder} from "../builder/PopupBuilder";
 import {SimpleTooltipPopup} from "./SimpleTooltipPopup";
 import {Editor} from "../../../Editor";
-import {EditorPopup} from "../EditorPopup";
+import {EditorInlinePopup} from "../EditorInlinePopup";
 
 /**
  *
@@ -14,7 +14,7 @@ export class SimpleTooltipBuilder implements PopupBuilder {
 
     }
 
-    build(editor: Editor): EditorPopup {
+    build(editor: Editor): EditorInlinePopup {
         return new SimpleTooltipPopup(editor, this.message);
     }
 

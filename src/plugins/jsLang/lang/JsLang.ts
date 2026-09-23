@@ -1,15 +1,10 @@
 import {LanguageBase} from "../../../lang/LanguageBase";
 import {IncrementalLexer} from "../../../lang/syntax/builder/lexer/IncrementalLexer";
-import {JsParser} from "./parser/JsParser";
 import {HighlighterBase} from "../../../lang/highlighter/HighlighterBase";
 import {JsHighlighter} from "./highlighter/JsHighlighter";
 import JsIncrLexer from "./lexer/JsIncrLexer";
-import {ASTBuilder} from "../../../lang/syntax/builder/parser/builder/ASTBuilder";
-import {IParser} from "../../../lang/syntax/builder/parser/IParser";
-import {JsPrinter} from "./template/JsPrinter";
-import {SpacingFormatter} from "../../../lang/codeStyle/spacing/SpacingFormatter";
-import {JsSpacingRules} from "../codeStyle/spacing/JsSpacingRules";
-import {JsLexicalGrammar} from "./lexer/JsLexicalGrammar";
+import {Icon} from "../../../core/ui/icons/Icon";
+import {FaIcon} from "../../../core/ui/icons/FaIcon";
 
 
 export default class JsLang extends LanguageBase {
@@ -17,13 +12,11 @@ export default class JsLang extends LanguageBase {
 
     private constructor() {
         super();
-
         JsLang._instance = this;
     }
 
     public static get INSTANCE(): JsLang {
-        if (!JsLang._instance) throw new Error("No instance of JsLang was found");
-        return JsLang._instance;
+        return JsLang._instance!;
     }
 
     public getKey(): string {
@@ -34,19 +27,21 @@ export default class JsLang extends LanguageBase {
         return "JavaScript";
     }
 
+    public getIcon(): Icon | null {
+        return FaIcon.brands("fa-js")
+            .colored("#f7df1e");
+    }
+
+    public getDefaultExtension(): string {
+        return "js";
+    }
+
+
     public createLexer(): IncrementalLexer {
         return new JsIncrLexer();
     }
 
     public createHighlighter(): HighlighterBase {
         return new JsHighlighter();
-    }
-
-    public createParser(builder: ASTBuilder): IParser {
-        return new JsParser(builder);
-    }
-
-    public getPrinter(): JsPrinter {
-        return new JsPrinter();
     }
 }

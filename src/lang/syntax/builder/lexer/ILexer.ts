@@ -1,5 +1,4 @@
-import {Source, TokenStream} from "../tokens/TokenStream";
-import {Token} from "../tokens/Token";
+import {TokenStream} from "../tokens/TokenStream";
 import {DocumentModificationEvent} from "../../../../editor/core/document/events/DocumentModificationEvent";
 import {Document} from "../../../../editor/core/document/Document";
 import {TextRange} from "../../../../editor/core/coordinate/range/TextRange";
@@ -17,11 +16,4 @@ export interface ILexer {
     lexAll(document: Document): void;
 
     lexAllToTokens(text: string): TokenStream;
-
-    /**
-     * Tokenize one character from the source given the LexerState
-     *
-     * @returns the tokenized token and the new lexer state
-     * */
-    tokenize(input: Source): Token;
 }

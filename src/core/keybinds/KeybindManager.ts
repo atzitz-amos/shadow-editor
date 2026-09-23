@@ -245,6 +245,7 @@ export class KeybindManager {
     private dispatch(candidates: ResolvedBinding[], ctx: KeybindContext): void {
         for (const {action} of candidates) {
             if (!ctx.applies(action.getKeybindContext())) continue;
+            if (!action.isApplicable(ctx)) continue;
 
             try {
                 action.run(ctx);

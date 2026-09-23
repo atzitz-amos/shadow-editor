@@ -291,6 +291,6 @@ export default class JsIncrLexer extends IncrementalLexer {
         }
 
         // --- Fallback operator token ---
-        return Token.unexpected(c1, TextRange.around(input.getOffset()));
+        return Token.unexpected(c1, input.getRange(start));
     }
 }

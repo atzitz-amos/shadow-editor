@@ -1,3 +1,6 @@
+import {LanguageBase} from "../../LanguageBase";
+import {LanguageCodeStyleDefinition} from "../../definitions/LanguageCodeStyleDefinition";
+
 /**
  *
  * @author Atzitz Amos
@@ -41,5 +44,10 @@ export class IndentUtils {
 
     static getAlignIndent(lines: string[]) {
         return Math.min(...lines.map(line => IndentUtils.getIndentationSize(line)));
+    }
+
+    static getLanguageSpecificIndentationSize(language: LanguageBase | null) {
+        const manager = LanguageCodeStyleDefinition.getCodeStyleManager(language);
+        return manager?.getIndentationSize() ?? 4;
     }
 }
