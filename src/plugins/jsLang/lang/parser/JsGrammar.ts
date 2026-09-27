@@ -22,7 +22,7 @@ import {JsFunctionStatement} from "../syntax/statements/JsFunctionStatement";
 import {JsLiteral} from "../syntax/literal/JsLiteral";
 import {JsExpr} from "../syntax/expr/JsExpr";
 import {JsSpreadExpr} from "../syntax/expr/JsSpreadExpr";
-import {JsFunctionParameter, JsFunctionParameters} from "../syntax/statements/JsFunctionParameters";
+import {JsFunctionParameter, JsFunctionParameterList} from "../syntax/statements/JsFunctionParameterList";
 import {JsVariableDeclaration} from "../syntax/statements/JsVariableDeclaration";
 import {JsEmptyStatement} from "../syntax/statements/JsEmptyStatement";
 import {JsPrefixOp} from "../syntax/expr/JsPrefixOp";
@@ -48,6 +48,7 @@ import {JsObjectLiteralValue} from "../syntax/literal/JsObjectLiteralValue";
 import {JsObjectLiteralPropertyShorthand} from "../syntax/literal/JsObjectLiteralPropertyShorthand";
 import {JsExprStatement} from "../syntax/statements/JsExprStatement";
 import {JsClassBody} from "../syntax/objects/JsClassBody";
+import {JsArgumentList} from "../syntax/expr/JsArgumentList";
 
 export class JsGrammar {
     public static readonly CodeBlock = ASTGrammar.createCodeBlock("CodeBlock", JsCodeBlock.builder());
@@ -78,8 +79,8 @@ export class JsGrammar {
     public static readonly LabelStatement = ASTGrammar.create("LabelStatement");
 
     public static readonly FunctionDeclaration = ASTGrammar.create("FunctionDeclaration", JsFunctionStatement.builder());
-    public static readonly FunctionArguments = ASTGrammar.create("FunctionArguments", JsFunctionParameters.builder());
-    public static readonly FunctionArgument = ASTGrammar.create("FunctionArgument", JsFunctionParameter.builder());
+    public static readonly FunctionParameter = ASTGrammar.create("FunctionParameter", JsFunctionParameterList.builder());
+    public static readonly FunctionParameterList = ASTGrammar.create("FunctionParameterList", JsFunctionParameter.builder());
     public static readonly ClassDeclaration = ASTGrammar.create("ClassDeclaration", JsClassDeclaration.builder());
     public static readonly ClassBody = ASTGrammar.create("ClassBody", JsClassBody.builder());
     public static readonly ClassMethodDeclaration = ASTGrammar.create("ClassMethod", JsClassMethod.builder());
@@ -113,6 +114,7 @@ export class JsGrammar {
     public static readonly ArrayAccessExpr = ASTGrammar.create("ArrayAccessExpr", JsArrayAccessExpr.builder());
     public static readonly CallExpr = ASTGrammar.create("CallExpr", JsCallExpr.builder());
     public static readonly NewExpr = ASTGrammar.create("NewExpr", JsNewExpr.builder());
+    public static readonly ArgumentList = ASTGrammar.create("ArgumentList", JsArgumentList.builder());
     public static readonly SpreadExpr = ASTGrammar.create("SpreadExpr", JsSpreadExpr.builder());
     public static readonly GroupExpr = ASTGrammar.create("GroupExpr", JsGroupExpr.builder());
 

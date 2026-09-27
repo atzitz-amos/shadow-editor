@@ -14,6 +14,10 @@ export class JsExprParser {
         this.myPrattParser = new JsPrattParser(parser, this, builder);
     }
 
+    getPrattParser(): JsPrattParser {
+        return this.myPrattParser;
+    }
+
     public setPotentiallyInLoop(value: boolean) {
         this.potentiallyInLoop = value;
     }
@@ -144,19 +148,19 @@ export class JsExprParser {
         return true;
     }
 
-    parseFunctionArgumentDeclaration(): void {
+    parseFunctionParameterListDeclaration(): void {
         const marker = this.builder.mark();
 
         while (!this.builder.done() && !this.builder.isNext(JsLexicalGrammar.RPAREN)) {
             const argumentMarker = this.builder.mark();
             this.parseParameterDeclaration();
-            argumentMarker.done(JsGrammar.FunctionArgument);
+            argumentMarker.done(JsGrammar.FunctionParameterList);
             if (!this.builder.consumeIf(JsLexicalGrammar.COMMA)) {
                 break;
             }
         }
 
-        marker.done(JsGrammar.FunctionArguments);
+        marker.done(JsGrammar.FunctionParameter);
     }
 
     parseVariableDeclarator() {
@@ -184,7 +188,7 @@ export class JsExprParser {
         }
 
         this.builder.expect(JsLexicalGrammar.LPAREN).failWith("Expected '('")
-            .then(() => this.parseFunctionArgumentDeclaration())
+            .then(() => this.parseFunctionParameterListDeclaration())
             .then(JsLexicalGrammar.RPAREN).failWith("Expected ')'")
             .then(() => this.parser.parseBlock(true, true, isAsync, isGenerator));
 

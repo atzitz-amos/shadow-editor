@@ -165,7 +165,7 @@ export class JsPrattParser {
         if (this.builder.isNext(JsLexicalGrammar.RPAREN)) {
             const next = this.builder.lookAhead(1);
             if (next && next.getValue() === "=>") {
-                rollbackMarker.done(JsGrammar.FunctionArguments);
+                rollbackMarker.done(JsGrammar.FunctionParameter);
                 this.builder.advance(); // Consume ')'
 
                 if (!this.builder.beforeNewLine()) {
@@ -220,6 +220,7 @@ export class JsPrattParser {
     }
 
     parseFunctionArguments() {
+        const marker = this.builder.mark();
         const oldSpreadAllowed = this.parser.isSpreadAllowed();
         this.parser.setIsSpreadAllowed(true);
         while (!this.builder.done() && !this.builder.isNext(JsLexicalGrammar.RPAREN)) {
@@ -229,6 +230,7 @@ export class JsPrattParser {
             }
         }
 
+        marker.done(JsGrammar.ArgumentList)
         this.parser.setIsSpreadAllowed(oldSpreadAllowed);
     }
 

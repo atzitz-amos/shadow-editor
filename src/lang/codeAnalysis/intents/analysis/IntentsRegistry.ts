@@ -9,7 +9,7 @@ import {LanguageBase} from "../../../LanguageBase";
  * @since 1.0.0
  */
 export class IntentsRegistry {
-    public static readonly INSTANCE = new IntentsRegistry();
+    private static instance: IntentsRegistry = new IntentsRegistry();
 
     private static readonly intentsEP = new ExtensionPoint("intents", IntentBase);
 
@@ -18,6 +18,10 @@ export class IntentsRegistry {
     }
 
     static getForLanguage(language: LanguageBase) {
-        return IntentsRegistry.getAllIntents().filter(intent => intent.getApplicableLanguage().some(lang => lang === language));
+        return IntentsRegistry.getAllIntents().filter(intent => intent.getApplicableLanguage().includes(language));
+    }
+
+    static getInstance() {
+        return this.instance;
     }
 }

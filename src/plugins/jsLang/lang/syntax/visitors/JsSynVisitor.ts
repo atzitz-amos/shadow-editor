@@ -50,6 +50,8 @@ import {JsObjectLiteralValue} from "../literal/JsObjectLiteralValue";
 import {JsObjectLiteralPropertyShorthand} from "../literal/JsObjectLiteralPropertyShorthand";
 import {JsExprStatement} from "../statements/JsExprStatement";
 import {JsClassBody} from "../objects/JsClassBody";
+import {JsFunctionParameter, JsFunctionParameterList} from "../statements/JsFunctionParameterList";
+import {JsArgumentList} from "../expr/JsArgumentList";
 
 /**
  *
@@ -88,6 +90,9 @@ export class JsSynVisitor extends SynNodeVisitor {
     }
 
     visitCallExpr(element: JsCallExpr): void {
+    }
+
+    visitArgumentList(element: JsArgumentList) {
     }
 
     visitMemberAccessExpr(element: JsMemberAccessExpr): void {
@@ -215,6 +220,12 @@ export class JsSynVisitor extends SynNodeVisitor {
     }
 
     visitFunctionExpr(element: JsFunctionExpr) {
+    }
+
+    visitFunctionParameterList(element: JsFunctionParameterList) {
+    }
+
+    visitFunctionParameter(element: JsFunctionParameter) {
     }
 
     visitArrowFunction(element: JsArrowFunctionExpr) {

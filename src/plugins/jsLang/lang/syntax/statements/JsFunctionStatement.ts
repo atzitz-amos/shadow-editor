@@ -1,5 +1,5 @@
 import {ASTNode} from "../../../../../lang/syntax/builder/parser/nodes/ASTNode";
-import {JsFunctionParameters} from "./JsFunctionParameters";
+import {JsFunctionParameterList} from "./JsFunctionParameterList";
 import {SynTokenNode} from "../../../../../lang/syntax/impl/SynTokenNode";
 import {JsCodeBlock} from "../JsCodeBlock";
 import {JsStatement} from "./JsStatement";
@@ -17,7 +17,7 @@ import {SynNamedElement} from "../../../../../lang/syntax/impl/reference/SynName
  */
 export class JsFunctionStatement extends JsStatement implements JsFunction, SynNamedElement {
     private readonly name: SynTokenNode;
-    private readonly parameters: JsFunctionParameters;
+    private readonly parameters: JsFunctionParameterList;
     private readonly body: JsCodeBlock;
     private readonly asyncToken?: SynTokenNode;
 
@@ -26,7 +26,7 @@ export class JsFunctionStatement extends JsStatement implements JsFunction, SynN
     constructor(node: ASTNode) {
         super(node);
 
-        this.parameters = this.getNthChildOfType(JsFunctionParameters, 0)!;
+        this.parameters = this.getNthChildOfType(JsFunctionParameterList, 0)!;
         this.body = this.getNthChildOfType(JsCodeBlock, 0)!;
 
         for (let token of this.getAllToken()) {
@@ -71,7 +71,7 @@ export class JsFunctionStatement extends JsStatement implements JsFunction, SynN
         return this.name ? this.name.getValue() : "";
     }
 
-    getParameters(): JsFunctionParameters {
+    getParameters(): JsFunctionParameterList {
         return this.parameters;
     }
 

@@ -19,7 +19,6 @@ export class JsParser implements IParser {
     private readonly myExprParser: JsExprParser;
 
     private isDoWhileASI: boolean = false;
-    private isAfterCodeBlock: boolean = false;
 
     constructor(private builder: ASTBuilder) {
         this.myExprParser = new JsExprParser(this, builder);
@@ -78,6 +77,17 @@ export class JsParser implements IParser {
         return this.builder.beforeNewLine() || this.builder.done() || this.builder.isNext(JsLexicalGrammar.RBRACE);
     }
 
+    /**
+     * Consumes the terminating ';' (or accepts ASI) *inside* the statement, then closes it,
+     * so the semicolon becomes part of the statement node.
+     */
+    private finishStatement(marker: Marker, type: Parameters<Marker["done"]>[0]): void {
+        if (!this.insertSemicolonIfNeeded()) {
+            this.builder.errorVirtual("Expected ';'");
+        }
+        marker.done(type);
+    }
+
     parse(): void {
         this.parseBlock(false, false, true, false);
     }
@@ -94,8 +104,6 @@ export class JsParser implements IParser {
 
     @ParserBoundaryNode
     parseBlock(expectBrace = true, isFunction: boolean | null = null, isAsync: boolean | null = null, isGenerator: boolean | null = null): void {
-        this.isAfterCodeBlock = false;
-
         const prevIsInAsync = this.myIsInAsync;
         const prevIsInGenerator = this.myIsInGenerator;
         const prevIsInFunction = this.myIsInFunction;
@@ -121,8 +129,6 @@ export class JsParser implements IParser {
             this.setInAsync(prevIsInAsync);
             this.setInGenerator(prevIsInGenerator);
         }
-
-        this.isAfterCodeBlock = true;
     }
 
     parseStatementOrExpr(): void {
@@ -134,17 +140,10 @@ export class JsParser implements IParser {
             const marker = this.builder.mark();
             this.builder.advance(); // consume ';'
             marker.done(JsGrammar.EmptyStatement);
-            return;
         } else if (this.builder.isNext(JsLexicalGrammar.IDENTIFIER) && this.builder.lookAhead(1)?.getType() === JsLexicalGrammar.COLON) {
             this.parseLabel();
         } else {
             this.parseStatementExpression();
-        }
-
-        if (this.isAfterCodeBlock) {
-            this.isAfterCodeBlock = false;
-        } else if (!this.insertSemicolonIfNeeded()) {
-            this.builder.errorVirtual("Expected ';'");
         }
     }
 
@@ -368,13 +367,13 @@ export class JsParser implements IParser {
         this.builder.expect(JsLexicalGrammar.KEYWORD, "while").failWith("Expected 'while'")
             .then(JsLexicalGrammar.LPAREN).failWith("Expected '('")
             .then(() => this.parseExpression())
-            .then(JsLexicalGrammar.RPAREN).failWith("Expected ')'")
+            .then(JsLexicalGrammar.RPAREN).failWith("Expected ')'");
 
         if (!this.builder.isNext(JsLexicalGrammar.SEMICOLON) && !this.builder.beforeNewLine()) {
             this.isDoWhileASI = true;
         }
 
-        marker.done(JsGrammar.DoWhileStatement);
+        this.finishStatement(marker, JsGrammar.DoWhileStatement);
     }
 
     parseSwitchStatement() {
@@ -476,7 +475,7 @@ export class JsParser implements IParser {
         let isAsync = !!this.builder.consumeIf(JsLexicalGrammar.IDENTIFIER, "async");
         if (isAsync && this.builder.beforeNewLine()) {
             marker.rollback();
-            return this.parseExpression();
+            return this.parseStatementExpression();
         }
 
         let isValid = this.builder.expect(JsLexicalGrammar.KEYWORD, "function").orError("Expected 'function'"); // consume 'function'
@@ -486,11 +485,10 @@ export class JsParser implements IParser {
         }
         let isGenerator = !!this.builder.consumeIf(JsLexicalGrammar.MATHEMATICAL_OPERATOR, "*");
 
-
         this.builder.expect(JsLexicalGrammar.IDENTIFIER).failWith("Function statement requires name");
 
         this.builder.expect(JsLexicalGrammar.LPAREN).failWith("Expected '('")
-            .then(() => this.myExprParser.parseFunctionArgumentDeclaration())
+            .then(() => this.myExprParser.parseFunctionParameterListDeclaration())
             .then(JsLexicalGrammar.RPAREN).failWith("Expected ')'")
             .then(() => {
                 this.parseBlock(true, true, isAsync, isGenerator);
@@ -507,7 +505,7 @@ export class JsParser implements IParser {
         if (!this.isSemicolonOrASI()) {
             this.parseExpression();
         }
-        marker.done(JsGrammar.ReturnStatement);
+        this.finishStatement(marker, JsGrammar.ReturnStatement);
     }
 
     parseBreakStatement() {
@@ -516,7 +514,7 @@ export class JsParser implements IParser {
         if (!this.isSemicolonOrASI()) {
             this.builder.expect(JsLexicalGrammar.IDENTIFIER).orError("Expected label identifier");
         }
-        marker.done(JsGrammar.BreakStatement);
+        this.finishStatement(marker, JsGrammar.BreakStatement);
     }
 
     parseContinueStatement() {
@@ -526,7 +524,7 @@ export class JsParser implements IParser {
         if (!this.isSemicolonOrASI()) {
             this.builder.expect(JsLexicalGrammar.IDENTIFIER).orError("Expected label identifier");
         }
-        marker.done(JsGrammar.ContinueStatement);
+        this.finishStatement(marker, JsGrammar.ContinueStatement);
     }
 
     parseThrowStatement() {
@@ -536,17 +534,17 @@ export class JsParser implements IParser {
 
         if (this.isSemicolonOrASI()) {
             this.builder.errorVirtual("Expected expression");
-            return marker.done(JsGrammar.ThrowStatement);
+        } else {
+            this.parseExpression();
         }
-        this.parseExpression();
-        marker.done(JsGrammar.ThrowStatement);
+        this.finishStatement(marker, JsGrammar.ThrowStatement);
     }
 
     parseDebuggerStatement() {
         const marker = this.builder.mark();
 
         this.builder.advance(); // consume 'debugger'
-        marker.done(JsGrammar.DebuggerStatement);
+        this.finishStatement(marker, JsGrammar.DebuggerStatement);
     }
 
     parseClassDeclaration() {
@@ -640,7 +638,7 @@ export class JsParser implements IParser {
 
         this.builder.advance(); // consume 'var' | 'let' | 'const'
         this.parseVariableDeclarationList();
-        marker.done(JsGrammar.VariableDeclaration);
+        this.finishStatement(marker, JsGrammar.VariableDeclaration);
     }
 
     parseVariableDeclarationList() {
@@ -664,7 +662,7 @@ export class JsParser implements IParser {
         marker.done(JsGrammar.Identifier);
 
         this.builder.expect(JsLexicalGrammar.LPAREN).failWith("Expected '('")
-            .then(() => this.myExprParser.parseFunctionArgumentDeclaration())
+            .then(() => this.myExprParser.parseFunctionParameterListDeclaration())
             .then(JsLexicalGrammar.RPAREN).failWith("Expected ')'")
             .then(() => this.parseBlock(true, true, isAsync, isGenerator));
 
@@ -692,7 +690,7 @@ export class JsParser implements IParser {
             .then(JsLexicalGrammar.RBRACKET).failWith("Expected ']'");
 
         if (this.builder.consumeIf(JsLexicalGrammar.LPAREN)) {
-            this.myExprParser.parseFunctionArgumentDeclaration();
+            this.myExprParser.parseFunctionParameterListDeclaration();
             this.builder.expect(JsLexicalGrammar.RPAREN).failWith("Expected ')'")
                 .then(() => this.parseBlock(true, true, isAsync, !!generatorToken));
             start.done(JsGrammar.ClassMethodDeclaration);
@@ -722,7 +720,7 @@ export class JsParser implements IParser {
             .then(JsLexicalGrammar.LPAREN).failWith("Expected '('")
             .then(() => {
                 if (this.builder.lookBehind()!.getValue() === "set") {
-                    this.myExprParser.parseFunctionArgumentDeclaration();
+                    this.myExprParser.parseFunctionParameterListDeclaration();
                 }
             })
             .then(JsLexicalGrammar.RPAREN).failWith("Expected ')'")
@@ -776,7 +774,7 @@ export class JsParser implements IParser {
     private parseStatementExpression(allowComma: boolean = true): void {
         const marker = this.builder.mark();
         this.parseExpression(allowComma);
-        marker.done(JsGrammar.ExpressionStatement);
+        this.finishStatement(marker, JsGrammar.ExpressionStatement);
     }
 
     private parseExpression(allowComma: boolean = true): void {

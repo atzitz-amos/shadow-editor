@@ -1,13 +1,25 @@
-import {SynDocument} from "../../../syntax/api/document/SynDocument";
 import {IntentBase} from "../IntentBase";
 import {SynNode} from "../../../syntax/api/SynNode";
 import {IntentsRegistry} from "./IntentsRegistry";
 import {Editor} from "../../../../editor/Editor";
 import {SynDocumentManager} from "../../../syntax/manager/SynDocumentManager";
+import {SynModTree} from "../../../codeGen/modification/SynModTree";
+import {DocumentModificationUtils} from "../../../../editor/core/document/utils/DocumentModificationUtils";
+import {Describable} from "../../../../core/ui/api/Describable";
+import {Icon} from "../../../../core/ui/icons/Icon";
+import {UndoStack} from "../../../../editor/core/undo/UndoStack";
 
-export type ApplicableIntent = {
-    intent: IntentBase,
-    node: SynNode
+export class ApplicableIntent implements Describable {
+    constructor(public readonly intent: IntentBase, public readonly node: SynNode) {
+    }
+
+    getIcon(): Icon | null {
+        return this.intent.getIcon();
+    }
+
+    getDescription(): string {
+        return this.intent.getDescription();
+    }
 }
 
 /**
@@ -17,29 +29,33 @@ export type ApplicableIntent = {
  * @since 1.0.0
  */
 export class IntentsAnalysis {
-    private static readonly INSTANCE: IntentsAnalysis = new IntentsAnalysis();
 
-    public static getInstance(): IntentsAnalysis {
-        return IntentsAnalysis.INSTANCE;
+    public static async executeIntent(editor: Editor, intent: ApplicableIntent) {
+        const document = SynDocumentManager.getOpenedSynDocument(editor);
+        const synMod = new SynModTree(document);
+        await intent.intent.execute(editor.getPrimaryCaret(), intent.node, synMod);
+
+        UndoStack.undoableAction(editor, "applyIndent", () => {
+            for (const modification of synMod.getModifications()) {
+                document.getDocument().replaceRange(modification.range, modification.text);
+            }
+        });
     }
 
-    getApplicableIntentsAt(document: SynDocument, offset: Offset): ApplicableIntent[] {
-        let element = document.getTree().getDeepestChildAt(offset) as SynNode | null;
+    public static getApplicableIntentsAtCaret(editor: Editor) {
+        const document = SynDocumentManager.getOpenedSynDocument(editor);
+        const caret = editor.getPrimaryCaret();
+        let element = document.getTree().getDeepestChildAt(caret.getOffset()) as SynNode | null;
         const result: ApplicableIntent[] = [];
         while (element) {
             for (const intent of IntentsRegistry.getForLanguage(document.getLanguage())) {
-                if (intent.getTargetTypes().some(type => element instanceof type) && intent.isApplicable(element)) {
-                    result.push({intent, node: element});
+                if (intent.getTargetTypes().some(type => element instanceof type) && intent.isApplicable(caret, element)) {
+                    result.push(new ApplicableIntent(intent, element));
                 }
-            }
 
+            }
             element = element.getParent()
         }
-
         return result;
-    }
-
-    getApplicableIntentsAtCaret(editor: Editor) {
-        return this.getApplicableIntentsAt(SynDocumentManager.getOpenedSynDocument(editor), editor.getPrimaryCaret().getOffset());
     }
 }

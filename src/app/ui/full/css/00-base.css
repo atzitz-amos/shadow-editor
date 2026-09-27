@@ -7,10 +7,14 @@
     outline: none;
 }
 
+:root {
+    --ide-system-font: "Inter", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
 body {
     margin: 0;
     padding: 0;
-    font-family: "Segoe UI", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: var(--ide-system-font), sans-serif;
     background: radial-gradient(circle at 0 0, #1b202c 0, transparent 50%),
     linear-gradient(160deg, #050609 0, #10131c 45%, #050609 100%);
     color: #e3e6f0;

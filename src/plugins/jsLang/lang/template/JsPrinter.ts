@@ -106,7 +106,7 @@ export class JsPrinter extends JsSynVisitor implements SynPrinter {
         this.write("new ");
         this.visitNext(element.getCallee());
         this.write("(");
-        element.getArguments().forEach((arg, index) => {
+        element.getArgumentList().getArguments().forEach((arg, index) => {
             if (index > 0) {
                 this.write(", ");
             }
@@ -118,7 +118,7 @@ export class JsPrinter extends JsSynVisitor implements SynPrinter {
     visitCallExpr(element: JsCallExpr) {
         this.visitNext(element.getCallee());
         this.write("(");
-        element.getArguments().forEach((arg, index) => {
+        element.getArguments().getArguments().forEach((arg, index) => {
             if (index > 0) {
                 this.write(", ");
             }

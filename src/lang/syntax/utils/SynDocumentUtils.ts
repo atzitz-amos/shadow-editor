@@ -1,4 +1,6 @@
 import {Document} from "../../../editor/core/document/Document";
+import {JsStatement} from "../../../plugins/jsLang/lang/syntax/statements/JsStatement";
+import {SynNode} from "../api/SynNode";
 
 /**
  *
@@ -9,5 +11,11 @@ import {Document} from "../../../editor/core/document/Document";
 export class SynDocumentUtils {
     public static getDocumentLengthTier(document: Document): number {
         return Math.log(document.getTotalDocumentLength());
+    }
+
+    static getIndentFor(node: SynNode) {
+        const document = node.getSynDocument().getDocument();
+        const line = document.getLineAt(node.getTextRange().start);
+        return line.getIndentationSize();
     }
 }

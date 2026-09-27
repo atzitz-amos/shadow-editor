@@ -81,10 +81,30 @@
             import {QuickParseUtils} from "./src/lang/syntax/utils/QuickParseUtils";
             import {SettingsDialog} from "./src/app/ui/full/settings/dialog/SettingsDialog";
             import HTMLLangPlugin from "./src/plugins/htmlLang/HTMLLangPlugin";
+            import {JsFunctionTemplate} from "./src/plugins/jsLang/lang/codeGen/template/JsFunctionTemplate";
+            import {JsReturnStatement} from "./src/plugins/jsLang/lang/syntax/statements/JsReturnStatement";
+            import {
+                JsFunctionParameterListTemplate
+            } from "./src/plugins/jsLang/lang/codeGen/template/JsFunctionParameterListTemplate";
+            import {JsStatementTemplate} from "./src/plugins/jsLang/lang/codeGen/template/JsStatementTemplate";
+            import {
+                JsFunctionParameterTemplate
+            } from "./src/plugins/jsLang/lang/codeGen/template/JsFunctionParameterTemplate";
+            import {JsExprTemplate} from "./src/plugins/jsLang/lang/codeGen/template/JsExprTemplate";
+            import {SynModTree} from "./src/lang/codeGen/modification/SynModTree";
 
             window.QuickParseUtils = QuickParseUtils;
 
             window.SettingsDialog = SettingsDialog;
+
+            window.SynModTree = SynModTree;
+
+            window.JsFunctionTemplate = JsFunctionTemplate;
+            window.JsReturnStatement = JsReturnStatement;
+            window.JsStatementTemplate = JsStatementTemplate;
+            window.JsFunctionParameterListTemplate = JsFunctionParameterListTemplate;
+            window.JsFunctionParameterTemplate = JsFunctionParameterTemplate;
+            window.JsExprTemplate = JsExprTemplate;
 
             window.format = () => {
                 const document = getSynDocument();
@@ -142,7 +162,6 @@
             window.SourceRewriter = SourceRewriter;
             window.AbstractSynTemplate = JsSynTemplate;
             window.SynSuiteRender = SynSuiteWindowRenderer;
-            window.SynModTree = SynModificationTree;
 
             window.ProjectFilesPaneHelper = ProjectFilesPaneHelper;
 

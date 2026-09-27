@@ -71,7 +71,7 @@ export class JsFormattingBlockVisitor extends JsSynVisitor implements Formatting
             for (const statement of node.getStatements()) {
                 this.builder.visit(statement);
 
-                const semicolon = node.getSemicolon(statement);
+                const semicolon = statement.getSemicolon();
                 if (semicolon) this.builder.advancePast(semicolon);
 
                 this.builder.break(FormattingBreak.ifParentExpanded(""));

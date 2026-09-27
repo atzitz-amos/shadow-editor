@@ -34,9 +34,9 @@ export class ProjectFilesNewEntryAction extends AbstractAction {
             filesTree.setExpanded(entry);
         }
 
-        setTimeout(() => {
+        setTimeout(async () => {
             filesTree.select(child)
-            if (child instanceof ProjectFile) EditorTabsHelper.newTab(child);
+            if (child instanceof ProjectFile) await EditorTabsHelper.newTab(child);
         });
     }
 

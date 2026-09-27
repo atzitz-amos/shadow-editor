@@ -15,8 +15,8 @@ export class DefaultActionsRegistry {
         this.isLoaded = true;
 
         const modules = import.meta.glob([
-            '../*.ts',
-            '../../../../app/**/actions/**/*.ts'
+            '../../../../app/**/actions/**/*.ts',
+            '../../../../editor/**/actions/**/*.ts'
         ], {eager: true});
         let registeredCount = 0;
 

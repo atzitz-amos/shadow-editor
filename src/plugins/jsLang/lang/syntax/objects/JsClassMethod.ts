@@ -4,7 +4,7 @@ import {SynNodeVisitor} from "../../../../../lang/syntax/visitors/SynNodeVisitor
 import {JsSynVisitor} from "../visitors/JsSynVisitor";
 import {SynTokenNode} from "../../../../../lang/syntax/impl/SynTokenNode";
 import {JsCodeBlock} from "../JsCodeBlock";
-import {JsFunctionParameters} from "../statements/JsFunctionParameters";
+import {JsFunctionParameterList} from "../statements/JsFunctionParameterList";
 import {JsSynUtils} from "../utils/JsSynUtils";
 import {JsClassPropertyKey} from "./JsClassPropertyKey";
 import {JsClassUtils} from "./JsClassUtils";
@@ -22,7 +22,7 @@ export class JsClassMethod extends JsClassMember {
     private readonly generatorToken: SynTokenNode | undefined;
 
     private readonly name: JsClassPropertyKey;
-    private readonly parameters: JsFunctionParameters;
+    private readonly parameters: JsFunctionParameterList;
     private readonly body: JsCodeBlock;
 
     constructor(node: ASTNode) {
@@ -58,7 +58,7 @@ export class JsClassMethod extends JsClassMember {
         return this.asyncToken;
     }
 
-    getParameters(): JsFunctionParameters {
+    getParameters(): JsFunctionParameterList {
         return this.parameters;
     }
 

@@ -1,4 +1,4 @@
-import {TextRange} from "../../../editor/core/coordinate/range/TextRange";
+import {HasRange, TextRange} from "../../../editor/core/coordinate/range/TextRange";
 import {SynNodeVisitor} from "../visitors/SynNodeVisitor";
 
 /**
@@ -7,7 +7,7 @@ import {SynNodeVisitor} from "../visitors/SynNodeVisitor";
  * @date 6/29/2026
  * @since 1.0.0
  */
-export interface SynBase {
+export interface SynBase extends HasRange {
     getTextRange(): TextRange;
 
     toDebugString(): string;

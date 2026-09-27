@@ -22,7 +22,7 @@ export abstract class SynASTElementImpl extends AbstractSynParentElement impleme
     protected readonly document: SynDocument;
     private readonly elementChildren: SynASTElement[];
 
-    protected constructor(node: ASTNode) {
+    constructor(node: ASTNode) {
         super(node.children);
         this.node = node;
         this.document = node.document;

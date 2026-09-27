@@ -2,7 +2,7 @@ import {JsExpr} from "./JsExpr";
 import {JsFunction} from "../api/JsFunction";
 import {ASTNode} from "../../../../../lang/syntax/builder/parser/nodes/ASTNode";
 import {JsCodeBlock} from "../JsCodeBlock";
-import {JsFunctionParameters} from "../statements/JsFunctionParameters";
+import {JsFunctionParameterList} from "../statements/JsFunctionParameterList";
 import {SynTokenNode} from "../../../../../lang/syntax/impl/SynTokenNode";
 import {SynNodeVisitor} from "../../../../../lang/syntax/visitors/SynNodeVisitor";
 import {JsSynVisitor} from "../visitors/JsSynVisitor";
@@ -14,7 +14,7 @@ import {JsSynVisitor} from "../visitors/JsSynVisitor";
  * @since 1.0.0
  */
 export class JsArrowFunctionExpr extends JsExpr implements JsFunction {
-    private readonly parameters: JsFunctionParameters;
+    private readonly parameters: JsFunctionParameterList;
     private readonly body: JsCodeBlock;
 
     private readonly asyncToken?: SynTokenNode;
@@ -23,7 +23,7 @@ export class JsArrowFunctionExpr extends JsExpr implements JsFunction {
     constructor(node: ASTNode) {
         super(node);
 
-        this.parameters = this.getNthChildOfType(JsFunctionParameters, 0)!;
+        this.parameters = this.getNthChildOfType(JsFunctionParameterList, 0)!;
         this.body = this.getNthChildOfType(JsCodeBlock, 0)!;
 
         for (let token of this.getAllToken()) {
@@ -51,7 +51,7 @@ export class JsArrowFunctionExpr extends JsExpr implements JsFunction {
         return this.asyncToken
     }
 
-    getParameters(): JsFunctionParameters {
+    getParameters(): JsFunctionParameterList {
         return this.parameters;
     }
 

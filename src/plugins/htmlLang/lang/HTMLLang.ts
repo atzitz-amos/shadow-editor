@@ -5,6 +5,7 @@ import {HtmlStatefulLexer} from "./lexer/HtmlStatefulLexer";
 import {HtmlHighlighter} from "./highlighter/HtmlHighlighter";
 import {Icon} from "../../../core/ui/icons/Icon";
 import {FaIcon} from "../../../core/ui/icons/FaIcon";
+import {ILexer} from "../../../lang/syntax/builder/lexer/ILexer";
 
 /**
  *
@@ -41,7 +42,7 @@ export default class HTMLLang extends LanguageBase {
             .colored("#E34F26");
     }
 
-    public createLexer(): IncrementalLexer {
+    public createLexer(): ILexer {
         return new HtmlStatefulLexer();
     }
 

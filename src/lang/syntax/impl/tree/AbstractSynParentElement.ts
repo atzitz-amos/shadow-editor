@@ -83,7 +83,7 @@ export abstract class AbstractSynParentElement implements SynParentElement {
             const range = child.getTextRange();
             if (offset < range.start) {
                 right = mid - 1;
-            } else if (offset >= range.end) {
+            } else if (offset > range.end) {
                 left = mid + 1;
             } else {
                 return child;

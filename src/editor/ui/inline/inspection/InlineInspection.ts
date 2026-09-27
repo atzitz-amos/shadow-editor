@@ -1,5 +1,5 @@
 import {Overlay} from "../widget/overlay/Overlay";
-import {HoverPopup} from "../../popups/builder/HoverPopup";
+import {HoverPopupFrame} from "../../popups/builder/HoverPopupFrame";
 import {TextRange} from "../../../core/coordinate/range/TextRange";
 import {Editor} from "../../../Editor";
 import {SimpleTooltipBuilder} from "../../popups/tooltip/SimpleTooltipBuilder";
@@ -15,7 +15,7 @@ import {TrackedRange} from "../../../core/coordinate/range/TrackedRange";
  */
 export class InlineInspection extends OverlayWidget {
     private overlay: Overlay | null = null;
-    private hoverPopup: HoverPopup;
+    private hoverPopup: HoverPopupFrame;
     private readonly range: TrackedRange;
 
     constructor(range: TextRange, private severity: InspectionSeverity, private message: string) {
@@ -48,7 +48,7 @@ export class InlineInspection extends OverlayWidget {
     init(overlay: Overlay): void {
         this.overlay = overlay;
 
-        this.hoverPopup = new HoverPopup(new SimpleTooltipBuilder(this.message))
+        this.hoverPopup = new HoverPopupFrame(new SimpleTooltipBuilder(this.message))
             .delayed(500)
             .attachToOverlay(overlay);
     }

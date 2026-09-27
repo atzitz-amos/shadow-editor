@@ -2,18 +2,18 @@
 .editor-popup {
     position: absolute;
     z-index: 1000;
-    background: #383b3f;
-    translate: 0 -2px;
+    background: #1a1a1c;
+    translate: 0 1px;
     padding: 5px;
-    border-radius: 6px;
     color: #bfbfbf;
-    font-size: 0.8em;
-    border: 1px solid #696666;
+    border: 1px solid #dedede3b;
+    box-shadow: 7px 5px 8px black;
 }
 
 .editor-popup, .editor-popup * {
     user-select: auto;
     pointer-events: auto;
+    font-size: 12px;
 }
 
 .ide-popup-layer {
@@ -32,4 +32,18 @@
 
 .ide-popup-layer.transparent {
     pointer-events: none;
+}
+
+/* Context Actions */
+.context-actions-popup {
+    padding: 0;
+}
+
+.context-actions-popup * {
+    font-family: var(--ide-system-font), sans-serif;
+}
+
+.context-actions-popup .ide-searchable-list-row {
+    gap: 3px !important;
+    padding-left: 3px !important;
 }

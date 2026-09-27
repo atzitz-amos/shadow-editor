@@ -2,6 +2,7 @@ import {IncrementalLexer} from "./syntax/builder/lexer/IncrementalLexer";
 import {ExtensionPointSupplier} from "../core/plugins/extensionPoints/ExtensionPointSupplier";
 import {HighlighterBase} from "./highlighter/HighlighterBase";
 import {Icon} from "../core/ui/icons/Icon";
+import {ILexer} from "./syntax/builder/lexer/ILexer";
 
 export abstract class LanguageBase implements ExtensionPointSupplier {
     public static readonly PLAIN_TEXT = new class extends LanguageBase {
@@ -33,7 +34,7 @@ export abstract class LanguageBase implements ExtensionPointSupplier {
 
     public abstract getDefaultExtension(): string;
 
-    public abstract createLexer(): IncrementalLexer;
+    public abstract createLexer(): ILexer;
 
     public abstract createHighlighter(): HighlighterBase;
 

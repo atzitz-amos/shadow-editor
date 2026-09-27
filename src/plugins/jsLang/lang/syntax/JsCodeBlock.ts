@@ -2,12 +2,9 @@ import {SynCodeBlock} from "../../../../lang/syntax/api/SynCodeBlock";
 import {ASTNode} from "../../../../lang/syntax/builder/parser/nodes/ASTNode";
 import {SynNodeVisitor} from "../../../../lang/syntax/visitors/SynNodeVisitor";
 import {JsSynVisitor} from "./visitors/JsSynVisitor";
-import {JsLexicalGrammar} from "../lexer/JsLexicalGrammar";
 import {SynScopeType} from "../../../../lang/indexes/scope/SynScopeType";
 import {JsSynUtils} from "./utils/JsSynUtils";
-import {SynASTElementImpl} from "../../../../lang/syntax/impl/tree/SynASTElementImpl";
 import {JsStatement} from "./statements/JsStatement";
-import {SynTokenNode} from "../../../../lang/syntax/impl/SynTokenNode";
 
 /**
  *
@@ -16,7 +13,7 @@ import {SynTokenNode} from "../../../../lang/syntax/impl/SynTokenNode";
  * @since 1.0.0
  */
 export class JsCodeBlock extends SynCodeBlock {
-    private readonly statements: SynASTElementImpl[];
+    private readonly statements: JsStatement[];
 
     constructor(node: ASTNode) {
         super(node);
@@ -28,7 +25,7 @@ export class JsCodeBlock extends SynCodeBlock {
         return this.getOpeningBrace() === undefined && this.getClosingBrace() === undefined;
     }
 
-    getStatements(): SynASTElementImpl[] {
+    getStatements(): JsStatement[] {
         return this.statements;
     }
 
@@ -44,13 +41,5 @@ export class JsCodeBlock extends SynCodeBlock {
             visitor.visitJsCodeBlock(this);
         }
         super.accept(visitor);
-    }
-
-    getSemicolon(statement: JsStatement): SynTokenNode | null {
-        let node = statement.nextSibling();
-        if (node instanceof SynTokenNode && node.getTokenType() === JsLexicalGrammar.SEMICOLON) {
-            return node;
-        }
-        return null;
     }
 }

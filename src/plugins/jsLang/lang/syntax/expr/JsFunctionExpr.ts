@@ -2,7 +2,7 @@ import {JsExpr} from "./JsExpr";
 import {ASTNode} from "../../../../../lang/syntax/builder/parser/nodes/ASTNode";
 import {JsFunction} from "../api/JsFunction";
 import {JsCodeBlock} from "../JsCodeBlock";
-import {JsFunctionParameters} from "../statements/JsFunctionParameters";
+import {JsFunctionParameterList} from "../statements/JsFunctionParameterList";
 import {SynTokenNode} from "../../../../../lang/syntax/impl/SynTokenNode";
 import {SynNodeVisitor} from "../../../../../lang/syntax/visitors/SynNodeVisitor";
 import {JsSynVisitor} from "../visitors/JsSynVisitor";
@@ -16,7 +16,7 @@ import {JsLexicalGrammar} from "../../lexer/JsLexicalGrammar";
  */
 export class JsFunctionExpr extends JsExpr implements JsFunction {
     private readonly name: SynTokenNode | null = null;
-    private readonly parameters: JsFunctionParameters;
+    private readonly parameters: JsFunctionParameterList;
     private readonly body: JsCodeBlock;
     private readonly asyncToken?: SynTokenNode;
 
@@ -25,7 +25,7 @@ export class JsFunctionExpr extends JsExpr implements JsFunction {
     constructor(node: ASTNode) {
         super(node);
 
-        this.parameters = this.getNthChildOfType(JsFunctionParameters, 0)!;
+        this.parameters = this.getNthChildOfType(JsFunctionParameterList, 0)!;
         this.body = this.getNthChildOfType(JsCodeBlock, 0)!;
         this.generatorToken = this.getAllTokensOfType(JsLexicalGrammar.MATHEMATICAL_OPERATOR)[0];
 
@@ -47,7 +47,7 @@ export class JsFunctionExpr extends JsExpr implements JsFunction {
         return this.name ?? null;
     }
 
-    getParameters(): JsFunctionParameters {
+    getParameters(): JsFunctionParameterList {
         return this.parameters;
     }
 

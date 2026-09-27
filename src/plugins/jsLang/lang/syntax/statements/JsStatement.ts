@@ -2,6 +2,8 @@ import {SynASTElementImpl} from "../../../../../lang/syntax/impl/tree/SynASTElem
 import {ASTNode} from "../../../../../lang/syntax/builder/parser/nodes/ASTNode";
 import {SynNodeVisitor} from "../../../../../lang/syntax/visitors/SynNodeVisitor";
 import {JsSynVisitor} from "../visitors/JsSynVisitor";
+import {SynTokenNode} from "../../../../../lang/syntax/impl/SynTokenNode";
+import {JsLexicalGrammar} from "../../lexer/JsLexicalGrammar";
 
 /**
  *
@@ -22,4 +24,11 @@ export class JsStatement extends SynASTElementImpl {
         super.accept(visitor);
     }
 
+    getSemicolon(): SynTokenNode | null {
+        const semicolon = this.getAllToken().find(token => token.getTokenType() === JsLexicalGrammar.SEMICOLON);
+        if (semicolon) {
+            return semicolon;
+        }
+        return null;
+    }
 }

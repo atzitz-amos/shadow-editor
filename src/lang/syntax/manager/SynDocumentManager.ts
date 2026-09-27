@@ -57,6 +57,14 @@ export class SynDocumentManager implements ServiceImpl {
         return this.getInstance().getOpenedSynDocument(editor);
     }
 
+    public static createVirtualSynDocumentForText(text: string, language: LanguageBase) {
+        return this.createVirtualSynDocument(EditorDocumentManager.createVirtualDocument(text, language));
+    }
+
+    public static createDetachedSynDocumentForText(text: string, language: LanguageBase) {
+        return new SynDocumentImpl(EditorDocumentManager.createVirtualDocument(text, language), null);
+    }
+
     public getOpenedSynDocument(editor: Editor) {
         return this.getSynDocument(editor.getOpenedDocument());
     }
@@ -116,9 +124,5 @@ export class SynDocumentManager implements ServiceImpl {
                 lexerInvalidRange
             ));
         }
-    }
-
-    static createVirtualSynDocumentForText(text: string, language: LanguageBase) {
-        return this.createVirtualSynDocument(EditorDocumentManager.createVirtualDocument(text, language));
     }
 }

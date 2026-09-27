@@ -4,6 +4,9 @@ import {JsGrammar} from "../../lang/parser/JsGrammar";
 import {JsArrowFunctionExpr} from "../../lang/syntax/expr/JsArrowFunctionExpr";
 import {JsFunction} from "../../lang/syntax/api/JsFunction";
 import {JsClassMethod} from "../../lang/syntax/objects/JsClassMethod";
+import {SynCodeBlock} from "../../../../lang/syntax/api/SynCodeBlock";
+import {JsCodeBlockTemplate} from "../../lang/codeGen/template/JsCodeBlockTemplate";
+import {JsCodeBlock} from "../../lang/syntax/JsCodeBlock";
 
 /**
  *
@@ -101,7 +104,7 @@ export class JsSpacingRules {
 
     public static readonly SPACE_AFTER_COMMA_IN_FUNCTION_DECLARATION = new SpacingRule("Space after ',' in function declarations")
         .after(JsLexicalGrammar.COMMA)
-        .in(JsGrammar.FunctionArguments)
+        .in(JsGrammar.FunctionParameter)
         .space();
 
     public static readonly SPACE_AFTER_COMMA_IN_ARRAY_LITERAL = new SpacingRule("Space after ',' in array literals")
@@ -205,6 +208,11 @@ export class JsSpacingRules {
     public static readonly SPACE_BEFORE_CODEBLOCK = new SpacingRule("Space before code block")
         .before(JsLexicalGrammar.LBRACE)
         .in(JsGrammar.CodeBlock)
+        .space();
+
+    public static readonly SPACE_BEFORE_IMPLICIT_CODEBLOCK = new SpacingRule("Space before implicit code block")
+        .in(JsGrammar.CodeBlock)
+        .if((p, n, node) => (node as JsCodeBlock).isImplicit())
         .space();
 
     public static readonly SPACE_BEFORE_CLASS_BRACE = new SpacingRule("Space before class brace")

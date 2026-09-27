@@ -28,7 +28,7 @@ import {WorkspaceRestorer} from "../project/WorkspaceRestorer";
 import {LatencyMonitor} from "../../editor/core/latency/LatencyMonitor";
 import {SynDocumentManager} from "../../lang/syntax/manager/SynDocumentManager";
 import {KeybindManager} from "../keybinds/KeybindManager";
-import {IntentAnalysisService} from "../../lang/codeAnalysis/intents/analysis/IntentAnalysisService";
+import {IntentsRegistry} from "../../lang/codeAnalysis/intents/analysis/IntentsRegistry";
 
 /**
  * Provides a single class that regroups all useful singletons and global services of the application
@@ -101,6 +101,10 @@ export class GlobalState {
         return ActionManager.getInstance();
     }
 
+    getIntentsRegistry(): IntentsRegistry {
+        return IntentsRegistry.getInstance();
+    }
+
     public static getWCPMetricsService(): WCPService {
         return WCPService.getInstance();
     }
@@ -135,10 +139,6 @@ export class GlobalState {
 
     public static getEditorKeyContextManager() {
         return EditorKeyContextManager.getInstance();
-    }
-
-    public static getIntentsAnalysisService(): IntentAnalysisService {
-        return IntentAnalysisService.getInstance();
     }
 
     public static getSynSuiteEngine(): SynSuiteEngine {

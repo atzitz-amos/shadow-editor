@@ -21,11 +21,12 @@ export class TextRange implements Serializable {
         return new TextRange(v, v + 1);
     }
 
-    static enclosing(items: HasRange[]) {
+    static enclosing(items: (HasRange | TextRange)[]) {
         let start = 0, end = 0;
         for (const item of items) {
-            if (item.getTextRange().start < start) start = item.getTextRange().start;
-            if (item.getTextRange().end > end) end = item.getTextRange().end;
+            const textRange = (item instanceof TextRange) ? item : item.getTextRange();
+            if (textRange.start < start) start = textRange.start;
+            if (textRange.end > end) end = textRange.end;
         }
 
         return new TextRange(start, end);
