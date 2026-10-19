@@ -6,6 +6,7 @@ const LAZY_VALUE = Symbol("lazyDataValue");
 
 interface LazyDataValue<T> {
     readonly [LAZY_VALUE]: true;
+
     get(): T;
 }
 

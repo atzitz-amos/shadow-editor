@@ -1,8 +1,8 @@
 import {DistantService, DistantServiceImpl} from "../../threaded/service/DistantService";
-import {Scheduler} from "../../scheduler/Scheduler";
-import {Logger} from "../../logging/logger/LoggerCore";
-import {UseLogger} from "../../logging/logger/LoggerDecorators";
 import {DistantGlobalState} from "../../global/DistantGlobalState";
+import {Logger} from "../../logging/logger/LoggerCore";
+import {Scheduler} from "../../scheduler/Scheduler";
+import {UseLogger} from "../../logging/Logger";
 
 /**
  *
@@ -15,8 +15,7 @@ import {DistantGlobalState} from "../../global/DistantGlobalState";
 export class SyncService implements DistantServiceImpl {
     private static instance: SyncService;
     private static readonly DELAY = 10 * 60 * 1000;
-
-    declare private readonly logger: Logger;
+    private declare readonly logger: Logger;
 
     public static getInstance(): SyncService {
         if (SyncService.instance === undefined) {
@@ -31,19 +30,21 @@ export class SyncService implements DistantServiceImpl {
 
     async begin() {
         await this.sync();
-        Scheduler.every(SyncService.DELAY, this.sync);
+        Scheduler.every(SyncService.DELAY, () => this.sync());
     }
 
-    private async sync() {
-        this.logger.info("Starting sync...");
+    private async sync(): Promise<void> {
+        try {
+            this.logger.info("Starting sync...");
 
-        const project = await DistantGlobalState.getCurrentProject();
-        if (!await project.isDefined()) {
-            this.logger.info("Aborting sync: no project...");
-            return;
+            // No project open -> the main thread returns undefined/null BY VALUE, not a Ref.
+            const project = await DistantGlobalState.getCurrentProject();
+            if (!project) {
+                this.logger.info("Aborting sync: no project...");
+                return;
+            }
+        } catch (e) {
+            this.logger.error("Sync failed", e);
         }
-        const fs = await project.getFS();
-
-        console.log(await fs.recursiveGetAllFiles());
     }
 }

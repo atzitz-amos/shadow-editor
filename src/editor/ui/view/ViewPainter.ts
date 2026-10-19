@@ -167,7 +167,8 @@ export class ViewPainter {
                 span.style.width = HTMLUtils.px(width * this.view.getCharSize() + 2);
             } else {
                 span.style.left = HTMLUtils.px(this.view.getCharSize() * start + 2);
-                span.style.width = HTMLUtils.px(width * this.view.getCharSize());
+                span.style.width = HTMLUtils.px(width * this.view.getCharSize() + 4);
+                span.style.translate = "-2px";
             }
         }
 
@@ -178,7 +179,7 @@ export class ViewPainter {
     }
 
     private paintVirtualOverlay(overlay: OverlayWidget, offset: number, start: number): HTMLSpanElement {
-        const span = HTMLUtils.createElement<HTMLSpanElement>("span.overlay-widget");
+        const span = HTMLUtils.createElement<HTMLSpanElement>("span.overlay-widget.virtual-overlay-widget");
         span.classList.add(...overlay.getClassList());
         span.style.zIndex = overlay.getDrawPriority().toString();
 

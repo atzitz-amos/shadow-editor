@@ -64,7 +64,7 @@ export class CodeStyleTab extends DebugToolTab {
 
         GlobalState.getMainEventBus().subscribe(this, DocumentModificationEvent.SUBSCRIBER, e => {
             if (this.isSelected) {
-                this.update(e.getEditor());
+                this.update(GlobalState.getMainEditor());
             }
         });
     }

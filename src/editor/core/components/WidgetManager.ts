@@ -79,6 +79,7 @@ export class WidgetManager {
 
         this.overlays = newOverlays;
         this.gutterComponents = newGutterComponents;
+
     }
 
     getEditor() {

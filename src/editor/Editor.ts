@@ -4,7 +4,7 @@ import {Caret, CaretModel, CaretMovementFlags} from "./core/caret/Caret";
 import {ModifierKeyHolder} from "../core/keybinds/Keybind";
 
 import {HTMLUtils} from "./utils/HTMLUtils";
-import {Document} from "./core/document/Document";
+import {Document, DocumentListener} from "./core/document/Document";
 import {WidgetManager} from "./core/components/WidgetManager";
 import {LogicalPosition} from "./core/coordinate/LogicalPosition";
 import {VisualPosition} from "./core/coordinate/VisualPosition";
@@ -36,6 +36,7 @@ import {EditorCharTypedContext} from "./core/behaviors/context/EditorCharTypedCo
 import {DocumentView} from "./core/document/view/DocumentView";
 import {EditorDocumentChangedEvent} from "./impl/events/EditorDocumentChangedEvent";
 import {CodeAnalysisService} from "../lang/codeAnalysis/analysis/CodeAnalysisService";
+import {DocumentModificationEvent} from "./core/document/events/DocumentModificationEvent";
 
 export class Editor {
     private static ID_COUNTER = 0;
@@ -80,6 +81,8 @@ export class Editor {
 
         this.document = documentView.getDocument();
         this.documentView = documentView;
+        this.observeDocument();
+        this.overrideLanguage(this.document.getLanguage());
 
         this.inlayManager = new InlayManager(this);
         this.coordinateMapper = new EditorCoordinateMapper(this.view);
@@ -115,17 +118,19 @@ export class Editor {
     changeDocument(documentView: DocumentView) {
         this.caretModel.removeAllIncludingPrimary();
         this.widgetManager.clearAllOverlays();
-        this.document.linkEditor(null);
 
         const oldDocument = this.document;
         this.document = documentView.getDocument();
         this.documentView = documentView;
-
-        this.document.linkEditor(this);
         this.caretModel.addCaret(this.offsetToLogical(documentView.getCaretOffset()));
 
         this.restoreFromDocumentView()
         this.repaintView();
+
+        this.unobserveDocument(oldDocument);
+        this.observeDocument();
+
+        this.overrideLanguage(this.document.getLanguage());
 
         this.eventBus.syncPublish(new EditorDocumentChangedEvent(this, oldDocument, this.documentView));
     }
@@ -140,6 +145,10 @@ export class Editor {
      +--------------------------+
      |           Data           |
      +--------------------------+    */
+    getId(): number {
+        return this.id;
+    }
+
     getView(): View {
         return this.view;
     }
@@ -374,7 +383,11 @@ export class Editor {
     onKeyDown(event: KeyboardEvent) {
         ModifierKeyHolder.getInstance().set(event);
 
-        KeybindManager.getInstance().onKeydown(ContextResolver.fromEvent(event));
+        if (!KeybindManager.getInstance().onKeydown(ContextResolver.fromEvent(event))) {
+            if (event.key === "Escape") {
+                if (this.getBehaviorManager().getCurrentMode()) this.getBehaviorManager().exitMode();
+            }
+        }
         this.eventBus.syncPublish(new KeyPressedEvent(this, event));
     }
 
@@ -451,5 +464,18 @@ export class Editor {
     private restoreFromDocumentView() {
         this.caretModel.getPrimary().moveToOffset(this.documentView.getCaretOffset(), CaretMovementFlags.JUMP);
         this.view.restoreFromDocumentView(this.documentView);
+    }
+
+    private observeDocument() {
+        const editor = this;
+        this.document.addObserver(this, new class implements DocumentListener {
+            documentModified(event: DocumentModificationEvent): void {
+                editor.repaintView();
+            }
+        });
+    }
+
+    private unobserveDocument(doc: Document): void {
+        doc.removeObserver(this);
     }
 }

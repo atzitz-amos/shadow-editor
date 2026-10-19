@@ -3,6 +3,7 @@ import JsLang from "../../JsLang";
 import {JsStatement} from "../../syntax/statements/JsStatement";
 import {JsSynTemplate} from "./JsSynTemplate";
 import {SynASTElement} from "../../../../../lang/syntax/api/tree/SynASTElement";
+import {JsParser} from "../../parser/JsParser";
 
 /**
  *
@@ -17,11 +18,12 @@ export class JsStatementTemplate extends JsSynTemplate {
     }
 
     public static fromString(statement: string): JsStatementTemplate {
-        const parsed = QuickParseUtils.quickParse(JsLang.INSTANCE, statement).tree;
-        const parsedStatement = parsed.getToplevelCodeblock().getNthChildOfType(JsStatement, 0);
-        if (!parsedStatement) {
+        const parsed = QuickParseUtils.quickParseElementFactory<JsParser>(JsLang.INSTANCE, statement, parser => {
+            parser.parseStatementOrExpr();
+        });
+        if (!(parsed instanceof JsStatement)) {
             throw new Error(`Failed to parse statement from string: ${statement}`);
         }
-        return new JsStatementTemplate(parsedStatement);
+        return new JsStatementTemplate(parsed);
     }
 }

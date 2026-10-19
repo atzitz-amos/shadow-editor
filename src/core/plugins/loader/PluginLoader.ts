@@ -2,6 +2,7 @@ import {PluginManager} from "../PluginManager";
 import {EditorPlugin} from "./Plugin";
 import {ExtensionPointSupplier} from "../extensionPoints/ExtensionPointSupplier";
 import {ExtensionPoint} from "../extensionPoints/ExtensionPoint";
+import {getExtensionPoint} from "../extensionPoints/Extension";
 import {Logger, UseLogger} from "../../logging/Logger";
 
 export class LoadedExtensionPoint {
@@ -24,6 +25,14 @@ export class LoadedExtensionPoint {
     }
 }
 
+type PluginModule = { pluginCls: Constructor<EditorPlugin>, pluginName: string };
+type ExtensionModule = {
+    extCls: Constructor<ExtensionPointSupplier>,
+    pluginName: string,
+    extPoint: string
+};
+type StylesheetEntry = { pluginName: string, url: () => Promise<string> };
+
 @UseLogger("PluginLoader")
 export class PluginLoader {
     private declare readonly logger: Logger;
@@ -38,25 +47,7 @@ export class PluginLoader {
         const stylesheets = this.resolveStylesheets();
 
         for (const module of modules) {
-            const plugin = new module.pluginCls();
-            const loadedExtensionPoints: Record<string, LoadedExtensionPoint[]> = {};
-            for (const {extCls, extPoint, pluginName} of extensionPoints) {
-                if (pluginName === module.pluginName) {
-                    if (!loadedExtensionPoints[extPoint]) {
-                        loadedExtensionPoints[extPoint] = [];
-                    }
-                    let extensionPoints = ExtensionPoint.forName(extPoint);
-                    if (extensionPoints.length) {
-                        loadedExtensionPoints[extPoint].push(new LoadedExtensionPoint(extensionPoints, plugin, new extCls()));
-                    } else {
-                        this.logger.debug("Skipping loading of extension point: " + extPoint + " for plugin: " + pluginName + " - extension point not found.");
-                        delete loadedExtensionPoints[extPoint];
-                    }
-                }
-            }
-
-            const pluginStyles = stylesheets.filter(s => s.pluginName === module.pluginName).map(s => s.url);
-            this.manager.registerPlugin(plugin, module.pluginName, loadedExtensionPoints, pluginStyles);
+            this.loadModule(module, extensionPoints, stylesheets);
         }
     }
 
@@ -69,26 +60,7 @@ export class PluginLoader {
         const stylesheets = this.resolveStylesheets();
 
         for (const module of modules) {
-            const plugin = new module.pluginCls();
-            const loadedExtensionPoints: Record<string, LoadedExtensionPoint[]> = {};
-
-            for (const {extCls, extPoint, pluginName} of extensionPoints) {
-                if (pluginName === module.pluginName) {
-                    if (!loadedExtensionPoints[extPoint]) {
-                        loadedExtensionPoints[extPoint] = [];
-                    }
-                    let extensionPoints = ExtensionPoint.forName(extPoint);
-                    if (extensionPoints.length) {
-                        loadedExtensionPoints[extPoint].push(new LoadedExtensionPoint(extensionPoints, plugin, new extCls()));
-                    } else {
-                        this.logger.debug("Skipping loading of extension point: " + extPoint + " for plugin: " + pluginName + " - extension point not found.");
-                        delete loadedExtensionPoints[extPoint];
-                    }
-                }
-            }
-
-            const pluginStyles = stylesheets.filter(s => s.pluginName === module.pluginName).map(s => s.url);
-            this.manager.registerPlugin(plugin, module.pluginName, loadedExtensionPoints, pluginStyles);
+            const plugin = this.loadModule(module, extensionPoints, stylesheets);
 
             // Await plugin's async onLoad if it exists
             if (typeof plugin.onLoadAsync === 'function') {
@@ -97,11 +69,37 @@ export class PluginLoader {
         }
     }
 
-    private effectiveImport(): { pluginCls: Constructor<EditorPlugin>, pluginName: string }[] {
+    private loadModule(
+        module: PluginModule,
+        extensionModules: ExtensionModule[],
+        stylesheets: StylesheetEntry[]
+    ): EditorPlugin {
+        const plugin = new module.pluginCls();
+        const loadedExtensionPoints: Record<string, LoadedExtensionPoint[]> = {};
+
+        for (const {extCls, extPoint, pluginName} of extensionModules) {
+            if (pluginName !== module.pluginName) continue;
+
+            const targets = ExtensionPoint.forName(extPoint);
+            if (!targets.length) {
+                this.logger.debug("Skipping loading of extension point: " + extPoint + " for plugin: " + pluginName + " - extension point not found.");
+                continue;
+            }
+
+            (loadedExtensionPoints[extPoint] ??= []).push(new LoadedExtensionPoint(targets, plugin, new extCls()));
+        }
+
+        const pluginStyles = stylesheets.filter(s => s.pluginName === module.pluginName).map(s => s.url);
+        this.manager.registerPlugin(plugin, module.pluginName, loadedExtensionPoints, pluginStyles);
+
+        return plugin;
+    }
+
+    private effectiveImport(): PluginModule[] {
         this.logger.debug("Scanning for plugins...");
 
         const imports = import.meta.glob("/src/plugins/*/*.ts", {eager: true});
-        const plugins: { pluginCls: Constructor<EditorPlugin>, pluginName: string }[] = [];
+        const plugins: PluginModule[] = [];
 
         let invalid: number = 0;
 
@@ -123,28 +121,33 @@ export class PluginLoader {
         return plugins;
     }
 
-    private resolveExtensionPoints(): {
-        extCls: Constructor<ExtensionPointSupplier>,
-        pluginName: string,
-        extPoint: string
-    }[] {
+    /**
+     * Discovers extension point suppliers anywhere under /src/plugins/{pluginName}/.
+     * A supplier is any default-exported class in a subdirectory of the plugin. The plugin
+     * name always comes from the path. The extension point comes from @Extension("some.point")
+     * if present, otherwise from the directory: a/b/File.ts → "a.b".
+     */
+    private resolveExtensionPoints(): ExtensionModule[] {
         this.logger.debug("Scanning for extension points...");
 
-        // ** matches any depth, so a/b/ → extPoint "a.b", a/ → extPoint "a"
         const imports = import.meta.glob("/src/plugins/*/**/*.ts", {eager: true});
-        const extensionPoints: {
-            extCls: Constructor<ExtensionPointSupplier>,
-            pluginName: string,
-            extPoint: string
-        }[] = [];
+        const extensionPoints: ExtensionModule[] = [];
 
         for (const path in imports) {
-            const module = imports[path] as { default: Constructor<ExtensionPointSupplier> };
-            if (module && module.default) {
-                // path = /src/plugins/{pluginName}/{seg…}/{file}.ts
-                const split = path.split('/');
-                const pluginName = split[3];
-                // Every segment between pluginName (idx 3) and the filename (last)
+            const module = imports[path] as { default?: Constructor<ExtensionPointSupplier> };
+            if (!module || !module.default) continue;
+
+            // path = /src/plugins/{pluginName}/{seg…}/{file}.ts
+            const split = path.split('/');
+            const pluginName = split[3];
+
+            // 1. Explicit @Extension decorator wins and allows any directory layout.
+            // 2. Otherwise fall back to the directory convention:
+            //    ['toolbar', 'items'] → "toolbar.items"
+            let extPoint = getExtensionPoint(module.default);
+            let source = "decorator";
+
+            if (!extPoint) {
                 const extPointSegments = split.slice(4, split.length - 1);
 
                 // Guard: skip plugin-root files (no subdir) and the styles directory
@@ -152,12 +155,12 @@ export class PluginLoader {
                     continue;
                 }
 
-                // ['toolbar', 'items'] → "toolbar.items"
-                const extPoint = extPointSegments.join('.');
-
-                extensionPoints.push({extCls: module.default, pluginName, extPoint});
-                this.logger.debug(`Found extension point: ${extPoint} for plugin: ${pluginName} (${module.default.name})`);
+                extPoint = extPointSegments.join('.');
+                source = "path";
             }
+
+            extensionPoints.push({extCls: module.default, pluginName, extPoint});
+            this.logger.debug(`Found extension point: ${extPoint} for plugin: ${pluginName} (${module.default.name}, via ${source})`);
         }
 
         this.logger.debug("Finished scanning. Found " + extensionPoints.length + " extension points.");
@@ -168,7 +171,7 @@ export class PluginLoader {
      * Auto-discovers CSS files from each plugin's styles/ directory.
      * Convention: /src/plugins/{pluginName}/styles/*.css
      */
-    private resolveStylesheets(): { pluginName: string, url: () => Promise<string> }[] {
+    private resolveStylesheets(): StylesheetEntry[] {
         this.logger.debug("Scanning for plugin stylesheets...");
 
         const imports = import.meta.glob("/src/plugins/*/styles/*.css", {
@@ -176,7 +179,7 @@ export class PluginLoader {
             query: "?url",
             import: "default"
         });
-        const stylesheets: { pluginName: string, url: () => Promise<string> }[] = [];
+        const stylesheets: StylesheetEntry[] = [];
 
         for (const path in imports) {
             const split = path.split('/');

@@ -4,6 +4,7 @@ import {HighlightHolder} from "../../../editor/ui/highlighter/HighlightHolder";
 import {Editor} from "../../../editor/Editor";
 import {SynDocument} from "../../syntax/api/document/SynDocument";
 import {AnnotatorBase} from "./AnnotatorBase";
+import {DocumentHighlightHolder} from "../../../editor/ui/highlighter/DocumentHighlightHolder";
 
 /**
  *
@@ -15,11 +16,7 @@ export class AnnotatorsCodeAnalysisPass implements CodeAnalysisPass<HighlightHol
     private readonly holder: HighlightHolder;
 
     constructor(private readonly document: SynDocument, private readonly annotators: AnnotatorBase[]) {
-        this.holder = new HighlightHolder(document.getDocument(), 2, true);
-    }
-
-    getPriority(): number {
-        return 2;
+        this.holder = new DocumentHighlightHolder(document.getDocument(), 2, true);
     }
 
     getHolder(): HighlightHolder {
@@ -33,8 +30,10 @@ export class AnnotatorsCodeAnalysisPass implements CodeAnalysisPass<HighlightHol
     }
 
     processResults(editor: Editor): void {
+        if (editor.getId() === 1) return;
         editor.getOpenedDocument().setAnnotations(this.holder)
         editor.repaintView();
+        editor.getView().triggerOverlaysRepaint();
     }
 
     runOnlyOnVisibleNodes(): boolean {

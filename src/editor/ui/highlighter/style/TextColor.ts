@@ -26,12 +26,12 @@ export class TextColor implements TextAttributeBase {
         this.color = color;
     }
 
-    apply(element: HTMLElement): void {
-        element.style.color = this.color;
-    }
-
     static of(color: string): TextColor {
         return new TextColor(color);
 
+    }
+
+    apply(element: HTMLElement): void {
+        element.style.color = this.color;
     }
 }

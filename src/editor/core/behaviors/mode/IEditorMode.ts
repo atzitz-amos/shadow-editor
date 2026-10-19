@@ -1,4 +1,5 @@
 import {IBehaviorProvider} from "../IBehaviorProvider";
+import {Editor} from "../../../Editor";
 
 /**
  *
@@ -11,7 +12,7 @@ export interface IEditorMode extends IBehaviorProvider {
 
     getDisplayName(): string;
 
-    onEnter(): void;
+    onEnter(editor: Editor): void;
 
-    onExit(): void;
+    onExit(editor: Editor): void;
 }

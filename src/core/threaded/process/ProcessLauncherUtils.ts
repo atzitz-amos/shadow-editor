@@ -3,19 +3,12 @@ import {Process} from "./Process";
 import {ProcessGateway} from "./ProcessGateway";
 import {ProcessMonitor} from "./manager/ProcessMonitor";
 import {ThreadedUtils} from "../ThreadedUtils";
+import {WorkerRemote} from "../wcp/remote/WorkerRemote";
 
 export class ProcessLauncherUtils {
-    public static createWorker(executable: ProcessExecutable): Worker {
-        const process = executable.getProcess();
-
-        return new Worker(process.getWorkerScriptPath(), {
-            type: 'module'
-        });
-    }
-
-    public static launch(worker: Worker, executable: ProcessExecutable, monitor: ProcessMonitor) {
-        monitor.initialize(worker);
-        worker.postMessage({
+    public static launch(remote: WorkerRemote, executable: ProcessExecutable, monitor: ProcessMonitor) {
+        monitor.initialize(remote);
+        remote.getWorker().postMessage({
             cmd: "launch",
             process: executable.getName(),
             args: executable.getForwardedArgs()

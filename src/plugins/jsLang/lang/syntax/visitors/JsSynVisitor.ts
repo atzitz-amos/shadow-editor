@@ -32,7 +32,7 @@ import {JsForIStatement} from "../statements/JsForIStatement";
 import {JsForOfStatement} from "../statements/JsForOfStatement";
 import {JsWhileStatement} from "../statements/JsWhileStatement";
 import {JsDoWhileStatement} from "../statements/JsDoWhileStatement";
-import {JsIfStatement} from "../statements/JsIfStatement";
+import {JsElseClause, JsIfClause, JsIfStatement} from "../statements/JsIfStatement";
 import {JsFunction} from "../api/JsFunction";
 import {JsFunctionStatement} from "../statements/JsFunctionStatement";
 import {JsFunctionExpr} from "../expr/JsFunctionExpr";
@@ -208,6 +208,12 @@ export class JsSynVisitor extends SynNodeVisitor {
     }
 
     visitIfStatement(element: JsIfStatement) {
+    }
+
+    visitIfClause(element: JsIfClause) {
+    }
+
+    visitElseClause(element: JsElseClause) {
     }
 
     visitEmptyStatement(element: JsEmptyStatement) {

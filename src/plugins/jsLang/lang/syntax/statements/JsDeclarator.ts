@@ -62,7 +62,7 @@ export class JsDeclarator extends SynNamedElement {
         return this.equToken;
     }
 
-    getExpression(): JsExpr | null {
+    getValue(): JsExpr | null {
         return this.expr;
     }
 

@@ -21,13 +21,18 @@ export function DistantService<T extends Constructor<DistantServiceImpl> & {
     // Defer registration to next microtask to avoid "Cannot access before initialization" errors
     queueMicrotask(() => {
         if (!ThreadedUtils.isWorkerThread()) {
-            Lifecycle.getInstance().addDistantService(ctor.getInstance());
+            if (!Lifecycle.getInstance().hasDistantService(ctor.getInstance()))
+                Lifecycle.getInstance().addDistantService(ctor.getInstance());
 
             if (ctor.prototype.hasOwnProperty("getPersistedKey") && ctor.prototype.hasOwnProperty("persist") && ctor.prototype.hasOwnProperty("load")) {
                 Lifecycle.getInstance().addPersistedObject(<PersistedObject>ctor.getInstance());
             }
         } else {
-            ctor.getInstance().begin();
+            self.addEventListener("message", async (event) => {
+                if (event.data && event.data.type === "init" && event.data.scriptPath === ctor.getInstance().getWorkerScriptPath()) {
+                    await ctor.getInstance().begin();
+                }
+            });
         }
     });
 }

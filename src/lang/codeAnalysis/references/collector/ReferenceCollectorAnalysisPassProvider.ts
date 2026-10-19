@@ -16,4 +16,8 @@ export class ReferenceCollectorAnalysisPassProvider extends CodeAnalysisPassProv
     createPass(editor: Editor, document: SynDocument): CodeAnalysisPass<null> {
         return new ReferenceCollectorAnalysisPass(document);
     }
+
+    getPriority(): number {
+        return 0;
+    }
 }

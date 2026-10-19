@@ -152,7 +152,7 @@ export class RelativePath {
         return this.segments.length;
     }
 
-    public getSegments(): readonly string[] {
+    public getSegments(): string[] {
         return this.segments.filter(s => s.length > 0 && s !== ".");
     }
 

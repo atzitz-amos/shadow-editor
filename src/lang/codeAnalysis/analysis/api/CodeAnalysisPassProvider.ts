@@ -10,4 +10,8 @@ import {CodeAnalysisPass} from "./CodeAnalysisPass";
  */
 export abstract class CodeAnalysisPassProvider<T> {
     abstract createPass(editor: Editor, document: SynDocument): CodeAnalysisPass<T>;
+
+    getPriority(): number {
+        return 10;
+    }
 }

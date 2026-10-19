@@ -9,11 +9,25 @@ import {SynNode} from "../api/SynNode";
  * @since 1.0.0
  */
 export class SynLazyVisitorOptimizer {
-    public constructor(private visitors: SynNodeVisitor[]) {
+    private visitors: Map<number, SynNodeVisitor[]>;
+
+    public constructor(visitors: Map<number, SynNodeVisitor[]> | SynNodeVisitor[]) {
+        if (Array.isArray(visitors)) {
+            this.visitors = new Map<number, SynNodeVisitor[]>();
+            this.visitors.set(0, visitors);
+        } else {
+            this.visitors = visitors;
+        }
     }
 
     public visitNode(node: SynNode) {
-        for (const visitor of this.visitors) {
+        for (const [_, visitors] of this.visitors.entries().toArray().toSorted((a, b) => a[0] - b[0])) {
+            this.visitWithVisitors(node, visitors);
+        }
+    }
+
+    public visitWithVisitors(node: SynNode, visitors: SynNodeVisitor[]) {
+        for (const visitor of visitors) {
             try {
                 node.accept(visitor);
             } catch (e) {
@@ -22,10 +36,10 @@ export class SynLazyVisitorOptimizer {
         }
 
         for (const child of node.getChildren()) {
-            this.visitNode(child);
+            this.visitWithVisitors(child, visitors);
         }
 
-        for (const visitor of this.visitors) {
+        for (const visitor of visitors) {
             try {
                 visitor.visitExitNode(node);
             } catch (e) {

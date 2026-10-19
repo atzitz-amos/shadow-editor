@@ -1,5 +1,3 @@
-// noinspection ES6UnusedImports
-
 import {ShadowApp} from "../../app/ShadowApp";
 import {Project} from "../project/Project";
 import {ActiveProjectHelper} from "./ActiveProjectHelper";
@@ -12,9 +10,6 @@ import {ProcessManager} from "../threaded/process/manager/ProcessManager";
 import {Lifecycle} from "../lifecycle/Lifecycle";
 import {Editor} from "../../editor/Editor";
 import {ShadowUI} from "../../app/ui/ShadowUI";
-
-// Load DistantGlobalState service
-import {DistantGlobalState} from "./DistantGlobalState";
 
 import {WCPService} from "../threaded/wcp/WCPMetricsService";
 import {PaneManager} from "../../app/core/panes/PaneManager";
@@ -41,8 +36,17 @@ export class GlobalState {
     private static _isReady: boolean = false;
     private static shadowApp: ShadowApp;
 
+    private static callbacks: (() => void)[] = [];
+
     public static init(app: ShadowApp): void {
         this.shadowApp = app;
+        this.callbacks.forEach(callback => callback());
+        this.callbacks = [];
+    }
+
+    public static whenAppReady(callback: () => void) {
+        if (this._isReady) callback();
+        else this.callbacks.push(callback);
     }
 
     public static getShadowApp(): ShadowApp {
@@ -60,6 +64,7 @@ export class GlobalState {
     public static getLifecycle(): Lifecycle {
         return Lifecycle.getInstance();
     }
+
 
     public static getLatencyMonitor(): LatencyMonitor {
         return LatencyMonitor.getInstance();
@@ -99,10 +104,6 @@ export class GlobalState {
 
     public static getActionManager(): ActionManager {
         return ActionManager.getInstance();
-    }
-
-    getIntentsRegistry(): IntentsRegistry {
-        return IntentsRegistry.getInstance();
     }
 
     public static getWCPMetricsService(): WCPService {
@@ -151,5 +152,9 @@ export class GlobalState {
 
     public static isReady(): boolean {
         return this._isReady;
+    }
+
+    getIntentsRegistry(): IntentsRegistry {
+        return IntentsRegistry.getInstance();
     }
 }

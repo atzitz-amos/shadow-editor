@@ -4,7 +4,6 @@
         <meta charset="UTF-8">
         <meta content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0 minimum-scale=1.0"
               name="viewport">
-        <meta content="ie=edge" http-equiv="X-UA-Compatible">
         <title>Editor Test</title>
 
         <link href="https://fonts.googleapis.com" rel="preconnect">
@@ -14,6 +13,16 @@
         <link href="res/editor.css" rel="stylesheet">
 
         <script crossorigin="anonymous" src="https://kit.fontawesome.com/cb36336f7b.js"></script>
+
+        <style>
+            .test-editor {
+                position: absolute;
+                top: 300px;
+                left: 100px;
+                border: 1px solid var(--editor-dialog-border-color);
+                box-shadow: 9px 8px 20px black;
+            }
+        </style>
     </head>
 
     <body>
@@ -55,7 +64,6 @@
             import DebugToolsPlugin from "./src/plugins/debugTools/DebugToolsPlugin";
             import {SourceRewriter} from "./src/lang/syntax/writer/SourceRewriter";
             import {SynModificationTree} from "./src/lang/syntax/writer/template/SynModificationTree";
-            import {JsSynTemplate} from "./src/plugins/jsLang/lang/template/JsSynTemplate";
             import {SynSuiteWindowRenderer} from "./src/app/testLib/lang/suite/renderer/SynSuiteWindowRenderer";
             import {IdeDialogUtilsCore} from "./src/core/ui/lib/dialog/utils/IdeDialogUtilsCore";
             import {FaIcon} from "./src/core/ui/icons/FaIcon";
@@ -64,10 +72,8 @@
             import {UIComponent, UIComponentMixin} from "./src/core/ui/engine/components/UIComponent";
             import {Measurable} from "./src/core/ui/engine/mixins/Measurable";
             import {VNodeStore} from "./src/core/project/filesystem/metadata/VNodeStore";
-            import {SpacingFormatter} from "./src/lang/codeStyle/spacing/SpacingFormatter";
             import {SynTreeOffsetJumper} from "./src/lang/codeStyle/utils/SynTreeOffsetJumper";
             import {SynASTElementImpl} from "./src/lang/syntax/impl/tree/SynASTElementImpl";
-            import {JsSpacingRules} from "./src/plugins/jsLang/codeStyle/spacing/JsSpacingRules";
             import {EditorHighlighterUtils} from "./src/editor/ui/highlighter/overlay/EditorHighlighterUtils";
             import {TextAttributeKey} from "./src/editor/ui/highlighter/style/TextAttributeKey";
             import {TextBackground} from "./src/editor/ui/highlighter/style/TextBackground";
@@ -90,14 +96,29 @@
             import {
                 JsFunctionParameterTemplate
             } from "./src/plugins/jsLang/lang/codeGen/template/JsFunctionParameterTemplate";
-            import {JsExprTemplate} from "./src/plugins/jsLang/lang/codeGen/template/JsExprTemplate";
+            import {JsExprTemplate} from "./src/plugins/jsLang/lang/codeGen/template/expr/JsExprTemplate";
             import {SynModTree} from "./src/lang/codeGen/modification/SynModTree";
+            import {JsSynTemplate} from "./src/plugins/jsLang/lang/codeGen/template/JsSynTemplate";
+            import {LiveTemplateOverlay} from "./src/editor/ui/inline/live/LiveTemplateOverlay";
+            import {LiveTemplateMode} from "./src/editor/core/live/LiveTemplateMode";
+            import {LiveTemplate} from "./src/editor/core/live/LiveTemplate";
+            import {SearchProcessor} from "./src/core/search/SearchProcessor";
+            import {HTMLUtils} from "./src/editor/utils/HTMLUtils";
+            import {LightEditor} from "./src/editor/light/LightEditor";
+            import {DocumentView} from "./src/editor/core/document/view/DocumentView";
+            import {EditorDocumentManager} from "./src/editor/core/document/EditorDocumentManager";
+            import {LifecycleTerminatedEvent} from "./src/core/lifecycle/events/LifecycleTerminatedEvent";
+            import {IdeFindDialog} from "./src/app/ui/full/search/IdeFindDialog";
+            import RiscVAssemblyLangPlugin from "./src/plugins/riscvAssemblyLang/RiscVAssemblyLangPlugin";
+            import {RiscV32LexicalGrammar} from "./src/plugins/riscvAssemblyLang/lang/lexer/Riscv32LexicalGrammar";
+            import {DocumentViewManager} from "./src/editor/core/document/view/DocumentViewManager";
 
             window.QuickParseUtils = QuickParseUtils;
 
             window.SettingsDialog = SettingsDialog;
 
             window.SynModTree = SynModTree;
+            window.SynDocumentManager = SynDocumentManager;
 
             window.JsFunctionTemplate = JsFunctionTemplate;
             window.JsReturnStatement = JsReturnStatement;
@@ -105,6 +126,31 @@
             window.JsFunctionParameterListTemplate = JsFunctionParameterListTemplate;
             window.JsFunctionParameterTemplate = JsFunctionParameterTemplate;
             window.JsExprTemplate = JsExprTemplate;
+
+            GlobalState.whenAppReady(() => {
+                setTimeout(() => {
+                    //IdeDialogUtilsCore.showDialog(new IdeFindDialog());
+                }, 2000)
+            });
+
+            window.searchAcrossFiles = async (q) => {
+                const start = performance.now();
+                let p = GlobalState.getCurrentProject()
+                const results = [];
+                for (const file of p.getFS().recursiveGetAllFiles()) {
+                    const content = await file.getTextContent();
+                    for (const line of content.split("\n")) {
+                        if (line.includes(content)) {
+                            results.push({
+                                file: file.getPath().toString(),
+                                line: line
+                            });
+                        }
+                    }
+                }
+                console.log("perf", performance.now() - start)
+                return results;
+            }
 
             window.format = () => {
                 const document = getSynDocument();
@@ -120,6 +166,20 @@
                 }
             }
 
+            window.LiveTemplateOverlay = LiveTemplateOverlay
+            window.LiveTemplateMode = LiveTemplateMode;
+            window.LiveTemplate = LiveTemplate;
+            window.createLive = r => {
+                const m = new LiveTemplateMode(r);
+                m.setTemplateModifiedCallback((d, ra) => {
+                    console.log("Modified: ", d.getTextBetween(ra.start, ra.end));
+                });
+
+                m.setTemplateRejectedCallback(() => console.log("Rejected"));
+                m.setTemplateAcceptedCallback(ra => console.log("Accepted"));
+                return m;
+            }
+
             window.VNodeStore = VNodeStore;
 
             window.ActionPopup = ActionPopup;
@@ -127,8 +187,6 @@
 
             window.LanguageParserDefinition = LanguageParserDefinition;
             window.jsScramble = new JsWhitespaceScrambler();
-
-            GlobalState.getMainEventBus().subscribe(window, MainEditorChangedEvent.SUBSCRIBER, e => console.log(e));
 
             window.setTimeout(() => window.JsCodeStyleManager = JsCodeStyleManager.getInstance(), 500);
 
@@ -165,8 +223,6 @@
 
             window.ProjectFilesPaneHelper = ProjectFilesPaneHelper;
 
-            console.log(SerializationUtils.getSerializableClassName(SettingBase))
-
             // Main entry point - launch the app and wait for startup to complete
             const app = await ShadowApp.launch(true);
             window.app = app;
@@ -188,6 +244,7 @@
                 app.enable(JSLangPlugin.class);
                 app.enable(HTMLLangPlugin.class);
                 app.enable(DebugToolsPlugin.class);
+                app.enable(RiscVAssemblyLangPlugin.class);
 
                 window.CommonKeyImpl = CommonKeyImpl;
                 window.ProjectPane = ProjectChooserPane;
@@ -216,6 +273,7 @@
                 window.SynLazyVisitorOptimizer = SynLazyVisitorOptimizer;
 
                 window.JsGr = JsLexicalGrammar;
+                window.RiscV32LexicalGrammar = RiscV32LexicalGrammar;
                 window.JsIncrLex = JsIncrLexer;
                 window.DocumentModificationEvent = DocumentModificationEvent;
 

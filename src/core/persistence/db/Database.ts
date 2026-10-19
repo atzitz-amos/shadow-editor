@@ -101,10 +101,6 @@ export class Store<T> {
     constructor(private readonly db: IDBDatabase, private readonly name: string) {
     }
 
-    private raw(mode: IDBTransactionMode): IDBObjectStore {
-        return this.db.transaction(this.name, mode).objectStore(this.name);
-    }
-
     /** Get a value by key. Returns `undefined` if not found. */
     get(key: IDBValidKey): Promise<T | undefined> {
         return promisifyRequest(this.raw("readonly").get(key)) as Promise<T | undefined>;
@@ -183,6 +179,10 @@ export class Store<T> {
         await promisifyTransaction(tx);
         return result;
     }
+
+    private raw(mode: IDBTransactionMode): IDBObjectStore {
+        return this.db.transaction(this.name, mode).objectStore(this.name);
+    }
 }
 
 // -----------------------------------------------------------------------
@@ -201,6 +201,16 @@ export class Database<S extends Schema = Record<string, unknown>> {
         private readonly onUpgrade?: (db: IDBDatabase, oldVersion: number, newVersion: number | null) => void
     ) {
         this.storeSpecs = stores.map(normalizeSpec);
+    }
+
+    /** Deletes the entire database. Fails if there are other open connections. */
+    static delete(name: string): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            const req = indexedDB.deleteDatabase(name);
+            req.onsuccess = () => resolve();
+            req.onerror = () => reject(req.error);
+            req.onblocked = () => reject(new DOMException(`Delete of "${name}" blocked by open connection`, "AbortError"));
+        });
     }
 
     /** Opens the connection, creating/upgrading object stores as needed. */
@@ -258,15 +268,5 @@ export class Database<S extends Schema = Record<string, unknown>> {
     close(): void {
         this.db?.close();
         this.db = null;
-    }
-
-    /** Deletes the entire database. Fails if there are other open connections. */
-    static delete(name: string): Promise<void> {
-        return new Promise<void>((resolve, reject) => {
-            const req = indexedDB.deleteDatabase(name);
-            req.onsuccess = () => resolve();
-            req.onerror = () => reject(req.error);
-            req.onblocked = () => reject(new DOMException(`Delete of "${name}" blocked by open connection`, "AbortError"));
-        });
     }
 }

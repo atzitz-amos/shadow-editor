@@ -1,6 +1,7 @@
-import {EditorEventBase} from "../../../../core/events/EditorEventBase";
 import {EventSubscriber} from "../../../../core/events/EventSubscriber";
 import {Document} from "../Document";
+import {EventBase} from "../../../../core/events/EventBase";
+import {BubbleDirection} from "../../../../core/events/BubbleDirection";
 
 /**
  * Fired whenever text is inserted into the document
@@ -9,11 +10,14 @@ import {Document} from "../Document";
  * @date 10/22/2025
  * @since 1.0.0
  */
-export class DocumentInsertEvent extends EditorEventBase {
+export class DocumentInsertEvent implements EventBase {
     public static readonly SUBSCRIBER = EventSubscriber.create(this);
 
     constructor(private document: Document, private location: Offset, private text: string) {
-        super(document.getEditor());
+    }
+
+    getBubbleDirection(): BubbleDirection {
+        return BubbleDirection.BUBBLE_UP;
     }
 
     getDocument(): Document {

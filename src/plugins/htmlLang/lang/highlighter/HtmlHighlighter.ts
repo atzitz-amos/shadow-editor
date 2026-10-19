@@ -5,7 +5,6 @@ import {HighlightHolder} from "../../../../editor/ui/highlighter/HighlightHolder
 import {Token} from "../../../../lang/syntax/builder/tokens/Token";
 import {HtmlLexicalGrammar} from "../lexer/HtmlLexicalGrammar";
 import {TextFontStyleKeys} from "../../../../editor/ui/highlighter/style/TextFontStyle";
-import {HtmlStatefulLexer} from "../lexer/HtmlStatefulLexer";
 
 /**
  *

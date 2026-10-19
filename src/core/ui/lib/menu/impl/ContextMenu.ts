@@ -16,10 +16,10 @@ export type ContextMenu = (contextMenu: ContextMenuElement) => void;
 
 class ContextMenuSingleton {
     public static readonly menuRoot: HTMLElement = HTMLUtils.createElement("div.ui-context-menu");
-    private static readonly outsidePointerDownListener = (e: PointerEvent) => {
-        if (this.menuRoot.style.display === "none") return;
-        if (!this.menuRoot.contains(e.target as Node)) this.closeHandler();
-    };
+
+    public static readonly closeHandler = () => {
+        this.menuRoot.style.display = "none";
+    }
 
     static {
         window.addEventListener("load", () => {
@@ -32,10 +32,6 @@ class ContextMenuSingleton {
         }, false);
     }
 
-    public static readonly closeHandler = () => {
-        this.menuRoot.style.display = "none";
-    }
-
     public static readonly escapeListener = (e: KeyboardEvent) => {
         if (e.key === "Escape") this.closeHandler();
     };
@@ -43,6 +39,11 @@ class ContextMenuSingleton {
     static getInstance() {
         return this.menuRoot;
     }
+
+    private static readonly outsidePointerDownListener = (e: PointerEvent) => {
+        if (this.menuRoot.style.display === "none") return;
+        if (!this.menuRoot.contains(e.target as Node)) this.closeHandler();
+    };
 }
 
 export class ContextMenuElement extends UIMenu {
@@ -53,7 +54,9 @@ export class ContextMenuElement extends UIMenu {
         super();
     }
 
-    static open<T>(x: number, y: number, contextMenu: ContextMenu, event?: KeybindEventLike & {target?: EventTarget | null}) {
+    static open<T>(x: number, y: number, contextMenu: ContextMenu, event?: KeybindEventLike & {
+        target?: EventTarget | null
+    }) {
         const menu = new ContextMenuElement();
         menu.context = event ? ContextResolver.fromEvent(event) : null;
         contextMenu(menu);

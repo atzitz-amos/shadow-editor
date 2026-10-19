@@ -6,7 +6,6 @@ import {JsStatementTemplate} from "./JsStatementTemplate";
 import {JsFunction} from "../../syntax/api/JsFunction";
 import {SynASTElement} from "../../../../../lang/syntax/api/tree/SynASTElement";
 import {SynParentElement} from "../../../../../lang/syntax/api/tree/SynParentElement";
-import {JsFunctionParameterList} from "../../syntax/statements/JsFunctionParameterList";
 import {JsFunctionParameterListTemplate} from "./JsFunctionParameterListTemplate";
 
 /**
@@ -43,7 +42,7 @@ export class JsFunctionTemplate extends JsSynTemplate {
         return null;
     }
 
-    getParameters(): JsFunctionParameterListTemplate{
+    getParameters(): JsFunctionParameterListTemplate {
         const params = (this.element as JsFunction & SynASTElement).getParameters();
         if (!params) {
             throw new Error("Function parameters not found.");

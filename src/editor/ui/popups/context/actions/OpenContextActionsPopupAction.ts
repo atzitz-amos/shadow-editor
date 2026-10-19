@@ -6,7 +6,6 @@ import {CommonDataKeys} from "../../../../../core/keybinds/context/data/CommonDa
 import {IntentsAnalysis} from "../../../../../lang/codeAnalysis/intents/analysis/IntentsAnalysis";
 import {OffsetAttachedPopupFrame} from "../../builder/OffsetAttachedPopupFrame";
 import {ContextActionPopupBuilder} from "../ContextActionPopupBuilder";
-import {IntentBase} from "../../../../../lang/codeAnalysis/intents/IntentBase";
 
 /**
  *

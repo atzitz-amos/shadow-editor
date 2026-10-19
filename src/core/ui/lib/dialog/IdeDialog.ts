@@ -103,6 +103,9 @@ export abstract class AbstractDialog implements IdeDialog {
         };
 
         const onMouseDown = (e) => {
+            const target = e.target as HTMLElement;
+            if (target.closest("input, textarea, select, button, [contenteditable='true']")) return;
+
             e.preventDefault();
             e.stopPropagation();
             element.focus();

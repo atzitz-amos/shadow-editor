@@ -7,7 +7,6 @@ import {ASTType} from "../../builder/parser/nodes/ASTGrammar";
 import {SynDocument} from "../../api/document/SynDocument";
 import {AbstractSynParentElement} from "./AbstractSynParentElement";
 import {SynScope} from "../../../indexes/scope/SynScope";
-import {SynCodeBlock} from "../../api/SynCodeBlock";
 import {SynParentElement} from "../../api/tree/SynParentElement";
 
 /**
@@ -40,7 +39,7 @@ export abstract class SynASTElementImpl extends AbstractSynParentElement impleme
 
     getScope(): SynScope | null {
         let element: SynParentElement | null = this;
-        while (element && !(element instanceof SynCodeBlock)) element = element.getParent();
+        while (element && !(element.isScopedElement())) element = element.getParent();
         return element ? element.getAssociatedScope() : null;
     }
 

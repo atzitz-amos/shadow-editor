@@ -15,6 +15,9 @@ export class TokenType {
 
 export class LexicalBuilder {
     public static make(name: string, matcher?: RegExp, getValue: ((match: RegExpExecArray) => string) | null = null): TokenType {
+        if (name === "INSTRUCTION") {
+        }
+
         return new TokenType(name, matcher, getValue);
     }
 

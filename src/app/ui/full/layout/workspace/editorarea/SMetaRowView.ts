@@ -11,6 +11,7 @@ import {IEditorMode} from "../../../../../../editor/core/behaviors/mode/IEditorM
 export class SMetaRowView extends UIComponent {
     private language: string = "Plain Text";
     private lineCol: string = "Ln 0, Col 0";
+    private mode: IEditorMode | null = null;
 
     constructor(root: HTMLElement) {
         super(HTMLUtils.createDiv("editor-meta-row", root));
@@ -41,7 +42,7 @@ export class SMetaRowView extends UIComponent {
             <span class="meta-line-col-editor-info">${this.lineCol}</span>
         </div>
         <div>
-            <span class="meta-mode-editor-info"></span>
+            <span class="meta-mode-editor-info">${this.mode?.getDisplayName() ?? ""}</span>
         </div>`;
         this.drawChildren();
     }
@@ -58,6 +59,7 @@ export class SMetaRowView extends UIComponent {
 
     private updateMode(newMode: IEditorMode | null) {
         this.getUnderlyingElement().querySelector(".meta-mode-editor-info")!.textContent = newMode ? newMode.getDisplayName() : "";
+        this.mode = newMode;
     }
 }
 

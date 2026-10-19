@@ -1,8 +1,8 @@
-import {JsSynTemplate} from "./JsSynTemplate";
-import {QuickParseUtils} from "../../../../../lang/syntax/utils/QuickParseUtils";
-import JsLang from "../../JsLang";
-import {JsParser} from "../../parser/JsParser";
-import {JsExpr} from "../../syntax/expr/JsExpr";
+import {JsSynTemplate} from "../JsSynTemplate";
+import {QuickParseUtils} from "../../../../../../lang/syntax/utils/QuickParseUtils";
+import JsLang from "../../../JsLang";
+import {JsParser} from "../../../parser/JsParser";
+import {JsExpr} from "../../../syntax/expr/JsExpr";
 
 /**
  *

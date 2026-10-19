@@ -57,3 +57,20 @@
 .editor-inline-highlight {
     transform: scaleY(1.1);
 }
+
+
+/* Live template */
+.live-template-overlay {
+    background: #71703347;
+    transform: translateX(-1px) scaleY(1.1);
+}
+
+.live-template-border {
+    border: 2px solid #6b6e16
+}
+
+.live-template-overlay.virtual-overlay-widget {
+    width: 7px !important;
+    translate: -1px;
+    transform: scaleY(1.1);
+}

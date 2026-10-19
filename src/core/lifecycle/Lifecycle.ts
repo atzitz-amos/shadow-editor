@@ -72,6 +72,10 @@ export class Lifecycle {
         this.distantServices.push(instance);
     }
 
+    hasDistantService(instance: DistantServiceImpl) {
+        return this.distantServices.includes(instance);
+    }
+
     /**
      * Register a persisted object to be recovered during the PersistenceRecoveryPhase.
      */
@@ -230,6 +234,7 @@ export class Lifecycle {
         this.phases.push(new EditorComponentsInitPhase());
         this.phases.push(new AppReadyPhase(app));
     }
+
 
     private async loadPlugins(): Promise<boolean> {
         const {PluginLoadPhase} = await import("./startup/phases/PluginLoadPhase");

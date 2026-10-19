@@ -22,6 +22,7 @@ export class ProcessGateway {
 
     public failImmediately(error: any) {
         this.postMessage(ProcessGatewayMessage.FAIL_IMMEDIATELY, {error: error.toString()});
+        throw new Error("Process failed immediately: " + error.toString());
     }
 
     public forward(result: any) {

@@ -103,7 +103,7 @@ export class ASTRecoveryBuilder extends ASTBuilder {
             totalTextLength: tree.getTextRange().getLength()
         }
 
-        this.collectNodeStats(tree, stats);
+        // this.collectNodeStats(tree, stats);
 
         return stats;
     }

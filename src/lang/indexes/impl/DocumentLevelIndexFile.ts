@@ -44,6 +44,10 @@ export class DocumentLevelIndexFile implements IndexFile {
         return results;
     }
 
+    resolveGlobal(name: string, scope: ResolveScope): ResolvedReference {
+        return this.globalScope.resolve(name, scope);
+    }
+
     acceptChildrenResolveRequest(scope: ResolveScope): boolean {
         return scope >= ResolveScope.IMPORTS;
     }

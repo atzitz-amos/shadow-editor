@@ -45,10 +45,11 @@ export class Scheduler {
      *
      * @param task The task to be debounced.
      * @param delay The delay in milliseconds to wait before executing the task after the last invocation.
+     * @param id
      * @return A NodeJS.Timeout object that can be used to cancel the scheduled task if needed.
      */
-    public static debounce(task: () => void, delay: number): NodeJS.Timeout {
-        let key = task.toString();
+    public static debounce(task: () => void, delay: number, id?: number): NodeJS.Timeout {
+        let key = task.toString() + (id ?? '');
 
         if (this.taskQueue.has(key)) {
             clearTimeout(this.taskQueue.get(key));

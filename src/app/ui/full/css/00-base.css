@@ -9,6 +9,8 @@
 
 :root {
     --ide-system-font: "Inter", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    --ide-code-font: "JetBrains", monospace;
+    --ide-code-font-thin: "JetBrains_Regular", monospace;
 }
 
 body {

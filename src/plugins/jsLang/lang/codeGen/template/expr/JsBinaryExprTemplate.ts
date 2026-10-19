@@ -1,10 +1,8 @@
-import {JsSynTemplate} from "./JsSynTemplate";
-import {QuickParseUtils} from "../../../../../lang/syntax/utils/QuickParseUtils";
-import {JsParser} from "../../parser/JsParser";
-import JsLang from "../../JsLang";
-import {JsBinaryExpr} from "../../syntax/expr/JsBinaryExpr";
+import {QuickParseUtils} from "../../../../../../lang/syntax/utils/QuickParseUtils";
+import {JsParser} from "../../../parser/JsParser";
+import JsLang from "../../../JsLang";
+import {JsBinaryExpr} from "../../../syntax/expr/JsBinaryExpr";
 import {JsExprTemplate} from "./JsExprTemplate";
-import {JsExpr} from "../../syntax/expr/JsExpr";
 
 /**
  *
@@ -22,11 +20,15 @@ export class JsBinaryExprTemplate extends JsExprTemplate {
     }
 
     public getLeft(): JsExprTemplate {
-        return new JsExprTemplate((this.element as JsBinaryExpr).getLeft());
+        const left = new JsExprTemplate((this.element as JsBinaryExpr).getLeft());
+        left.addObserver(this);
+        return left;
     }
 
     public getRight(): JsExprTemplate {
-        return new JsExprTemplate((this.element as JsBinaryExpr).getRight());
+        const right = new JsExprTemplate((this.element as JsBinaryExpr).getRight());
+        right.addObserver(this);
+        return right;
     }
 
     public setLeft(template: JsExprTemplate) {

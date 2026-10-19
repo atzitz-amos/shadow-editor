@@ -30,7 +30,7 @@ export class SelectAllAction extends AbstractAction {
 }
 
 export class SelectDoubleClickAction extends AbstractAction {
-    static readonly DELIMITER = /[\s.,;:!?(){}[\]<>]/;
+    static readonly DELIMITER = /[\s.,;:!?(){}[\]<>=]/;
 
     getName(): string {
         return 'SelectDoubleClick';

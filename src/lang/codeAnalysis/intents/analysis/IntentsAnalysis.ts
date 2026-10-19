@@ -4,7 +4,6 @@ import {IntentsRegistry} from "./IntentsRegistry";
 import {Editor} from "../../../../editor/Editor";
 import {SynDocumentManager} from "../../../syntax/manager/SynDocumentManager";
 import {SynModTree} from "../../../codeGen/modification/SynModTree";
-import {DocumentModificationUtils} from "../../../../editor/core/document/utils/DocumentModificationUtils";
 import {Describable} from "../../../../core/ui/api/Describable";
 import {Icon} from "../../../../core/ui/icons/Icon";
 import {UndoStack} from "../../../../editor/core/undo/UndoStack";

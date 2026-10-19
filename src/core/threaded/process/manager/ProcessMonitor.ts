@@ -1,6 +1,7 @@
 import {ProcessExecutable} from "../ProcessExecutable";
 import {ProcessGatewayMessage} from "../ProcessGatewayMessage";
 import {Scheduler} from "../../../scheduler/Scheduler";
+import {WorkerRemote} from "../../wcp/remote/WorkerRemote";
 
 export enum ProcessState {
     RUNNING,
@@ -17,12 +18,13 @@ export class ProcessMonitor {
 
     private progressListeners: ((progress: number) => void)[] = [];
     private successListeners: ((result: any) => void)[] = [];
+    private errorListeners: ((error: any) => void)[] = [];
 
-    constructor(private executable: ProcessExecutable, private worker: Worker) {
+    constructor(private executable: ProcessExecutable, private remote: WorkerRemote) {
     }
 
-    initialize(worker: Worker) {
-        worker.onmessage = this.onMessage.bind(this);
+    initialize(remote: WorkerRemote) {
+        remote.getWorker().onmessage = this.onMessage.bind(this);
 
         this.state = ProcessState.RUNNING;
         this.launchedAt = Date.now();
@@ -34,6 +36,10 @@ export class ProcessMonitor {
 
     public whenComplete(listener: (result: any) => void) {
         this.successListeners.push(listener);
+    }
+
+    public whenError(listener: (error: any) => void) {
+        this.errorListeners.push(listener);
     }
 
     public getCompletionTime() {
@@ -48,7 +54,7 @@ export class ProcessMonitor {
     public timeoutAfter(ms: number) {
         Scheduler.after(ms, () => {
             if (this.state === ProcessState.RUNNING) {
-                this.worker.terminate();
+                this.remote.terminate();
                 this.state = ProcessState.CANCELLED;
                 console.warn(`Process ${this.getProcessName()} timed out after ${ms}ms`);
             }
@@ -57,9 +63,8 @@ export class ProcessMonitor {
 
     public cancel() {
         if (this.state === ProcessState.RUNNING) {
-            this.worker.terminate();
+            this.remote.terminate();
             this.state = ProcessState.CANCELLED;
-            console.warn(`Process ${this.getProcessName()} was cancelled`);
         }
     }
 
@@ -74,6 +79,14 @@ export class ProcessMonitor {
             this.successListeners.forEach(listener => listener(data.result));
         } else if (data.cmd === ProcessGatewayMessage.NOTIFY_PROGRESS) {
             this.progressListeners.forEach(listener => listener(data.progress));
+        } else if (data.cmd === ProcessGatewayMessage.NOTIFY_ERROR) {
+            this.completedAt = Date.now();
+            this.state = ProcessState.FAILED;
+            this.errorListeners.forEach(listener => listener(data.error));
+        } else if (data.cmd === ProcessGatewayMessage.FAIL_IMMEDIATELY) {
+            this.completedAt = Date.now();
+            this.state = ProcessState.FAILED;
+            this.errorListeners.forEach(listener => listener(data.error));
         }
     }
 }

@@ -3,7 +3,7 @@ import {QuickParseUtils} from "../../../../../lang/syntax/utils/QuickParseUtils"
 import JsLang from "../../JsLang";
 import {JsParser} from "../../parser/JsParser";
 import {JsFunctionParameter} from "../../syntax/statements/JsFunctionParameterList";
-import {JsExprTemplate} from "./JsExprTemplate";
+import {JsExprTemplate} from "./expr/JsExprTemplate";
 import {JsFunctionParameterListTemplate} from "./JsFunctionParameterListTemplate";
 import {TextRange} from "../../../../../editor/core/coordinate/range/TextRange";
 import {JsGrammar} from "../../parser/JsGrammar";

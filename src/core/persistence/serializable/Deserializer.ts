@@ -11,7 +11,7 @@ import {SerializationUtils} from "./SerializationUtils";
  */
 @UseLogger("Deserializer")
 export class Deserializer {
-    private readonly declare logger: Logger;
+    declare private readonly logger: Logger;
 
     private readonly customDeserializers: Map<string, CustomDeserializer<any>> = new Map();
 

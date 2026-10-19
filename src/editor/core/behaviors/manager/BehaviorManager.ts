@@ -33,8 +33,8 @@ export class BehaviorManager {
 
         this.modeStack.push(mode);
 
-        oldMode?.onExit();
-        mode.onEnter();
+        oldMode?.onExit(this.editor);
+        mode.onEnter(this.editor);
         this.editor.getEventBus().syncPublish(new EditorModeChangedEvent(this.editor, oldMode, mode))
     }
 
@@ -42,8 +42,8 @@ export class BehaviorManager {
         if (this.modeStack.length !== 0) {
             const oldMode = this.modeStack.pop()!;
             const newMode = this.modeStack[this.modeStack.length - 1] ?? null;
-            oldMode.onExit();
-            newMode?.onEnter();
+            oldMode.onExit(this.editor);
+            newMode?.onEnter(this.editor);
             this.editor.getEventBus().syncPublish(new EditorModeChangedEvent(this.editor, oldMode, newMode))
         }
     }
@@ -103,7 +103,7 @@ export class BehaviorManager {
 
     getCurrentMode(): IEditorMode | null {
         if (this.modeStack.length === 0) return null;
-        return this.modeStack.pop()!;
+        return this.modeStack[this.modeStack.length - 1];
     }
 
     private tryInvoke(func: (b: IBehaviorProvider) => BehaviorHandlingMode) {

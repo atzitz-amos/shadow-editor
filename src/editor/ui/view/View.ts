@@ -90,9 +90,42 @@ export class View {
         this.scrolling.scrollTo(targetX, targetY, mode);
     }
 
-    ensureCaretVisible() {
-        if (this.offScreen(this.editor.getPrimaryCaret().getVisual()))
-            this.scrollIntoView(this.editor.getPrimaryCaret().getLogical(), ScrollMode.Smooth);
+    ensureCaretVisible(margin: number = 1) {
+        const caret = this.editor.getPrimaryCaret();
+        const logical = caret.getLogical();
+
+        const visibleLines = this.getVisualLineCount();
+        // A margin larger than half the viewport can't be satisfied on both sides
+        const m = Math.max(0, Math.min(margin, Math.floor((visibleLines - 1) / 2)));
+
+        const firstLine = this.scrolling.scrollYLines;
+        const lastLine = firstLine + visibleLines - 1;
+        const row = logical.row;
+
+        let targetLine: number | null = null;
+        if (row < firstLine + m) {
+            targetLine = row - m;                      // caret too close to the top
+        } else if (row > lastLine - m) {
+            targetLine = row - (visibleLines - 1) + m; // caret too close to the bottom
+        }
+
+        if (targetLine !== null) {
+            const maxLine = Math.max(0, this.editor.getLineCount() + 2 - visibleLines); // matches getMaxHeight()
+            targetLine = Math.min(Math.max(0, targetLine), maxLine);
+        }
+
+        const scrollX = this.scrollIntoViewAlongX(
+            logical.col,
+            this.scrolling.scrollXChars,
+            this.scrolling.scrollXChars + this.getVisualCharCount() - 1
+        );
+
+        if (targetLine === null && scrollX === null) return; // already within bounds
+
+        const targetX = scrollX !== null ? scrollX * this.getCharSize() : this.scrolling.scrollX;
+        const targetY = targetLine !== null ? targetLine * this.getLineHeight() : this.scrolling.scrollY;
+
+        this.scrolling.scrollTo(targetX, targetY, ScrollMode.Smooth);
     }
 
     getEditor(): Editor {
@@ -237,6 +270,7 @@ export class View {
 
     onMouseDown(event: MouseEvent) {
         event.preventDefault();
+        event.stopPropagation();
         this.focus();
 
         this.editor.onMouseDown(event);

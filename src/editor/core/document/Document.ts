@@ -1,33 +1,36 @@
-import {Editor} from "../../Editor";
 import {EditorRawData} from "./RawData";
 import {LineData} from "./LineData";
 import {TextRange} from "../coordinate/range/TextRange";
 import {LanguageBase} from "../../../lang/LanguageBase";
-import {DocumentInsertEvent} from "./events/DocumentInsertEvent";
-import {DocumentModificationEvent} from "./events/DocumentModificationEvent";
-import {DocumentDeleteEvent} from "./events/DocumentDeleteEvent";
 import {ProjectFile} from "../../../core/project/filesystem/tree/ProjectFile";
 import {TokenCache} from "./TokenCache";
 import {Scheduler} from "../../../core/scheduler/Scheduler";
 import {GlobalState} from "../../../core/global/GlobalState";
 import {DocumentSaveRequestEvent} from "./events/DocumentSaveRequestEvent";
-import {EditorOpenedDocumentEvent} from "./events/EditorOpenedDocumentEvent";
 import {UnsafeFlagsService} from "../../../core/sync/flags/UnsafeFlagsService";
 import {UnsafeFlags} from "../../../core/sync/flags/UnsafeFlags";
 import {TrackedRange} from "../coordinate/range/TrackedRange";
 import {UndoRedoActionStack} from "../undo/UndoRedoActionStack";
 import {HighlightHolder} from "../../ui/highlighter/HighlightHolder";
+import {DocumentModificationEvent} from "./events/DocumentModificationEvent";
+import {DocumentHighlightHolder} from "../../ui/highlighter/DocumentHighlightHolder";
+
+
+export interface DocumentListener {
+    documentModified(event: DocumentModificationEvent): void;
+}
 
 /**
  * Represents an opened file in the editor
  * Store the language, the line-breaks, the components and the AST of a file */
 export class Document {
-    private editor: Editor | null = null;
 
     private modificationTimestamp: number = 0;
 
     private data: EditorRawData;
     private file: ProjectFile | null = null;
+
+    private readonly observers: Map<object, DocumentListener> = new Map();
 
     private lines: LineData[];
     private lineBreaks: Offset[] = [];
@@ -43,10 +46,18 @@ export class Document {
     constructor(content: string, private language: LanguageBase | null = null) {
         this.data = new EditorRawData(content);
 
-        this.highlightsHolder = new HighlightHolder(this, 1);
-        this.annotationsHolder = new HighlightHolder(this, 2, true);
+        this.highlightsHolder = new DocumentHighlightHolder(this, 1);
+        this.annotationsHolder = new DocumentHighlightHolder(this, 2, true);
 
         this.parseLines();
+    }
+
+    addObserver(observer: object, listener: DocumentListener) {
+        this.observers.set(observer, listener);
+    }
+
+    removeObserver(observer: object) {
+        this.observers.delete(observer);
     }
 
     getHighlightsHolder(): HighlightHolder {
@@ -59,26 +70,6 @@ export class Document {
 
     setAnnotations(holder: HighlightHolder) {
         this.annotationsHolder = holder;
-    }
-
-    public getEditor(): Editor {
-        if (!this.editor) {
-            throw new Error("Document is not attached to an editor.");
-        }
-        return this.editor;
-    }
-
-    public isLinkedToEditor(): boolean {
-        return this.editor !== null;
-    }
-
-    public linkEditor(editor: Editor | null): void {
-        this.editor = editor;
-
-        if (this.editor != null) {
-            this.editor.overrideLanguage(this.language);
-            this.editor.getEventBus().syncPublish(new EditorOpenedDocumentEvent(this.editor, this));
-        }
     }
 
     public getAssociatedFile(): ProjectFile | null {
@@ -204,10 +195,7 @@ export class Document {
         this.updateTrackedRanges(offset, offset, text.length);
         this.recomputeLines(offset, text, false);
 
-        if (this.isLinkedToEditor()) {
-            this.editor!.getEventBus().syncPublish(new DocumentModificationEvent(this, new TextRange(offset, offset), text, null));
-            this.editor!.getEventBus().asyncPublish(new DocumentInsertEvent(this, offset, text));
-        }
+        this.fireEventChanged(new TextRange(offset, offset), text, null);
 
         this.maybeSave();
         this.myUndoRedoStack.addInsert(offset, text)
@@ -220,11 +208,8 @@ export class Document {
         this.updateTrackedRanges(at, at + n, 0);
         this.recomputeLines(at, deleted, true);
 
-        if (this.isLinkedToEditor()) {
-            let affectedRange = new TextRange(at, at + n);
-            this.editor!.getEventBus().syncPublish(new DocumentModificationEvent(this, affectedRange, null, deleted));
-            this.editor!.getEventBus().asyncPublish(new DocumentDeleteEvent(this, affectedRange));
-        }
+        let affectedRange = new TextRange(at, at + n);
+        this.fireEventChanged(affectedRange, null, deleted);
 
         this.maybeSave();
         this.myUndoRedoStack.addDelete(at, deleted);
@@ -369,6 +354,11 @@ export class Document {
 
         const stickToRight = isStart ? !greedy : greedy;
         return stickToRight ? from + insertedLength : from;
+    }
+
+    private fireEventChanged(affectedRange: TextRange, text: string | null, deleted: string | null) {
+        const event = new DocumentModificationEvent(this, affectedRange, text, deleted);
+        this.observers.forEach(l => l.documentModified(event));
     }
 }
 

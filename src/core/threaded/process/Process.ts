@@ -15,7 +15,7 @@ export abstract class Process implements Launchable {
         }
     }
 
-    abstract run(gateway: ProcessGateway | null, ...args: any[]): Promise<any>;
+    abstract run(gateway: ProcessGateway, ...args: any[]): Promise<any>;
 
     abstract getWorkerScriptPath(): string;
 }

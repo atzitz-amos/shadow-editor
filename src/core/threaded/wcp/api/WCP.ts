@@ -62,7 +62,7 @@ export class WCP {
             remote.close("error");
         }, true);
 
-        worker.postMessage({type: "init"});
+        worker.postMessage({type: "init", scriptPath: launchable.getWorkerScriptPath()});
 
         GlobalState.getMainEventBus().syncPublish(new WebWorkerCreatedEvent(remote));
 

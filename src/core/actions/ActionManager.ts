@@ -40,7 +40,7 @@ export class ActionManager {
         }
         this.actions.get(key)!.push(action);
         KeybindManager.getInstance().registerAction(action, action.getDefaultKeybinding())
-        
+
         this.actionsToInitialize.push(action)
         Scheduler.debounce(() => {
             this.actionsToInitialize.forEach(action => action.addToGroups());

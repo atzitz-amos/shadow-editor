@@ -46,6 +46,7 @@ export class DocumentViewManager {
 
     public begin(): void {
         GlobalState.getMainEventBus().subscribe(this, CaretMovedEvent.SUBSCRIBER, e => {
+            if (e.getEditor() !== GlobalState.getMainEditor()) return;
             Scheduler.debounce(
                 () => {
                     const view = DocumentViewManager.getSavedDocumentView(e.getEditor().getOpenedDocument());
@@ -53,9 +54,12 @@ export class DocumentViewManager {
                 }, 1000);
         });
 
-        Scrolling.addScrollListener((doc, x, y) => {
+        Scrolling.addScrollListener((view, doc, x, y) => {
+            if (view.getEditor() !== GlobalState.getMainEditor()) return;
             Scheduler.debounce(() => {
                 const view = DocumentViewManager.getSavedDocumentView(doc);
+                if (isNaN(x)) x = 0;
+                if (isNaN(y)) y = 0;
                 view.setScrollX(x);
                 view.setScrollY(y);
             }, 1000);

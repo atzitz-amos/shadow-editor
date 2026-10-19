@@ -11,7 +11,6 @@ import {JsBreakStatement} from "../lang/syntax/statements/JsBreakStatement";
 import {QuickFix} from "../../../lang/codeAnalysis/inspections/quickfix/QuickFix";
 import {SynModificationTree} from "../../../lang/syntax/writer/template/SynModificationTree";
 import {SynASTElement} from "../../../lang/syntax/api/tree/SynASTElement";
-import {JsSynTemplate} from "../lang/template/JsSynTemplate";
 
 /**
  *
@@ -60,6 +59,5 @@ class SwitchCaseFallsThroughQuickFix extends QuickFix {
     }
 
     applyFix(element: SynASTElement, synModTree: SynModificationTree): void {
-        synModTree.insertBefore(element, new JsSynTemplate("break"));
     }
 }

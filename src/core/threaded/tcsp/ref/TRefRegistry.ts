@@ -4,57 +4,66 @@ import {ThreadedUtils} from "../../ThreadedUtils";
 import {Logger} from "../../../logging/logger/LoggerCore";
 
 /**
+ * Holds every object that has been handed out by reference.
+ *
+ * - "Pinned" entries (GlobalState, Logger, window...) are permanent roots and can never be freed
+ *   by a remote proxy being garbage collected.
+ * - Everything else is stored under a fresh UUID and removed when the remote side frees it.
  *
  * @author Atzitz Amos
  * @date 4/5/2026
  * @since 1.0.0
  */
 export class TRefRegistry {
-    private readonly registry: Map<string, any> = new Map();
+    private static readonly globals = globalThis as unknown as Record<string, unknown>;
+
+    private readonly objects = new Map<string, unknown>();
+    private readonly pinned = new Set<string>();
 
     public constructor() {
-        this.registry.set("GlobalState", GlobalState);
-        this.registry.set("Logger", Logger);
-        if (ThreadedUtils.isMainThread()) this.registry.set("window", window);
+        this.pin("GlobalState", GlobalState);
+        this.pin("Logger", Logger);
+        if (ThreadedUtils.isMainThread()) this.pin("window", window);
     }
 
-
-    get(uuid: string) {
-        return this.registry.get(uuid) ?? window[uuid];
+    /** Resolves a registered id, falling back to a global of that name. */
+    get(id: string): any {
+        return this.objects.has(id) ? this.objects.get(id) : TRefRegistry.globals[id];
     }
 
-    isDefined(uuid: string): boolean {
-        if (this.registry.has(uuid)) {
-            const value = this.registry.get(uuid);
-            return value !== null && value !== undefined;
+    isDefined(id: string): boolean {
+        if (this.objects.has(id)) {
+            return this.objects.get(id) != null;
         }
-
-        if (Object.prototype.hasOwnProperty.call(window, uuid)) {
-            const value = (window as any)[uuid];
-            return value !== null && value !== undefined;
-        }
-
-        return false;
+        return Object.prototype.hasOwnProperty.call(globalThis, id) && TRefRegistry.globals[id] != null;
     }
 
-    save(obj: any): string {
+    save(obj: unknown): string {
         const uuid = UUIDHelper.newUUID();
-        this.registry.set(uuid, obj);
+        this.objects.set(uuid, obj);
         return uuid;
     }
 
+    /** Returns the id under which the named root / global can be addressed. */
     getOrSave(name: string): string {
-        if (this.registry.has(name)) {
+        if (this.objects.has(name)) {
             return name;
         }
-        const obj = window[name];
+
+        const obj = TRefRegistry.globals[name];
         if (obj === undefined) {
-            throw new Error(`Could not find object with name ${name} in registry or global window`);
+            throw new Error(`Could not find object "${name}" in registry or globalThis`);
         }
         return this.save(obj);
     }
 
-    delete(uuid: string) {
-        this.registry.delete(uuid);
+    delete(id: string): void {
+        if (this.pinned.has(id)) return;
+        this.objects.delete(id);
+    }
+
+    private pin(name: string, value: unknown): void {
+        this.objects.set(name, value);
+        this.pinned.add(name);
     }
 }

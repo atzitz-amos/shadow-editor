@@ -1,6 +1,6 @@
 import {TextRange} from "../../coordinate/range/TextRange";
 import {FragmentEvent, FragmentType} from "./FragmentEvent";
-import {TextAttributeKey} from "../../../ui/highlighter/style/TextAttributeKey";
+import {FragmentStyle} from "../../../../core/highlighter/FragmentStyle";
 
 /**
  * Represents a fragment (start / end) of a widget or highlight
@@ -12,7 +12,7 @@ import {TextAttributeKey} from "../../../ui/highlighter/style/TextAttributeKey";
 export class Fragment {
     private readonly elements: HTMLSpanElement[] = [];
 
-    constructor(private range: TextRange, private readonly priority: number, private attributes: TextAttributeKey, private classList: string[]) {
+    constructor(private range: TextRange, private readonly priority: number, private attributes: FragmentStyle, private classList: string[]) {
     }
 
     getRange(): TextRange {
@@ -31,7 +31,7 @@ export class Fragment {
         return this.elements;
     }
 
-    getFragmentStyle(): TextAttributeKey {
+    getFragmentStyle(): FragmentStyle {
         return this.attributes;
     }
 

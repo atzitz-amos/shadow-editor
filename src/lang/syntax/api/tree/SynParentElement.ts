@@ -1,6 +1,7 @@
 import {SynNode} from "../SynNode";
 import {SynTokenNode} from "../../impl/SynTokenNode";
 import {TokenType} from "../../builder/tokens/TokenType";
+import {SynScopedElement} from "./SynScopedElement";
 
 /**
  *
@@ -32,4 +33,6 @@ export interface SynParentElement extends SynNode {
     setSynthetic(): void;
 
     isParentElement(): this is SynParentElement;
+
+    isScopedElement(): this is SynScopedElement;
 }

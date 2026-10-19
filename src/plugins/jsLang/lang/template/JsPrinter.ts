@@ -198,7 +198,7 @@ export class JsPrinter extends JsSynVisitor implements SynPrinter {
         else this.visitNext(nameNode);
         if (element.isInitialized()) {
             this.write(" = ");
-            this.visitNext(element.getExpression()!);
+            this.visitNext(element.getValue()!);
         }
     }
 

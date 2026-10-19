@@ -5,6 +5,7 @@ import {SynScopeType} from "../../indexes/scope/SynScopeType";
 import {SynScope} from "../../indexes/scope/SynScope";
 import {SynTokenNode} from "../impl/SynTokenNode";
 import {JsLexicalGrammar} from "../../../plugins/jsLang/lang/lexer/JsLexicalGrammar";
+import {SynScopedElement} from "./tree/SynScopedElement";
 
 /**
  *
@@ -47,5 +48,9 @@ export abstract class SynCodeBlock extends SynASTElementImpl {
 
     getAssociatedScopeType(): SynScopeType | null {
         return null;
+    }
+
+    isScopedElement(): this is SynScopedElement {
+        return true;
     }
 }

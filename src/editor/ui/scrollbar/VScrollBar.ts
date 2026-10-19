@@ -15,13 +15,6 @@ export class VScrollBar implements Component {
     private startY: number = 0;
     private startTop: number;
 
-    private readonly onDocMouseMove = (e: MouseEvent) => {
-        if (this.isDragging) this.drag(e);
-    };
-    private readonly onDocMouseUp = () => {
-        this.isDragging = false;
-    };
-
     constructor(private view: View) {
     }
 
@@ -73,6 +66,14 @@ export class VScrollBar implements Component {
         this.handle.style.height = HTMLUtils.px(handleHeight);
         this.handle.style.top = HTMLUtils.px(handleY);
     }
+
+    private readonly onDocMouseMove = (e: MouseEvent) => {
+        if (this.isDragging) this.drag(e);
+    };
+
+    private readonly onDocMouseUp = () => {
+        this.isDragging = false;
+    };
 
     private drag(e: MouseEvent) {
         const deltaY = e.clientY - this.startY;

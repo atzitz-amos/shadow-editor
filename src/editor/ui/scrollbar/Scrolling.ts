@@ -2,7 +2,7 @@ import {View} from "../view/View";
 import {Document} from "../../core/document/Document";
 
 export class Scrolling {
-    private static readonly scrollListeners: ((doc: Document, x: number, y: number) => void)[] = [];
+    private static readonly scrollListeners: ((view: View, doc: Document, x: number, y: number) => void)[] = [];
 
     // Eased scroll-to state — used ONLY for discrete jumps (caret follow, goto-line).
     scrollX: number;
@@ -50,11 +50,11 @@ export class Scrolling {
         return this.scrollX % this.view.getCharSize();
     }
 
-    public static addScrollListener(listener: (doc: Document, x: number, y: number) => void) {
+    public static addScrollListener(listener: (view: View, doc: Document, x: number, y: number) => void) {
         this.scrollListeners.push(listener);
     }
 
-    public static removeScrollListener(listener: (doc: Document, x: number, y: number) => void) {
+    public static removeScrollListener(listener: (view: View, doc: Document, x: number, y: number) => void) {
         const index = this.scrollListeners.indexOf(listener);
         if (index !== -1) {
             this.scrollListeners.splice(index, 1);
@@ -74,7 +74,7 @@ export class Scrolling {
         this.scrollX = this.clampX(this.scrollX + dx);
         this.scrollY = this.clampY(this.scrollY + dy);
 
-        Scrolling.scrollListeners.forEach(l => l(this.view.getEditor().getOpenedDocument(), this.scrollX, this.scrollY));
+        Scrolling.scrollListeners.forEach(l => l(this.view, this.view.getEditor().getOpenedDocument(), this.scrollX, this.scrollY));
 
         this.view.triggerRepaint();
     }
@@ -98,7 +98,7 @@ export class Scrolling {
             this.startAnimation(targetX, targetY);
         }
 
-        Scrolling.scrollListeners.forEach(l => l(this.view.getEditor().getOpenedDocument(), x, y));
+        Scrolling.scrollListeners.forEach(l => l(this.view, this.view.getEditor().getOpenedDocument(), x, y));
     }
 
     private clampX(x: number): number {

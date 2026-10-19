@@ -1,6 +1,7 @@
 import {IEditorMode} from "./IEditorMode";
 import {EditorBehavior} from "../EditorBehavior";
 import {CtrlDeleteBehavior} from "../behavior/CtrlDeleteBehavior";
+import {Editor} from "../../../Editor";
 
 /**
  *
@@ -17,10 +18,10 @@ export abstract class EditorModeEx implements IEditorMode {
         return "";
     }
 
-    onEnter() {
+    onEnter(editor: Editor) {
     }
 
-    onExit() {
+    onExit(editor: Editor) {
     }
 
     getCharTypedBehavior(): EditorBehavior {

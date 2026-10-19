@@ -27,13 +27,9 @@ export class IncrementalParserOptimizer {
             return this;
         }
 
-        if (!this.builder.inRecoveryMode()) {
-            this.isValid = false;
-        } else {
-            this.isValid = true;
-            this.checkpoints = this.builder.getSavedCheckpoints();
-            this.index = 0;
-        }
+        this.isValid = true;
+        this.checkpoints = this.builder.getSavedCheckpoints();
+        this.index = 0;
         return this;
     }
 
@@ -49,7 +45,7 @@ export class IncrementalParserOptimizer {
     }
 
     private obtainNode(target: (...args: any[]) => void, cls: any, args: any[]): SynNode {
-        if (this.isValid) {
+        if (this.isValid && this.checkpoints) {
             const checkpoint = this.advanceToCheckpoint(target.name, cls, args);
             if (checkpoint?.contextMatches(args)
                 && !this.builder.getLexerInvalidRange().intersects(checkpoint.getAdjustedRange(this.builder.getEditTextDelta()))) {

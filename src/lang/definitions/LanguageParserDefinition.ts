@@ -24,6 +24,11 @@ export abstract class LanguageParserDefinition {
         return def;
     }
 
+    static has(language: LanguageBase | null) {
+        if (!language) return false;
+        return this.getParserDefinition(language) !== null;
+    }
+
     public getPriority(): number {
         return 1;
     }
@@ -33,9 +38,4 @@ export abstract class LanguageParserDefinition {
     public abstract createParser(builder: ASTBuilder): IParser;
 
     public abstract createPrinter(): SynPrinter;
-
-    static has(language: LanguageBase | null) {
-        if (!language) return false;
-        return this.getParserDefinition(language) !== null;
-    }
 }

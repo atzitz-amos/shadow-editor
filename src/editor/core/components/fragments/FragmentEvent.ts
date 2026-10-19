@@ -1,5 +1,4 @@
 import {Fragment} from "./Fragment";
-import {InlayWidget} from "../../../ui/inline/widget/inlay/InlayWidget";
 
 export class FragmentEvent {
     constructor(public type: FragmentType, private fragment: Fragment | null, public pos: Offset) {
@@ -13,8 +12,8 @@ export class FragmentEvent {
         return new FragmentEvent(FragmentType.END_RANGE, fragment, fragment.getRange().end);
     }
 
-    static inlay(inlay: InlayWidget) {
-        return new FragmentEvent(FragmentType.INLAY, null, inlay.getOffset());
+    static inlay(pos: Offset) {
+        return new FragmentEvent(FragmentType.INLAY, null, pos);
     }
 
     getFragment(): Fragment {

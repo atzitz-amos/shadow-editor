@@ -101,6 +101,18 @@ export class KeybindManager {
     }
 
     /**
+     * Public helper: returns true when the given DOM event matches the
+     * provided keybind (key + modifiers). Useful for custom handling or
+     * testing without going through the manager's dispatch pipeline.
+     */
+    public static eventMatchesKeybind(kb: Keybind, event: KeyboardEvent | MouseEvent): boolean {
+        const key = event instanceof KeyboardEvent ? keyFromKeyboardEvent(event) : keyFromMouseEvent(event);
+        if (key === undefined) return false;
+        if (key !== kb.key) return false;
+        return modifiersMatch(kb, event);
+    }
+
+    /**
      * Registers an action with the manager.
      *
      * @param action the action to register
@@ -156,26 +168,14 @@ export class KeybindManager {
         return this.defaultKeybinds.get(id);
     }
 
-    /**
-     * Public helper: returns true when the given DOM event matches the
-     * provided keybind (key + modifiers). Useful for custom handling or
-     * testing without going through the manager's dispatch pipeline.
-     */
-    public static eventMatchesKeybind(kb: Keybind, event: KeyboardEvent | MouseEvent): boolean {
-        const key = event instanceof KeyboardEvent ? keyFromKeyboardEvent(event) : keyFromMouseEvent(event);
-        if (key === undefined) return false;
-        if (key !== kb.key) return false;
-        return modifiersMatch(kb, event);
-    }
-
-    onKeydown(ctx: KeybindContext): void {
+    onKeydown(ctx: KeybindContext): boolean {
         const event = ctx.getEvent();
-        if (!(event instanceof KeyboardEvent)) return;
+        if (!(event instanceof KeyboardEvent)) return false;
 
         const key = keyFromKeyboardEvent(event);
-        if (key === undefined) return;
+        if (key === undefined) return false;
 
-        this.dispatch(this.resolveCandidates(key, event), ctx);
+        return this.dispatch(this.resolveCandidates(key, event), ctx);
     }
 
     onMousedown(ctx: KeybindContext): void {
@@ -242,14 +242,14 @@ export class KeybindManager {
      * (e.g. cursor isn't in a class body), which falls through to the
      * next candidate on the same key.
      */
-    private dispatch(candidates: ResolvedBinding[], ctx: KeybindContext): void {
+    private dispatch(candidates: ResolvedBinding[], ctx: KeybindContext): boolean {
         for (const {action} of candidates) {
             if (!ctx.applies(action.getKeybindContext())) continue;
             if (!action.isApplicable(ctx)) continue;
 
             try {
                 action.run(ctx);
-                return;
+                return true;
             } catch (err) {
                 if (err instanceof KeybindNotApplicableAbortError) {
                     continue;
@@ -257,5 +257,6 @@ export class KeybindManager {
                 throw err;
             }
         }
+        return false;
     }
 }

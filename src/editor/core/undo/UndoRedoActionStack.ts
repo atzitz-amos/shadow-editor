@@ -97,6 +97,14 @@ export class UndoRedoActionStack {
     }
 
     discardFrame() {
-        this.frameStack.pop();
+        return this.frameStack.pop();
+    }
+
+    undoFrame(editor: Editor, frame: UndoStackFrame) {
+        UndoStack.whileUndoing(() => {
+            while (!frame.undo(editor, this.document)) {
+
+            }
+        })
     }
 }

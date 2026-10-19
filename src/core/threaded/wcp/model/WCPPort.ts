@@ -2,6 +2,12 @@ export class WCPPort {
     private static readonly byName = new Map<string, WCPPort>();
     private static readonly byId = new Map<string, WCPPort>();
 
+    private constructor(
+        private readonly name: string,
+        private readonly id: string
+    ) {
+    }
+
     public static forName(name: string): WCPPort {
         const normalizedName = name.trim();
         if (!normalizedName) {
@@ -28,10 +34,13 @@ export class WCPPort {
         return existing;
     }
 
-    private constructor(
-        private readonly name: string,
-        private readonly id: string
-    ) {
+    private static hash(value: string): string {
+        let hash = 5381;
+        for (let i = 0; i < value.length; i++) {
+            hash = (hash * 33) ^ value.charCodeAt(i);
+        }
+
+        return "p_" + (hash >>> 0).toString(16);
     }
 
     public getName(): string {
@@ -40,15 +49,6 @@ export class WCPPort {
 
     public getId(): string {
         return this.id;
-    }
-
-    private static hash(value: string): string {
-        let hash = 5381;
-        for (let i = 0; i < value.length; i++) {
-            hash = (hash * 33) ^ value.charCodeAt(i);
-        }
-
-        return "p_" + (hash >>> 0).toString(16);
     }
 }
 

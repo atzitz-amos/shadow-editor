@@ -1,6 +1,6 @@
 import {LangRegistry} from "../../../lang/LangRegistry";
 import {ProjectFile} from "../../../core/project/filesystem/tree/ProjectFile";
-import {Document} from "./Document";
+import {Document, DocumentListener} from "./Document";
 import {UUIDHelper} from "../../utils/UUIDHelper";
 import {Service} from "../../../core/threaded/service/Service";
 import {GlobalState} from "../../../core/global/GlobalState";
@@ -15,9 +15,8 @@ import {LanguageBase} from "../../../lang/LanguageBase";
  * @since 1.0.0
  */
 @Service
-export class EditorDocumentManager {
+export class EditorDocumentManager implements DocumentListener {
     private static readonly instance: EditorDocumentManager = new EditorDocumentManager();
-
     private readonly documents: Map<string, Document> = new Map();
 
     public static getInstance() {
@@ -43,15 +42,15 @@ export class EditorDocumentManager {
         return uuid;
     }
 
-    public getDocumentForId(id: string): Document | null {
-        if (this.documents.has(id)) return this.documents.get(id)!;
-        return null;
-    }
-
     static createVirtualDocument(text: string, language: LanguageBase) {
         const document = new Document(text, language);
         this.getInstance().prepare(document);
         return document;
+    }
+
+    public getDocumentForId(id: string): Document | null {
+        if (this.documents.has(id)) return this.documents.get(id)!;
+        return null;
     }
 
     public getDocumentForFile(file: ProjectFile): Document {
@@ -72,9 +71,10 @@ export class EditorDocumentManager {
     }
 
     public begin() {
-        GlobalState.getMainEventBus().subscribe(this, DocumentModificationEvent.SUBSCRIBER, e => {
-            this.onDocumentChange(e);
-        });
+    }
+
+    documentModified(event: DocumentModificationEvent): void {
+        this.onDocumentChange(event);
     }
 
     private onDocumentChange(event: DocumentModificationEvent) {
@@ -90,6 +90,7 @@ export class EditorDocumentManager {
         highlighter.highlight(event.getDocument().getTokenCache().createTokenStream(), holder);
 
         SynDocumentManager.getInstance().notifyModified(event.getDocument(), event, modifiedRange);
+        GlobalState.getMainEventBus().syncPublish(event);
     }
 
     private prepare(document: Document) {
@@ -101,5 +102,7 @@ export class EditorDocumentManager {
 
         const highlighter = LangRegistry.getHighlighter(language);
         highlighter.highlight(document.getTokenCache().createTokenStream(), document.getHighlightsHolder());
+
+        document.addObserver(this, this);
     }
 }

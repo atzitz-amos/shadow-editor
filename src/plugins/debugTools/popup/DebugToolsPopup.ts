@@ -7,7 +7,6 @@ import {Scheduler} from "../../../core/scheduler/Scheduler";
 import {CodeStyleTab} from "./codeStyle/CodeStyleTab";
 import {GlobalState} from "../../../core/global/GlobalState";
 import {KeyPressedEvent} from "../../../editor/impl/events/PhysicalEvents";
-import {EditorHighlighterUtils} from "../../../editor/ui/highlighter/overlay/EditorHighlighterUtils";
 
 /**
  *

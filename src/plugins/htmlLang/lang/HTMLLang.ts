@@ -1,6 +1,5 @@
 import {HighlighterBase} from "../../../lang/highlighter/HighlighterBase";
 import {LanguageBase} from "../../../lang/LanguageBase";
-import {IncrementalLexer} from "../../../lang/syntax/builder/lexer/IncrementalLexer";
 import {HtmlStatefulLexer} from "./lexer/HtmlStatefulLexer";
 import {HtmlHighlighter} from "./highlighter/HtmlHighlighter";
 import {Icon} from "../../../core/ui/icons/Icon";

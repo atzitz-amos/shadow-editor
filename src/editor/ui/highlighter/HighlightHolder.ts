@@ -3,39 +3,18 @@
  * Date: 10/6/2025
  */
 
-import {TextAttributeKey} from "./style/TextAttributeKey";
 import {TextRange} from "../../core/coordinate/range/TextRange";
-import {Fragment} from "../../core/components/fragments/Fragment";
+import {TextAttributeKey} from "./style/TextAttributeKey";
 import {OverlayWidget} from "../inline/widget/overlay/OverlayWidget";
-import {TrackedRange} from "../../core/coordinate/range/TrackedRange";
-import {Document} from "../../core/document/Document";
+import {Fragment} from "../../core/components/fragments/Fragment";
 
-export class HighlightHolder {
-    private fragments: Fragment[] = [];
+export interface HighlightHolder {
+    highlightRange(range: TextRange, attributes: TextAttributeKey, classNames?: string[]): void;
 
-    private overlays: OverlayWidget[] = [];
+    addOverlay(widget: OverlayWidget): void;
 
-    constructor(private document: Document, private readonly priority: number, private readonly trackRanges: boolean = false) {
-    }
+    clear(): void;
 
-    highlightRange(range: TextRange, attributes: TextAttributeKey, classNames?: string[]) {
-        if (this.trackRanges) {
-            range = TrackedRange.of(range);
-            this.document.addTrackedRange(range as TrackedRange);
-        }
-        this.fragments.push(new Fragment(range, this.priority, attributes, classNames ?? []));
-    }
+    toFragments(): Fragment[]
 
-    addOverlay(widget: OverlayWidget) {
-        this.overlays.push(widget);
-    }
-
-    clear() {
-        this.fragments = [];
-        this.overlays = [];
-    }
-
-    toFragments(): Fragment[] {
-        return this.fragments;
-    }
 }

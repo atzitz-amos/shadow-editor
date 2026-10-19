@@ -15,6 +15,7 @@ import {SynEditorTreeChangedEvent} from "../../../editor/core/lang/events/SynEdi
 import {SynDocumentManager} from "../../syntax/manager/SynDocumentManager";
 import {SynDocument} from "../../syntax/api/document/SynDocument";
 import {LanguageParserDefinition} from "../../definitions/LanguageParserDefinition";
+import {CollectionUtils} from "../../../editor/utils/collection/CollectionUtils";
 
 /**
  *
@@ -50,22 +51,18 @@ export class CodeAnalysisService {
     private onSynTreeChanged(event: SynTreeChangedEvent) {
         Scheduler.debounce(() => {
             this.invokePasses(event.getSynDocument());
-        }, 100 * SynDocumentUtils.getDocumentLengthTier(event.getSynDocument().getDocument()));
+        }, 100 * SynDocumentUtils.getDocumentLengthTier(event.getSynDocument().getDocument()), this.editor.getId());
     }
 
     private invokePasses(synDocument: SynDocument) {
-        if (this.lastUpdatedTimestamp >= synDocument.getModificationTimestamp()) {
-            return;
-        }
-
         const providers = CodeAnalysisService.codeAnalysisPassEP.getAll();
 
-        const visitors: SynNodeVisitor[] = [];
+        const visitors: Map<number, SynNodeVisitor[]> = new Map<number, SynNodeVisitor[]>();
         const passes: CodeAnalysisPass<any>[] = [];
 
         for (const provider of providers) {
             const pass = provider.createPass(this.editor, synDocument);
-            visitors.push(...pass.collectVisitors());
+            CollectionUtils.getOrSet(visitors, provider.getPriority(), () => []).push(...pass.collectVisitors());
             passes.push(pass);
         }
 

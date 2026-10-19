@@ -7,7 +7,7 @@ import JsLang from "../lang/JsLang";
 import {JsFunctionParameterList} from "../lang/syntax/statements/JsFunctionParameterList";
 import {Caret, CaretMovementFlags} from "../../../editor/core/caret/Caret";
 import {JsArgumentList} from "../lang/syntax/expr/JsArgumentList";
-import {JsBinaryExprTemplate} from "../lang/codeGen/template/JsBinaryExprTemplate";
+import {JsBinaryExprTemplate} from "../lang/codeGen/template/expr/JsBinaryExprTemplate";
 import {TextRange} from "../../../editor/core/coordinate/range/TextRange";
 import {JsFunctionParameterListTemplate} from "../lang/codeGen/template/JsFunctionParameterListTemplate";
 import {JsArgumentListTemplate} from "../lang/codeGen/template/JsArgumentListTemplate";
@@ -18,7 +18,7 @@ import {JsArgumentListTemplate} from "../lang/codeGen/template/JsArgumentListTem
  * @date 9/27/2026
  * @since 1.0.0
  */
-export default class JsSwapOperandsLeftIntent extends IntentBase {
+export default class JsSwapOperandsRightIntent extends IntentBase {
     getApplicableLanguage(): LanguageBase[] {
         return [JsLang.INSTANCE];
     }
@@ -46,7 +46,7 @@ export default class JsSwapOperandsLeftIntent extends IntentBase {
         const offset = caret.getOffset();
         if (node instanceof JsBinaryExpr) {
             const length = new TextRange(node.getTextRange().start, node.getRight().getTextRange().start).getLength();
-            caret.moveToOffset(caret.getOffset() - length, CaretMovementFlags.JUMP);
+            caret.moveToOffset(caret.getOffset() + length, CaretMovementFlags.JUMP);
 
             const expr = new JsBinaryExprTemplate(node);
             expr.setLeft(expr.getRight());
@@ -77,6 +77,7 @@ export default class JsSwapOperandsLeftIntent extends IntentBase {
                 template.replaceArgument(index - 1, args[index]);
                 synModTree.replaceNode(node, template);
 
+                const length = new TextRange(node.getArguments()[index - 1].getTextRange().start, node.getArguments()[index].getTextRange().start).getLength();
                 caret.moveToOffset(node.getArguments()[index].getTextRange().start, CaretMovementFlags.JUMP);
             }
         }

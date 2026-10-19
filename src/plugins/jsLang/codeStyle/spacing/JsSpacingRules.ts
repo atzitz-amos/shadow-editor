@@ -3,9 +3,6 @@ import {JsLexicalGrammar} from "../../lang/lexer/JsLexicalGrammar";
 import {JsGrammar} from "../../lang/parser/JsGrammar";
 import {JsArrowFunctionExpr} from "../../lang/syntax/expr/JsArrowFunctionExpr";
 import {JsFunction} from "../../lang/syntax/api/JsFunction";
-import {JsClassMethod} from "../../lang/syntax/objects/JsClassMethod";
-import {SynCodeBlock} from "../../../../lang/syntax/api/SynCodeBlock";
-import {JsCodeBlockTemplate} from "../../lang/codeGen/template/JsCodeBlockTemplate";
 import {JsCodeBlock} from "../../lang/syntax/JsCodeBlock";
 
 /**

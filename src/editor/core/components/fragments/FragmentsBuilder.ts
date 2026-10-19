@@ -1,6 +1,8 @@
-import {FragmentEvent, FragmentType} from "./FragmentEvent";
+import {FragmentEvent} from "./FragmentEvent";
 import {TextRange} from "../../coordinate/range/TextRange";
 import {WidgetManager} from "../WidgetManager";
+import {Fragment} from "./Fragment";
+import {FragmentsBuilder as CoreFragmentsBuilder} from "../../../../core/highlighter/FragmentsBuilder";
 
 /**
  * Builds fragment events from highlights and components
@@ -13,12 +15,20 @@ export class FragmentsBuilder {
     public static build(range: TextRange, manager: WidgetManager): FragmentEvent[] {
         let fragments = manager.getDocument().getHighlightsHolder().toFragments();
         fragments = fragments.concat(manager.getDocument().getAnnotationsHolder().toFragments());
-        const events = fragments.flatMap(f => f.toEvents(range.start, range.end));
+        const extra: FragmentEvent[] = [];
 
         for (const inlay of manager.getInlaysInRange(range)) {
-            events.push(FragmentEvent.inlay(inlay));
+            extra.push(FragmentEvent.inlay(inlay.getOffset()));
         }
 
-        return events.sort((a, b) => a.pos - b.pos || ((a.type === FragmentType.END_RANGE ? 1 : 0) - (b.type === FragmentType.END_RANGE ? 1 : 0)));
+        return CoreFragmentsBuilder.fromFragments(fragments, range, extra);
+    }
+
+    public static fromFragments(
+        fragments: Fragment[],
+        range: TextRange,
+        extra: FragmentEvent[] = []
+    ): FragmentEvent[] {
+        return CoreFragmentsBuilder.fromFragments(fragments, range, extra);
     }
 }

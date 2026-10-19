@@ -84,7 +84,8 @@ export class EditorCoordinateMapper {
 
     visualToXY(pos: VisualPosition): XYPoint {
         const inlays = this.inlayManager.getInlays();
-        const lineStart = this.editor.getOpenedDocument().getLineData(pos.row).getStart();
+        const lineStart = this.editor.getOpenedDocument().getLineData(pos.row)?.getStart();
+        if (lineStart === undefined) return new XYPoint(0, 0);
 
         let logicalDelta = 0;
         let visualDelta = 0;

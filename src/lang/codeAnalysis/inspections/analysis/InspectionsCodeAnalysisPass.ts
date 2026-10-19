@@ -20,10 +20,6 @@ export class InspectionsCodeAnalysisPass implements CodeAnalysisPass<ProblemsHol
         this.holder = new ProblemsHolder(document);
     }
 
-    getPriority(): number {
-        return 1;
-    }
-
     collectVisitors(): SynNodeVisitor[] {
         return this.inspections
             .filter(x => x.getApplicableLanguages().includes(this.document.getLanguage()))

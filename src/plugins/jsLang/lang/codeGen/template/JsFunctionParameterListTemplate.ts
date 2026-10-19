@@ -8,7 +8,6 @@ import {SynASTElement} from "../../../../../lang/syntax/api/tree/SynASTElement";
 import {TextRange} from "../../../../../editor/core/coordinate/range/TextRange";
 import {SynTokenNode} from "../../../../../lang/syntax/impl/SynTokenNode";
 import {JsLexicalGrammar} from "../../lexer/JsLexicalGrammar";
-import {JsFunctionTemplate} from "./JsFunctionTemplate";
 
 /**
  *

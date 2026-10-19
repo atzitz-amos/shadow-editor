@@ -60,8 +60,4 @@ export class ReferenceCollectorAnalysisPass implements CodeAnalysisPass<null> {
     runOnlyOnVisibleNodes(): boolean {
         return false;
     }
-
-    getPriority(): number {
-        return 0;
-    }
 }

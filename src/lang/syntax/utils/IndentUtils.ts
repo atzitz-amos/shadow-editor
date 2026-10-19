@@ -1,5 +1,6 @@
 import {LanguageBase} from "../../LanguageBase";
 import {LanguageCodeStyleDefinition} from "../../definitions/LanguageCodeStyleDefinition";
+import {SynNode} from "../api/SynNode";
 
 /**
  *
@@ -49,5 +50,11 @@ export class IndentUtils {
     static getLanguageSpecificIndentationSize(language: LanguageBase | null) {
         const manager = LanguageCodeStyleDefinition.getCodeStyleManager(language);
         return manager?.getIndentationSize() ?? 4;
+    }
+
+    static getIndentationForSynNode(node: SynNode) {
+        const offset = node.getTextRange().start;
+        const document = node.getSynDocument().getDocument();
+        return document.getLineAt(offset).getIndentationSize();
     }
 }

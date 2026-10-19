@@ -7,6 +7,7 @@ import {TokenType} from "../../builder/tokens/TokenType";
 import {SynNodeVisitor} from "../../visitors/SynNodeVisitor";
 import {SynTokenNode} from "../SynTokenNode";
 import {SynErrorNode} from "../SynErrorNode";
+import {SynScopedElement} from "../../api/tree/SynScopedElement";
 
 /**
  *
@@ -190,6 +191,10 @@ export abstract class AbstractSynParentElement implements SynParentElement {
 
     isParentElement(): this is SynParentElement {
         return true;
+    }
+
+    isScopedElement(): this is SynScopedElement {
+        return false;
     }
 
     accept(visitor: SynNodeVisitor): void {

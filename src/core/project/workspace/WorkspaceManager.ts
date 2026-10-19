@@ -14,7 +14,7 @@ import {EditorTab} from "../../../app/core/tabs/EditorTab";
  * @since 1.0.0
  */
 export class WorkspaceManager {
-    private static readonly declare triggerPersist: () => void;
+    declare private static readonly triggerPersist: () => void;
 
     @Persisted({
         deserializer: d => d.use(Workspace, Workspace.deserializer)

@@ -6,6 +6,7 @@ import {ActiveProjectHelper} from "../core/global/ActiveProjectHelper";
 import {EditorPlugin} from "../core/plugins/loader/Plugin";
 import {ShadowUI} from "./ui/ShadowUI";
 import {ShadowUILoadedEvent} from "./events/ShadowUILoadedEvent";
+import {ShadowGlobal} from "../core/global/ShadowGlobal";
 
 /**
  * Represents the backend of the Shadow Editor application. It is responsible for managing
@@ -44,7 +45,7 @@ export class ShadowApp {
         ShadowApp.instance = new ShadowApp();
 
         // Initialize GlobalState with the app
-        GlobalState.init(ShadowApp.instance);
+        await ShadowGlobal.init(ShadowApp.instance);
 
         if (showProgressBar)
             // Launch the UI (this will display the progress bar)

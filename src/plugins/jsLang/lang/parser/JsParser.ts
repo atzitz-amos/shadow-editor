@@ -8,6 +8,7 @@ import {TokenExpectation} from "../../../../lang/syntax/builder/parser/builder/T
 import {IncrementalParser} from "../../../../lang/syntax/builder/parser/optimizer/api/IncrementalParser";
 import {ParserBoundaryNode} from "../../../../lang/syntax/builder/parser/optimizer/api/ParserBoundaryNode";
 import {Token} from "../../../../lang/syntax/builder/tokens/Token";
+import {ASTType} from "../../../../lang/syntax/builder/parser/nodes/ASTGrammar";
 
 @IncrementalParser
 export class JsParser implements IParser {
@@ -75,17 +76,6 @@ export class JsParser implements IParser {
         if (!!this.builder.consumeIf(JsLexicalGrammar.SEMICOLON)) return true;
 
         return this.builder.beforeNewLine() || this.builder.done() || this.builder.isNext(JsLexicalGrammar.RBRACE);
-    }
-
-    /**
-     * Consumes the terminating ';' (or accepts ASI) *inside* the statement, then closes it,
-     * so the semicolon becomes part of the statement node.
-     */
-    private finishStatement(marker: Marker, type: Parameters<Marker["done"]>[0]): void {
-        if (!this.insertSemicolonIfNeeded()) {
-            this.builder.errorVirtual("Expected ';'");
-        }
-        marker.done(type);
     }
 
     parse(): void {
@@ -726,6 +716,17 @@ export class JsParser implements IParser {
             .then(JsLexicalGrammar.RPAREN).failWith("Expected ')'")
             .then(() => this.parseBlock(true, false, false, false));
         start.done(JsGrammar.ClassMethodDeclaration);
+    }
+
+    /**
+     * Consumes the terminating ';' (or accepts ASI) *inside* the statement, then closes it,
+     * so the semicolon becomes part of the statement node.
+     */
+    private finishStatement(marker: Marker, type: ASTType): void {
+        if (!this.insertSemicolonIfNeeded()) {
+            this.builder.errorVirtual("Expected ';'");
+        }
+        marker.done(type);
     }
 
     private parseClassMethodOrField(start: Marker, isAsync: Token | null, isGenerator: Token | null) {

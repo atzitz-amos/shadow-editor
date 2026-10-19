@@ -6,7 +6,6 @@ import {JsCodeBlock} from "../../syntax/JsCodeBlock";
 import {JsStatement} from "../../syntax/statements/JsStatement";
 import {JsStatementTemplate} from "./JsStatementTemplate";
 import {TextRange} from "../../../../../editor/core/coordinate/range/TextRange";
-import {IndentUtils} from "../../../../../lang/syntax/utils/IndentUtils";
 
 /**
  *
@@ -25,9 +24,16 @@ export class JsCodeBlockTemplate extends JsSynTemplate {
         return new JsCodeBlockTemplate(parsed);
     }
 
-    public insertStatementBefore(statement: JsStatement, template: JsStatementTemplate, indent: string="") {
+    public insertStatementBefore(statement: JsStatement, template: JsStatementTemplate, indent: string = "") {
         const offset = this.toRelativeOffset(statement.getTextRange().start);
         this.insertTemplate(offset, template);
         this.modify(new TextRange(offset, offset), "\n" + indent);
+    }
+
+    public insertStatementAtStart(template: JsStatementTemplate, indent: string = "") {
+        const offset = this.toRelativeOffset(this.getElement().getTextRange().start + 1);
+        this.modify(new TextRange(offset, offset), "\n" + indent);
+
+        this.insertTemplate(offset, template);
     }
 }

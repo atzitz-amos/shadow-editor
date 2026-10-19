@@ -3,7 +3,7 @@ import {QuickParseUtils} from "../../../../../lang/syntax/utils/QuickParseUtils"
 import JsLang from "../../JsLang";
 import {JsParser} from "../../parser/JsParser";
 import {JsArgumentList} from "../../syntax/expr/JsArgumentList";
-import {JsExprTemplate} from "./JsExprTemplate";
+import {JsExprTemplate} from "./expr/JsExprTemplate";
 
 /**
  *

@@ -37,7 +37,7 @@ export class ContextResolver {
         };
     }
 
-    public static fromEvent(event: KeybindEventLike & {target?: EventTarget | null}): KeybindContext {
+    public static fromEvent(event: KeybindEventLike & { target?: EventTarget | null }): KeybindContext {
         const target = event.target instanceof HTMLElement ? event.target : document.activeElement;
         return this.fromElement(target, event);
     }
@@ -77,7 +77,7 @@ export class ContextResolver {
         return new DataContext(null, undefined, resolver);
     }
 
-    public static provider(values: Partial<{editor: Editor; pane: IPane}>): ContextProvider {
+    public static provider(values: Partial<{ editor: Editor; pane: IPane }>): ContextProvider {
         return {
             provide: (key) => {
                 if (key === CommonDataKeys.EDITOR) return values.editor;

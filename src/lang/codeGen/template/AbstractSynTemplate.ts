@@ -25,6 +25,8 @@ export abstract class AbstractSynTemplate implements TemplateModificationObserve
      */
     private readonly originals: { start: number, end: number, lengthDelta: number }[] = [];
 
+    private readonly liveRanges: TextRange[] = [];
+
     private readonly observers: TemplateModificationObserver[] = [];
 
     constructor(protected readonly element: SynASTElement) {
@@ -77,7 +79,7 @@ export abstract class AbstractSynTemplate implements TemplateModificationObserve
      * E.g. after replacing [0, 5] with "H", any modification inside [0, 5] throws,
      * while an insert of "ello" at [5, 5] is shifted to an insert at [1, 1].
      */
-    modify(range: TextRange, text: string): void {
+    modify(range: TextRange, text: string): TextRange {
         const start = range.start;
         const end = range.end;
 
@@ -100,6 +102,8 @@ export abstract class AbstractSynTemplate implements TemplateModificationObserve
 
         this.originals.push({start, end, lengthDelta: text.length - (end - start)});
         this.modifications.push({range: range.delta(shift), text});
+
+        return range.delta(shift);
     }
 
     protected insertTemplate(offset: number, template: AbstractSynTemplate): void {

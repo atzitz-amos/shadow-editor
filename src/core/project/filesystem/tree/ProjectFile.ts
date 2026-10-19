@@ -16,6 +16,9 @@ import {VFileNode} from "../metadata/VNode";
 export class ProjectFile implements FileSystemEntry {
     private cachedContent: string | null = null;
 
+    /** `lastModified:size` of the on-disk file the cache was read from. */
+    private cacheStamp: string | null = null;
+
     public constructor(private readonly fs: FileSystem, private readonly vNode: VFileNode) {
     }
 
@@ -79,10 +82,19 @@ export class ProjectFile implements FileSystemEntry {
         return this.getDeletedAt() !== null;
     }
 
+    /**
+     * Always reflects what is on disk, but only pays for reading + decoding the text when the file actually changed.
+     * (`getFile()` is a cheap snapshot; `text()` is the expensive part.)
+     */
     async getTextContent(): Promise<string> {
         const handle = await this.fs.getFileContent(this);
         const file = await handle.getFile();
-        this.cachedContent = await file.text();
+
+        const stamp = `${file.lastModified}:${file.size}`;
+        if (this.cachedContent === null || this.cacheStamp !== stamp) {
+            this.cachedContent = await file.text();
+            this.cacheStamp = stamp;
+        }
         return this.cachedContent;
     }
 
@@ -96,6 +108,7 @@ export class ProjectFile implements FileSystemEntry {
 
     async save(content: string): Promise<void> {
         this.cachedContent = await this.fs.write(this, content);
+        this.cacheStamp = null; // disk stamp changed; the next read re-validates (and re-reads once)
     }
 
     getURI(): EditorURI {

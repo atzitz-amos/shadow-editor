@@ -64,7 +64,7 @@ export class TextLayer {
 }
 
 export class CaretLayer {
-    private _caret: HTMLDivElement;
+    private _carets: Map<number, HTMLDivElement>;
     private _input: HTMLInputElement;
     private _blink: NodeJS.Timeout;
     private readonly view: View;
@@ -74,14 +74,26 @@ export class CaretLayer {
         this.view = view;
         this.element = HTMLUtils.createElement('div.editor-layer.layer-caret', root) as HTMLDivElement;
 
-        this._caret = HTMLUtils.createElement('div.editor-caret#caret-0', this.element) as HTMLDivElement;
+        this._carets = new Map();
         this._input = HTMLUtils.createElement('input.editor-input', this.element) as HTMLInputElement;
+        this._input.setAttribute("autofocus", "true");
 
         this._blink = setInterval(() => this.blink(), 750);
+
+        view.getEditor().getEventBus().subscribe(this, CaretAddedEvent.SUBSCRIBER, e => {
+            this._carets.set(e.getCaret().id, HTMLUtils.createElement(`div.editor-caret#caret-${e.getCaret().id}`, this.element) as HTMLDivElement);
+        });
+
+        view.getEditor().getEventBus().subscribe(this, CaretRemovedEvent.SUBSCRIBER, e => {
+            if (this._carets.has(e.getCaret().id)) {
+                this._carets.get(e.getCaret().id)?.remove();
+                this._carets.delete(e.getCaret().id);
+            }
+        });
     }
 
     public blinkReset() {
-        this._caret.classList.remove("blink");
+        this._carets.forEach(c => c.classList.remove("blink"));
         clearInterval(this._blink);
         this._blink = setInterval(this.blink.bind(this), 750);
     }
@@ -130,6 +142,10 @@ export class CaretLayer {
     update(): void {
         this.view.getEditor().getCaretModel().forEachCaret(caret => {
             const caretEl = this.getCaretElement(caret);
+            if (!caretEl) {
+                console.warn(`Caret element for caret ${caret.id} not found`);
+                return;
+            }
             const xy = caret.getXY();
 
             caretEl.style.top = HTMLUtils.px(xy.y);
@@ -138,11 +154,11 @@ export class CaretLayer {
     }
 
     getCaretElement(caret: Caret): HTMLDivElement {
-        return this.element.querySelector(`#caret-${caret.id}`) as HTMLDivElement;
+        return this._carets.get(caret.id) as HTMLDivElement;
     }
 
     private blink() {
-        this._caret.classList.toggle('blink');
+        this._carets.forEach(c => c.classList.toggle('blink'));
     }
 }
 

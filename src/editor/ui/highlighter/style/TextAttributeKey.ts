@@ -6,6 +6,8 @@
 import {TextAttributeBase} from "./TextAttributeBase";
 
 export class TextAttributeKey {
+    public static readonly EMPTY: TextAttributeKey = new TextAttributeKey([]);
+
     constructor(private attribute: TextAttributeBase[]) {
     }
 

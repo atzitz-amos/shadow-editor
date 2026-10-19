@@ -17,7 +17,9 @@ export enum CaretMovementFlags {
 }
 
 export class Caret {
-    id: number = 0;
+    public static id: number = 0;
+
+    id: number;
 
     editor: Editor;
     caretModel: CaretModel;
@@ -32,6 +34,8 @@ export class Caret {
     private myVisual: VisualPosition;
 
     constructor(caretModel: CaretModel, pos: LogicalPosition, isPrimary: boolean) {
+        this.id = Caret.id++;
+
         this.caretModel = caretModel;
         this.editor = caretModel.editor;
         this.isPrimary = isPrimary;

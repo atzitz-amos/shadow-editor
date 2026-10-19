@@ -145,21 +145,6 @@ export abstract class EditorInlinePopupFrame {
         this.onPopupOpened(popupElement);
     }
 
-    private readonly onPopupMouseDown = (event: MouseEvent): void => {
-        // Keep clicks inside the popup from bubbling up to editor-level handlers.
-        event.stopPropagation();
-    };
-
-    private readonly onOutsideMouseDown = (event: MouseEvent): void => {
-        if (!this.isWithinPopup(event.target)) {
-            this.hide();
-        }
-    };
-
-    private readonly onPopupKeyDown = (event: KeyboardEvent): void => {
-        this.onKeyDown(event);
-    };
-
     /**
      * Only wired up when {@link captureFocus} is enabled. Override to react to other keys;
      * call `super.onKeyDown(event)` to keep the default Escape-to-close behavior.
@@ -201,4 +186,19 @@ export abstract class EditorInlinePopupFrame {
         return target instanceof Node && this.popup !== null &&
             this.popup.getUnderlyingElement().contains(target);
     }
+
+    private readonly onPopupMouseDown = (event: MouseEvent): void => {
+        // Keep clicks inside the popup from bubbling up to editor-level handlers.
+        event.stopPropagation();
+    };
+
+    private readonly onOutsideMouseDown = (event: MouseEvent): void => {
+        if (!this.isWithinPopup(event.target)) {
+            this.hide();
+        }
+    };
+
+    private readonly onPopupKeyDown = (event: KeyboardEvent): void => {
+        this.onKeyDown(event);
+    };
 }

@@ -19,9 +19,9 @@ export class DocumentView implements Serializable {
 
     constructor(documentId: string, scrollX: number, scrollY: number, caretOffset: Offset) {
         this.documentId = documentId;
-        this.scrollX = scrollX;
-        this.scrollY = scrollY;
-        this.caretOffset = caretOffset;
+        this.scrollX = scrollX ?? 0;
+        this.scrollY = scrollY ?? 0;
+        this.caretOffset = caretOffset ?? 0;
     }
 
     public static deserializer(data: any) {

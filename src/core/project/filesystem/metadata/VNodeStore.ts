@@ -11,7 +11,7 @@ export class VNodeStore {
     @Persisted({
         mutable: true
     })
-    private static accessor nodesById = new Map<string, VNode>;
+    private static accessor nodesById = new Map<string, VNode>();
 
     private static instance: VNodeStore | null = null;
     private readonly nodesById: Map<string, VNode>;
@@ -42,7 +42,7 @@ export class VNodeStore {
         return index;
     }
 
-
+    /** NOTE: also returns soft-deleted nodes. Check `deletedAt` if you need live nodes only. */
     public getById(id: string): VNode | undefined {
         return this.nodesById.get(id);
     }
@@ -65,19 +65,23 @@ export class VNodeStore {
     public getChildren(dirId: string): VNode[] {
         const children = this.childrenByParent.get(dirId);
         if (!children) return [];
-        return [...children.values()]
-            .map(id => this.nodesById.get(id)!)
-            .filter(n => n.deletedAt === null);
+
+        const result: VNode[] = [];
+        for (const id of children.values()) {
+            const node = this.nodesById.get(id);
+            if (node && node.deletedAt === null) result.push(node);
+        }
+        return result;
     }
 
     public getPath(id: string): string {
         const parts: string[] = [];
         let node = this.nodesById.get(id);
         while (node) {
-            parts.unshift(node.name);
+            parts.push(node.name);
             node = node.parentId ? this.nodesById.get(node.parentId) : undefined;
         }
-        return '/' + parts.join('/');
+        return '/' + parts.reverse().join('/');
     }
 
     public getRoot(name: string): VNode {
@@ -87,7 +91,6 @@ export class VNodeStore {
         }
         return this.nodesById.get(id)!;
     }
-
 
     public createFile(id: string,
                       name: string,
@@ -126,25 +129,25 @@ export class VNodeStore {
     }
 
     public rename(id: string, newName: string): void {
-        const node = this.nodesById.get(id);
-        if (!node) throw new Error(`Unknown node ${id}`);
-        const parentKey = node.parentId ?? "";
-        this.childrenByParent.get(parentKey)?.delete(node.name);
+        const node = this.requireNode(id);
+        this.assertNameFree(node.parentId, newName, id);
+
+        const siblings = this.siblings(node.parentId);
+        siblings.delete(node.name);
         node.name = newName;
         node.modifiedAt = Date.now();
-        this.childrenByParent.get(parentKey)!.set(newName, id);
+        siblings.set(newName, id);
     }
 
     public move(id: string, newParentId: string | null): void {
-        const node = this.nodesById.get(id);
-        if (!node) throw new Error(`Unknown node ${id}`);
-        const oldKey = node.parentId ?? "";
-        const newKey = newParentId ?? "";
-        this.childrenByParent.get(oldKey)?.delete(node.name);
+        const node = this.requireNode(id);
+        this.assertNameFree(newParentId, node.name, id);
+        this.assertNotInsideSelf(id, newParentId);
+
+        this.siblings(node.parentId).delete(node.name);
         node.parentId = newParentId;
         node.modifiedAt = Date.now();
-        if (!this.childrenByParent.has(newKey)) this.childrenByParent.set(newKey, new Map());
-        this.childrenByParent.get(newKey)!.set(node.name, id);
+        this.siblings(newParentId).set(node.name, id);
     }
 
     public delete(id: string): void {
@@ -153,22 +156,66 @@ export class VNodeStore {
         node.deletedAt = Date.now(); // soft delete; keep in maps for undo/history
     }
 
+    /** Size + modifiedAt in one go (one mutation instead of two for the persistence layer to observe). */
+    public updateFile(id: string, size: number, modifiedAt: number): void {
+        const node = this.requireNode(id) as VFileNode;
+        node.size = size;
+        node.modifiedAt = modifiedAt;
+    }
+
     updateModifiedAt(id: string, at: number) {
-        this.getById(id)!.modifiedAt = at;
+        this.requireNode(id).modifiedAt = at;
     }
 
     updateFileSize(id: string, length: number) {
-        (<VFileNode>this.getById(id)).size = length;
+        (this.requireNode(id) as VFileNode).size = length;
     }
 
     private register(node: VNode) {
+        this.assertNameFree(node.parentId, node.name);
+
         this.nodesById.set(node.id, node);
-        const parentKey = node.parentId ?? "";
-        if (!this.childrenByParent.has(parentKey)) {
-            this.childrenByParent.set(parentKey, new Map());
-        }
-        this.childrenByParent.get(parentKey)!.set(node.name, node.id);
+        this.siblings(node.parentId).set(node.name, node.id);
 
         return node;
+    }
+
+    private requireNode(id: string): VNode {
+        const node = this.nodesById.get(id);
+        if (!node) throw new Error(`Unknown node ${id}`);
+        return node;
+    }
+
+    private siblings(parentId: string | null): Map<string, string> {
+        const key = parentId ?? "";
+        let map = this.childrenByParent.get(key);
+        if (!map) {
+            map = new Map();
+            this.childrenByParent.set(key, map);
+        }
+        return map;
+    }
+
+    /**
+     * The index is keyed by name, so a duplicate silently overwrites the old sibling: it would vanish from
+     * getChildren/resolvePath while staying in nodesById. A slot held by a soft-deleted node may be reused.
+     * (If you add "undo delete", restoring must re-check the name.)
+     */
+    private assertNameFree(parentId: string | null, name: string, selfId?: string): void {
+        const existingId = this.childrenByParent.get(parentId ?? "")?.get(name);
+        if (!existingId || existingId === selfId) return;
+
+        const existing = this.nodesById.get(existingId);
+        if (existing && existing.deletedAt === null) {
+            throw new Error(`"${name}" already exists in this directory`);
+        }
+    }
+
+    private assertNotInsideSelf(id: string, newParentId: string | null): void {
+        let cursor = newParentId ? this.nodesById.get(newParentId) : undefined;
+        while (cursor) {
+            if (cursor.id === id) throw new Error("Cannot move a directory into itself");
+            cursor = cursor.parentId ? this.nodesById.get(cursor.parentId) : undefined;
+        }
     }
 }
