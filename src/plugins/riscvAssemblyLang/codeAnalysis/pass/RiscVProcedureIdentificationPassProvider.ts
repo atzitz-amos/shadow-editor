@@ -11,7 +11,7 @@ import RiscVProcedureIdentificationPass from "./RiscVProcedureIdentificationPass
  * @since 1.0.0
  */
 export default class RiscVProcedureIdentificationPassProvider extends CodeAnalysisPassProvider<null> {
-    createPass(editor: Editor, document: SynDocument): CodeAnalysisPass<null> {
+    createPass(document: SynDocument): CodeAnalysisPass<null> {
         return new RiscVProcedureIdentificationPass();
     }
 

@@ -7,19 +7,20 @@ import {Marker} from "../../../../lang/syntax/builder/parser/builder/Marker";
 import {TokenExpectation} from "../../../../lang/syntax/builder/parser/builder/TokenExpectation";
 import {IncrementalParser} from "../../../../lang/syntax/builder/parser/optimizer/api/IncrementalParser";
 import {ParserBoundaryNode} from "../../../../lang/syntax/builder/parser/optimizer/api/ParserBoundaryNode";
+import {Stateful} from "../../../../lang/syntax/builder/parser/optimizer/api/Stateful";
 import {Token} from "../../../../lang/syntax/builder/tokens/Token";
 import {ASTType} from "../../../../lang/syntax/builder/parser/nodes/ASTGrammar";
 
 @IncrementalParser
 export class JsParser implements IParser {
-    public myIsInAsync = false;
-    public myIsInGenerator = false;
-    public myIsInFunction = false;
-    public myIsSpreadAllowed = false;
+    @Stateful public myIsInAsync = false;
+    @Stateful public myIsInGenerator = false;
+    @Stateful public myIsInFunction = false;
+    @Stateful public myIsSpreadAllowed = false;
 
     private readonly myExprParser: JsExprParser;
 
-    private isDoWhileASI: boolean = false;
+    @Stateful private isDoWhileASI: boolean = false;
 
     constructor(private builder: ASTBuilder) {
         this.myExprParser = new JsExprParser(this, builder);
@@ -97,9 +98,9 @@ export class JsParser implements IParser {
         const prevIsInAsync = this.myIsInAsync;
         const prevIsInGenerator = this.myIsInGenerator;
         const prevIsInFunction = this.myIsInFunction;
-        if (isFunction) this.setInFunction(isFunction);
-        if (isAsync) this.setInAsync(isAsync);
-        if (isGenerator) this.setInGenerator(isGenerator);
+        if (isFunction !== null) this.setInFunction(isFunction);
+        if (isAsync !== null) this.setInAsync(isAsync);
+        if (isGenerator !== null) this.setInGenerator(isGenerator);
 
         try {
             const marker = this.builder.mark();
@@ -210,12 +211,11 @@ export class JsParser implements IParser {
                 this.parseStatementExpression(false);
                 break;
             case "yield":
-                this.parseStatementExpression(false);
+                this.parseStatementExpression();
                 break;
             case "await":
                 this.parseStatementExpression(false);
                 break;
-
             default:
                 this.builder.advance();
                 this.builder.popAndError("Unexpected keyword");
@@ -478,8 +478,8 @@ export class JsParser implements IParser {
         this.builder.expect(JsLexicalGrammar.IDENTIFIER).failWith("Function statement requires name");
 
         this.builder.expect(JsLexicalGrammar.LPAREN).failWith("Expected '('")
-            .then(() => this.myExprParser.parseFunctionParameterListDeclaration())
-            .then(JsLexicalGrammar.RPAREN).failWith("Expected ')'")
+            .then(() => this.myExprParser.parseFunctionParameterListDeclaration());
+        this.builder.expect(JsLexicalGrammar.RPAREN).failWith("Expected ')'")
             .then(() => {
                 this.parseBlock(true, true, isAsync, isGenerator);
             });
@@ -553,11 +553,26 @@ export class JsParser implements IParser {
     }
 
     parseClassBody() {
+        const oldIsInFunc = this.isInFunction();
+        const oldIsSpreadAllowed = this.isSpreadAllowed();
+        const oldIsInAsync = this.isAsyncAllowed();
+        const oldIsInGenerator = this.isInGenerator();
+
+        this.setInFunction(false);
+        this.setIsSpreadAllowed(false);
+        this.setInAsync(false);
+        this.setInGenerator(false);
+
         const marker = this.builder.mark();
 
         while (!this.builder.done() && !this.builder.isNext(JsLexicalGrammar.RBRACE)) {
             this.parseClassElement();
         }
+
+        this.setInAsync(oldIsInAsync);
+        this.setInGenerator(oldIsInGenerator);
+        this.setInFunction(oldIsInFunc);
+        this.setIsSpreadAllowed(oldIsSpreadAllowed);
 
         marker.done(JsGrammar.ClassBody);
     }
@@ -570,11 +585,13 @@ export class JsParser implements IParser {
         const isGenerator = this.builder.consumeIf(JsLexicalGrammar.MATHEMATICAL_OPERATOR, "*");
         const isPrivateField = this.builder.consumeIf(JsLexicalGrammar.HASHTAG); // If it's a private field or method
 
-        if ((isStatic || isAsync) && !isGenerator && !isPrivateField) {
+        if (isStatic && !isAsync && !isGenerator && !isPrivateField && this.builder.isNext(JsLexicalGrammar.LBRACE)) {
+            return this.parseClassStaticBlock(start);
+        } else if ((isStatic || isAsync) && !isGenerator && !isPrivateField) {
             // We try to treat it as an identifier
             if (this.builder.isNext(JsLexicalGrammar.LPAREN)) {
                 start.rollback();
-                return this.parseClassMethodDefinition(start, false)
+                return this.parseClassMethodDefinition(start, false, false)
             } else if (this.builder.isNext(JsLexicalGrammar.ASSIGNMENT_OPERATOR, '=') || this.builder.isNext(JsLexicalGrammar.SEMICOLON) || this.builder.beforeNewLine()) {
                 start.rollback();
                 if (isAsync && !isStatic) {
@@ -595,10 +612,10 @@ export class JsParser implements IParser {
                 if (isStatic) {
                     this.builder.markErrorAndRemove(isStatic, "Constructor cannot be static");
                 }
-                this.parseClassMethodDefinition(start, false);
+                this.parseClassMethodDefinition(start, false, false);
             } else if (next.getValue() === "get" || next.getValue() === "set") {
                 if (!this.builder.lookAhead(1)!.isType(JsLexicalGrammar.IDENTIFIER)) {
-                    this.parseClassMethodDefinition(start, !!isAsync);
+                    this.parseClassMethodDefinition(start, !!isAsync, !!isGenerator);
                 } else {
                     if (isAsync) {
                         this.builder.popAndError("Getter/Setter cannot be async");
@@ -731,7 +748,7 @@ export class JsParser implements IParser {
 
     private parseClassMethodOrField(start: Marker, isAsync: Token | null, isGenerator: Token | null) {
         if (this.builder.lookAhead(1)?.isType(JsLexicalGrammar.LPAREN)) {
-            this.parseClassMethodDefinition(start, !!isAsync);
+            this.parseClassMethodDefinition(start, !!isAsync, !!isGenerator);
         } else {
             if (isAsync) {
                 this.builder.markErrorAndRemove(isAsync, "Class field cannot be async");
@@ -785,5 +802,10 @@ export class JsParser implements IParser {
     private reportOutOfContextKeyword(msg: string) {
         this.builder.advance(); // consume the keyword
         this.builder.popAndError(msg); // Remove it from the tree and report error
+    }
+
+    private parseClassStaticBlock(start: Marker) {
+        this.parseBlock(true, false, false, false);
+        start.done(JsGrammar.ClassStaticBlock);
     }
 }

@@ -1,21 +1,13 @@
 import {SynTreeChangedEvent} from "../../events/SynTreeChangedEvent";
-import {ExtensionPoint} from "../../../core/plugins/extensionPoints/ExtensionPoint";
-import {CodeAnalysisPass} from "./api/CodeAnalysisPass";
-import {SynNodeVisitor} from "../../syntax/visitors/SynNodeVisitor";
-import {SynLazyVisitorOptimizer} from "../../syntax/visitors/SynLazyVisitorOptimizer";
-import {CodeAnalysisPassProvider} from "./api/CodeAnalysisPassProvider";
-import {InspectionsCodeAnalysisPassProvider} from "../inspections/analysis/InspectionsCodeAnalysisPassProvider";
-import {AnnotatorsCodeAnalysisPassProvider} from "../annotators/AnnotatorsCodeAnalysisPassProvider";
 import {Scheduler} from "../../../core/scheduler/Scheduler";
 import {SynDocumentUtils} from "../../syntax/utils/SynDocumentUtils";
-import {ReferenceCollectorAnalysisPassProvider} from "../references/collector/ReferenceCollectorAnalysisPassProvider";
 import {Editor} from "../../../editor/Editor";
 import {GlobalState} from "../../../core/global/GlobalState";
 import {SynEditorTreeChangedEvent} from "../../../editor/core/lang/events/SynEditorTreeChangedEvent";
 import {SynDocumentManager} from "../../syntax/manager/SynDocumentManager";
 import {SynDocument} from "../../syntax/api/document/SynDocument";
 import {LanguageParserDefinition} from "../../definitions/LanguageParserDefinition";
-import {CollectionUtils} from "../../../editor/utils/collection/CollectionUtils";
+import {CodeAnalysisManager} from "../../syntax/manager/CodeAnalysisManager";
 
 /**
  *
@@ -24,15 +16,6 @@ import {CollectionUtils} from "../../../editor/utils/collection/CollectionUtils"
  * @since 1.0.0
  */
 export class CodeAnalysisService {
-    private static readonly codeAnalysisPassEP = new ExtensionPoint("codeAnalysis/pass", CodeAnalysisPassProvider)
-        .withDefaultContributors(
-            ReferenceCollectorAnalysisPassProvider.INSTANCE,
-            InspectionsCodeAnalysisPassProvider.INSTANCE,
-            AnnotatorsCodeAnalysisPassProvider.INSTANCE
-        );
-
-    private lastUpdatedTimestamp: number = -1;
-
     constructor(private readonly editor: Editor) {
         GlobalState.getMainEventBus().subscribe(this, SynTreeChangedEvent.SUBSCRIBER, e => {
             if (e.getSynDocument().getDocument() == editor.getOpenedDocument()) {
@@ -45,33 +28,24 @@ export class CodeAnalysisService {
     restart() {
         if (!this.editor.getCurrentLanguage() || !LanguageParserDefinition.has(this.editor.getCurrentLanguage())) return;
         const synDocument = SynDocumentManager.getOpenedSynDocument(this.editor);
-        this.invokePasses(synDocument);
+
+        this.getManager().forceRunCodeAnalysis(synDocument);
+        this.update(synDocument);
+    }
+
+    private getManager(): CodeAnalysisManager {
+        return CodeAnalysisManager.getInstance();
     }
 
     private onSynTreeChanged(event: SynTreeChangedEvent) {
         Scheduler.debounce(() => {
-            this.invokePasses(event.getSynDocument());
+            this.update(event.getSynDocument());
         }, 100 * SynDocumentUtils.getDocumentLengthTier(event.getSynDocument().getDocument()), this.editor.getId());
     }
 
-    private invokePasses(synDocument: SynDocument) {
-        const providers = CodeAnalysisService.codeAnalysisPassEP.getAll();
 
-        const visitors: Map<number, SynNodeVisitor[]> = new Map<number, SynNodeVisitor[]>();
-        const passes: CodeAnalysisPass<any>[] = [];
-
-        for (const provider of providers) {
-            const pass = provider.createPass(this.editor, synDocument);
-            CollectionUtils.getOrSet(visitors, provider.getPriority(), () => []).push(...pass.collectVisitors());
-            passes.push(pass);
-        }
-
-        new SynLazyVisitorOptimizer(visitors).visitNode(synDocument.getTree());
-
-        for (const pass of passes) {
-            pass.processResults(this.editor);
-        }
-
-        this.lastUpdatedTimestamp = synDocument.getModificationTimestamp();
+    private update(synDocument: SynDocument) {
+        const holder = this.getManager().ensureUpToDate(synDocument);
+        holder.applyAll(this.editor);
     }
 }

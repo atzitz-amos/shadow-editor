@@ -7,6 +7,8 @@ import {JsSynVisitor} from "../lang/syntax/visitors/JsSynVisitor";
 import {JsEmptyStatement} from "../lang/syntax/statements/JsEmptyStatement";
 import {QuickFix} from "../../../lang/codeAnalysis/inspections/quickfix/QuickFix";
 import {SynModificationTree} from "../../../lang/syntax/writer/template/SynModificationTree";
+import {InspectionBase} from "../../../lang/codeAnalysis/inspections/Inspection";
+import {JsCodeBlock} from "../lang/syntax/JsCodeBlock";
 
 /**
  *
@@ -14,7 +16,7 @@ import {SynModificationTree} from "../../../lang/syntax/writer/template/SynModif
  * @date 6/5/2026
  * @since 1.0.0
  */
-export default class EmptyStatementInspection {
+export default class EmptyStatementInspection extends InspectionBase {
     getId(): string {
         return "javascript.inspections.emptyStatement";
     }
@@ -29,9 +31,11 @@ export default class EmptyStatementInspection {
 
     buildVisitor(holder: ProblemsHolder): SynNodeVisitor {
         const inspection = this;
-
         return new class extends JsSynVisitor {
             visitEmptyStatement(element: JsEmptyStatement) {
+                const parent = element.getParent();
+                if (parent instanceof JsCodeBlock && parent.isImplicit() && parent.getElementChildren().length === 1) return;
+
                 holder.registerProblem(inspection, "Empty statement", element, [new class extends QuickFix {
                     getId(): string {
                         return "javascript.quickFix.removeEmptyStatement"
@@ -49,4 +53,3 @@ export default class EmptyStatementInspection {
         };
     }
 }
-

@@ -98,17 +98,29 @@ export class Scrolling {
             this.startAnimation(targetX, targetY);
         }
 
-        Scrolling.scrollListeners.forEach(l => l(this.view, this.view.getEditor().getOpenedDocument(), x, y));
+        Scrolling.scrollListeners.forEach(l => l(this.view, this.view.getEditor().getOpenedDocument(), targetX, targetY));
     }
 
     private clampX(x: number): number {
-        const maxX = Math.max(0, (this.view.getEditor().getOpenedDocument().getMaxLengthLine() - this.view.getVisualCharCount() + 2) * this.view.getCharSize());
-        return Math.min(Math.max(0, x), maxX);
+        const maxChars = this.view.getEditor().getOpenedDocument().getMaxLengthLine() - this.view.getVisualCharCount() + 2;
+        return this.clamp(x, maxChars, this.view.getCharSize());
     }
 
     private clampY(y: number): number {
-        const maxY = Math.max(0, (this.view.getEditor().getLineCount() - this.view.getVisualLineCount() + 2) * this.view.getLineHeight());
-        return Math.min(Math.max(0, y), maxY);
+        const maxLines = this.view.getEditor().getLineCount() - this.view.getVisualLineCount() + 2;
+        return this.clamp(y, maxLines, this.view.getLineHeight());
+    }
+
+    /**
+     * Clamps to [0, maxUnits * unitSize]. A non-finite value falls back to 0, so a bad value can never stick,
+     * and the upper bound is skipped while the view metrics haven't been measured yet (hidden / not laid out). */
+    private clamp(value: number, maxUnits: number, unitSize: number): number {
+        if (!Number.isFinite(value)) value = 0;
+
+        const max = Math.max(0, maxUnits * unitSize);
+        if (!(unitSize > 0) || !Number.isFinite(max)) return Math.max(0, value);
+
+        return Math.min(Math.max(0, value), max);
     }
 
     private normalizeWheelDelta(deltaX: number, deltaY: number): [number, number] {

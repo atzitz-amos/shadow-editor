@@ -25,7 +25,9 @@ export class HTMLUtils {
                 name = "";
             } else name += i;
         }
-        _(el, type, name);
+        // A bare tag name ("span") has no class or id to trigger the creation in the loop
+        if (!el) el = document.createElement(name);
+        else _(el, type, name);
 
         if (x) {
             x.appendChild(el as HTMLElement);

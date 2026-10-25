@@ -69,12 +69,6 @@ export class CodeStyleTab extends DebugToolTab {
         });
     }
 
-    dispose() {
-        this.setSelected(false);
-        GlobalState.getMainEventBus().unsubscribe(this, CaretMovedEvent.SUBSCRIBER);
-        GlobalState.getMainEventBus().unsubscribe(this, EditorLanguageChanged.SUBSCRIBER);
-    }
-
     getName(): string {
         return "codeStyle";
     }

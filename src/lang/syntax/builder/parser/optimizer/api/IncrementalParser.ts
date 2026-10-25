@@ -1,5 +1,4 @@
 import {IncrementalParserOptimizer} from "../impl/IncrementalParserOptimizer";
-import {getAllStatefulFields} from "./Stateful";
 
 
 export const IncrementalParser =
@@ -7,12 +6,11 @@ export const IncrementalParser =
         target: T,
         context: ClassDecoratorContext
     ): T {
-        const optimizer = new IncrementalParserOptimizer(target, getAllStatefulFields(context));
-
         return class extends target {
             constructor(...args: any[]) {
                 super(...args);
-                this._optimizer = optimizer.begin(this, args);
+                // One optimizer per parser instance: it holds the cursor into the saved checkpoints.
+                this._optimizer = new IncrementalParserOptimizer().begin(this, args);
             }
         };
     };

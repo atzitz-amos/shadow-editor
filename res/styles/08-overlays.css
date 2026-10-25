@@ -71,6 +71,6 @@
 
 .live-template-overlay.virtual-overlay-widget {
     width: 7px !important;
-    translate: -1px;
-    transform: scaleY(1.1);
+    /* transform, not translate: translate carries the horizontal scroll (see 07-text.css) */
+    transform: translateX(-1px) scaleY(1.1);
 }

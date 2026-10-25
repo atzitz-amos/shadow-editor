@@ -114,6 +114,9 @@ export class SynDocumentManager implements ServiceImpl {
         const synDocument = this.getSynDocument(document);
 
         const checkpoints = synDocument.getCheckpoints();
+        // The checkpoints only describe the text before this edit: if this parse doesn't commit (e.g. it times out),
+        // the next edit must not apply its own delta to them.
+        synDocument.discardCheckpoints();
         if (!checkpoints) {
             this.parse(synDocument);
         } else {
@@ -121,6 +124,7 @@ export class SynDocumentManager implements ServiceImpl {
                 checkpoints,
                 event.getOffset(),
                 event.getTextDelta(),
+                event.getAffectedRange().getLength(),
                 lexerInvalidRange
             ));
         }

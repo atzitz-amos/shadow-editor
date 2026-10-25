@@ -29,13 +29,14 @@ export class IdeDialogUtilsCore {
     }
 
     public static isOpen(popup: Class<IdeDialog>): boolean {
-        return GlobalState.getUI().getActiveDialog() instanceof popup;
+        return GlobalState.getUI().getOpenDialogs().some(dialog => dialog instanceof popup);
     }
 
     public static closeDialog(popup: Class<IdeDialog>, wasCancelled: boolean = true): void {
-        const activePopup = GlobalState.getUI().getActiveDialog();
-        if (activePopup instanceof popup) {
-            activePopup.close(wasCancelled);
+        for (const dialog of GlobalState.getUI().getOpenDialogs()) {
+            if (dialog instanceof popup) {
+                dialog.close(wasCancelled);
+            }
         }
     }
 }

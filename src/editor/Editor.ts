@@ -37,6 +37,7 @@ import {DocumentView} from "./core/document/view/DocumentView";
 import {EditorDocumentChangedEvent} from "./impl/events/EditorDocumentChangedEvent";
 import {CodeAnalysisService} from "../lang/codeAnalysis/analysis/CodeAnalysisService";
 import {DocumentModificationEvent} from "./core/document/events/DocumentModificationEvent";
+import {EditorReadonlyMode} from "./core/behaviors/readonly/EditorReadonlyMode";
 
 export class Editor {
     private static ID_COUNTER = 0;
@@ -47,6 +48,8 @@ export class Editor {
 
     private root: HTMLElement;
     private _attached: boolean = false;
+
+    private readonly: boolean = false;
 
     private readonly behaviorManager: BehaviorManager;
 
@@ -90,11 +93,26 @@ export class Editor {
         this.caretModel = new CaretModel(this, this.offsetToLogical(documentView.getCaretOffset()));
     }
 
+    setReadonly(readonly: boolean) {
+        if (readonly && !this.readonly) {
+            this.behaviorManager.enterMode(new EditorReadonlyMode());
+        } else if (this.readonly) this.behaviorManager.exitMode();
+        this.readonly = readonly;
+    }
+
+    isReadonly() {
+        return this.readonly;
+    }
+
+
     isAttached() {
         return this._attached;
     }
 
     attach(element: HTMLElement) {
+        if (this._attached)
+            throw new Error("Editor is already attached to a DOM element.");
+
         this.root = HTMLUtils.createElement('div.editor', element) as HTMLDivElement;
         ContextResolver.register(this.root, {
             provide: key => {
@@ -385,7 +403,7 @@ export class Editor {
 
         if (!KeybindManager.getInstance().onKeydown(ContextResolver.fromEvent(event))) {
             if (event.key === "Escape") {
-                if (this.getBehaviorManager().getCurrentMode()) this.getBehaviorManager().exitMode();
+                if (this.getBehaviorManager().getCurrentMode()?.escapeWillExit()) this.getBehaviorManager().exitMode();
             }
         }
         this.eventBus.syncPublish(new KeyPressedEvent(this, event));
@@ -412,9 +430,12 @@ export class Editor {
     onMouseMove(event: MouseEvent) {
         if (!this.eventBus.publishCancellable(new MouseMovedEvent(this, event))) return;
 
+        ModifierKeyHolder.getInstance().isMouseDown = (event.buttons & 1) !== 0;
         if (ModifierKeyHolder.isMouseDown()) {
             ModifierKeyHolder.getInstance().setIsDragging(true);
             this.moveCaretToMouseEvent(event);
+        } else {
+            ModifierKeyHolder.getInstance().setIsDragging(false);
         }
     }
 

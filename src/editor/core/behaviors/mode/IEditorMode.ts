@@ -15,4 +15,6 @@ export interface IEditorMode extends IBehaviorProvider {
     onEnter(editor: Editor): void;
 
     onExit(editor: Editor): void;
+
+    escapeWillExit(): boolean;
 }

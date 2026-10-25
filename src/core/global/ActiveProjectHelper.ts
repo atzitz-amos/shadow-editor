@@ -30,4 +30,8 @@ export class ActiveProjectHelper {
     static onFilesystemReady(subscriber: any, callback: (ev: ProjectFileSystemLoadedEvent) => void) {
         GlobalState.getMainEventBus().subscribe(subscriber, ProjectFileSystemLoadedEvent.SUBSCRIBER, callback);
     }
+
+    static offFilesystemReady(subscriber: any) {
+        GlobalState.getMainEventBus().unsubscribe(subscriber, ProjectFileSystemLoadedEvent.SUBSCRIBER);
+    }
 }

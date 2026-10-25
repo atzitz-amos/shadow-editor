@@ -73,7 +73,7 @@ export class KeybindContext {
         return this.event;
     }
 
-    public abort(): void {
+    public abort(): never {
         throw new KeybindNotApplicableAbortError();
     }
 

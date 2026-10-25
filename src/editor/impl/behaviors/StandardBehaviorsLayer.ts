@@ -15,15 +15,19 @@ export class StandardBehaviorsLayer implements IBehaviorProvider {
     }
 
     getCopyBehavior(): EditorBehavior {
-        return EditorBehavior.DO_NOTHING;
+        return DefaultBehaviors.COPY_BEHAVIOR;
+    }
+
+    getPasteBehavior(): EditorBehavior {
+        return DefaultBehaviors.PASTE_BEHAVIOR;
     }
 
     getCutBehavior(): EditorBehavior {
-        return EditorBehavior.DO_NOTHING;
+        return DefaultBehaviors.CUT_BEHAVIOR;
     }
 
     getShiftTabPressedBehavior(): EditorBehavior {
-        return EditorBehavior.DO_NOTHING;
+        return DefaultBehaviors.SHIFT_TAB_PRESSED_BEHAVIOR;
     }
 
     getDeleteBackwardBehavior(): EditorBehavior {
@@ -42,11 +46,7 @@ export class StandardBehaviorsLayer implements IBehaviorProvider {
         return DefaultBehaviors.ENTER_PRESSED_BEHAVIOR;
     }
 
-    getPasteBehavior(): EditorBehavior {
-        return EditorBehavior.DO_NOTHING;
-    }
-
     getTabPressedBehavior(): EditorBehavior {
-        return EditorBehavior.DO_NOTHING;
+        return DefaultBehaviors.TAB_PRESSED_BEHAVIOR;
     }
 }

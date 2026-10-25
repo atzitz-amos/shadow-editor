@@ -77,3 +77,114 @@ ide-button {
     outline-offset: -2px;
     box-shadow: 0 0 0 2px var(--ide-btn-primary-bg);
 }
+/* ---- Menu button (see IdeMenuButton) ------------------------------------ */
+
+.ide-menu-button {
+    display: inline-flex;
+    align-items: stretch;
+    position: relative;
+    vertical-align: middle;
+    --ide-menu-button-size: 24px;
+}
+
+.ide-menu-button.small {
+    --ide-menu-button-size: 20px;
+    font-size: 10px;
+}
+
+.ide-menu-button button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    position: relative;
+    height: var(--ide-menu-button-size);
+    min-width: var(--ide-menu-button-size);
+    padding: 0 8px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    background: transparent;
+    color: #8f97aa;
+    font-family: var(--ide-system-font), sans-serif;
+    font-size: 11px;
+    cursor: pointer;
+    transition: color 120ms ease, background-color 120ms ease, border-color 120ms ease;
+}
+
+.ide-menu-button.icon-only .ide-menu-button-main {
+    padding: 0;
+}
+
+.ide-menu-button button:focus {
+    outline: none;
+}
+
+.ide-menu-button button:focus-visible {
+    border-color: #3a4b74;
+}
+
+.ide-menu-button button:disabled {
+    color: #3f4658;
+    cursor: default;
+}
+
+/* Ghost: toolbar icon button */
+.ide-menu-button.ghost button:hover:not(:disabled) {
+    background: #131a28;
+    color: #c8d0e4;
+}
+
+.ide-menu-button.ghost.open > button {
+    background: #151d2d;
+    border-color: #2f3f63;
+    color: #d4dcf0;
+}
+
+/* Primary / secondary reuse the ide-btn palette */
+.ide-menu-button.primary button {
+    background: var(--ide-btn-primary-bg);
+    color: #ffffff;
+}
+
+.ide-menu-button.primary button:hover:not(:disabled),
+.ide-menu-button.primary.open > button {
+    background: var(--ide-btn-primary-hover);
+}
+
+.ide-menu-button.secondary button {
+    background: var(--ide-btn-secondary-bg);
+    border-color: var(--ide-btn-secondary-border);
+    color: var(--ide-text-primary);
+}
+
+.ide-menu-button.secondary button:hover:not(:disabled),
+.ide-menu-button.secondary.open > button {
+    background: var(--ide-btn-secondary-hover);
+}
+
+/* The corner triangle hinting that a click opens a menu */
+.ide-menu-button-indicator {
+    position: absolute;
+    right: 2px;
+    bottom: 2px;
+    border-style: solid;
+    border-width: 0 0 4px 4px;
+    border-color: transparent transparent currentColor transparent;
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+/* Split: [main | arrow] */
+.ide-menu-button.split .ide-menu-button-main {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.ide-menu-button.split .ide-menu-button-arrow {
+    min-width: 0;
+    padding: 0 4px;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    border-left-color: rgba(255, 255, 255, 0.08);
+    font-size: 8px;
+}

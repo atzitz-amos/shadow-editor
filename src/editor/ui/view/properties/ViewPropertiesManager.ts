@@ -114,6 +114,8 @@ export class ViewPropertiesManager {
             this.updateSetting(setting, setting.getCurrentValue());
 
         this.sizerCleanup = _sizer(this.root, (charSize) => {
+            // A hidden editor measures 0, keep the last valid size instead
+            if (!(charSize > 0)) return;
             this.cachedCharSize = charSize;
             this.recomputeCounts();
         });
@@ -148,8 +150,11 @@ export class ViewPropertiesManager {
     }
 
     private recomputeCounts() {
-        this.visualLineCount = Math.floor(this.height / this.lineHeight);
-        this.visualCharCount = Math.floor(this.view.getLayers().layers_el.getBoundingClientRect().width / this.getCharSize());
+        // Skip until the metrics are known, dividing by 0/undefined would yield Infinity or NaN
+        if (this.lineHeight > 0)
+            this.visualLineCount = Math.floor(this.height / this.lineHeight);
+        if (this.getCharSize() > 0)
+            this.visualCharCount = Math.floor(this.view.getLayers().layers_el.getBoundingClientRect().width / this.getCharSize());
     }
 }
 

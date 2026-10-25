@@ -13,6 +13,12 @@ export interface IdeDialog {
 
     isTransparent(): boolean;
 
+    /** Whether a mouse press outside the dialog cancels it while it is the topmost dialog. */
+    isClosedOnOutsideClick(): boolean;
+
+    /** Whether pressing Escape cancels it while it is the topmost dialog. */
+    isClosedOnEscape(): boolean;
+
     onClose(callback: (wasCancelled: boolean) => void): void;
 
     containsXY(x: number, y: number): boolean;
@@ -24,12 +30,17 @@ export interface IdeResultDialog<R> extends IdeDialog {
 }
 
 export abstract class AbstractDialog implements IdeDialog {
+    // Registered while closed (e.g. in the constructor): kept for the lifetime of the dialog
     private readonly closeCallbacks: ((wasCancelled: boolean) => void)[] = [];
+    // Registered while open (e.g. by awaitResult() or the dialog host): only apply to the current opening
+    private readonly sessionCloseCallbacks: ((wasCancelled: boolean) => void)[] = [];
     private activeElement: HTMLElement | null = null;
 
     close(isCancelled: boolean): void {
         if (this.activeElement) {
-            this.closeCallbacks.forEach(callback => callback(isCancelled));
+            const callbacks = [...this.closeCallbacks, ...this.sessionCloseCallbacks];
+            this.sessionCloseCallbacks.length = 0;
+            callbacks.forEach(callback => callback(isCancelled));
 
             this.activeElement.remove();
             this.activeElement = null;
@@ -38,8 +49,6 @@ export abstract class AbstractDialog implements IdeDialog {
 
     open(parent: HTMLElement): void {
         if (!this.activeElement) {
-            this.closeCallbacks.length = 0;
-
             this.activeElement = this.getPopupElement();
             this.activeElement.classList.add('ide-popup');
 
@@ -53,7 +62,7 @@ export abstract class AbstractDialog implements IdeDialog {
     }
 
     onClose(callback: (wasCancelled: boolean) => void): void {
-        this.closeCallbacks.push(callback);
+        (this.activeElement ? this.sessionCloseCallbacks : this.closeCallbacks).push(callback);
     }
 
     containsXY(x: number, y: number): boolean {
@@ -67,10 +76,26 @@ export abstract class AbstractDialog implements IdeDialog {
         return false;
     }
 
+    isClosedOnOutsideClick(): boolean {
+        return true;
+    }
+
+    isClosedOnEscape(): boolean {
+        return true;
+    }
+
     protected abstract getPopupElement(): HTMLElement;
 
     protected onDrag(newX: number, newY: number): void {
 
+    }
+
+    /**
+     * Whether pressing the mouse on the element starts moving the dialog. By default the whole dialog moves it,
+     * except form controls and elements with a drag of their own.
+     */
+    protected canBeMovedFrom(target: HTMLElement): boolean {
+        return !target.closest("input, textarea, select, button, [contenteditable='true'], [draggable='true']");
     }
 
     private setupDragging(element: HTMLElement) {
@@ -103,8 +128,7 @@ export abstract class AbstractDialog implements IdeDialog {
         };
 
         const onMouseDown = (e) => {
-            const target = e.target as HTMLElement;
-            if (target.closest("input, textarea, select, button, [contenteditable='true']")) return;
+            if (!this.canBeMovedFrom(e.target as HTMLElement)) return;
 
             e.preventDefault();
             e.stopPropagation();

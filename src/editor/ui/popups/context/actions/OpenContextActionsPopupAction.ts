@@ -32,6 +32,10 @@ export class OpenContextActionsPopupAction extends AbstractAction {
         }
     }
 
+    isApplicable(ctx: KeybindContext): boolean {
+        return ctx.isEditorEvent() && !ctx.require(CommonDataKeys.EDITOR).isReadonly();
+    }
+
     getName(): string {
         return "Open Context Actions Popup";
     }

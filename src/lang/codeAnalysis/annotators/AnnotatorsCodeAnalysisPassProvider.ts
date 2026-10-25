@@ -18,7 +18,7 @@ export class AnnotatorsCodeAnalysisPassProvider extends CodeAnalysisPassProvider
 
     private static readonly annotatorsEP: ExtensionPoint<AnnotatorBase> = new ExtensionPoint("annotators", AnnotatorBase);
 
-    createPass(editor: Editor, document: SynDocument): CodeAnalysisPass<HighlightHolder> {
+    createPass(document: SynDocument): CodeAnalysisPass<HighlightHolder> {
         return new AnnotatorsCodeAnalysisPass(document, AnnotatorsCodeAnalysisPassProvider.annotatorsEP.getAll());
     }
 }

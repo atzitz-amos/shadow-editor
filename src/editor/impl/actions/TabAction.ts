@@ -1,8 +1,7 @@
 import {AbstractAction} from "../../../core/actions/AbstractAction";
 import {Key, Keybind} from "../../../core/keybinds/Keybind";
 import {KeybindContext} from "../../../core/keybinds/context/KeybindContext";
-import {DocumentModificationUtils} from "../../core/document/utils/DocumentModificationUtils";
-import {IndentUtils} from "../../../lang/syntax/utils/IndentUtils";
+import {EditorBehaviorContext} from "../../core/behaviors/context/EditorBehaviorContext";
 
 
 export class TabAction extends AbstractAction {
@@ -25,26 +24,11 @@ export class TabAction extends AbstractAction {
 
     run(ctx: KeybindContext) {
         const editor = ctx.requireEditor();
-
         ctx.getEvent().preventDefault();
-        const caret = editor.getPrimaryCaret();
 
-        const indent = IndentUtils.makeIndentString(IndentUtils.getLanguageSpecificIndentationSize(editor.getCurrentLanguage()));
-
-        DocumentModificationUtils.modifyWithCaret(editor.getOpenedDocument(), caret, "tab", () => {
-            if (caret.getSelectionModel().isSelectionActive) {
-                const start = caret.getSelectionModel().getStart().row;
-                const end = caret.getSelectionModel().getEnd().row;
-
-                for (let i = start; i <= end; i++) {
-                    editor.insertText(editor.getOpenedDocument().getLineData(i).getStart(), indent);
-                }
-            } else {
-                editor.insertText(caret.getOffset(), indent);
-            }
+        editor.getCaretModel().forEachCaret(caret => {
+            editor.getBehaviorManager().invokeTabPressed(new EditorBehaviorContext(editor, caret));
         });
-
-        editor.repaintView();
     }
 }
 
@@ -53,22 +37,9 @@ export class ShiftTabAction extends AbstractAction {
         ctx.getEvent().preventDefault();
 
         const editor = ctx.requireEditor();
-        const document = editor.getOpenedDocument();
-        const selectionModel = editor.getPrimaryCaret().getSelectionModel();
-
-        const start = selectionModel.isSelectionActive ? selectionModel.getStart().row : editor.getPrimaryCaret().getLogical().row;
-        const end = selectionModel.isSelectionActive ? selectionModel.getEnd().row : editor.getPrimaryCaret().getLogical().row;
-
-        DocumentModificationUtils.modifyWithCaret(document, editor.getPrimaryCaret(), "dedent", () => {
-            for (let i = start; i <= end; i++) {
-                const line = document.getLineData(i);
-                const indent = line.getIndentationSize();
-                const dedentSize = Math.min(indent, IndentUtils.getLanguageSpecificIndentationSize(editor.getCurrentLanguage()));
-                document.deleteAt(line.getStart(), dedentSize);
-            }
-        }, false);
-
-        editor.repaintView();
+        editor.getCaretModel().forEachCaret(caret => {
+            editor.getBehaviorManager().invokeShiftTabPressed(new EditorBehaviorContext(editor, caret));
+        });
     }
 
     getName(): string {

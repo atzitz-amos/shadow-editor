@@ -39,6 +39,11 @@ export class ProjectFilesTree extends UIComponentMixin(Focusable) {
         });
     }
 
+    public dispose(): void {
+        ActiveProjectHelper.offFilesystemReady(this);
+        super.dispose();
+    }
+
     public draw(): void {
         // this.setInnerHTML(`
         //     <div class="tree-item depth-0 expanded">

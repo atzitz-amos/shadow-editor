@@ -4,11 +4,13 @@ import {JsGrammar} from "./JsGrammar";
 import {ErrorHandlingMode, JsPrattParser, OperatorPrecedence} from "./JsPrattParser";
 import {ASTBuilder} from "../../../../lang/syntax/builder/parser/builder/ASTBuilder";
 import {Marker} from "../../../../lang/syntax/builder/parser/builder/Marker";
+import {Stateful} from "../../../../lang/syntax/builder/parser/optimizer/api/Stateful";
+import {Token} from "../../../../lang/syntax/builder/tokens/Token";
 
 export class JsExprParser {
     private myPrattParser: JsPrattParser;
 
-    private potentiallyInLoop = false;
+    @Stateful private potentiallyInLoop = false;
 
     constructor(private parser: JsParser, private builder: ASTBuilder) {
         this.myPrattParser = new JsPrattParser(parser, this, builder);
@@ -26,20 +28,23 @@ export class JsExprParser {
         return this.potentiallyInLoop;
     }
 
-    parseParameterDeclaration(): void {
+    parseParameterDeclaration(): Token | null {
+        let isRest: Token | null = null;
         if (!this.tryParseDestructuringPattern()) {
-            this.builder.consumeIf(JsLexicalGrammar.ELLIPSIS);
+            isRest = this.builder.consumeIf(JsLexicalGrammar.ELLIPSIS);
             let isValid = this.builder.expect(JsLexicalGrammar.IDENTIFIER).orError("Expected parameter name") !== null;
             if (!isValid) {
-                while (!this.builder.done() && !this.builder.isNext(JsLexicalGrammar.COMMA) && !this.builder.isNext(JsLexicalGrammar.RPAREN)) {
-                    this.builder.advance(false);
-                }
-                return;
+                this.skipToParameterEnd();
+                return null;
             }
         }
         if (this.builder.consumeIf(JsLexicalGrammar.ASSIGNMENT_OPERATOR, "=")) {
+            if (isRest) {
+                this.builder.errorOn(isRest, "Rest parameter cannot have a default value");
+            }
             this.parseExpression(false);
         }
+        return isRest;
     }
 
     parseExpression(allowComma = true): void {
@@ -54,13 +59,17 @@ export class JsExprParser {
         this.builder.consumeIf(JsLexicalGrammar.ELLIPSIS);
         const start = this.builder.mark();
         this.builder.advance(); // consume '['
+
         while (!this.builder.done() && !this.builder.isNext(JsLexicalGrammar.RBRACKET)) {
             if (this.builder.isNext(JsLexicalGrammar.COMMA)) {
                 this.builder.add(JsGrammar.EmptyCommaExpr);
                 this.builder.advance();
                 continue;
             }
-            this.parseParameterDeclaration();
+            let lastSpread = this.parseParameterDeclaration();
+            if (lastSpread && this.builder.isNext(JsLexicalGrammar.COMMA)) {
+                this.builder.errorOn(lastSpread, "Rest parameter must be last in destructuring list pattern");
+            }
             if (!this.builder.consumeIf(JsLexicalGrammar.COMMA)) {
                 break;
             }
@@ -79,7 +88,7 @@ export class JsExprParser {
                 this.builder.advance();
                 continue;
             }
-            this.builder.consumeIf(JsLexicalGrammar.ELLIPSIS);
+            let restToken = this.builder.consumeIf(JsLexicalGrammar.ELLIPSIS);
 
             const propKeyStart = this.builder.mark();
             let isIdentifierKey = false;
@@ -116,6 +125,8 @@ export class JsExprParser {
             propValueStart.done(JsGrammar.ObjectPropertyValue);
             if (!this.builder.consumeIf(JsLexicalGrammar.COMMA)) {
                 break;
+            } else if (restToken) {
+                this.builder.errorOn(restToken, "Rest property must be last in destructuring object pattern");
             }
         }
         this.builder.expect(JsLexicalGrammar.RBRACE).orError("Expected '}'");
@@ -150,17 +161,24 @@ export class JsExprParser {
 
     parseFunctionParameterListDeclaration(): void {
         const marker = this.builder.mark();
+        const old = this.parser.isInGenerator();
+        this.parser.setInGenerator(false);
 
         while (!this.builder.done() && !this.builder.isNext(JsLexicalGrammar.RPAREN)) {
             const argumentMarker = this.builder.mark();
-            this.parseParameterDeclaration();
-            argumentMarker.done(JsGrammar.FunctionParameterList);
+            let spread = this.parseParameterDeclaration();
+            argumentMarker.done(JsGrammar.FunctionParameter);
+            if (spread && this.builder.isNext(JsLexicalGrammar.COMMA)) {
+                this.builder.errorOn(spread, "Rest parameter must be last in parameter list");
+            }
             if (!this.builder.consumeIf(JsLexicalGrammar.COMMA)) {
                 break;
             }
         }
 
-        marker.done(JsGrammar.FunctionParameter);
+        this.parser.setInGenerator(old);
+
+        marker.done(JsGrammar.FunctionParameterList);
     }
 
     parseVariableDeclarator() {
@@ -188,8 +206,8 @@ export class JsExprParser {
         }
 
         this.builder.expect(JsLexicalGrammar.LPAREN).failWith("Expected '('")
-            .then(() => this.parseFunctionParameterListDeclaration())
-            .then(JsLexicalGrammar.RPAREN).failWith("Expected ')'")
+            .then(() => this.parseFunctionParameterListDeclaration());
+        this.builder.expect(JsLexicalGrammar.RPAREN).failWith("Expected ')'")
             .then(() => this.parser.parseBlock(true, true, isAsync, isGenerator));
 
         start.done(JsGrammar.FunctionExpression);
@@ -232,16 +250,23 @@ export class JsExprParser {
         }
     }
 
-    parseYieldExpression(start: Marker) {
-        const token = this.builder.lookBehind();
-
-        if (!this.parser.insertSemicolonIfNeeded()) {
-            this.parseExpression();
-        }
-        start.done(JsGrammar.YieldStatement);
-
-        if (!this.parser.isInGenerator()) {
-            this.builder.errorOn(token!, "'yield' used outside of a generator function");
+    /**
+     * Error recovery for an invalid parameter: skips to the next `,` or to the bracket closing the enclosing list.
+     * Bracketed groups are skipped whole, so that in `(1, ()=>{})` the inner `)` isn't taken for the end of the list
+     * (which would make `tryParseGroupingOrArrowFunction` see `) =>` and parse an arrow function).
+     */
+    private skipToParameterEnd() {
+        let depth = 0;
+        while (!this.builder.done()) {
+            if (this.builder.isNext(JsLexicalGrammar.LPAREN) || this.builder.isNext(JsLexicalGrammar.LBRACKET) || this.builder.isNext(JsLexicalGrammar.LBRACE)) {
+                depth++;
+            } else if (this.builder.isNext(JsLexicalGrammar.RPAREN) || this.builder.isNext(JsLexicalGrammar.RBRACKET) || this.builder.isNext(JsLexicalGrammar.RBRACE)) {
+                if (depth === 0) return;
+                depth--;
+            } else if (depth === 0 && this.builder.isNext(JsLexicalGrammar.COMMA)) {
+                return;
+            }
+            this.builder.advance(false);
         }
     }
 }

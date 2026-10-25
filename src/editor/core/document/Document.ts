@@ -24,6 +24,8 @@ export interface DocumentListener {
  * Represents an opened file in the editor
  * Store the language, the line-breaks, the components and the AST of a file */
 export class Document {
+    private static ID_COUNTER = 0;
+    private readonly id: number = Document.ID_COUNTER++;
 
     private modificationTimestamp: number = 0;
 
@@ -327,7 +329,7 @@ export class Document {
 
         Scheduler.debounce(() => {
             GlobalState.getMainEventBus().asyncPublish(new DocumentSaveRequestEvent(this, this.getAssociatedFile()!, Date.now()));
-        }, 1000)
+        }, 1000, this.id)
     }
 
     private updateTrackedRanges(from: Offset, to: Offset, insertedLength: number) {

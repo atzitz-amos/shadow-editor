@@ -20,7 +20,7 @@ export class JsFunctionParameterTemplate extends JsSynTemplate {
     public static fromString(parameter: string): JsFunctionParameterTemplate {
         const parsed = QuickParseUtils.quickParseElementFactory<JsParser>(JsLang.INSTANCE, parameter, (parser, marker) => {
             parser.getExprParser().parseParameterDeclaration();
-            marker.done(JsGrammar.FunctionParameterList);
+            marker.done(JsGrammar.FunctionParameter);
         });
         if (!(parsed instanceof JsFunctionParameter))
             throw new Error(`Failed to parse function parameter from string: ${parameter}`);

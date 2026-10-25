@@ -41,6 +41,8 @@ export class MapCell implements Cell, Map<any, any> {
     }
 
     delete(key: any): boolean {
+        // originalValue is what gets persisted, it must lose the key as well
+        this.originalValue.delete(key);
         const wasDeleted = this.value.delete(key);
         if (wasDeleted) this.model.persistCell(this);
         return wasDeleted;
@@ -63,6 +65,7 @@ export class MapCell implements Cell, Map<any, any> {
     }
 
     clear() {
+        this.originalValue.clear();
         this.value.clear();
         this.model.persistCell(this);
     }

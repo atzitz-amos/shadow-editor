@@ -269,6 +269,7 @@
 
 .ast-tree-inner .ast-tree-actions {
     display: inline-flex;
+    gap: 10px;
     position: absolute;
     right: 20px;
     font-size: 12px;
@@ -292,6 +293,15 @@
     left: 9px;
 }
 
+
+.ast-tree-inner details.caret-target > summary {
+    background: rgb(200 96 232 / 0.25);
+    border-radius: 3px;
+}
+
+.ast-tree-inner details.caret-target {
+    opacity: 100%;
+}
 
 .popup-tree .node-title {
     font-family: "JetBrains", monospace;

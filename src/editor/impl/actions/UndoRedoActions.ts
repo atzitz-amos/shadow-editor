@@ -33,6 +33,7 @@ export class UndoAction extends AbstractAction {
 
     run(ctx: KeybindContext): void {
         const editor = ctx.requireEditor();
+        if (editor.isReadonly()) ctx.abort();
         editor.getOpenedDocument().getUndoRedoStack().undo(editor);
         editor.repaintView();
     }
@@ -62,6 +63,7 @@ export class RedoAction extends AbstractAction {
 
     run(ctx: KeybindContext): void {
         const editor = ctx.requireEditor();
+        if (editor.isReadonly()) ctx.abort();
         editor.getOpenedDocument().getUndoRedoStack().redo(editor);
         editor.repaintView();
     }

@@ -10,6 +10,7 @@ import {SynFile} from "../filesystem/SynFile";
 import {Document} from "../../../../editor/core/document/Document";
 import {IndexFile} from "../../../indexes/IndexFile";
 import {ASTCheckpoint} from "../../builder/parser/optimizer/recovery/ASTCheckpoint";
+import {SynDocumentCodeAnalysisHolder} from "../../impl/document/SynDocumentCodeAnalysisHolder";
 
 /**
  *
@@ -21,6 +22,8 @@ export interface SynDocument extends URILocatedResource {
     getURI(): EditorURI;
 
     getSynFile(): SynFile | null;
+
+    getCodeAnalysisHolder(): SynDocumentCodeAnalysisHolder;
 
     getAssociatedFile(): ProjectFile | null;
 
@@ -37,6 +40,11 @@ export interface SynDocument extends URILocatedResource {
     commit(tree: SynTree, checkpoints: ASTCheckpoint[], timestamp: number): void;
 
     getCheckpoints(): ASTCheckpoint[] | null;
+
+    /**
+     * Forgets the checkpoints of the last commit, so the next parse starts from scratch unless it commits new ones.
+     */
+    discardCheckpoints(): void;
 
     getFullRange(): TextRange;
 

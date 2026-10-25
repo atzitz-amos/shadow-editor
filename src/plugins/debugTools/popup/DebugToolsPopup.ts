@@ -35,10 +35,6 @@ export class DebugToolsPopup extends AbstractDialog {
     constructor() {
         super();
 
-        this.onClose(() => {
-            this.tabs.forEach(tab => tab.dispose());
-        })
-
         GlobalState.getMainEventBus().subscribe(this, KeyPressedEvent.SUBSCRIBER, e => {
             if (e.getEvent().key === "Escape") {
                 this.close(false);

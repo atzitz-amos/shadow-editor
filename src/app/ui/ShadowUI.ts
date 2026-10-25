@@ -17,4 +17,6 @@ export interface ShadowUI {
     cancelDialog(): void;
 
     getActiveDialog(): IdeDialog | null;
+
+    getOpenDialogs(): IdeDialog[];
 }

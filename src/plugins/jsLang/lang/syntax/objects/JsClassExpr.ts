@@ -27,7 +27,7 @@ export class JsClassExpr extends JsExpr implements JsClass {
         this.extendsExpr = this.getNthChildOfType(JsExpr, 0);
         this.body = this.getNthChildOfType(JsCodeBlock, 0)!;
 
-        this.members = this.body.getAllChildrenOfType(JsClassMember);
+        this.members = this.body?.getAllChildrenOfType(JsClassMember);
     }
 
     getName(): SynTokenNode | undefined {

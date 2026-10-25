@@ -13,6 +13,7 @@ import {EditorKeyContextManager} from "../../core/keycontext/EditorKeyContextMan
 import {TextRange} from "../../core/coordinate/range/TextRange";
 import {CaretMovementFlags} from "../../core/caret/Caret";
 import {DocumentView} from "../../core/document/view/DocumentView";
+import {ModifierKeyHolder} from "../../../core/keybinds/Keybind";
 
 
 export class View {

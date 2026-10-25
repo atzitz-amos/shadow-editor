@@ -1,3 +1,5 @@
+import {GlobalState} from "../../../core/global/GlobalState";
+
 /**
  *
  * @author Atzitz Amos
@@ -17,8 +19,10 @@ export abstract class DebugToolTab {
 
     abstract getElement(): HTMLElement;
 
+    /** Drops every main event bus subscription made with this tab as subscriber. Overrides must call super. */
     dispose() {
-
+        this.setSelected(false);
+        GlobalState.getMainEventBus().unsubscribeAll(this);
     }
 
     init() {

@@ -15,33 +15,35 @@ export type ContextMenu = (contextMenu: ContextMenuElement) => void;
 
 
 class ContextMenuSingleton {
-    public static readonly menuRoot: HTMLElement = HTMLUtils.createElement("div.ui-context-menu");
+    private static menuRoot: HTMLElement | null = null;
 
     public static readonly closeHandler = () => {
-        this.menuRoot.style.display = "none";
-    }
-
-    static {
-        window.addEventListener("load", () => {
-            document.body.appendChild(this.menuRoot)
-            document.body.addEventListener("keydown", this.escapeListener)
-            document.body.addEventListener("click", this.closeHandler)
-            document.addEventListener("pointerdown", this.outsidePointerDownListener, true);
-
-            this.menuRoot.style.display = "none";
-        }, false);
+        if (this.menuRoot) this.menuRoot.style.display = "none";
     }
 
     public static readonly escapeListener = (e: KeyboardEvent) => {
         if (e.key === "Escape") this.closeHandler();
     };
 
-    static getInstance() {
+    /**
+     * The menu element is created on first use rather than when this module loads, so that importing it stays
+     * safe where there is no DOM, such as in web workers.
+     */
+    static getInstance(): HTMLElement {
+        if (!this.menuRoot) {
+            this.menuRoot = HTMLUtils.createElement("div.ui-context-menu");
+            this.menuRoot.style.display = "none";
+            document.body.appendChild(this.menuRoot);
+
+            document.body.addEventListener("keydown", this.escapeListener);
+            document.body.addEventListener("click", this.closeHandler);
+            document.addEventListener("pointerdown", this.outsidePointerDownListener, true);
+        }
         return this.menuRoot;
     }
 
     private static readonly outsidePointerDownListener = (e: PointerEvent) => {
-        if (this.menuRoot.style.display === "none") return;
+        if (!this.menuRoot || this.menuRoot.style.display === "none") return;
         if (!this.menuRoot.contains(e.target as Node)) this.closeHandler();
     };
 }

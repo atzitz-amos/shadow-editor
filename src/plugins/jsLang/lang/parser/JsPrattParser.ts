@@ -60,7 +60,7 @@ export class JsPrattParser {
     parseExpression(rbp = 0): ErrorHandlingMode {
         const exprStart = this.builder.mark();
 
-        let currentErrorMode = this.nud();
+        let currentErrorMode = this.nud(rbp);
         if (currentErrorMode !== ErrorHandlingMode.NONE) {
             if (currentErrorMode === ErrorHandlingMode.ROLLBACK) this.builder.errorVirtual("Expected expression");
             return currentErrorMode;
@@ -158,14 +158,12 @@ export class JsPrattParser {
             return ErrorHandlingMode.ERROR_NODE;
         }
         const rollbackMarker = this.builder.mark();
-
         // Speculatively parse as function parameters: (a, b)
-        this.parseFunctionArguments();
+        this.myExprParser.parseFunctionParameterListDeclaration();
 
         if (this.builder.isNext(JsLexicalGrammar.RPAREN)) {
             const next = this.builder.lookAhead(1);
             if (next && next.getValue() === "=>") {
-                rollbackMarker.done(JsGrammar.FunctionParameter);
                 this.builder.advance(); // Consume ')'
 
                 if (!this.builder.beforeNewLine()) {
@@ -175,7 +173,16 @@ export class JsPrattParser {
                     if (this.builder.isNext(JsLexicalGrammar.LBRACE)) {
                         this.parseArrowFunctionBlockBody(hasAsyncToken);
                     } else {
+                        const oldIsInFunc = this.parser.isInFunction();
+                        const oldIsGenerator = this.parser.isInGenerator();
+                        const oldIsAsync = this.parser.isAsyncAllowed();
+                        this.parser.setInFunction(true);
+                        this.parser.setInGenerator(false);
+                        this.parser.setInAsync(hasAsyncToken);
                         this.parseExpression(OperatorPrecedence.ASSIGNMENT);
+                        this.parser.setInFunction(oldIsInFunc);
+                        this.parser.setInGenerator(oldIsGenerator);
+                        this.parser.setInAsync(oldIsAsync);
                     }
 
                     start.done(JsGrammar.ArrowFunctionExpression);
@@ -242,7 +249,7 @@ export class JsPrattParser {
         this.parser.parseBlock(true, true, isAsync, false)
     }
 
-    private nud(): ErrorHandlingMode {
+    private nud(rbp = 0): ErrorHandlingMode {
         const start = this.builder.mark();
         const token = this.builder.advance();
         if (!token) {
@@ -275,12 +282,12 @@ export class JsPrattParser {
         } else if (type === JsLexicalGrammar.ELLIPSIS) {
             if (!this.parser.isSpreadAllowed()) {
                 this.builder.errorOn(token, "Spread operator is not allowed here");
-                return this.nud();  // We still want to parse the expression after the ellipsis
+                return this.nud(rbp);  // We still want to parse the expression after the ellipsis
             }
             this.parseExpression(OperatorPrecedence.PREFIX);
             start.done(JsGrammar.SpreadExpr);
         } else if (type === JsLexicalGrammar.KEYWORD || value === "async" || value === "await") {
-            this.parseKeywordNud(value, start);
+            this.parseKeywordNud(value, start, rbp);
         } else if (type === JsLexicalGrammar.LPAREN) {
             return this.tryParseGroupingOrArrowFunction(start);
         } else if (type === JsLexicalGrammar.IDENTIFIER) {
@@ -304,7 +311,7 @@ export class JsPrattParser {
         return ErrorHandlingMode.NONE;
     }
 
-    private parseKeywordNud(value: string, start: Marker) {
+    private parseKeywordNud(value: string, start: Marker, rbp: number) {
         switch (value) {
             case "function":
                 this.myExprParser.parseFunctionExpression(start);
@@ -348,7 +355,26 @@ export class JsPrattParser {
                 }
                 break
             case "yield":
-                this.myExprParser.parseYieldExpression(start);
+                const yieldToken = this.builder.lookBehind();
+                const hasNoOperand = this.parser.isSemicolonOrASI()
+                    || this.builder.isNext(JsLexicalGrammar.RPAREN)
+                    || this.builder.isNext(JsLexicalGrammar.RBRACKET)
+                    || this.builder.isNext(JsLexicalGrammar.COMMA)
+                    || this.builder.isNext(JsLexicalGrammar.COLON);
+                if (!hasNoOperand) {
+                    this.builder.consumeIf(JsLexicalGrammar.MATHEMATICAL_OPERATOR, "*");
+                    this.parseExpression(OperatorPrecedence.ASSIGNMENT - 1); // Operand is an AssignmentExpression
+                } else if (this.builder.consumeIf(JsLexicalGrammar.MATHEMATICAL_OPERATOR, "*")) {
+                    this.builder.errorVirtual("'yield*' must be followed by an expression");
+                }
+                start.done(JsGrammar.YieldStatement);
+
+                if (!this.parser.isInGenerator()) {
+                    this.builder.errorOn(yieldToken!, "'yield' used outside of a generator function");
+                } else if (rbp > OperatorPrecedence.ASSIGNMENT) {
+                    // YieldExpression is an AssignmentExpression: it can't be an operand of unary/binary/new
+                    this.builder.errorOn(yieldToken!, "'yield' expression must be parenthesized here");
+                }
                 break;
             case "await":
                 if (this.parser.isAsyncAllowed()) {

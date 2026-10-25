@@ -15,7 +15,7 @@ import {InspectionsRegistry} from "../InspectionsRegistry";
 export class InspectionsCodeAnalysisPassProvider extends CodeAnalysisPassProvider<ProblemsHolder> {
     public static readonly INSTANCE = new InspectionsCodeAnalysisPassProvider();
 
-    createPass(editor: Editor, document: SynDocument): CodeAnalysisPass<ProblemsHolder> {
+    createPass(document: SynDocument): CodeAnalysisPass<ProblemsHolder> {
         return new InspectionsCodeAnalysisPass(document, InspectionsRegistry.getAll());
     }
 }

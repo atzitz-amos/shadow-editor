@@ -30,6 +30,8 @@ export class ASTTreeTab extends DebugToolTab {
 
     private element: HTMLElement | null = null;
 
+    private readonly nodeElements = new Map<SynNode, HTMLElement>();
+
     getName(): string {
         return "ast";
     }
@@ -145,6 +147,7 @@ export class ASTTreeTab extends DebugToolTab {
     private updateASTTree(file: SynFile | undefined) {
         console.log(file);
         if (!this.element) return;
+        this.nodeElements.clear();
         if (!file) {
             this.element.innerHTML = "No AST available for this file";
             return;
@@ -170,10 +173,17 @@ export class ASTTreeTab extends DebugToolTab {
 
         const actionsDiv = HTMLUtils.createDiv("ast-tree-actions");
         actionsDiv.innerHTML = `
-            <i class="fa fa-refresh ast-refresh-button"></i>
+            <i class="fa-solid fa-location-crosshairs ast-jump-to-caret-button" title="Jump to node at caret"></i>
+            <i class="fa fa-refresh ast-refresh-button" title="Refresh"></i>
         `;
 
-        actionsDiv.querySelector("i")?.addEventListener("click", () => {
+        actionsDiv.querySelector(".ast-jump-to-caret-button")?.addEventListener("click", e => {
+            // Avoid toggling the enclosing <details> through its <summary>
+            e.preventDefault();
+            this.jumpToNodeAtCaret();
+        });
+
+        actionsDiv.querySelector(".ast-refresh-button")?.addEventListener("click", () => {
             this.update(GlobalState.getMainEditor());
         });
 
@@ -186,6 +196,7 @@ export class ASTTreeTab extends DebugToolTab {
         const nodeName = node.constructor.name;
         const nodeElement = this.buildASTNode(nodeName, null, node.getTextRange(), parent);
         nodeElement.setAttribute("open", "true");
+        this.nodeElements.set(node, nodeElement);
 
         for (const child of node.getChildren()) {
             if (child instanceof AbstractSynParentElement) {
@@ -208,5 +219,29 @@ export class ASTTreeTab extends DebugToolTab {
         }
 
         nodeElement!.classList.add("leaf-node");
+        this.nodeElements.set(leaf, nodeElement!);
+    }
+
+    private jumpToNodeAtCaret() {
+        const editor = GlobalState.getMainEditor();
+        if (!editor || !this.element) return;
+
+        // The rendered tree is stale after an edit, rebuild it so the node lookup matches the document
+        if (this.element.querySelector(".ast-refresh-button.needs-refresh")) {
+            this.update(editor);
+        }
+
+        const tree = SynDocumentManager.getSynDocument(editor.getOpenedDocument()).getTree();
+        const node = tree.getDeepestChildAt(editor.getPrimaryCaret().getOffset());
+        const nodeElement = node ? this.nodeElements.get(node) : undefined;
+        if (!nodeElement) return;
+
+        for (let el = nodeElement.parentElement; el && el !== this.element; el = el.parentElement) {
+            if (el instanceof HTMLDetailsElement) el.open = true;
+        }
+
+        this.element.querySelector(".caret-target")?.classList.remove("caret-target");
+        nodeElement.classList.add("caret-target");
+        nodeElement.querySelector("summary")?.scrollIntoView({behavior: "smooth", block: "center"});
     }
 }

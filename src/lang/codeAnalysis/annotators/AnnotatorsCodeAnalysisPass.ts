@@ -30,7 +30,6 @@ export class AnnotatorsCodeAnalysisPass implements CodeAnalysisPass<HighlightHol
     }
 
     processResults(editor: Editor): void {
-        if (editor.getId() === 1) return;
         editor.getOpenedDocument().setAnnotations(this.holder)
         editor.repaintView();
         editor.getView().triggerOverlaysRepaint();

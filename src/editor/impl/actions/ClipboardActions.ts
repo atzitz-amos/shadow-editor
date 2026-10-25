@@ -2,8 +2,7 @@ import {AbstractAction} from "../../../core/actions/AbstractAction";
 import {KeybindContext} from "../../../core/keybinds/context/KeybindContext";
 import {Key} from "../../../core/keybinds/Keybind";
 import {KeybindContextDescriptor} from "../../../core/keybinds/context/KeybindContextDescriptor";
-import {ClipboardUtils} from "../../core/clipboard/ClipboardUtils";
-import {UndoStack} from "../../core/undo/UndoStack";
+import {ClipboardBehaviorContext} from "../../core/behaviors/context/ClipboardBehaviorContext";
 
 /**
  *
@@ -35,14 +34,11 @@ export class CopyAction extends AbstractAction {
 
     run(ctx: KeybindContext): void {
         const editor = ctx.requireEditor();
-        const caret = editor.getPrimaryCaret();
 
-        if (!caret.getSelectionModel().isSelectionActive) {
-            let line = editor.getOpenedDocument().getLineAt(caret.getOffset());
-            caret.getSelectionModel().select(line.getStart(), line.getEnd());
-            caret.refresh();
-        }
-        ClipboardUtils.copyToClipboard(caret.getSelectedText()!);
+        editor.getCaretModel().forEachCaret(caret => {
+            editor.getBehaviorManager().invokeCopy(new ClipboardBehaviorContext(editor, caret));
+        });
+        editor.getView().resetBlink();
     }
 
 }
@@ -72,19 +68,12 @@ export class CutAction extends AbstractAction {
 
     run(ctx: KeybindContext): void {
         const editor = ctx.requireEditor();
-        const caret = editor.getPrimaryCaret();
+        ctx.getEvent().preventDefault();
 
-        UndoStack.undoableAction(editor, "cut", () => {
-            if (!caret.getSelectionModel().isSelectionActive) {
-                let line = editor.getOpenedDocument().getLineAt(caret.getOffset());
-                const text = editor.getOpenedDocument().substring(line.getStart(), line.getEnd());
-                editor.deleteWholeLine(caret);
-                ClipboardUtils.copyToClipboard(text);
-                return;
-            }
-            ClipboardUtils.copyToClipboard(caret.getSelectedText()!);
-            editor.deleteSelection(caret);
+        editor.getCaretModel().forEachCaret(caret => {
+            editor.getBehaviorManager().invokeCut(new ClipboardBehaviorContext(editor, caret));
         });
+        editor.getView().resetBlink();
     }
 }
 
@@ -112,15 +101,11 @@ export class PasteAction extends AbstractAction {
 
     run(ctx: KeybindContext): void {
         const editor = ctx.requireEditor();
-
         ctx.getEvent().preventDefault();
 
-        ClipboardUtils.getClipboardText().then(text => {
-            if (text) {
-                UndoStack.undoableAction(editor, "paste", () => {
-                    editor.type(text);
-                });
-            }
+        editor.getCaretModel().forEachCaret(caret => {
+            editor.getBehaviorManager().invokePaste(new ClipboardBehaviorContext(editor, caret));
         });
+        editor.getView().resetBlink();
     }
 }

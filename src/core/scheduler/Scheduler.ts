@@ -40,6 +40,23 @@ export class Scheduler {
     }
 
     /**
+     * Resolves once the browser has painted a new frame, unlike {@link yield} whose continuation may run before any
+     * rendering. Gives up after {@code timeout} milliseconds, as hidden pages do not render frames.
+     */
+    public static async nextFrame(timeout: number = 100): Promise<void> {
+        if (typeof requestAnimationFrame !== "function") return await new Promise(resolve => setTimeout(resolve, 0));
+
+        return await new Promise(resolve => {
+            const timer = setTimeout(resolve, timeout);
+            // A task queued from an animation frame callback runs once that frame is painted
+            requestAnimationFrame(() => setTimeout(() => {
+                clearTimeout(timer);
+                resolve();
+            }, 0));
+        });
+    }
+
+    /**
      * Debounces a task, ensuring it is only executed after a specified delay has passed since the last time it was invoked.
      * If the task is invoked again before the delay has passed, the previous invocation is canceled and the delay is reset.
      *

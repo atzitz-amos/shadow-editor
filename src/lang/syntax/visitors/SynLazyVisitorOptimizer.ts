@@ -11,7 +11,12 @@ import {SynNode} from "../api/SynNode";
 export class SynLazyVisitorOptimizer {
     private visitors: Map<number, SynNodeVisitor[]>;
 
-    public constructor(visitors: Map<number, SynNodeVisitor[]> | SynNodeVisitor[]) {
+    /**
+     * @param visitors the visitors to run, grouped by priority (lowest first)
+     * @param onError called when a visitor throws, the traversal continues with the other visitors
+     */
+    public constructor(visitors: Map<number, SynNodeVisitor[]> | SynNodeVisitor[],
+                       private readonly onError: VisitorErrorHandler = SynLazyVisitorOptimizer.warnOnError) {
         if (Array.isArray(visitors)) {
             this.visitors = new Map<number, SynNodeVisitor[]>();
             this.visitors.set(0, visitors);
@@ -31,7 +36,7 @@ export class SynLazyVisitorOptimizer {
             try {
                 node.accept(visitor);
             } catch (e) {
-                console.warn(`Visitor ${visitor.constructor.name} threw an error while visiting node ${node.constructor.name}: ${e}`);
+                this.onError(visitor, node, e, false);
             }
         }
 
@@ -43,8 +48,14 @@ export class SynLazyVisitorOptimizer {
             try {
                 visitor.visitExitNode(node);
             } catch (e) {
-                console.warn(`Visitor ${visitor.constructor.name} threw an error while exiting node ${node.constructor.name}: ${e}`);
+                this.onError(visitor, node, e, true);
             }
         }
     }
+
+    private static warnOnError(visitor: SynNodeVisitor, node: SynNode, error: unknown, whileExiting: boolean) {
+        console.warn(`Visitor ${visitor.constructor.name} threw an error while ${whileExiting ? "exiting" : "visiting"} node ${node.constructor.name}: ${error}`);
+    }
 }
+
+export type VisitorErrorHandler = (visitor: SynNodeVisitor, node: SynNode, error: unknown, whileExiting: boolean) => void;

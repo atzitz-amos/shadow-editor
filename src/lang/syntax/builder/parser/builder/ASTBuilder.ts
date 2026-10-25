@@ -77,7 +77,11 @@ export class ASTBuilder {
         return new TokenStreamMarker(this, this.currentOffset, this.lastTokenOffset, this.stream.getIndex(), this.production.length, this.isErrorState)
     }
 
-    copyIntoProduction(node: SynNode): void {
+    /**
+     * @param wasInvalid what {@link wasInvalid} returned right after the node was originally built
+     * @param trailingTrivia length of the whitespace/comments the node ends with (after its last token)
+     */
+    copyIntoProduction(node: SynNode, wasInvalid: boolean = this.isErrorState, trailingTrivia: number = 0): void {
         const length = node.getTextRange().getLength();   // invariant: unchanged text ⇒ unchanged length
         const tokenCount = node.getTokenCount();
 
@@ -87,12 +91,12 @@ export class ASTBuilder {
 
         // Advance builder state exactly as if we'd parsed this span for real.
         const newOffset = this.currentOffset + length;
-        this.lastTokenOffset = newOffset;
+        this.lastTokenOffset = newOffset - trailingTrivia;
         this.currentOffset = newOffset;
 
         this.stream.jumpN(tokenCount);
 
-        this.wasInErrorState = this.isErrorState;
+        this.wasInErrorState = wasInvalid;
         this.isErrorState = false;
     }
 
@@ -257,6 +261,10 @@ export class ASTBuilder {
         return this.wasInErrorState;
     }
 
+    getLastTokenOffset(): number {
+        return this.lastTokenOffset;
+    }
+
     getTextOffset(): number {
         const token = this.seek();
         if (!token) return this.currentOffset;
@@ -293,6 +301,8 @@ export class ASTBuilder {
         for (const child of children) {
             if (child instanceof SynASTElementImpl)
                 child.getASTNode().setRelativeOffset(child.getASTNode().getGlobalOffset()! - range.start);
+            else if (child instanceof SynErrorNode)
+                child.setRelativeTo(range.start);
         }
 
         if (type.treeBuilder) {

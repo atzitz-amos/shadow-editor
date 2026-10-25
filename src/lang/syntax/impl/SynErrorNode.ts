@@ -9,8 +9,17 @@ import {SynLeafElement} from "../api/tree/SynLeafElement";
 
 
 export class SynErrorNode extends SynLeafElement implements SynNode {
+    private relativeStart: Offset | null = null;
+
     constructor(private range: TextRange, private message: string, document: SynDocument) {
         super(document)
+    }
+
+    /**
+     * Anchors the error to its parent's start, so it moves along when the parent is reused by an incremental parse.
+     */
+    setRelativeTo(parentStart: Offset) {
+        this.relativeStart = this.range.start - parentStart;
     }
 
     getTokenCount(): number {
@@ -18,7 +27,7 @@ export class SynErrorNode extends SynLeafElement implements SynNode {
     }
 
     getURI(): EditorURI {
-        return this.document.getURI().selectedRegion(this.range, URITargetType.ERROR);
+        return this.document.getURI().selectedRegion(this.getTextRange(), URITargetType.ERROR);
     }
 
     getType(): ASTType {
@@ -26,7 +35,11 @@ export class SynErrorNode extends SynLeafElement implements SynNode {
     }
 
     getTextRange(): TextRange {
-        return this.range;
+        const parent = this.getParent();
+        if (this.relativeStart === null || !parent) return this.range;
+
+        const start = parent.getTextRange().start + this.relativeStart;
+        return new TextRange(start, start + this.range.getLength());
     }
 
     getErrorMessage(): string {

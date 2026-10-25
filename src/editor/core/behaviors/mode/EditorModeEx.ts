@@ -24,6 +24,10 @@ export abstract class EditorModeEx implements IEditorMode {
     onExit(editor: Editor) {
     }
 
+    escapeWillExit(): boolean {
+        return true;
+    }
+
     getCharTypedBehavior(): EditorBehavior {
         return EditorBehavior.FORWARD_ALL;
     }

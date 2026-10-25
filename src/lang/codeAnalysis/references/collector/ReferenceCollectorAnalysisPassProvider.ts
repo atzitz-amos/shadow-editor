@@ -13,7 +13,7 @@ import {ReferenceCollectorAnalysisPass} from "./ReferenceCollectorAnalysisPass";
 export class ReferenceCollectorAnalysisPassProvider extends CodeAnalysisPassProvider<null> {
     public static readonly INSTANCE: ReferenceCollectorAnalysisPassProvider = new ReferenceCollectorAnalysisPassProvider();
 
-    createPass(editor: Editor, document: SynDocument): CodeAnalysisPass<null> {
+    createPass(document: SynDocument): CodeAnalysisPass<null> {
         return new ReferenceCollectorAnalysisPass(document);
     }
 

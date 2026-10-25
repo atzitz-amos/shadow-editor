@@ -157,8 +157,10 @@ export class ViewPainter {
         span.classList.add(...overlay.getClassList());
         span.style.zIndex = overlay.getDrawPriority().toString();
 
+        // Never set `translate` here: the stylesheet uses it on line children to apply the horizontal scroll
         if (isFullLine) {
-            span.style.left = HTMLUtils.px(0);
+            // Offset by scrollX so that, once shifted back by the scroll, it still covers the whole visible line
+            span.style.left = HTMLUtils.px(this.view.getScroll().scrollX);
             span.style.width = HTMLUtils.px(this.view.getViewWidth());
         } else {
             let width = end - start;
@@ -166,9 +168,8 @@ export class ViewPainter {
                 span.style.left = HTMLUtils.px(0);
                 span.style.width = HTMLUtils.px(width * this.view.getCharSize() + 2);
             } else {
-                span.style.left = HTMLUtils.px(this.view.getCharSize() * start + 2);
+                span.style.left = HTMLUtils.px(this.view.getCharSize() * start);
                 span.style.width = HTMLUtils.px(width * this.view.getCharSize() + 4);
-                span.style.translate = "-2px";
             }
         }
 

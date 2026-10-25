@@ -77,12 +77,14 @@ export class JsGrammar {
     public static readonly AwaitStatement = ASTGrammar.create("AwaitExpr", JsAwaitExpr.builder());
     public static readonly DebuggerStatement = ASTGrammar.create("DebuggerStatement");
     public static readonly LabelStatement = ASTGrammar.create("LabelStatement");
+    public static readonly ImportStatement = ASTGrammar.create("ImportStatement");
 
     public static readonly FunctionDeclaration = ASTGrammar.create("FunctionDeclaration", JsFunctionStatement.builder());
-    public static readonly FunctionParameter = ASTGrammar.create("FunctionParameter", JsFunctionParameterList.builder());
-    public static readonly FunctionParameterList = ASTGrammar.create("FunctionParameterList", JsFunctionParameter.builder());
+    public static readonly FunctionParameter = ASTGrammar.create("FunctionParameter", JsFunctionParameter.builder());
+    public static readonly FunctionParameterList = ASTGrammar.create("FunctionParameterList", JsFunctionParameterList.builder());
     public static readonly ClassDeclaration = ASTGrammar.create("ClassDeclaration", JsClassDeclaration.builder());
     public static readonly ClassBody = ASTGrammar.create("ClassBody", JsClassBody.builder());
+    public static readonly ClassStaticBlock = ASTGrammar.create("ClassStaticBlock", JsCodeBlock.builder());
     public static readonly ClassMethodDeclaration = ASTGrammar.create("ClassMethod", JsClassMethod.builder());
     public static readonly ClassField = ASTGrammar.create("ClassField", JsClassField.builder());
 

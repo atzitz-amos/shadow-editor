@@ -26,7 +26,8 @@ export class FullShadowUI implements ShadowUI {
     private readonly myFooter: SFooter;
     private readonly root: HTMLElement;
     private readonly myDialogLayer: HTMLElement;
-    private activeDialog: IdeDialog | null = null;
+    // Open dialogs, bottom to top: only the last one reacts to outside clicks and Escape
+    private readonly dialogStack: IdeDialog[] = [];
 
     constructor(root: HTMLElement) {
         this.root = root;
@@ -41,13 +42,22 @@ export class FullShadowUI implements ShadowUI {
         this.myDialogLayer = HTMLUtils.createElement("div.ide-popup-layer.no-popup", root);
 
         this.myDialogLayer.addEventListener("mousedown", (event) => {
-            if (this.activeDialog && !this.activeDialog.containsXY(event.x, event.y)) this.cancelDialog();
+            const top = this.getActiveDialog();
+            if (top && top.isClosedOnOutsideClick() && !top.containsXY(event.x, event.y)) this.cancelDialog();
         });
 
+        // Remember the topmost dialog before the event reaches it: some dialogs close themselves on Escape,
+        // and the dialog underneath must not be closed by that same key press once it becomes the topmost one
+        let escapeTarget: IdeDialog | null = null;
         this.myDialogLayer.addEventListener("keydown", (event) => {
-            if (event.key === "Escape") {
-                this.cancelDialog();
+            if (event.key === "Escape") escapeTarget = this.getActiveDialog();
+        }, true);
+
+        this.myDialogLayer.addEventListener("keydown", (event) => {
+            if (event.key === "Escape" && escapeTarget && escapeTarget.isOpen() && escapeTarget.isClosedOnEscape()) {
+                escapeTarget.close(true);
             }
+            escapeTarget = null;
         });
 
         document.addEventListener("focusin", e => {
@@ -88,40 +98,43 @@ export class FullShadowUI implements ShadowUI {
         });
     }
 
+    /**
+     * Opens the dialog on top of the already opened ones. An opened dialog of the same class is closed first,
+     * so that triggering the same dialog twice replaces it instead of stacking a copy.
+     */
     showDialog(dialog: IdeDialog) {
-        if (this.activeDialog) {
-            this.activeDialog.close(true);
+        for (const opened of [...this.dialogStack]) {
+            if (opened.constructor === dialog.constructor) opened.close(true);
         }
 
-        this.activeDialog = dialog;
-
-        this.myDialogLayer.classList.remove("no-popup");
-        if (dialog.isTransparent()) {
-            this.myDialogLayer.classList.add("transparent");
-        } else {
-            this.myDialogLayer.classList.remove("transparent");
-        }
-
+        this.dialogStack.push(dialog);
         dialog.open(this.myDialogLayer);
 
         dialog.onClose(() => {
-            if (this.activeDialog === dialog) {
-                this.activeDialog = null;
-                this.myDialogLayer.classList.add("no-popup");
-            }
+            const index = this.dialogStack.indexOf(dialog);
+            if (index !== -1) this.dialogStack.splice(index, 1);
+            this.updateDialogLayer();
         });
+
+        this.updateDialogLayer();
     }
 
     cancelDialog() {
-        if (this.activeDialog) {
-            this.activeDialog.close(true);
-            this.activeDialog = null;
-        }
-
-        this.myDialogLayer.classList.add("no-popup");
+        this.getActiveDialog()?.close(true);
     }
 
     getActiveDialog(): IdeDialog | null {
-        return this.activeDialog;
+        return this.dialogStack.at(-1) ?? null;
+    }
+
+    getOpenDialogs(): IdeDialog[] {
+        return [...this.dialogStack];
+    }
+
+    private updateDialogLayer() {
+        const top = this.getActiveDialog();
+
+        this.myDialogLayer.classList.toggle("no-popup", top === null);
+        this.myDialogLayer.classList.toggle("transparent", top !== null && top.isTransparent());
     }
 }

@@ -11,16 +11,24 @@ export class UndoStack {
 
 
     static whileUndoing(func: () => void) {
+        const wasUndoing = this.undoing;
         this.undoing = true;
-        func();
-        this.undoing = false;
+        try {
+            func();
+        } finally {
+            this.undoing = wasUndoing;
+        }
     }
 
     static undoableAction<T>(editor: Editor, name: string, func: () => T, transparent: boolean = false): T {
-        const wasApplied = editor.getOpenedDocument().getUndoRedoStack().startUndoableAction(editor, name, transparent);
-        const result = func();
-        if (wasApplied) editor.getOpenedDocument().getUndoRedoStack().finishUndoableAction(editor);
-        return result;
+        const stack = editor.getOpenedDocument().getUndoRedoStack();
+        const wasApplied = stack.startUndoableAction(editor, name, transparent);
+        try {
+            return func();
+        } finally {
+            // Always close the frame, otherwise a throwing action would leave it open and block every later frame
+            if (wasApplied) stack.finishUndoableAction(editor);
+        }
     }
 
     static discardFrame(editor: Editor) {

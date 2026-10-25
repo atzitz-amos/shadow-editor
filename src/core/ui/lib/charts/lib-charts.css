@@ -1,0 +1,85 @@
+/* ---- IdeDonutChart ------------------------------------------------------ */
+
+.ide-donut {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+}
+
+.ide-donut-chart {
+    flex: none;
+}
+
+.ide-donut-chart circle {
+    fill: none;
+}
+
+.ide-donut-track {
+    stroke: #151b28;
+}
+
+/* Focusing a segment, from the ring or the legend, fades the others */
+.ide-donut-segment,
+.ide-donut-legend > span {
+    transition: opacity 120ms ease;
+}
+
+/* Hit-tested by the component from the pointer position, see IdeDonutChart.segmentAt */
+.ide-donut-chart * {
+    pointer-events: none;
+}
+
+.ide-donut.focusing .ide-donut-segment:not(.focused) {
+    opacity: 0.25;
+}
+
+.ide-donut.focusing .ide-donut-legend > span:not(.focused) {
+    opacity: 0.4;
+}
+
+.ide-donut-total {
+    font-family: var(--ide-code-font-thin), monospace;
+    font-size: 15px;
+    fill: #e3e8f5;
+}
+
+.ide-donut-caption {
+    font-family: var(--ide-system-font), sans-serif;
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    fill: #6c7280;
+}
+
+.ide-donut-legend {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    column-gap: 18px;
+    row-gap: 9px;
+    align-items: center;
+    font-size: 12px;
+    color: #c0c5d3;
+}
+
+.ide-donut-legend-name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ide-donut-swatch {
+    width: 9px;
+    height: 9px;
+    border-radius: 2px;
+}
+
+.ide-donut-legend-value,
+.ide-donut-legend-share {
+    font-family: var(--ide-code-font-thin), monospace;
+    font-size: 11px;
+    text-align: right;
+}
+
+.ide-donut-legend-share {
+    color: #6c7280;
+}

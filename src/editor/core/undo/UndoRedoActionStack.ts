@@ -47,21 +47,11 @@ export class UndoRedoActionStack {
     }
 
     public addInsert(offset: Offset, text: string) {
-        if (UndoStack.undoing || !this.currentFrame) return;
-        if (!this.currentFrame) {
-            console.error("Attempting document modification without an active UndoActionStack");
-            this.currentFrame = new UndoStackFrame("default", true);
-        }
-        this.currentFrame.addAction('insert', offset, text);
+        this.record('insert', offset, text);
     }
 
     public addDelete(offset: Offset, text: string) {
-        if (UndoStack.undoing) return;
-        if (!this.currentFrame) {
-            console.warn("Attempting document modification without an active UndoActionStack");
-            this.currentFrame = new UndoStackFrame("default", true);
-        }
-        this.currentFrame.addAction('delete', offset, text);
+        this.record('delete', offset, text);
     }
 
     undo(editor: Editor) {
@@ -102,9 +92,20 @@ export class UndoRedoActionStack {
 
     undoFrame(editor: Editor, frame: UndoStackFrame) {
         UndoStack.whileUndoing(() => {
-            while (!frame.undo(editor, this.document)) {
-
-            }
+            // The first call may only restore the caret/selection; the second one then applies the undo
+            if (!frame.undo(editor, this.document)) frame.undo(editor, this.document);
         })
+    }
+
+    private record(kind: 'insert' | 'delete', offset: Offset, text: string) {
+        if (UndoStack.undoing) return;
+        if (!this.currentFrame) {
+            // An edit outside an undoable action shifts every offset recorded below it, so older frames can't be replayed safely
+            console.warn(`Document ${kind} outside an undoable action; clearing undo history`);
+            this.frameStack.length = 0;
+            this.redoStack.length = 0;
+            return;
+        }
+        this.currentFrame.addAction(kind, offset, text);
     }
 }

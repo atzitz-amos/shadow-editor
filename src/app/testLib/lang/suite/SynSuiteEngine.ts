@@ -1,25 +1,57 @@
-import {SynSuitePersister} from "./SynSuitePersister";
 import {GlobalState} from "../../../../core/global/GlobalState";
-import {SynSuiteParserTest} from "./SynSuiteParserTest";
-import {SynAutomatedTestResult} from "./SynAutomatedTestResult";
 import {LangRegistry} from "../../../../lang/LangRegistry";
 import {Document} from "../../../../editor/core/document/Document";
 import {LanguageBase} from "../../../../lang/LanguageBase";
-import {ASTBuilder} from "../../../../lang/syntax/builder/parser/builder/ASTBuilder";
 import {KillSignalTriggeredError, TimeoutKillSignal} from "../../../../core/utils/KillSignal";
 import {UseLogger} from "../../../../core/logging/logger/LoggerDecorators";
-import {SynSuiteWindowRenderer} from "./renderer/SynSuiteWindowRenderer";
-import {SynDocument} from "../../../../lang/syntax/api/document/SynDocument";
-import {SynDocumentManager} from "../../../../lang/syntax/manager/SynDocumentManager";
 import {Logger} from "../../../../core/logging/logger/LoggerCore";
+import {Editor} from "../../../../editor/Editor";
+import {UUIDHelper} from "../../../../editor/utils/UUIDHelper";
+import {Scheduler} from "../../../../core/scheduler/Scheduler";
+import {PluginManager} from "../../../../core/plugins/PluginManager";
+import {SynDocumentImpl} from "../../../../lang/syntax/impl/document/SynDocumentImpl";
+import {SynDocument} from "../../../../lang/syntax/api/document/SynDocument";
+import {ASTRecoveryBuilder} from "../../../../lang/syntax/builder/parser/optimizer/recovery/ASTRecoveryBuilder";
+import {LanguageParserDefinition} from "../../../../lang/definitions/LanguageParserDefinition";
+import {CodeAnalysisManager} from "../../../../lang/syntax/manager/CodeAnalysisManager";
+import {CodeAnalysisPass} from "../../../../lang/codeAnalysis/analysis/api/CodeAnalysisPass";
+import {CodeAnalysisUtils} from "../../../../lang/codeAnalysis/analysis/CodeAnalysisUtils";
 import {
     InspectionsCodeAnalysisPass
 } from "../../../../lang/codeAnalysis/inspections/analysis/InspectionsCodeAnalysisPass";
+import {
+    InspectionsCodeAnalysisPassProvider
+} from "../../../../lang/codeAnalysis/inspections/analysis/InspectionsCodeAnalysisPassProvider";
+import {AnnotatorsCodeAnalysisPassProvider} from "../../../../lang/codeAnalysis/annotators/AnnotatorsCodeAnalysisPassProvider";
 import {InspectionsRegistry} from "../../../../lang/codeAnalysis/inspections/InspectionsRegistry";
-import {CodeAnalysisUtils} from "../../../../lang/codeAnalysis/analysis/CodeAnalysisUtils";
-import {SynTree} from "../../../../lang/syntax/api/tree/SynTree";
+import {InspectionBase} from "../../../../lang/codeAnalysis/inspections/Inspection";
+import {ProblemsHolder} from "../../../../lang/codeAnalysis/inspections/problems/ProblemsHolder";
+import {SynSuiteGroups, SynSuiteInspection, SynSuiteTest, SynSuiteTestOptions} from "./SynSuiteTest";
+import {SynSuiteExecution, SynSuiteTestResult, SynSuiteTimings} from "./SynSuiteTestResult";
+import {SynSuiteTestStore} from "./SynSuiteTestStore";
+import {SynSuiteTestsRunEvent} from "./events/SynSuiteTestsRunEvent";
+
+export type SynSuiteSnapshotRequest = {
+    name: string,
+    /** Dotted path of the group of the test, the root by default. Created if it does not exist */
+    group?: string,
+    description?: string,
+    options: SynSuiteTestOptions
+}
 
 /**
+ * Raised when a test case cannot be created, the message is meant to be shown to the user.
+ */
+export class SynSuiteError extends Error {
+}
+
+/**
+ * Creates and runs SynSuite test cases.
+ * <p>
+ * Every test runs in its own detached document with its own code analysis, independently of the editor:
+ * the passes contributed to {@link CodeAnalysisManager} run as usual, except that annotators are skipped and
+ * inspections are restricted to the plugins selected by the test. Snapshots go through that same pipeline, so
+ * that a freshly created test always passes.
  *
  * @author Atzitz Amos
  * @date 6/4/2026
@@ -27,145 +59,357 @@ import {SynTree} from "../../../../lang/syntax/api/tree/SynTree";
  */
 @UseLogger("SynSuiteEngine")
 export class SynSuiteEngine {
+    private static readonly PARSER_TIMEOUT = 1000;
+    /** Longest a run of tests goes without letting the browser paint, in milliseconds */
+    private static readonly FRAME_BUDGET = 16;
     private static readonly instance: SynSuiteEngine = new SynSuiteEngine();
 
     private declare readonly logger: Logger;
+
+    private readonly lastResults: Map<string, SynSuiteTestResult> = new Map<string, SynSuiteTestResult>();
 
     public static getInstance() {
         return this.instance;
     }
 
-    public snapshot(key: string, pluginId: string, description?: string) {
-        const editor = GlobalState.getMainEditor();
+    private static describeError(error: unknown): string {
+        return error instanceof Error ? (error.stack ?? error.message) : String(error);
+    }
 
-        if (editor.getCurrentLanguage() === null) {
-            console.warn("Trying to snapshot a file with no registered language, skipping");
-            return;
+    private static toInspections(holder: ProblemsHolder): SynSuiteInspection[] {
+        return holder.getProblems()
+            .map(problem => ({
+                inspectionId: problem.getInspection().getId(),
+                pluginId: InspectionsRegistry.definingPlugin(problem.getInspection())?.getId() ?? null,
+                message: problem.getDescription(),
+                range: {start: problem.getRange().getStart(), end: problem.getRange().getEnd()}
+            }))
+            .sort((a, b) => a.range.start - b.range.start
+                || a.range.end - b.range.end
+                || a.inspectionId.localeCompare(b.inspectionId));
+    }
+
+    public getStore(): SynSuiteTestStore {
+        return SynSuiteTestStore.getInstance();
+    }
+
+    /**
+     * @returns the remembered snapshot options, with "every plugin" resolved to the plugins currently loaded
+     */
+    public getDefaultSnapshotOptions(): SynSuiteTestOptions {
+        const defaults = this.getStore().getSnapshotDefaults();
+        return {
+            includeInspections: defaults.includeInspections,
+            pluginIds: defaults.pluginIds ?? PluginManager.getInstance().getPluginList().map(p => p.getPlugin().getId())
+        };
+    }
+
+    /**
+     * Creates a test case from the content of the file opened in the editor.
+     *
+     * @throws SynSuiteError if the test cannot be created
+     */
+    public snapshot(editor: Editor, request: SynSuiteSnapshotRequest): SynSuiteTest {
+        const language = editor.getCurrentLanguage();
+        if (!language) {
+            throw new SynSuiteError("The opened file has no registered language");
         }
 
-        const document = editor.getCodeAnalysisService().getSynFile().getSynDocument();
-        const content = editor.getOpenedDocument().getTextContent();
-
-        const holder = CodeAnalysisUtils.runCodeAnalysisPass(document, new InspectionsCodeAnalysisPass(
-            document,
-            InspectionsRegistry.getForPlugin(pluginId)
-        ));
-
-        const problems = holder.getProblems().map(p => ({
-            inspectionKey: p.getInspection().getId(),
-            message: p.getDescription(),
-            range: {start: p.getRange().getStart(), end: p.getRange().end}
-        }));
-
-        SynSuitePersister.getInstance().addTest(pluginId, {
-            pluginId,
-            key,
-            description: description ?? "",
-            language: editor.getCurrentLanguage()!.getKey(),
-            code: content,
-            expectedTree: document.getTree().toTreeRepr(),
-            expectedInspections: problems
-        });
+        return this.createTest(editor.getOpenedDocument().getTextContent(), language, request);
     }
 
-    public getAllTests(): Map<string, SynSuiteParserTest[]> {
-        return SynSuitePersister.getInstance().getAllTests();
+    /**
+     * Runs the code through the pipeline and stores the output as the expected snapshot of a new test case.
+     *
+     * @throws SynSuiteError if the test cannot be created
+     */
+    public createTest(code: string, language: LanguageBase, request: SynSuiteSnapshotRequest): SynSuiteTest {
+        const name = request.name.trim();
+        const group = request.group ?? SynSuiteGroups.ROOT;
+        if (name === "") {
+            throw new SynSuiteError("The test needs a name");
+        }
+        if (name.includes(".")) {
+            throw new SynSuiteError("The name cannot contain dots, use groups to categorize tests");
+        }
+        if (group !== SynSuiteGroups.ROOT && !SynSuiteGroups.isValid(group)) {
+            throw new SynSuiteError(`Invalid group '${group}'`);
+        }
+        if (this.getStore().find(group, name)) {
+            throw new SynSuiteError(`A test named '${SynSuiteGroups.join(group, name)}' already exists`);
+        }
+
+        const options: SynSuiteTestOptions = {
+            includeInspections: request.options.includeInspections,
+            pluginIds: [...request.options.pluginIds]
+        };
+
+        const execution = this.execute(code, language, options);
+        if (execution.timedOut) {
+            throw new SynSuiteError(`The parser timed out after ${SynSuiteEngine.PARSER_TIMEOUT}ms`);
+        }
+        if (!execution.actual || execution.errors.length > 0) {
+            throw new SynSuiteError("The code could not be analysed:\n" + execution.errors.join("\n"));
+        }
+
+        const now = Date.now();
+        const test: SynSuiteTest = {
+            id: UUIDHelper.newUUID(),
+            name,
+            group,
+            description: request.description?.trim() ?? "",
+            language: language.getKey(),
+            code,
+            options,
+            expected: execution.actual,
+            createdAt: now,
+            updatedAt: now
+        };
+
+        this.getStore().add(test);
+        this.lastResults.set(test.id, new SynSuiteTestResult(test, execution));
+        return test;
     }
 
-    clearPlugin(pluginId: string) {
-        SynSuitePersister.getInstance().clearTestsForPlugin(pluginId);
+    public runTest(test: SynSuiteTest): SynSuiteTestResult {
+        const result = this.doRunTest(test);
+        GlobalState.getMainEventBus().syncPublish(new SynSuiteTestsRunEvent([result]));
+        return result;
     }
 
-    clearTests() {
-        SynSuitePersister.getInstance().clearAllTests();
-    }
+    /**
+     * Runs the tests one after the other, yielding to the event loop in between so that the UI stays responsive, and
+     * letting the browser paint about once per {@link FRAME_BUDGET} so that the progress is seen as it happens.
+     */
+    public async runTests(tests: SynSuiteTest[] = this.getStore().getAll(),
+                          onProgress?: (result: SynSuiteTestResult, done: number, total: number) => void): Promise<SynSuiteTestResult[]> {
+        const results: SynSuiteTestResult[] = [];
+        let lastFrame = performance.now();
 
-    patchTest(pluginId: string, testKey: string, patch: Partial<SynSuiteParserTest> | null) {
-        SynSuitePersister.getInstance().patchTest(pluginId, testKey, patch);
-    }
-
-    public runTests(pluginId: string, openPopup: boolean = false, profile: boolean = false): Map<string, SynAutomatedTestResult> {
-        const tests = SynSuitePersister.getInstance().getTests(pluginId);
-        const results = new Map<string, SynAutomatedTestResult>();
-
-        if (profile) console.profile("Running SynSuite tests for plugin " + pluginId);
         for (const test of tests) {
-            let result = this.runTest(pluginId, test, LangRegistry.getInstance().getLanguageByKey(test.language));
-            results.set(test.key, result);
+            const result = this.doRunTest(test);
+            results.push(result);
+
+            onProgress?.(result, results.length, tests.length);
+            if (performance.now() - lastFrame < SynSuiteEngine.FRAME_BUDGET) {
+                await Scheduler.yield();
+            } else {
+                await Scheduler.nextFrame();
+                lastFrame = performance.now();
+            }
         }
 
-        if (profile) console.profileEnd("Running SynSuite tests for plugin " + pluginId);
-        if (openPopup) new SynSuiteWindowRenderer().render(results);
-
+        GlobalState.getMainEventBus().syncPublish(new SynSuiteTestsRunEvent(results));
         return results;
     }
 
-    getTestsForPlugin(name: string) {
-        return SynSuitePersister.getInstance().getTests(name);
+    public getLastResult(testId: string): SynSuiteTestResult | null {
+        return this.lastResults.get(testId) ?? null;
     }
 
-    private runTest(pluginId: string, test: SynSuiteParserTest, lang: LanguageBase | null): SynAutomatedTestResult {
-        if (lang === null) {
-            return new SynAutomatedTestResult(
-                test,
-                ["Language not found for test, cannot run"],
-                "",
-                [],
-                0,
-                0,
-                0
-            );
+    /**
+     * Makes the actual output of the result the new expected snapshot of its test.
+     *
+     * @throws SynSuiteError if the result has no output, or if the test was modified since the result was obtained
+     */
+    public acceptActual(result: SynSuiteTestResult): SynSuiteTest {
+        const actual = result.getActual();
+        if (!actual) {
+            throw new SynSuiteError("The test did not produce any output to accept");
         }
 
-        // Overhead
-        const document = new Document(test.code, lang);
-        let synDocument: SynDocument = SynDocumentManager.createVirtualSynDocument(document);
+        const current = this.getStore().get(result.getTest().id);
+        if (!current) {
+            throw new SynSuiteError("The test no longer exists");
+        }
+        if (current.updatedAt !== result.getTest().updatedAt) {
+            throw new SynSuiteError("The test was modified since it ran, run it again before accepting its output");
+        }
 
-        const lexStart = performance.now();
-        lang.createLexer().lexAll(document);
-        const lexEnd = performance.now();
+        const updated = this.getStore().update(current.id, {expected: actual})!;
+        this.lastResults.delete(current.id);
+        return updated;
+    }
 
-        let astBuilder: ASTBuilder, tree: SynTree, parseEnd: number;
+    public removeTest(testId: string): boolean {
+        this.lastResults.delete(testId);
+        return this.getStore().remove(testId);
+    }
+
+    // ---- organization ----
+
+    /**
+     * Renames the last segment of a group: "js.parser" renamed "syntax" becomes "js.syntax".
+     *
+     * @returns the new path of the group
+     * @throws SynSuiteError if the name is invalid or already taken
+     */
+    public renameGroup(group: string, name: string): string {
+        name = name.trim();
+        if (!SynSuiteGroups.isValidSegment(name)) {
+            throw new SynSuiteError(`Invalid group name '${name}': use letters, digits, _, $ and -`);
+        }
+        return this.relocateGroup(group, SynSuiteGroups.join(SynSuiteGroups.parent(group), name));
+    }
+
+    /**
+     * Moves a group, with its content, into another group or to the root.
+     *
+     * @returns the new path of the group
+     * @throws SynSuiteError if the group would be moved into itself, or a group of the same name is already there
+     */
+    public moveGroup(group: string, parent: string): string {
+        if (SynSuiteGroups.isWithin(parent, group) && parent !== SynSuiteGroups.ROOT) {
+            throw new SynSuiteError("A group cannot be moved into itself");
+        }
+        return this.relocateGroup(group, SynSuiteGroups.join(parent, SynSuiteGroups.lastSegment(group)));
+    }
+
+    /**
+     * @throws SynSuiteError if a test of the same name is already in the group
+     */
+    public moveTest(testId: string, group: string): SynSuiteTest {
+        const test = this.requireTest(testId);
+        if (SynSuiteGroups.of(test) === group) return test;
+        if (this.getStore().find(group, test.name)) {
+            throw new SynSuiteError(`A test named '${SynSuiteGroups.join(group, test.name)}' already exists`);
+        }
+        return this.getStore().relocate(testId, {group})!;
+    }
+
+    /**
+     * @throws SynSuiteError if the name is invalid or already taken in the group of the test
+     */
+    public renameTest(testId: string, name: string): SynSuiteTest {
+        const test = this.requireTest(testId);
+        name = name.trim();
+        if (name === "" || name.includes(".")) {
+            throw new SynSuiteError("A test name cannot be empty nor contain dots");
+        }
+        if (name === test.name) return test;
+        if (this.getStore().find(SynSuiteGroups.of(test), name)) {
+            throw new SynSuiteError(`A test named '${SynSuiteGroups.join(SynSuiteGroups.of(test), name)}' already exists`);
+        }
+        return this.getStore().relocate(testId, {name})!;
+    }
+
+    private relocateGroup(group: string, target: string): string {
+        if (group === SynSuiteGroups.ROOT) throw new SynSuiteError("The root cannot be moved nor renamed");
+        if (target === group) return group;
+        if (this.getStore().hasGroup(target)) throw new SynSuiteError(`A group '${target}' already exists`);
+
+        this.getStore().relocateGroup(group, target);
+        return target;
+    }
+
+    private requireTest(testId: string): SynSuiteTest {
+        const test = this.getStore().get(testId);
+        if (!test) throw new SynSuiteError("The test no longer exists");
+        return test;
+    }
+
+    private doRunTest(test: SynSuiteTest): SynSuiteTestResult {
+        const language = LangRegistry.getLanguageByKey(test.language);
+        const execution = language
+            ? this.execute(test.code, language, test.options)
+            : this.failedExecution(null, `Unknown language '${test.language}'`);
+
+        const result = new SynSuiteTestResult(test, execution);
+        this.lastResults.set(test.id, result);
+        return result;
+    }
+
+    private execute(code: string, language: LanguageBase, options: SynSuiteTestOptions): SynSuiteExecution {
+        const timings: SynSuiteTimings = {lexer: 0, parser: 0, analysis: 0};
+
+        const definition = LanguageParserDefinition.getParserDefinition(language);
+        if (!definition) {
+            return this.failedExecution(null, `No parser registered for language '${language.getKey()}'`);
+        }
+
+        const document = new Document(code, language);
+        const synDocument = new SynDocumentImpl(document, null);
+
+        let start = performance.now();
         try {
-            astBuilder = new ASTBuilder(synDocument, synDocument.getLanguage(), new TimeoutKillSignal(1000));
-            lang.createParser(astBuilder).parse();
-            tree = astBuilder.getTree();
-            synDocument.commit(tree, document.getModificationTimestamp());
-            parseEnd = performance.now();
+            LangRegistry.getLexer(language).lexAll(document);
         } catch (e) {
+            return this.failedExecution(synDocument, "The lexer crashed: " + SynSuiteEngine.describeError(e), timings);
+        }
+        timings.lexer = performance.now() - start;
+
+        start = performance.now();
+        try {
+            const builder = new ASTRecoveryBuilder(synDocument, language, new TimeoutKillSignal(SynSuiteEngine.PARSER_TIMEOUT));
+            definition.createParser(builder).parse();
+            synDocument.commit(builder.getTree(), builder.getCheckpoints(), document.getModificationTimestamp());
+        } catch (e) {
+            timings.parser = performance.now() - start;
             if (e instanceof KillSignalTriggeredError) {
-                return new SynAutomatedTestResult(
-                    test,
-                    ["Parser timed out"],
-                    "",
-                    [],
-                    lexEnd - lexStart,
-                    0,
-                    0,
-                    true);
-            } else throw e;
+                return {actual: null, timings, timedOut: true, errors: [], synDocument};
+            }
+            return this.failedExecution(synDocument, "The parser crashed: " + SynSuiteEngine.describeError(e), timings);
+        }
+        timings.parser = performance.now() - start;
+
+        const errors: string[] = [];
+        const inspectionsPass = options.includeInspections
+            ? new InspectionsCodeAnalysisPass(synDocument, this.getInspections(options.pluginIds))
+            : null;
+
+        start = performance.now();
+        CodeAnalysisUtils.runCodeAnalysisPasses(
+            synDocument,
+            this.collectPasses(synDocument, inspectionsPass),
+            (visitor, node, error, whileExiting) => errors.push(
+                `${visitor.constructor.name || "Anonymous visitor"} threw while ${whileExiting ? "exiting" : "visiting"} `
+                + `${node.constructor.name}: ${SynSuiteEngine.describeError(error)}`));
+        timings.analysis = performance.now() - start;
+
+        return {
+            actual: {
+                tree: synDocument.getTree().toTreeRepr(),
+                inspections: inspectionsPass ? SynSuiteEngine.toInspections(inspectionsPass.getHolder()) : []
+            },
+            timings,
+            timedOut: false,
+            errors,
+            synDocument
+        };
+    }
+
+    /**
+     * Instantiates the passes contributed to the code analysis, replacing the inspections pass by one restricted
+     * to the selected plugins and leaving the annotators out as they only produce highlighting.
+     */
+    private collectPasses(synDocument: SynDocument, inspectionsPass: InspectionsCodeAnalysisPass | null) {
+        const passes: { pass: CodeAnalysisPass<any>, priority: number }[] = [];
+
+        for (const provider of CodeAnalysisManager.getInstance().getPassProviders()) {
+            if (provider instanceof AnnotatorsCodeAnalysisPassProvider) continue;
+
+            if (provider instanceof InspectionsCodeAnalysisPassProvider) {
+                if (inspectionsPass) passes.push({pass: inspectionsPass, priority: provider.getPriority()});
+                continue;
+            }
+
+            passes.push({pass: provider.createPass(synDocument), priority: provider.getPriority()});
         }
 
-        const holder = CodeAnalysisUtils.runCodeAnalysisPass(synDocument, new InspectionsCodeAnalysisPass(
-            synDocument, InspectionsRegistry.getForPlugin(pluginId)
-        ))
-        const inspectEnd = performance.now();
+        return passes;
+    }
 
-        const treeRepr = synDocument.getTree().toTreeRepr();
-        const inspections = holder.getProblems().map(p => ({
-            inspectionKey: p.getInspection().getId(),
-            message: p.getDescription(),
-            range: {start: p.getRange().getStart(), end: p.getRange().getEnd()}
-        }));
+    private getInspections(pluginIds: string[]): InspectionBase[] {
+        return InspectionsRegistry.getAll()
+            .filter(inspection => {
+                const pluginId = InspectionsRegistry.definingPlugin(inspection)?.getId();
+                return pluginId !== undefined && pluginIds.includes(pluginId);
+            });
+    }
 
-        return new SynAutomatedTestResult(
-            test,
-            [],
-            treeRepr,
-            inspections,
-            lexEnd - lexStart,
-            parseEnd - lexEnd,
-            inspectEnd - parseEnd
-        )
+    private failedExecution(synDocument: SynDocument | null, error: string,
+                            timings: SynSuiteTimings = {lexer: 0, parser: 0, analysis: 0}): SynSuiteExecution {
+        this.logger.warn(error);
+        return {actual: null, timings, timedOut: false, errors: [error], synDocument};
     }
 }

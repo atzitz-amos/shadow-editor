@@ -1,0 +1,169 @@
+/* ---- IdeSideBySideDiff -------------------------------------------------- */
+
+.ide-diff {
+    --ide-diff-line-height: 17px;
+    --ide-diff-number-width: 44px;
+    --ide-diff-background: #0b1019;
+    --ide-diff-deleted-bg: rgba(217, 131, 124, 0.12);
+    --ide-diff-deleted-text: #f0b0aa;
+    --ide-diff-inserted-bg: rgba(127, 174, 138, 0.13);
+    --ide-diff-inserted-text: #b5dcbf;
+
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    border: 1px solid #1a2130;
+    border-radius: 5px;
+    background: var(--ide-diff-background);
+    overflow: hidden;
+}
+
+.ide-diff-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    flex: none;
+    border-bottom: 1px solid #1a2130;
+    background: #0d121c;
+    color: #888fa1;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.ide-diff-header > .ide-diff-title,
+.ide-diff-title-row {
+    padding: 7px 10px 7px calc(var(--ide-diff-number-width) + 6px);
+}
+
+.ide-diff-header > .ide-diff-title {
+    border-right: 1px solid #1a2130;
+}
+
+.ide-diff-title-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.ide-diff-stats {
+    display: flex;
+    gap: 8px;
+    font-family: var(--ide-code-font-thin), monospace;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+.ide-diff-stat-inserted { color: #7fae8a; }
+.ide-diff-stat-deleted { color: #d9837c; }
+.ide-diff-identical { color: #7fae8a; }
+
+/* Two panes, each scrolling on its own; their vertical scroll is kept in sync by the component */
+.ide-diff-panes {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 0;
+}
+
+.ide-diff-pane {
+    min-width: 0;
+    min-height: 0;
+    /* Always shown, so that both panes have the same viewport height and their lines stay aligned */
+    overflow: scroll;
+}
+
+.ide-diff-pane + .ide-diff-pane {
+    border-left: 1px solid #1a2130;
+}
+
+/* As wide as the longest line, so that line backgrounds span the whole scrollable width */
+.ide-diff-lines {
+    width: max-content;
+    min-width: 100%;
+    font-family: var(--ide-code-font-thin), monospace;
+    font-size: 11px;
+    line-height: var(--ide-diff-line-height);
+    color: #b9c1d4;
+}
+
+.ide-diff-line {
+    display: flex;
+    height: var(--ide-diff-line-height);
+}
+
+.ide-diff-line-number {
+    position: sticky;
+    left: 0;
+    flex: none;
+    width: var(--ide-diff-number-width);
+    padding-right: 8px;
+    background: var(--ide-diff-background);
+    color: #3d4558;
+    text-align: right;
+    user-select: none;
+}
+
+.ide-diff-text {
+    padding: 0 12px 0 6px;
+    white-space: pre;
+    user-select: text;
+}
+
+.ide-diff-line.deleted {
+    background: var(--ide-diff-deleted-bg);
+    color: var(--ide-diff-deleted-text);
+}
+
+.ide-diff-line.inserted {
+    background: var(--ide-diff-inserted-bg);
+    color: var(--ide-diff-inserted-text);
+}
+
+/* The sticky line number hides the text scrolling under it, it keeps the tint of its line */
+.ide-diff-line.deleted .ide-diff-line-number {
+    background: linear-gradient(var(--ide-diff-deleted-bg), var(--ide-diff-deleted-bg)), var(--ide-diff-background);
+    color: inherit;
+}
+
+.ide-diff-line.inserted .ide-diff-line-number {
+    background: linear-gradient(var(--ide-diff-inserted-bg), var(--ide-diff-inserted-bg)), var(--ide-diff-background);
+    color: inherit;
+}
+
+.ide-diff-line.deleted .ide-diff-line-number::before { content: "−"; float: left; padding-left: 6px; }
+.ide-diff-line.inserted .ide-diff-line-number::before { content: "+"; float: left; padding-left: 6px; }
+
+/* No line on this side: the other side has lines it does not */
+.ide-diff-line.empty {
+    background: repeating-linear-gradient(135deg, transparent 0 4px, rgba(255, 255, 255, 0.025) 4px 8px);
+}
+
+.ide-diff-line.empty .ide-diff-line-number {
+    background: transparent;
+}
+
+.ide-diff-fold {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-sizing: border-box;
+    height: calc(var(--ide-diff-line-height) + 6px);
+    padding-left: calc(var(--ide-diff-number-width) + 6px);
+    border-top: 1px solid #141a26;
+    border-bottom: 1px solid #141a26;
+    background: #0f1520;
+    color: #6c7280;
+    font-family: var(--ide-system-font), sans-serif;
+    font-size: 11px;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.ide-diff-fold:hover {
+    background: #131b29;
+    color: #a2a8b9;
+}
+
+.ide-diff-fold i {
+    font-size: 10px;
+}

@@ -29,6 +29,7 @@ export class ASTRecoveryBuilder extends ASTBuilder {
     private savedCheckpoints: ASTCheckpoint[];
     private textOffset: Offset;
     private textDelta: number;
+    private replacedLength: number;
     private lexerInvalidRange: TextRange;
 
     private readonly codeblockReused: Set<SynNode> = new Set<SynNode>();
@@ -47,11 +48,12 @@ export class ASTRecoveryBuilder extends ASTBuilder {
         this.savedCheckpoints = recoveryInfo.checkpoints;
         this.textOffset = recoveryInfo.textOffset;
         this.textDelta = recoveryInfo.textDelta;
+        this.replacedLength = recoveryInfo.replacedLength;
         this.lexerInvalidRange = recoveryInfo.lexerInvalidRange;
     }
 
-    pushCheckpoint(name: string, contextFingerprint: any[]): ASTCheckpoint {
-        const checkpoint = new ASTCheckpoint(name, contextFingerprint);
+    pushCheckpoint(name: string, args: any[], entryState: unknown[]): ASTCheckpoint {
+        const checkpoint = new ASTCheckpoint(name, args, entryState);
         this.currentCheckpoints.push(checkpoint);
         return checkpoint;
     }
@@ -72,12 +74,16 @@ export class ASTRecoveryBuilder extends ASTBuilder {
         return this.textDelta;
     }
 
+    getEditReplacedLength(): number {
+        return this.replacedLength;
+    }
+
     getLexerInvalidRange(): TextRange {
         return this.lexerInvalidRange;
     }
 
-    copyIntoProduction(node: SynNode) {
-        super.copyIntoProduction(node);
+    copyIntoProduction(node: SynNode, wasInvalid?: boolean, trailingTrivia?: number) {
+        super.copyIntoProduction(node, wasInvalid, trailingTrivia);
 
         if (this.collectStatistics) {
             this.codeblockReused.add(node);

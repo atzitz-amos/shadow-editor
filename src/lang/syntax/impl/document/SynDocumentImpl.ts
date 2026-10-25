@@ -13,6 +13,7 @@ import {DocumentLevelIndexFile} from "../../../indexes/impl/DocumentLevelIndexFi
 import {ASTCheckpoint} from "../../builder/parser/optimizer/recovery/ASTCheckpoint";
 import {GlobalState} from "../../../../core/global/GlobalState";
 import {SynTreeChangedEvent} from "../../../events/SynTreeChangedEvent";
+import {SynDocumentCodeAnalysisHolder} from "./SynDocumentCodeAnalysisHolder";
 
 /**
  *
@@ -23,15 +24,17 @@ import {SynTreeChangedEvent} from "../../../events/SynTreeChangedEvent";
 export class SynDocumentImpl implements SynDocument {
     private static DOCUMENT_ID = 0;
     private readonly id: number;
-
     private modificationTimestamp: number = 0;
-    private dirty: boolean = true;
 
+    private dirty: boolean = true;
     private tree: SynTree;
+
+    private readonly codeAnalysisHolder: SynDocumentCodeAnalysisHolder = new SynDocumentCodeAnalysisHolder(this);
+
     private checkpoints: ASTCheckpoint[] | null = null;
     private indexFile: DocumentLevelIndexFile;
-
     private readonly language: LanguageBase;
+
     private readonly problemsHolder: ProblemsHolder;
 
     constructor(private readonly document: Document, private readonly synFile: SynFile | null) {
@@ -63,6 +66,10 @@ export class SynDocumentImpl implements SynDocument {
         return this.checkpoints;
     }
 
+    discardCheckpoints(): void {
+        this.checkpoints = null;
+    }
+
     getAssociatedFile(): ProjectFile | null {
         return this.document.getAssociatedFile();
     }
@@ -73,6 +80,10 @@ export class SynDocumentImpl implements SynDocument {
 
     getModificationTimestamp(): number {
         return this.modificationTimestamp;
+    }
+
+    getCodeAnalysisHolder(): SynDocumentCodeAnalysisHolder {
+        return this.codeAnalysisHolder;
     }
 
     getURI(): EditorURI {

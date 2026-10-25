@@ -20,5 +20,5 @@ export abstract class EditorBehavior {
         }
     }
 
-    abstract invoke(context: IBehaviorContext): BehaviorHandlingMode;
+    abstract invoke(ctx: IBehaviorContext): BehaviorHandlingMode;
 }

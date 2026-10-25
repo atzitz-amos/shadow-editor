@@ -38,6 +38,7 @@ export class PersistenceModel {
     private wasInitialized: boolean = false;
 
     private readonly updateQueue: Set<Cell> = new Set<Cell>();
+    private flushChain: Promise<void> = Promise.resolve();
 
     public static getInstance(): PersistenceModel {
         if (!this._instance) {
@@ -92,7 +93,7 @@ export class PersistenceModel {
      * pending written out together as one batch.
      */
     public async flushNow(): Promise<void> {
-        Scheduler.debounce(async () => await this.flush(), 1000);
+        await this.flush();
     }
 
     private addInitializer(cell: Cell) {
@@ -147,22 +148,31 @@ export class PersistenceModel {
         Scheduler.debounce(async () => await this.flush(), 1000);
     }
 
-    private async flush() {
+    private flush(): Promise<void> {
+        // Serialize flushes so a forced flush can't race a debounced one and land a stale value last
+        const run = this.flushChain.then(() => this.doFlush());
+        this.flushChain = run.catch(() => undefined);
+        return run;
+    }
+
+    private async doFlush() {
         if (!UnsafeFlagsService.clear(UnsafeFlags.PERSISTENCE)) return;
         if (!this.updateQueue.size) return;
+        if (!this.wasInitialized) throw new Error("Attempted to persist a cell before its value was initialized");
 
-        this.logger.debug(`Persisting cells: ` + this.updateQueue.values().map(x => x.getKey()).reduce((a, b) => a + ", " + b));
+        // Snapshot the queue before awaiting: a cell modified while the writes are in flight is
+        // re-queued by persistCell and picked up by the next flush instead of being cleared here.
+        const cells = [...this.updateQueue];
+        this.updateQueue.clear();
 
-        for (const cell of this.updateQueue) {
-            if (!this.wasInitialized) throw new Error("Attempted to persist a cell before its value was initialized");
+        this.logger.debug(`Persisting cells: ` + cells.map(x => x.getKey()).join(", "));
 
+        for (const cell of cells) {
             const serializer = new Serializer();
             const value = serializer.serializeObject(cell.getValue());
 
             const store = this.db.getObjectStore("objects");
             await store.set(cell.getKey(), {version: cell.getVersion(), value});
         }
-
-        this.updateQueue.clear();
     }
 }

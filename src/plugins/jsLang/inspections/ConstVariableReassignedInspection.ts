@@ -9,6 +9,9 @@ import {JsAssignmentExpr} from "../lang/syntax/expr/JsAssignmentExpr";
 import {QuickFix} from "../../../lang/codeAnalysis/inspections/quickfix/QuickFix";
 import {SynModificationTree} from "../../../lang/syntax/writer/template/SynModificationTree";
 import {SynSymbol} from "../../../lang/syntax/impl/reference/SynSymbol";
+import {JsDeclarator} from "../lang/syntax/statements/JsDeclarator";
+import {ResolveScope} from "../../../lang/indexes/resolve/ResolveScope";
+import {SimpleResolvedReference} from "../../../lang/indexes/resolve/result/SimpleResolvedReference";
 
 /**
  *
@@ -35,10 +38,12 @@ export default class ConstVariableReassignedInspection extends InspectionBase {
         return new class extends JsSynVisitor {
             visitAssignmentExpr(element: JsAssignmentExpr) {
                 for (const identifier of element.getAllModifiedIdentifiers()) {
-                    /*let decl = identifier.resolve();
-                    if (decl && decl instanceof JsDeclarator && decl.isConst()) {
+                    let ref = identifier.getScope()?.resolve(identifier.getName(), ResolveScope.ALL);
+                    if (ref?.length == 1 && ref[0] instanceof SimpleResolvedReference) {
+                        const decl = ref[0].getNode();
+                        if (!(decl instanceof JsDeclarator && decl.isConst())) continue;
                         holder.registerProblem(inspection, "Cannot reassign a const variable", identifier, [new ConstVariableReassignedQuickFix()]);
-                    }*/
+                    }
                 }
             }
         }

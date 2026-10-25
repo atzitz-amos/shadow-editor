@@ -4,3 +4,6 @@
 @import "dialog/lib-dialog.css";
 @import "lists/lib-lists.css";
 @import "highlight/lib-highlighted-fragment.css";
+@import "./tree/lib-tree.css";
+@import "./charts/lib-charts.css";
+@import "./diff/lib-diff.css";

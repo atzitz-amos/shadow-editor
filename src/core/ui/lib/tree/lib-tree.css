@@ -1,0 +1,237 @@
+/* ---- IdeTree ------------------------------------------------------------ */
+
+.ide-tree {
+    /* Chevron width + gap: a child chevron lines up under the icon of its parent */
+    --ide-tree-indent: 18px;
+    --ide-tree-row-height: 24px;
+    font-size: 12px;
+}
+
+.ide-tree:focus {
+    outline: none;
+}
+
+.ide-tree ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.ide-tree-children {
+    position: relative;
+    display: none;
+}
+
+.ide-tree-item.expanded > .ide-tree-children {
+    display: block;
+}
+
+/* Indent guide, drawn under the caret of the expanded group */
+.ide-tree.show-guides .ide-tree-children::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 4px;
+    left: calc(var(--depth) * var(--ide-tree-indent) + 12px);
+    width: 1px;
+    background: #232a3b;
+    pointer-events: none;
+}
+
+.ide-tree.show-guides .ide-tree-item.contains-selection > .ide-tree-children::before {
+    background: #34405c;
+}
+
+.ide-tree-row {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: var(--ide-tree-row-height);
+    /* Indentation is padding on the row so that hover and selection span the whole width */
+    padding: 0 4px 0 calc(var(--depth) * var(--ide-tree-indent) + 6px);
+    border-radius: 4px;
+    color: #a7aec2;
+    cursor: default;
+    outline: none;
+}
+
+.ide-tree-row:hover {
+    background: #4999ff12;
+}
+
+.ide-tree-row.selected {
+    background: #6793ff33;
+    color: #dfe5f5;
+}
+
+.ide-tree:not(:focus-within) .ide-tree-row.selected {
+    background: #6793ff1c;
+}
+
+.ide-tree-caret {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 12px;
+    height: 100%;
+    font-size: 8px;
+    color: #6f7588;
+    transition: transform 120ms ease;
+}
+
+.ide-tree-item.expanded > .ide-tree-row .ide-tree-caret {
+    transform: rotate(90deg);
+}
+
+.ide-tree-icon {
+    display: flex;
+    justify-content: center;
+    flex: none;
+    width: 12px;
+    align-items: center;
+    height: 100%;
+    /* Even sizes keep the glyphs centered on whole pixels in the 24px row, so the icon and the chevron line up */
+    font-size: 12px;
+}
+
+.ide-tree-item.group > .ide-tree-row .ide-tree-icon {
+    color: #8b9ccc;
+}
+
+.ide-tree-item.leaf > .ide-tree-row .ide-tree-icon {
+    color: #7c8498;
+}
+
+.ide-tree-label {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ide-tree-item.group > .ide-tree-row .ide-tree-label {
+    color: #c4cadb;
+}
+
+.ide-tree-row.selected .ide-tree-label {
+    color: #e3e8f5;
+}
+
+.ide-tree-decorations,
+.ide-tree-row-actions {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex: none;
+}
+
+.ide-tree-decorations:empty,
+.ide-tree-row-actions {
+    display: none;
+}
+
+/* Row actions replace the decorations while the row is hovered, selected or has a menu open */
+.ide-tree-row:is(:hover, .selected, :has(.ide-menu-button.open)) .ide-tree-row-actions:not(:empty) {
+    display: flex;
+}
+
+.ide-tree-row:is(:hover, .selected, :has(.ide-menu-button.open)):has(.ide-tree-row-actions:not(:empty)) .ide-tree-decorations {
+    display: none;
+}
+
+.ide-tree-loading,
+.ide-tree-empty {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: var(--ide-tree-row-height);
+    color: #6f7588;
+    font-size: 11px;
+    font-style: italic;
+}
+
+.ide-tree-loading {
+    padding-left: calc(var(--depth) * var(--ide-tree-indent) + 24px);
+}
+
+.ide-tree-empty {
+    justify-content: center;
+}
+
+.ide-tree-loading i {
+    animation: ide-tree-spin 0.8s linear infinite;
+}
+
+@keyframes ide-tree-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ---- Decoration helpers ------------------------------------------------- */
+
+.ide-tree-badge {
+    min-width: 18px;
+    padding: 0 5px;
+    border-radius: 8px;
+    background: #1a2132;
+    color: #7d859a;
+    font-size: 10px;
+    line-height: 15px;
+    text-align: center;
+}
+
+.ide-tree-dot {
+    width: 7px;
+    height: 7px;
+    margin: 0 5px;
+    border-radius: 50%;
+    background: #3a4152;
+}
+
+/* Small ghost icon buttons for row actions */
+.ide-tree-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    background: transparent;
+    color: #8f97aa;
+    font-size: 10px;
+    cursor: pointer;
+}
+
+.ide-tree-action:hover {
+    background: #131a28;
+    color: #c8d0e4;
+}
+
+.ide-tree-action.danger:hover {
+    background: #2a0d0d80;
+    color: #f47067;
+}
+
+/* ---- Drag and drop ------------------------------------------------------ */
+
+.ide-tree-row.dragging {
+    opacity: 0.45;
+}
+
+.ide-tree-row.drop-target {
+    background: rgba(92, 123, 245, 0.16);
+    box-shadow: inset 0 0 0 1px rgba(92, 123, 245, 0.55);
+}
+
+/* Dropping on the empty area of the tree */
+.ide-tree.drop-root {
+    border-radius: 4px;
+    background: rgba(92, 123, 245, 0.06);
+    box-shadow: inset 0 0 0 1px rgba(92, 123, 245, 0.35);
+}
