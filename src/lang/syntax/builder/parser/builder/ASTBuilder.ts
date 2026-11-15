@@ -18,15 +18,15 @@ import {LanguageBase} from "../../../../LanguageBase";
 import {SynASTElementImpl} from "../../../impl/tree/SynASTElementImpl";
 
 export class ASTBuilder {
-    protected readonly stream: TokenStream;
+    protected stream: TokenStream;
 
     protected readonly production: SynNode[] = [];
 
-    private currentOffset: number = 0;
-    private lastTokenOffset: number = 0;
+    protected currentOffset: number = 0;
+    protected lastTokenOffset: number = 0;
 
-    private isErrorState: boolean = false;
-    private wasInErrorState: boolean = false;
+    protected isErrorState: boolean = false;
+    protected wasInErrorState: boolean = false;
 
     constructor(private readonly document: SynDocument, private readonly language: LanguageBase, private signal: KillSignal) {
         this.stream = document.makeTokenStream();
@@ -77,10 +77,6 @@ export class ASTBuilder {
         return new TokenStreamMarker(this, this.currentOffset, this.lastTokenOffset, this.stream.getIndex(), this.production.length, this.isErrorState)
     }
 
-    /**
-     * @param wasInvalid what {@link wasInvalid} returned right after the node was originally built
-     * @param trailingTrivia length of the whitespace/comments the node ends with (after its last token)
-     */
     copyIntoProduction(node: SynNode, wasInvalid: boolean = this.isErrorState, trailingTrivia: number = 0): void {
         const length = node.getTextRange().getLength();   // invariant: unchanged text ⇒ unchanged length
         const tokenCount = node.getTokenCount();

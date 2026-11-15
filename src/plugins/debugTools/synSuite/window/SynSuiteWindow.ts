@@ -77,6 +77,14 @@ export class SynSuiteWindow extends UIComponent {
         await this.importLegacyTests();
     }
 
+    dispose(): void {
+        const bus = GlobalState.getMainEventBus();
+        bus.unsubscribe(this, SynSuiteTestsChangedEvent.SUBSCRIBER);
+        bus.unsubscribe(this, SynSuiteTestsRunEvent.SUBSCRIBER);
+        this.context.dispose();
+        super.dispose();
+    }
+
     /** Brings in the tests of the first version of SynSuite, the first time the window opens */
     private async importLegacyTests() {
         const store = this.context.store;
@@ -92,14 +100,6 @@ export class SynSuiteWindow extends UIComponent {
             // Left undone so that it is attempted again on the next opening
             console.error("Could not import the legacy SynSuite tests", e);
         }
-    }
-
-    dispose(): void {
-        const bus = GlobalState.getMainEventBus();
-        bus.unsubscribe(this, SynSuiteTestsChangedEvent.SUBSCRIBER);
-        bus.unsubscribe(this, SynSuiteTestsRunEvent.SUBSCRIBER);
-        this.context.dispose();
-        super.dispose();
     }
 
     /** The requested selection, or the first failing test, or the root group */

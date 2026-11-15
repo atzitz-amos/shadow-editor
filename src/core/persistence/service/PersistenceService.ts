@@ -1,7 +1,7 @@
 import {Service} from "../../threaded/service/Service";
 import {Scheduler} from "../../scheduler/Scheduler";
-import {UnsafeFlagsService} from "../../sync/flags/UnsafeFlagsService";
-import {UnsafeFlags} from "../../sync/flags/UnsafeFlags";
+import {UnsafeFlagsService} from "../flags/UnsafeFlagsService";
+import {UnsafeFlags} from "../flags/UnsafeFlags";
 
 /**
  *

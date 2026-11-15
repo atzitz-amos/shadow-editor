@@ -1,5 +1,7 @@
 import {UIComponent} from "../../engine/components/UIComponent";
 import {HTMLUtils} from "../../../../editor/utils/HTMLUtils";
+import {UIComponentElement} from "../elements/UIComponentElement";
+import {CustomElementsRegistry} from "../CustomElementsRegistry";
 
 export type IdeDonutSegment = {
     label: string,
@@ -199,3 +201,78 @@ export class IdeDonutChart extends UIComponent {
         return legend;
     }
 }
+
+/**
+ * {@code <ide-donut-chart caption="tests" size="150" thickness="16" gap="2" legend="false">}: an {@link IdeDonutChart}.
+ * <p>
+ * The segments are either its {@code <ide-donut-segment label="Passed" value="12" color="#7fae8a">} children, or
+ * the ones given to the {@code segments} property, which then take precedence. Values are formatted by the
+ * {@code format} property when set.
+ */
+class _CustomIdeDonutChart extends UIComponentElement<IdeDonutChart> {
+    private readonly observer = new MutationObserver(records => {
+        const segmentsChanged = records.some(record => record.type === "attributes"
+            || [...record.addedNodes, ...record.removedNodes].some(node => node.nodeName === "IDE-DONUT-SEGMENT"));
+        if (segmentsChanged) this.getComponent()?.setSegments(this.segments);
+    });
+    private explicitSegments: IdeDonutSegment[] | null = null;
+    private formatter: ((value: number) => string) | null = null;
+
+    static get observedAttributes() {
+        return ["size", "thickness", "gap", "caption", "legend"];
+    }
+
+    get segments(): IdeDonutSegment[] {
+        return this.explicitSegments ?? this.segmentsFromChildren();
+    }
+
+    /** Overrides the {@code <ide-donut-segment>} children, null uses them again */
+    set segments(segments: IdeDonutSegment[] | null) {
+        this.explicitSegments = segments;
+        this.getComponent()?.setSegments(this.segments);
+    }
+
+    get format(): ((value: number) => string) | null {
+        return this.formatter;
+    }
+
+    set format(format: ((value: number) => string) | null) {
+        this.formatter = format;
+        this.scheduleRebuild();
+    }
+
+    connectedCallback() {
+        super.connectedCallback();
+        this.observer.observe(this, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ["label", "value", "color"]
+        });
+    }
+
+    disconnectedCallback() {
+        this.observer.disconnect();
+    }
+
+    protected createComponent(): IdeDonutChart {
+        return new IdeDonutChart(this.segments, {
+            size: this.numberAttribute("size"),
+            thickness: this.numberAttribute("thickness"),
+            gap: this.numberAttribute("gap"),
+            caption: this.stringAttribute("caption"),
+            legend: this.booleanAttribute("legend"),
+            format: this.formatter ?? undefined
+        });
+    }
+
+    private segmentsFromChildren(): IdeDonutSegment[] {
+        return [...this.querySelectorAll(":scope > ide-donut-segment")].map(segment => ({
+            label: segment.getAttribute("label") ?? "",
+            value: Number(segment.getAttribute("value")) || 0,
+            color: segment.getAttribute("color") ?? "currentColor"
+        }));
+    }
+}
+
+CustomElementsRegistry.register("ide-donut-chart", _CustomIdeDonutChart);

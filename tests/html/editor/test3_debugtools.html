@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title>Shadow Studio · Debug Tools Popup</title>
+        <link rel="stylesheet" href="test3.css"/>
+        <script src="https://kit.fontawesome.com/cb36336f7b.js" crossorigin="anonymous"></script>
+        <style>
+            .debug-popup {
+                position: fixed;
+                top: 120px;
+                right: 56px;
+                width: min(620px, calc(100vw - 80px));
+                min-width: 420px;
+                border: 1px solid #252d42;
+                border-radius: 14px;
+                background: linear-gradient(180deg, rgba(17, 23, 35, 0.95), rgba(12, 17, 27, 0.95));
+                backdrop-filter: blur(10px);
+                box-shadow: 0 22px 60px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(199, 210, 255, 0.04) inset;
+                overflow: hidden;
+                z-index: 30;
+            }
+
+            .debug-popup.dragging {
+                cursor: grabbing;
+                user-select: none;
+                box-shadow: 0 28px 70px rgba(0, 0, 0, 0.62), 0 0 0 1px rgba(199, 210, 255, 0.06) inset;
+            }
+
+            .debug-popup-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 14px;
+                padding: 12px 14px;
+                background: rgba(16, 22, 34, 0.85);
+                border-bottom: 1px solid #20283a;
+                cursor: grab;
+            }
+
+            .debug-popup-title {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                color: #d9deee;
+                font-size: 13px;
+                font-weight: 600;
+                letter-spacing: 0.02em;
+            }
+
+            .debug-popup-title-icon {
+                width: 26px;
+                height: 26px;
+                border-radius: 8px;
+                display: grid;
+                place-items: center;
+                color: #ccd4ea;
+                background: #1a2234;
+                border: 1px solid #2a3347;
+            }
+
+            .debug-popup-actions {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .debug-dot {
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                background: #6f7891;
+            }
+
+            .debug-dot.active {
+                background: #8e9bff;
+                box-shadow: 0 0 10px rgba(142, 155, 255, 0.65);
+            }
+
+            .debug-popup-tabs {
+                display: flex;
+                gap: 4px;
+                padding: 8px 10px;
+                border-bottom: 1px solid #1f2739;
+                background: rgba(13, 19, 29, 0.9);
+            }
+
+            .debug-tab {
+                border: 1px solid transparent;
+                background: transparent;
+                color: #8690a8;
+                border-radius: 9px;
+                padding: 8px 12px;
+                font-size: 12px;
+                font-weight: 600;
+                letter-spacing: 0.01em;
+                cursor: pointer;
+                transition: 0.16s ease;
+            }
+
+            .debug-tab:hover {
+                color: #c8d0e7;
+                background: rgba(44, 56, 84, 0.32);
+            }
+
+            .debug-tab.active {
+                color: #dbe2f6;
+                background: rgba(47, 59, 91, 0.58);
+                border-color: #34405b;
+                box-shadow: 0 0 0 1px rgba(147, 162, 224, 0.15) inset;
+            }
+
+            .debug-popup-content {
+                min-height: 210px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #8b95ad;
+                font-size: 13px;
+                letter-spacing: 0.01em;
+                background: rgba(11, 16, 25, 0.75);
+            }
+        </style>
+    </head>
+    <body>
+        <div class="shell">
+            <header class="shell-topbar">
+                <div class="topbar-brand">
+                    <div class="logo-mark">
+                        <span class="logo-dot"></span>
+                    </div>
+                    <div class="brand-text">
+                        <div class="brand-title">Shadow Studio</div>
+                        <div class="brand-sub">Session · split focus</div>
+                    </div>
+                </div>
+                <div class="topbar-middle">
+                    <div class="topbar-search">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <span class="search-placeholder">Search files, symbols or tasks</span>
+                        <span class="kbd">Ctrl</span><span class="kbd">K</span>
+                    </div>
+                </div>
+                <div class="topbar-actions">
+                    <div class="topbar-pulse">
+                        <span class="pulse-dot"></span>
+                        <span class="pulse-text">Focused · 27m</span>
+                    </div>
+                </div>
+            </header>
+
+            <main class="shell-main">
+                <nav class="rail">
+                    <button class="rail-item rail-item-active" title="Projects">
+                        <i class="fa-solid fa-diagram-project"></i>
+                    </button>
+                    <button class="rail-item" title="Tasks">
+                        <i class="fa-solid fa-list-check"></i>
+                    </button>
+                    <button class="rail-item" title="Settings">
+                        <i class="fa-solid fa-gear"></i>
+                    </button>
+                </nav>
+
+                <section class="workspace">
+                    <section class="focus-columns">
+                        <div class="focus-column primary">
+                            <header class="column-header">
+                                <div class="column-breadcrumbs">
+                                    <span>shadow-editor</span>
+                                    <span class="crumb-sep">/</span>
+                                    <span>tests</span>
+                                    <span class="crumb-sep">/</span>
+                                    <span class="crumb-active">debug-tools</span>
+                                </div>
+                            </header>
+                            <div class="column-body">
+                                <div class="column-editor">
+                                    <div class="column-editor-body"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </section>
+            </main>
+
+            <div class="debug-popup" id="debugPopup">
+                <div class="debug-popup-header" id="debugPopupHeader">
+                    <div class="debug-popup-title">
+                        <div class="debug-popup-title-icon">
+                            <i class="fa-solid fa-toolbox"></i>
+                        </div>
+                        Debug Tools
+                    </div>
+                    <div class="debug-popup-actions">
+                        <span class="debug-dot active"></span>
+                        <span class="debug-dot"></span>
+                        <span class="debug-dot"></span>
+                    </div>
+                </div>
+                <div class="debug-popup-tabs" id="debugTabs">
+                    <button class="debug-tab active" data-tab="ast">AST Tree</button>
+                    <button class="debug-tab" data-tab="formatter">Code Formatter</button>
+                    <button class="debug-tab" data-tab="syn">Syn Suite</button>
+                    <button class="debug-tab" data-tab="tokens">Token Lens</button>
+                </div>
+                <div class="debug-popup-content" id="debugPopupContent">No content</div>
+            </div>
+        </div>
+
+        <script>
+            (function () {
+                const popup = document.getElementById("debugPopup");
+                const header = document.getElementById("debugPopupHeader");
+                const tabs = document.getElementById("debugTabs");
+                const content = document.getElementById("debugPopupContent");
+
+                let dragging = false;
+                let offsetX = 0;
+                let offsetY = 0;
+
+                header.addEventListener("mousedown", function (event) {
+                    dragging = true;
+                    popup.classList.add("dragging");
+                    const rect = popup.getBoundingClientRect();
+                    offsetX = event.clientX - rect.left;
+                    offsetY = event.clientY - rect.top;
+                });
+
+                document.addEventListener("mousemove", function (event) {
+                    if (!dragging) {
+                        return;
+                    }
+                    const maxLeft = window.innerWidth - popup.offsetWidth;
+                    const maxTop = window.innerHeight - popup.offsetHeight;
+                    const nextLeft = Math.min(Math.max(8, event.clientX - offsetX), Math.max(8, maxLeft - 8));
+                    const nextTop = Math.min(Math.max(8, event.clientY - offsetY), Math.max(8, maxTop - 8));
+                    popup.style.left = nextLeft + "px";
+                    popup.style.top = nextTop + "px";
+                    popup.style.right = "auto";
+                });
+
+                document.addEventListener("mouseup", function () {
+                    dragging = false;
+                    popup.classList.remove("dragging");
+                });
+
+                tabs.addEventListener("click", function (event) {
+                    const button = event.target.closest(".debug-tab");
+                    if (!button) {
+                        return;
+                    }
+                    tabs.querySelectorAll(".debug-tab").forEach(function (tab) {
+                        tab.classList.remove("active");
+                    });
+                    button.classList.add("active");
+                    content.textContent = "No content";
+                });
+            })();
+        </script>
+    </body>
+</html>

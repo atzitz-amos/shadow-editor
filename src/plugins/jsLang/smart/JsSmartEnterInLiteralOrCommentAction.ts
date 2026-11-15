@@ -21,8 +21,7 @@ export default class JsSmartEnterInLiteralOrCommentAction extends SmartInlineEnt
 
     isApplicable(ctx: EditorBehaviorContext): boolean {
         const token = ctx.getTokenAtCaret();
-        console.log("Token: " + token?.getType());
-        if (token === null || token.getRange().start === ctx.getCaretOffset() || ModifierKeyHolder.isShiftPressed()) return false;
+        if (!token || token.getRange().start === ctx.getCaretOffset() || ModifierKeyHolder.isShiftPressed()) return false;
         return (
             token.getType() === JsLexicalGrammar.STRING_LITERAL
             || token.getType() === JsLexicalGrammar.SINGLE_LINE_COMMENT

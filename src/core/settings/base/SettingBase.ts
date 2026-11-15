@@ -3,8 +3,8 @@ import {SettingCreatedEvent} from "../events/SettingCreatedEvent";
 import {SettingChangedEvent} from "../events/SettingChangedEvent";
 import {GlobalState} from "../../global/GlobalState";
 import {Serializable, SerializableType} from "../../persistence/serializable/Serializable";
-import {UnsafeFlagsService} from "../../sync/flags/UnsafeFlagsService";
-import {UnsafeFlags} from "../../sync/flags/UnsafeFlags";
+import {UnsafeFlagsService} from "../../persistence/flags/UnsafeFlagsService";
+import {UnsafeFlags} from "../../persistence/flags/UnsafeFlags";
 
 /**
  * Represents a setting of type T

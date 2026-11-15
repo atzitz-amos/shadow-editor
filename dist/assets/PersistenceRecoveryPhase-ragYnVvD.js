@@ -1,0 +1,1 @@
+import{en as e,fn as t}from"./Project-ffz7-_KD.js";var n=class extends t{persistedObjects;name=`Recovering Data`;priority=20;critical=!0;constructor(e){super(),this.persistedObjects=e}async run(){await e.getInstance().init()}};export{n as PersistenceRecoveryPhase};

@@ -7,8 +7,7 @@
  */
 export class SynSuiteElements {
     /**
-     * A secondary {@code <ide-button>} with an icon. The element renders itself once attached, so it is fully
-     * configured before being appended.
+     * A secondary {@code <ide-button>} with an icon.
      */
     static button(parent: HTMLElement, label: string, icon: string, enabled: boolean, onClick: () => void, tooltip?: string): HTMLElement {
         const button = document.createElement("ide-button");

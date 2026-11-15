@@ -2,6 +2,7 @@ import {ProjectDirectory} from "./tree/ProjectDirectory";
 import {RelativePath, RelativePathInput} from "./path/RelativePath";
 import {ProjectFile} from "./tree/ProjectFile";
 import {FileSystemEntry} from "./tree/FileSystemEntry";
+import {BinaryContent, ProjectBinaryFile} from "./tree/ProjectBinaryFile";
 
 /**
  *
@@ -22,11 +23,18 @@ export interface FileSystem {
 
     createFile(path: RelativePathInput, name: string): ProjectFile;
 
+    /** Defaults to `application/octet-stream`. */
+    createBinaryFile(parent: ProjectDirectory, name: string, mimeType?: string): ProjectBinaryFile;
+
+    createBinaryFile(path: RelativePathInput, name: string, mimeType?: string): ProjectBinaryFile;
+
     getEntry(path: RelativePathInput): FileSystemEntry;
 
     getDir(path: RelativePathInput): ProjectDirectory;
 
     getFile(path: RelativePathInput): ProjectFile;
+
+    getBinaryFile(path: RelativePathInput): ProjectBinaryFile;
 
     getPath(entry: FileSystemEntry): RelativePath;
 
@@ -37,6 +45,10 @@ export interface FileSystem {
     isFile(entry: FileSystemEntry): boolean;
 
     isFile(path: RelativePathInput): boolean;
+
+    isBinaryFile(entry: FileSystemEntry): boolean;
+
+    isBinaryFile(path: RelativePathInput): boolean;
 
     isDirectory(entry: FileSystemEntry): boolean;
 
@@ -57,6 +69,10 @@ export interface FileSystem {
     getFileContent(file: ProjectFile): Promise<FileSystemFileHandle>;
 
     write(file: ProjectFile, content: string): Promise<string>;
+
+    readBinary(file: ProjectBinaryFile): Promise<File>;
+
+    writeBinary(file: ProjectBinaryFile, content: BinaryContent): Promise<void>;
 
     getEntryById(id: string): FileSystemEntry;
 }

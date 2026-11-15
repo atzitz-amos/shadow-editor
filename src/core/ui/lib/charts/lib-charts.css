@@ -83,3 +83,12 @@
 .ide-donut-legend-share {
     color: #6c7280;
 }
+
+ide-donut-chart {
+    display: block;
+}
+
+/* Data of the chart, drawn by the chart itself */
+ide-donut-segment {
+    display: none;
+}

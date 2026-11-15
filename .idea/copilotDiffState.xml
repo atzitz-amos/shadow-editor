@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CopilotDiffPersistence">
+    <option name="pendingDiffs">
+      <map>
+        <entry key="/Inspection (snapshot).ts">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="/Inspection (snapshot).ts" />
+              <option name="originalContent" value="import {InspectionSeverity} from &quot;./InspectionSeverity&quot;;&#10;import {LanguageBase} from &quot;../LanguageBase&quot;;&#10;&#10;/**&#10; *&#10; * @author Atzitz Amos&#10; * @date 6/1/2026&#10; * @since 1.0.0&#10; */&#10;export interface InspectionBase {&#10;    getId(): string;&#10;&#10;    getSeverity(): InspectionSeverity;&#10;&#10;    getApplicableLanguages(): LanguageBase[];&#10;}&#10;" />
+              <option name="updatedContent" value="import {InspectionSeverity} from &quot;./InspectionSeverity&quot;;&#10;import {LanguageBase} from &quot;../LanguageBase&quot;;&#10;&#10;/**&#10; *&#10; * @author Atzitz Amos&#10; * @date 6/1/2026&#10; * @since 1.0.0&#10; */&#10;export abstract class InspectionBase {&#10;    abstract getId(): string;&#10;&#10;    abstract getSeverity(): InspectionSeverity;&#10;&#10;    abstract getApplicableLanguages(): LanguageBase[];&#10;}&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>

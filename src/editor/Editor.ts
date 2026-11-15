@@ -401,12 +401,12 @@ export class Editor {
     onKeyDown(event: KeyboardEvent) {
         ModifierKeyHolder.getInstance().set(event);
 
+        if (!this.eventBus.publishCancellable(new KeyPressedEvent(this, event))) return;
         if (!KeybindManager.getInstance().onKeydown(ContextResolver.fromEvent(event))) {
             if (event.key === "Escape") {
                 if (this.getBehaviorManager().getCurrentMode()?.escapeWillExit()) this.getBehaviorManager().exitMode();
             }
         }
-        this.eventBus.syncPublish(new KeyPressedEvent(this, event));
     }
 
     onMouseDown(event: MouseEvent) {

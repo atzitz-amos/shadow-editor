@@ -14,9 +14,14 @@ import {Measurable} from "../../../core/ui/engine/mixins/Measurable";
  */
 export abstract class EditorInlinePopup extends UIComponentMixin(Measurable) implements InlinePopup {
     protected isOpen = false;
+    private disposedCallback: (() => void) | null = null;
 
     protected constructor(protected editor: Editor, className: string, private closeOn: CloseOn) {
         super(HTMLUtils.createDiv("editor-popup " + className));
+
+        // The view scrolls the editor on every wheel event and cancels its default: one over a popup must not
+        // reach it, or the popup could not be scrolled with the wheel.
+        this.getUnderlyingElement().addEventListener("wheel", e => e.stopPropagation(), {passive: true});
     }
 
     close(): void {
@@ -27,9 +32,21 @@ export abstract class EditorInlinePopup extends UIComponentMixin(Measurable) imp
     }
 
     dispose(): void {
+        if (this.isDisposed()) return;
+
         EditorKeysHelper.notifyClosed(this);
         this.isOpen = false;
         super.dispose();
+
+        this.disposedCallback?.();
+    }
+
+    /**
+     * Called once the popup is disposed, whoever disposed it: its owner, or a {@link CloseOn} flag it was
+     * opened with.
+     */
+    setOnDisposed(callback: (() => void) | null): void {
+        this.disposedCallback = callback;
     }
 
     open(x: number, y: number, closeOn: CloseOn = this.closeOn): void {

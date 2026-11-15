@@ -2,54 +2,92 @@
 
 # Shadow Editor
 
-A complete editor written from scratch in TypeScript supporting text highlighting, AST parsers, and more.
+A browser-based code editor and IDE shell written from scratch in TypeScript. It has no runtime framework: the
+text view, the incremental lexers and parsers, the code analysis pipeline, the UI toolkit and the plugin system are
+all part of this repository.
 
 <p align="center">
   <img src="./docs/assets/screenshot_ide.png" alt="Shadow Editor" width="900"/>
 </p>
 
-This file aims at providing with the basic functionality
-and installation features. In case you are interested by plugin development, you can check
-out [DOCUMENTATION.md](/docs/DOCUMENTATION.md).  
-<br>
+This file covers what the editor does and how to run it. If you want to extend it (add a language, an inspection, a
+pane, an action...), read [DOCUMENTATION.md](./docs/DOCUMENTATION.md).
+
 > [!NOTE]
-> This project is still under developpment and hence doesn't provide a release bundle. The only way to use this project
-> for now is to download the source code directly.
+> This project is still under development and doesn't provide a release bundle. The only way to use it for now is to
+> run it from source.
 
 ***
 
 ## Features
 
-### AST Viewer
+### Editing
 
-Shadow Editor ships with a built-in AST viewer, letting you inspect the parse tree of any open document in real time alongside the editor.
+- Custom text view with gutter, scrollbars, selection, clipboard and grouped undo/redo
+- Incremental lexing and parsing: only the part of the document affected by an edit is re-lexed and re-parsed
+- Syntax highlighting, plus semantic highlighting from annotators that run on the syntax tree
+- Smart typing: auto-closing brackets and quotes, skipping over a closing character, smart Enter and Backspace
+- Code completion (`Ctrl+Space`, or as you type)
+- Context actions (`Alt+Enter`): intents such as "Swap operands" or "Convert `for…of` into an indexed `for`", and
+  quick fixes for inspection problems
+- Code formatting for JavaScript (`Ctrl+Alt+L`)
+- Read-only editors and a side-by-side diff view
 
-<p align="center">
-  <img src="./docs/assets/screenshot_ast_tree.png" alt="AST Viewer panel showing a parsed JavaScript file" width="900"/>
-</p>
+### Languages
+
+Language support comes from plugins. Three are bundled:
+
+| Plugin              | Language        | What it provides                                                                                      |
+|:--------------------|:----------------|:------------------------------------------------------------------------------------------------------|
+| `jsLang`            | JavaScript      | Lexer, parser, highlighting, annotators, inspections, intents, completion, smart typing, code style   |
+| `htmlLang`          | HTML            | Lexer, parser, highlighting, inspections, smart typing (tag auto-close)                               |
+| `riscvAssemblyLang` | RISC-V assembly | Lexer, parser, highlighting, label annotator, control-flow analysis and inspections                   |
 
 ### Inspections
 
-The editor continuously analyses your code and surfaces diagnostics inline — warnings, errors, and hints appear directly at the relevant location without interrupting your flow.
+The editor analyses your code as you type and reports problems inline, at the location they apply to.
 
 <p align="center">
   <img src="./docs/assets/screenshot_inspections.png" alt="Inline inspection showing a switch case fall-through warning" width="900"/>
 </p>
 
+### IDE shell
+
+- Projects stored in the browser, with a project file tree (create, rename, delete)
+- Editor tabs and breadcrumbs; open tabs, caret and scroll positions are restored when you reload
+- Automatic saving
+- Search Everywhere across the project files (`Ctrl+Shift+F`)
+- Dockable panes, a settings dialog, context menus and a dialog system
+
+### Debug tools
+
+The bundled `debugTools` plugin adds tooling for working on the editor itself:
+
+- **AST viewer**: a pane showing the syntax tree of the open document, updated as you type and following the caret
+- **Debug tools popup** (`Ctrl+Alt+,`): AST and code style inspectors
+- **SynSuite** (`Ctrl+Shift+Alt+T`): a snapshot test suite for parsers and inspections. `Ctrl+Alt+T` snapshots the
+  current document as a new test
+
+<p align="center">
+  <img src="./docs/assets/screenshot_ast_tree.png" alt="AST Viewer panel showing a parsed JavaScript file" width="900"/>
+</p>
+
 ***
 
-## Installation
+## Getting started
 
 ### Prerequisites
 
-- Node.js (v18 or higher recommended)
-- npm or yarn
+- Node.js 20.19+ or 22.12+ (required by Vite 8)
+- npm
+- A browser that supports the Origin Private File System, IndexedDB and module web workers. Development is done on
+  Chromium-based browsers.
 
 ### Setup
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/shadow-editor.git
+   git clone https://github.com/atzitz-amos/shadow-editor.git
    cd shadow-editor
    ```
 
@@ -63,142 +101,138 @@ The editor continuously analyses your code and surfaces diagnostics inline — w
    npm run dev
    ```
 
-4. Open your browser and navigate to `http://localhost:5173` (or the URL shown in the terminal)
+4. Open `http://localhost:5173/shadow-editor/dist/` in your browser.
 
-## Basic Usage
+> [!IMPORTANT]
+> The app is served under the `/shadow-editor/dist/` base path (see `base` in [vite.config.ts](./vite.config.ts)),
+> not at the server root. `http://localhost:5173/` alone will not load it.
 
-### Launching the application
+### Other scripts
 
-The ShadowEditor can be launched in two distinct modes: FullUI and EditorOnly. The first one provides with a complete
-user interface, while the second one only renders the editor component, allowing you to integrate it into your own
-application.
-In any case, the `ShadowApp` class must be running as it manages the lifecycle of the application. Here is how to launch
-the app in both modes:
+| Command           | What it does                                           |
+|:------------------|:-------------------------------------------------------|
+| `npm run dev`     | Starts the Vite development server                     |
+| `npm run build`   | Builds the app into `dist/`                            |
+| `npm run preview` | Serves the content of `dist/` locally                  |
+
+`dist/` is committed to the repository, so a production build can be served from any static host under the
+`/shadow-editor/dist/` path.
+
+### Where your data lives
+
+Everything is stored in the browser, per origin:
+
+- Project files are written to the Origin Private File System
+- Settings, open tabs, workspaces and other state are written to an IndexedDB database named `shadow.db`
+
+Nothing is sent to a server. Clearing the site data of the origin deletes your projects.
+
+***
+
+## Keyboard shortcuts
+
+These are the default bindings.
+
+| Shortcut                    | Action                                              |
+|:----------------------------|:----------------------------------------------------|
+| `Ctrl+Space`                | Open code completion                                |
+| `Alt+Enter`                 | Open context actions (intents and quick fixes)      |
+| `Ctrl+Alt+L`                | Reformat code (JavaScript)                          |
+| `Ctrl+Numpad /`             | Comment or uncomment the selected lines (JavaScript) |
+| `Ctrl+Z` / `Ctrl+Shift+Z`   | Undo / redo                                         |
+| `Ctrl+C` / `Ctrl+X` / `Ctrl+V` | Copy / cut / paste                               |
+| `Ctrl+A`                    | Select all                                          |
+| `Ctrl+Y`                    | Delete the current line                             |
+| `Tab` / `Shift+Tab`         | Indent / dedent                                     |
+| `Ctrl+←` / `Ctrl+→`         | Move the caret by word                              |
+| `Ctrl+Backspace`            | Delete the word before the caret                    |
+| `Ctrl+Shift+F`              | Search Everywhere                                   |
+| `Ctrl+Alt+S`                | Open settings                                       |
+| `Alt+Insert`                | New file or directory (project tree)                |
+| `Delete`                    | Delete the selected entry (project tree)            |
+| `Ctrl+Alt+,`                | Toggle the debug tools popup                        |
+| `Ctrl+Shift+Alt+T`          | Open the SynSuite window                            |
+| `Ctrl+Alt+T`                | Snapshot the current document as a SynSuite test    |
+
+***
+
+## Using the editor in your own page
+
+`ShadowApp` owns the application lifecycle and must be launched before anything else. Once it is running, open a
+project, create the UI and enable the plugins you need:
 
 ```typescript
-import {ShadowUIFactory} from "./src/app/ui/ShadowUIFactory";
 import {ShadowApp} from "./src/app/ShadowApp";
+import {ShadowUIFactory} from "./src/app/ui/ShadowUIFactory";
+import {Project} from "./src/core/project/Project";
+import JSLangPlugin from "./src/plugins/jsLang/JSLangPlugin";
 
-const app = await ShadowApp.launch(true); // true if you want to show the progress bar as the app is loading, false otherwise
+// `true` shows the splash screen and progress bar while the app is loading
+const app = await ShadowApp.launch(true);
 
 if (!app) {
     console.error("Failed to launch the Shadow Editor application.");
 } else {
-    console.log("Shadow Editor application launched successfully.");
+    app.openProject(new Project("myProject"));
 
-    // FullUI mode
-    ui = await ShadowUIFactory.fullAppUI();
+    const ui = await ShadowUIFactory.fullAppUI();
 
-    // EditorOnly mode
-    ui = await ShadowUIFactory.singleEditorUI();
+    // Plugins are discovered automatically but start disabled
+    app.enable(JSLangPlugin.class);
+
+    const editor = ui.getMainEditor();
 }
 ```
 
+`ShadowApp.launch()` resolves to `undefined` if a critical startup phase failed. [index.html](./index.html) is the
+entry point used by the development server and shows a complete setup.
+
+> [!NOTE]
+> `ShadowUIFactory.singleEditorUI()`, meant to render a single editor without the IDE shell, is not implemented yet.
+> `fullAppUI()` is the only working mode.
+
 ### Plugins
 
-The Shadow Editor is extremely configurable by using Plugins. Plugins can be used for a wide variety of purposes, such
-as adding support for new languages, providing with new actions, or even modifying the user interface. You can check
-out [DOCUMENTATION.md](/docs/DOCUMENTATION.md) for more details about plugin development. However, here
-are some examples of how to use plugins in your application:
-
-### Enabling
-
-Plugins are automatically loaded from the `src.plugins` directory. However, plugins are always loaded in disabled mode.
-To enable a plugin, you have to use explicitly tell the app to do so. For instance, to enable javascript support:
+Plugins are loaded from `src/plugins`: each directory is a plugin, and each subdirectory contributes to an extension
+point. They are always loaded disabled, so you have to enable the ones you want:
 
 ```typescript
-import JSLangPlugin from "./src/plugins/jsLang/JSLangPlugin"; // exported default
+import DebugToolsPlugin from "./src/plugins/debugTools/DebugToolsPlugin";
 
-
-app.enable(JSLangPlugin.class); // The `class` property of a plugin is a special variable holding a reference to the plugin class itself, which is singleton. 
+app.enable(DebugToolsPlugin.class); // `class` refers to the plugin class itself
 ```
 
 ### Events
 
-The editor is constantly broadcasting events about its state. You can listen to these events by using
-the `EventBus` class. For instance, to listen to document changes:
+The app broadcasts what happens on an `EventBus`. Every event class exposes a `SUBSCRIBER` to subscribe with:
 
 ```typescript
-const bus = GlobalState.getMainEventBus(); // GlobalState is a special class that holds references
-                                           // to the most important components of the app, such as the main event bus
+import {GlobalState} from "./src/core/global/GlobalState";
+import {DocumentModificationEvent} from "./src/editor/core/document/events/DocumentModificationEvent";
 
-bus.subscribe(this, DocumentModificationEvent.SUBSCRIBER, (event: DocumentModificationEvent) => {
-    // Do something when the document is modified
-});
-
-```
-
-### Actions and contextual data
-
-Actions extend `AbstractAction` and receive a `KeybindContext` when they run. The
-context contains the trigger event and typed contextual data. Use
-`CommonDataKeys` instead of relying on closures or manually constructing
-editor/pane state:
-
-```typescript
-import {AbstractAction} from "./src/core/actions/AbstractAction";
-import {CommonDataKeys} from "./src/core/keybinds/context/data/CommonDataKeys";
-import {Keybind} from "./src/core/keybinds/Keybind";
-import {KeybindContext} from "./src/core/keybinds/context/KeybindContext";
-
-export class OpenFileAction extends AbstractAction {
-    getName(): string {
-        return "Open File";
-    }
-
-    getDescription(): string {
-        return "Open the file selected in the project tree.";
-    }
-
-    getDefaultKeybinding(): Keybind | null {
-        return null;
-    }
-
-    getRequiredKeys() {
-        return [CommonDataKeys.PROJECT_FILE];
-    }
-
-    run(ctx: KeybindContext): void {
-        const file = ctx.require(CommonDataKeys.PROJECT_FILE);
-        // Use file.getURI(), navigate to it, or perform another file action.
-    }
-}
-```
-
-`getRequiredKeys()` is used by keybinds and menus to determine whether an
-action is applicable. `ctx.require(key)` is typed and throws the normal
-not-applicable error when a required value is missing. For editor actions, the
-built-in keys include `EDITOR`, `PANE`, `PROJECT_FILE`, `PROJECT_FILES`, and
-`TEXT_AREA`. Legacy `requireEditor()`, `requirePane()`, and
-`getKeybindContext()` remain available while existing actions are migrated.
-
-Menus can use registered actions directly. Context-menu data is captured when
-the menu opens, so the action receives the file or editor that initiated the
-menu even if focus changes before the item is clicked:
-
-```typescript
-contextMenu.addAction("Open", new OpenFileAction());
-```
-
-For small one-off operations, the callback form is still supported and
-receives the same context:
-
-```typescript
-contextMenu.addAction("Delete", ctx => {
-    const file = ctx?.require(CommonDataKeys.PROJECT_FILE);
-    file?.delete();
+GlobalState.getMainEventBus().subscribe(this, DocumentModificationEvent.SUBSCRIBER, event => {
+    console.log("Inserted:", event.getInsertedText());
 });
 ```
 
-Related actions can be placed in an `ActionGroup` and added to a menu with
-`setGroup()`:
+Writing plugins, actions, inspections and the rest of the API is covered in
+[DOCUMENTATION.md](./docs/DOCUMENTATION.md).
 
-```typescript
-contextMenu.setGroup(projectActions);
-```
+***
 
-Only active group actions are added, and their applicability is evaluated
-against the menu's captured context.
+## Repository layout
+
+| Path           | Content                                                                                           |
+|:---------------|:--------------------------------------------------------------------------------------------------|
+| `src/core`     | Infrastructure: lifecycle, events, plugins, actions and keybinds, persistence, settings, projects and file system, web workers, UI toolkit |
+| `src/editor`   | The editor component: document model, caret, view, highlighting, popups, undo, completion UI      |
+| `src/lang`     | Language framework: lexers, parsers, syntax trees, code analysis, completion, code generation, code style |
+| `src/app`      | The IDE shell: `ShadowApp`, layout, panes, tabs, settings, search, the SynSuite engine            |
+| `src/plugins`  | Bundled plugins: `jsLang`, `htmlLang`, `riscvAssemblyLang`, `debugTools`                          |
+| `res`          | Editor stylesheets, fonts and images                                                              |
+| `docs`         | Documentation and screenshots                                                                     |
+| `tests`        | Standalone experiments and manual test pages                                                      |
+| `dist`         | Production build output                                                                           |
 
 ## Acknowledgments
 
@@ -208,3 +242,7 @@ ASTBuilder, Actions, etc...)*. Moreover, the design of the UI draws a lot of ins
 
 This project also uses [JetBrains Mono](https://www.jetbrains.com/lp/mono/), licensed under
 the [Apache 2.0 License](https://www.apache.org/licenses/LICENSE-2.0).
+
+## License
+
+Shadow Editor is licensed under the [Apache License 2.0](./LICENSE).

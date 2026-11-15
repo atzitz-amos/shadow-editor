@@ -9,7 +9,6 @@ import {Editor} from "../../Editor";
 export class UndoStack {
     public static undoing: boolean = false;
 
-
     static whileUndoing(func: () => void) {
         const wasUndoing = this.undoing;
         this.undoing = true;

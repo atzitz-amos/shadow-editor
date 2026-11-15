@@ -27,6 +27,11 @@ export class EditorKeyContextManager {
         return this.INSTANCE.currentEditor === editor;
     }
 
+    /** The editor that has, or last had, the keyboard focus */
+    static getCurrentEditor(): Editor | null {
+        return this.INSTANCE.currentEditor;
+    }
+
     static isFocused() {
         return this.INSTANCE.isFocused;
     }

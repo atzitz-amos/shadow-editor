@@ -8,7 +8,8 @@ export class TokenType {
         public getValue: ((match: RegExpExecArray) => string) | null,
         public priority: number = 0,
         public shouldSkip: boolean = false,
-        public isComment: boolean = false
+        public isComment: boolean = false,
+        public isIdentifier: boolean = false
     ) {
     }
 }
@@ -16,6 +17,10 @@ export class TokenType {
 export class LexicalBuilder {
     public static make(name: string, matcher?: RegExp, getValue: ((match: RegExpExecArray) => string) | null = null): TokenType {
         return new TokenType(name, matcher, getValue);
+    }
+
+    public static makeIdentifier(name: string, matcher?: RegExp, getValue: ((match: RegExpExecArray) => string) | null = null): TokenType {
+        return new TokenType(name, matcher, getValue, 0, false, false, true);
     }
 
     public static makeSkippable(name?: string, matcher: RegExp = /\s+/): TokenType {

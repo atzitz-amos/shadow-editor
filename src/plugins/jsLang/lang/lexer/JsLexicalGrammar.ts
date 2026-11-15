@@ -26,12 +26,12 @@ export class JsLexicalGrammar implements LexicalGrammar {
     /**
      * Token for JavaScript keywords.
      */
-    public static readonly KEYWORD = LexicalBuilder.make("KEYWORD", /\b(?:break|case|catch|class|const|continue|debugger|default|delete|do|else|export|extends|finally|for|function|if|import|in|instanceof|let|new|null|return|super|switch|this|throw|true|false|try|typeof|var|void|while|with|yield|async|await|undefined|constructor)\b/);
+    public static readonly KEYWORD = LexicalBuilder.makeIdentifier("KEYWORD", /\b(?:break|case|catch|class|const|continue|debugger|default|delete|do|else|export|extends|finally|for|function|if|import|in|instanceof|let|new|null|return|super|switch|this|throw|true|false|try|typeof|var|void|while|with|yield|async|await|undefined|constructor)\b/);
 
     /**
      * Token for valid JavaScript identifiers.
      */
-    public static readonly IDENTIFIER = LexicalBuilder.make("IDENTIFIER", /^[$_\p{ID_Start}][$_\u200C\u200D\p{ID_Continue}]*/u);
+    public static readonly IDENTIFIER = LexicalBuilder.makeIdentifier("IDENTIFIER", /^[$_\p{ID_Start}][$_\u200C\u200D\p{ID_Continue}]*/u);
 
     /**
      * Token for number literals (decimal, hex, binary, octal, scientific).

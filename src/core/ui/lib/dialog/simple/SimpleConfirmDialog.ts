@@ -49,7 +49,7 @@ export class SimpleConfirmDialog extends AbstractDialog implements IdeResultDial
                 confirmButton.focus();
                 e.preventDefault();
             } else if (e.key === "Tab") {
-                if (document.activeElement === cancelButton.querySelector(".ide-btn")) {
+                if (document.activeElement === cancelButton) {
                     confirmButton.focus();
                 } else {
                     cancelButton.focus();

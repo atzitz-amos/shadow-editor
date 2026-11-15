@@ -3,7 +3,7 @@ import {Editor} from "../../../Editor";
 import {EditorInlinePopupFrame} from "./EditorInlinePopupFrame";
 
 /**
- * Popup anchored to a specific offset in the editor. Like {@link HoverPopup}, it has no hover
+ * Popup anchored to a specific offset in the editor. It has no hover
  * trigger: once attached it stays open until the user clicks outside it or presses Escape - both
  * handled by {@link EditorInlinePopupFrame}'s default behavior.
  *
@@ -13,6 +13,7 @@ import {EditorInlinePopupFrame} from "./EditorInlinePopupFrame";
  */
 export class OffsetAttachedPopupFrame extends EditorInlinePopupFrame {
     private offset: number | null = null;
+    private closedCallback: (() => void) | null = null;
 
     public constructor(private readonly editor: Editor, builder: PopupBuilder) {
         super(builder);
@@ -35,6 +36,23 @@ export class OffsetAttachedPopupFrame extends EditorInlinePopupFrame {
     }
 
     /**
+     * Moves the open popup over `offset`.
+     */
+    public moveToOffset(offset: number): void {
+        this.offset = offset;
+        this.reposition();
+    }
+
+    /**
+     * Called every time the popup closes, whatever closed it: {@link detach}, {@link dispose}, a click outside
+     * of it, or one of its {@link CloseOn} flags.
+     */
+    public onClosed(callback: () => void): this {
+        this.closedCallback = callback;
+        return this;
+    }
+
+    /**
      * Closes the popup (if open) and clears the attachment, allowing {@link attachToOffset} to be
      * called again on this instance.
      */
@@ -45,6 +63,10 @@ export class OffsetAttachedPopupFrame extends EditorInlinePopupFrame {
 
     protected getEditor(): Editor {
         return this.editor;
+    }
+
+    protected onPopupClosed(): void {
+        this.closedCallback?.();
     }
 
     protected computeAnchor(): { x: number; top: number; bottom: number } {

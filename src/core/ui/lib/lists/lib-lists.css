@@ -1,28 +1,46 @@
 
-.ide-searchable-list {
+.ide-list {
     display: flex;
     flex-direction: column;
     padding: 5px;
     gap: 1px;
+    width: 100%;
 }
 
-.ide-searchable-list-row {
+/* The items of a list, whatever component they are */
+.ide-list > * {
+    border-radius: 3px;
+}
+
+.ide-list > :hover {
+    background-color: #18202c;
+}
+
+.ide-list > .selected {
+    background-color: #1d2c43;
+}
+
+.ide-list > .ide-list-empty:hover {
+    background-color: transparent;
+}
+
+.ide-icon-list-item {
     height: 25px;
     display: flex;
     gap: 10px;
     align-items: center;
     padding: 2px 10px 2px 5px;
-    border-radius: 3px;
 }
 
-.ide-searchable-list-row:hover {
-    background-color: #18202c;
-}
-
-.ide-searchable-list-row.selected {
-    background-color: #1d2c43;
-}
-
-.ide-searchable-list-row-icon {
+.ide-icon-list-item-icon {
     width: 15px;
+}
+
+ide-searchable-list {
+    display: block;
+}
+
+/* Data of the list, drawn by the list itself */
+ide-list-item {
+    display: none;
 }

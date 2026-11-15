@@ -1,5 +1,5 @@
 import {SynNode} from "../../../syntax/api/SynNode";
-import {SynModificationTree} from "../../../syntax/writer/template/SynModificationTree";
+import {SynModTree} from "../../../codeGen/modification/SynModTree";
 
 /**
  *
@@ -8,7 +8,7 @@ import {SynModificationTree} from "../../../syntax/writer/template/SynModificati
  * @since 1.0.0
  */
 export abstract class QuickFix {
-    abstract applyFix(element: SynNode, synModTree: SynModificationTree): void;
+    abstract applyFix(element: SynNode, synModTree: SynModTree): void;
 
     abstract getId(): string;
 

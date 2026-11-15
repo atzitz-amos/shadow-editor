@@ -2,6 +2,7 @@ import {ProjectDirectory} from "../../../project/filesystem/tree/ProjectDirector
 import {FileSystemEntry} from "../../../project/filesystem/tree/FileSystemEntry";
 import {EventBus} from "../../../events/EventBus";
 import {FileCreatedEvent} from "../../../project/events/FileCreatedEvent";
+import {BinaryFileCreatedEvent} from "../../../project/events/BinaryFileCreatedEvent";
 import {DirectoryCreatedEvent} from "../../../project/events/DirectoryCreatedEvent";
 import {GlobalState} from "../../../global/GlobalState";
 import {ProjectFile} from "../../../project/filesystem/tree/ProjectFile";
@@ -74,7 +75,8 @@ export class FileSystemTree extends IdeTree<FileSystemEntry> {
             contextMenu: fsOptions.contextMenu,
             onKeydown: fsOptions.onKeydown,
             onSelect: entry => entry && fsOptions.onEntrySelect?.(entry),
-            onOpen: entry => fsOptions.onFileOpened?.(entry as ProjectFile)
+            // Binary files are leaves too, but there is nothing to open them in
+            onOpen: entry => entry.isFile() && fsOptions.onFileOpened?.(entry)
         });
 
         this.setOptions({
@@ -110,7 +112,7 @@ export class FileSystemTree extends IdeTree<FileSystemEntry> {
     }
 
     setFileOpenedHandler(handler: (entry: ProjectFile) => void) {
-        this.setOptions({onOpen: entry => handler(entry as ProjectFile)});
+        this.setOptions({onOpen: entry => entry.isFile() && handler(entry)});
     }
 
     setEntrySelectedHandler(handler: (entry: FileSystemEntry) => void) {
@@ -132,6 +134,7 @@ export class FileSystemTree extends IdeTree<FileSystemEntry> {
     private subscribeToFsEvents(): void {
         this.unsubscribeFromFsEvents();
         this.eventBus.subscribe(this, FileCreatedEvent.SUBSCRIBER, (e) => this.handleEntryCreated(e.getEntry()));
+        this.eventBus.subscribe(this, BinaryFileCreatedEvent.SUBSCRIBER, (e) => this.handleEntryCreated(e.getEntry()));
         this.eventBus.subscribe(this, DirectoryCreatedEvent.SUBSCRIBER, (e) => this.handleEntryCreated(e.getEntry()));
         this.eventBus.subscribe(this, EntryDeletedEvent.SUBSCRIBER, (e) => this.remove(e.getEntry()));
         this.eventBus.subscribe(this, EntryRenamedEvent.SUBSCRIBER, (e) => this.update(e.getEntry()));
@@ -139,6 +142,7 @@ export class FileSystemTree extends IdeTree<FileSystemEntry> {
 
     private unsubscribeFromFsEvents(): void {
         this.eventBus.unsubscribe(this, FileCreatedEvent.SUBSCRIBER);
+        this.eventBus.unsubscribe(this, BinaryFileCreatedEvent.SUBSCRIBER);
         this.eventBus.unsubscribe(this, DirectoryCreatedEvent.SUBSCRIBER);
         this.eventBus.unsubscribe(this, EntryDeletedEvent.SUBSCRIBER);
         this.eventBus.unsubscribe(this, EntryRenamedEvent.SUBSCRIBER);

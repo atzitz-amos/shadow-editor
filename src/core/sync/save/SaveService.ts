@@ -2,8 +2,8 @@ import {Service} from "../../threaded/service/Service";
 import {GlobalState} from "../../global/GlobalState";
 import {DocumentSaveRequestEvent} from "../../../editor/core/document/events/DocumentSaveRequestEvent";
 import {Logger, UseLogger} from "../../logging/Logger";
-import {UnsafeFlagsService} from "../flags/UnsafeFlagsService";
-import {UnsafeFlags} from "../flags/UnsafeFlags";
+import {UnsafeFlagsService} from "../../persistence/flags/UnsafeFlagsService";
+import {UnsafeFlags} from "../../persistence/flags/UnsafeFlags";
 
 /**
  *

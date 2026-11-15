@@ -2,6 +2,7 @@ import {CustomElementsRegistry} from "../CustomElementsRegistry";
 import {UIComponent} from "../../engine/components/UIComponent";
 import {UIVariant} from "../theme/UIVariant";
 import {HTMLUtils} from "../../../../editor/utils/HTMLUtils";
+import {IdeControlElement} from "../elements/IdeControlElement";
 
 export class IdeButton extends UIComponent {
     constructor(private msg: string, private readonly variant: UIVariant = UIVariant.PRIMARY) {
@@ -36,51 +37,20 @@ export class IdeButton extends UIComponent {
     }
 }
 
-class _CustomIdeButton extends HTMLElement {
+/**
+ * {@code <ide-button>}: the element itself is the button (no inner {@code <button>}), so its content, style and
+ * class list can be changed like those of any regular element.
+ */
+class _CustomIdeButton extends IdeControlElement {
     constructor() {
-        super();
-    }
-
-    static get observedAttributes() {
-        return ['disabled'];
-    }
-
-    connectedCallback() {
-        this.render();
-    }
-
-    attributeChangedCallback(name: string, oldValue: any, newValue: any) {
-        // Sync the disabled attribute down to the internal native button element
-        const btn = this.querySelector('button');
-        if (btn) {
-            if (newValue !== null) btn.setAttribute(name, '');
-            else btn.removeAttribute(name);
-        }
-    }
-
-    render() {
-        const disabled = this.hasAttribute('disabled') ? "disabled " : "";
-        const primary = this.hasAttribute('primary') ? "primary " : "";
-        const secondary = this.hasAttribute('secondary') ? "secondary " : "";
-        const ghost = this.hasAttribute('ghost') ? "ghost" : "";
-
-        const existingContent = this.innerHTML;
-
-        this.innerHTML = `
-            <button class="ide-btn" ${disabled + primary + secondary + ghost}>
-                ${existingContent}
-            </button>
-        `;
+        super("button");
 
         this.addEventListener("keydown", e => {
-            if (e.key === "Enter") {
-                this.click();
+            if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                if (!this.disabled) this.click();
             }
-        })
-    }
-
-    focus(options?: FocusOptions) {
-        (<HTMLElement>this.querySelector(".ide-btn")).focus(options);
+        });
     }
 }
 

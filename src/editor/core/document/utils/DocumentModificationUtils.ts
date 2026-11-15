@@ -18,6 +18,15 @@ export class DocumentModificationUtils {
         }
     }
 
+    /**
+     * A JUMP leaves the selection alone, including its anchor, which is where the next shift + move starts
+     * selecting from. Without a selection to preserve, the anchor has to follow the caret.
+     */
+    public static resetSelectionAnchor(caret: Caret) {
+        const selection = caret.getSelectionModel();
+        if (!selection.isSelectionActive) selection.clear();
+    }
+
     private static doModifyWithCaret(document: Document, caret: Caret, callback: () => void) {
         const offset = caret.getOffset();
         const trackedRange = new TrackedRange(offset, offset, false, true);
@@ -30,6 +39,7 @@ export class DocumentModificationUtils {
         else
             caret.moveToOffset(trackedRange.getEnd(), CaretMovementFlags.JUMP);
         trackedRange.invalidate();
+        this.resetSelectionAnchor(caret);
 
         caret.editor.getView().resetBlink();
     }

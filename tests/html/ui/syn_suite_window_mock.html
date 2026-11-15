@@ -1,0 +1,1489 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>SynSuite window — mock</title>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+        <script crossorigin="anonymous" src="https://kit.fontawesome.com/cb36336f7b.js"></script>
+        <style>
+            :root {
+                --font: "Inter", "Segoe UI", sans-serif;
+                --mono: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+
+                --bg-panel: #0f141f;
+                --bg-bar: rgba(16, 22, 34, 0.85);
+                --border: #20283a;
+                --border-soft: #1a2130;
+                --text: #c0c5d3;
+                --text-strong: #e3e8f5;
+                --text-dim: #6c7280;
+                --text-faint: #4f5a6b;
+                --accent: #4a76bc;
+                --accent-soft: #6793ff33;
+
+                --passed: #3fb950;
+                --failed: #f85149;
+                --error: #e3b341;
+                --idle: #3a4152;
+
+                /* Soft, desaturated tones for the status icons */
+                --status-passed: #7fae8a;
+                --status-failed: #d9837c;
+                --status-error: #c9a85e;
+                --status-idle: #5a6274;
+                --status-running: #7f9bd6;
+            }
+
+            .status-icon {
+                width: 14px;
+                flex: none;
+                text-align: center;
+                font-size: 11px;
+            }
+
+            .status-icon.passed { color: var(--status-passed); }
+            .status-icon.failed { color: var(--status-failed); }
+            .status-icon.error { color: var(--status-error); font-size: 10px; }
+            .status-icon.idle { color: var(--status-idle); font-size: 10px; }
+            .status-icon.running { color: var(--status-running); }
+
+            * {
+                box-sizing: border-box;
+                user-select: none;
+            }
+
+            body {
+                margin: 0;
+                height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-family: var(--font);
+                font-size: 12px;
+                color: var(--text);
+                background: radial-gradient(circle at 0 0, #1b202c 0, transparent 50%),
+                linear-gradient(160deg, #050609 0, #10131c 45%, #050609 100%);
+            }
+
+            button {
+                font-family: inherit;
+            }
+
+            /* ── Window frame (SynSuitePopup) ────────────────────────────────────── */
+
+            .window {
+                display: flex;
+                flex-direction: column;
+                width: min(1100px, calc(100vw - 80px));
+                height: min(720px, calc(100vh - 80px));
+                overflow: hidden;
+                border: 1px solid #252d42;
+                border-radius: 7px;
+                background: linear-gradient(180deg, rgba(17, 23, 35, 0.97), rgba(12, 17, 27, 0.97));
+                box-shadow: 0 22px 60px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(199, 210, 255, 0.04) inset;
+            }
+
+            .bar {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                padding: 0 12px;
+                background: var(--bg-bar);
+                flex: none;
+            }
+
+            .header {
+                height: 44px;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .title {
+                color: #d9deee;
+                font-size: 13px;
+                font-weight: 600;
+                letter-spacing: 0.02em;
+                margin-right: 8px;
+            }
+
+            .summary {
+                display: flex;
+                gap: 14px;
+                margin-right: auto;
+            }
+
+            .summary-item {
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+                color: #8e96aa;
+                font-size: 11px;
+            }
+
+            .summary-item.zero {
+                opacity: 0.45;
+            }
+
+            .chip {
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+                height: 20px;
+                padding: 0 8px;
+                border-radius: 10px;
+                background: #161d2b;
+                color: #8e96aa;
+                font-size: 11px;
+            }
+
+            .chip i {
+                font-size: 9px;
+            }
+
+            .chip.passed i { color: var(--passed); }
+            .chip.failed i { color: var(--failed); }
+            .chip.error i { color: var(--error); }
+            .chip.idle i { color: var(--idle); }
+
+            .icon-btn {
+                position: relative;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                min-width: 26px;
+                height: 26px;
+                padding: 0 7px;
+                gap: 6px;
+                border: 1px solid transparent;
+                border-radius: 4px;
+                background: transparent;
+                color: #8f97aa;
+                font-size: 11px;
+                cursor: pointer;
+                transition: color 120ms ease, background-color 120ms ease;
+            }
+
+            .icon-btn:hover:not(:disabled) {
+                background: #131a28;
+                color: #c8d0e4;
+            }
+
+            .icon-btn:disabled {
+                color: #3f4658;
+                cursor: default;
+            }
+
+            .icon-btn.danger:hover:not(:disabled) {
+                color: #f47067;
+                background: #2a0d0d80;
+            }
+
+            .btn {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                height: 26px;
+                padding: 0 10px;
+                border: 1px solid #3f475c;
+                border-radius: 4px;
+                background: #242936;
+                color: var(--text);
+                font-size: 11px;
+                white-space: nowrap;
+                cursor: pointer;
+            }
+
+            .btn:hover:not(:disabled) {
+                background: #2f3647;
+            }
+
+            .btn.primary {
+                border-color: transparent;
+                background: var(--accent);
+                color: #fff;
+            }
+
+            .btn.primary:hover:not(:disabled) {
+                background: #335195;
+            }
+
+            .btn:disabled {
+                opacity: 0.45;
+                cursor: default;
+            }
+
+            .btn .fa-play {
+                font-size: 9px;
+            }
+
+            /* Split button: [Run all | ▾] */
+            .split {
+                display: inline-flex;
+            }
+
+            .split .btn:first-child {
+                border-top-right-radius: 0;
+                border-bottom-right-radius: 0;
+            }
+
+            .split .btn:last-child {
+                padding: 0 6px;
+                border-top-left-radius: 0;
+                border-bottom-left-radius: 0;
+                border-left: 1px solid rgba(255, 255, 255, 0.12);
+                font-size: 8px;
+            }
+
+            .toolbar {
+                height: 40px;
+                border-bottom: 1px solid var(--border);
+                background: rgba(13, 18, 28, 0.6);
+            }
+
+            .segmented {
+                display: inline-flex;
+                padding: 2px;
+                border-radius: 5px;
+                background: #121826;
+                border: 1px solid var(--border-soft);
+            }
+
+            .segmented button {
+                height: 22px;
+                padding: 0 9px;
+                border: 0;
+                border-radius: 3px;
+                background: transparent;
+                color: #7d859a;
+                font-size: 11px;
+                cursor: pointer;
+            }
+
+            .segmented button.active {
+                background: #1f2738;
+                color: var(--text-strong);
+            }
+
+            .search {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                height: 26px;
+                width: 220px;
+                margin-left: auto;
+                padding: 0 8px;
+                border-radius: 4px;
+                background: #15252f;
+                box-shadow: 0 0 1px 0 #44b5c4;
+                color: #5d6b7a;
+            }
+
+            .search input {
+                flex: 1;
+                min-width: 0;
+                border: 0;
+                outline: 0;
+                background: transparent;
+                color: #d7def0;
+                font-family: inherit;
+                font-size: 12px;
+                user-select: text;
+            }
+
+            .progress {
+                height: 2px;
+                background: transparent;
+                flex: none;
+            }
+
+            .progress > div {
+                height: 100%;
+                width: 0;
+                background: linear-gradient(90deg, var(--accent), #6fa0ff);
+                transition: width 120ms linear;
+            }
+
+            /* ── Layout ──────────────────────────────────────────────────────────── */
+
+            .main {
+                flex: 1;
+                display: grid;
+                grid-template-columns: 300px 1fr;
+                min-height: 0;
+            }
+
+            .side {
+                display: flex;
+                flex-direction: column;
+                min-height: 0;
+                border-right: 1px solid var(--border);
+                background: rgba(10, 14, 22, 0.45);
+            }
+
+            .tree {
+                flex: 1;
+                overflow: auto;
+                padding: 6px;
+                outline: none;
+            }
+
+            .detail {
+                display: flex;
+                flex-direction: column;
+                min-width: 0;
+                min-height: 0;
+            }
+
+            .statusbar {
+                height: 26px;
+                border-top: 1px solid var(--border);
+                color: var(--text-dim);
+                font-size: 11px;
+            }
+
+            .statusbar .spacer {
+                flex: 1;
+            }
+
+            /* ── Tree (IdeTree look) ─────────────────────────────────────────────── */
+
+            .tree ul {
+                list-style: none;
+                margin: 0;
+                padding: 0;
+                position: relative;
+            }
+
+            .tree li > ul {
+                display: none;
+            }
+
+            .tree li.expanded > ul {
+                display: block;
+            }
+
+            .tree li > ul::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                bottom: 4px;
+                left: calc(var(--depth) * 14px + 12px);
+                width: 1px;
+                background: #232a3b;
+            }
+
+            .row {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                height: 24px;
+                padding: 0 6px 0 calc(var(--depth) * 14px + 6px);
+                border-radius: 4px;
+                color: #a7aec2;
+                cursor: default;
+            }
+
+            .row:hover {
+                background: #4999ff12;
+            }
+
+            .row.selected {
+                background: var(--accent-soft);
+                color: var(--text-strong);
+            }
+
+            .caret {
+                width: 12px;
+                flex: none;
+                font-size: 8px;
+                color: #6f7588;
+                text-align: center;
+                transition: transform 120ms ease;
+            }
+
+            li.expanded > .row .caret {
+                transform: rotate(90deg);
+            }
+
+            .row .icon {
+                width: 14px;
+                flex: none;
+                text-align: center;
+                font-size: 11px;
+                color: #8b9ccc;
+            }
+
+            .row.test .icon {
+                color: #7c8498;
+            }
+
+            .row .label {
+                flex: 1;
+                min-width: 0;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            .row.group .label {
+                color: #c4cadb;
+            }
+
+            .row .match {
+                color: #fff;
+                background: #3a5a9a;
+                border-radius: 2px;
+            }
+
+            .count {
+                padding-right: 4px;
+                color: #565e72;
+                font-size: 11px;
+            }
+
+            .row.group.has-failures .icon {
+                color: var(--status-failed);
+            }
+
+            .dot {
+                width: 7px;
+                height: 7px;
+                margin: 0 5px;
+                border-radius: 50%;
+                flex: none;
+            }
+
+            .dot.passed { background: var(--passed); }
+            .dot.failed { background: var(--failed); box-shadow: 0 0 6px #f8514980; }
+            .dot.error { background: var(--error); }
+            .dot.idle { background: var(--idle); }
+            .dot.running {
+                background: transparent;
+                border: 2px solid var(--accent);
+                border-top-color: transparent;
+                animation: spin 0.7s linear infinite;
+            }
+
+            @keyframes spin {
+                to { transform: rotate(360deg); }
+            }
+
+            .tree-empty {
+                padding: 24px 12px;
+                text-align: center;
+                color: var(--text-dim);
+            }
+
+            /* ── Detail ──────────────────────────────────────────────────────────── */
+
+            .detail-head {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                padding: 14px 16px 12px;
+                border-bottom: 1px solid var(--border-soft);
+            }
+
+            .detail-title-row {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .detail-path {
+                font-family: var(--mono);
+                font-size: 11px;
+                color: var(--text-dim);
+            }
+
+            .detail-path b {
+                font-weight: normal;
+                color: var(--text);
+            }
+
+            .detail-name {
+                font-size: 16px;
+                font-weight: 600;
+                color: var(--text-strong);
+            }
+
+            .detail-actions {
+                display: flex;
+                gap: 6px;
+                margin-left: auto;
+            }
+
+            .detail-description {
+                color: #8e96aa;
+            }
+
+            .meta {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+
+            .meta .chip i {
+                color: #6f7a94;
+            }
+
+            .banner {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                padding: 7px 10px;
+                border-radius: 5px;
+                border: 1px solid;
+            }
+
+            .banner.passed { color: #8fdf9f; background: #0d2a1466; border-color: #1a4422; }
+            .banner.failed { color: #ff9c95; background: #2a0d0d66; border-color: #521010; }
+            .banner.error { color: #f1cf7a; background: #2a1f0066; border-color: #4d3a08; }
+            .banner.idle { color: #8e96aa; background: #161d2b; border-color: var(--border-soft); }
+
+            .tabs {
+                display: flex;
+                gap: 18px;
+                padding: 0 16px;
+                height: 34px;
+                border-bottom: 1px solid #141923;
+                flex: none;
+            }
+
+            .tab {
+                position: relative;
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                padding: 0;
+                border: 0;
+                background: transparent;
+                color: #515970;
+                font-size: 11px;
+                font-weight: 600;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+                cursor: pointer;
+            }
+
+            .tab:hover {
+                color: #a2a8b9;
+            }
+
+            .tab.active {
+                color: #5c7bf5;
+            }
+
+            .tab.active::after {
+                content: "";
+                position: absolute;
+                left: 0;
+                right: 0;
+                bottom: -1px;
+                height: 2px;
+                background: #5c7bf5;
+            }
+
+            .tab .tab-badge {
+                color: var(--status-failed);
+                font-size: 10px;
+                letter-spacing: 0;
+            }
+
+            .tab-body {
+                flex: 1;
+                overflow: auto;
+                padding: 14px 16px;
+                min-height: 0;
+            }
+
+            /* Code with line numbers and inspection underlines */
+            .code {
+                margin: 0;
+                padding: 10px 0;
+                border-radius: 5px;
+                border: 1px solid var(--border-soft);
+                background: #0b1019;
+                font-family: var(--mono);
+                font-size: 12px;
+                line-height: 19px;
+                color: #c9d1e3;
+                user-select: text;
+                counter-reset: line;
+            }
+
+            .code .line {
+                display: block;
+                padding-right: 12px;
+                white-space: pre;
+            }
+
+            .code .line::before {
+                counter-increment: line;
+                content: counter(line);
+                display: inline-block;
+                width: 34px;
+                margin-right: 14px;
+                padding-right: 8px;
+                text-align: right;
+                color: #3d4558;
+                border-right: 1px solid #161d2a;
+            }
+
+            .code .problem {
+                text-decoration: underline wavy;
+                text-decoration-thickness: 1px;
+                text-underline-offset: 3px;
+            }
+
+            .code .problem.expected { text-decoration-color: #7d8aa8; }
+            .code .problem.missing { text-decoration-color: var(--error); }
+            .code .problem.unexpected { text-decoration-color: var(--failed); }
+            .code .problem.matched { text-decoration-color: var(--passed); }
+
+            .legend {
+                display: flex;
+                gap: 14px;
+                margin-top: 10px;
+                color: var(--text-dim);
+                font-size: 11px;
+            }
+
+            .legend span::before {
+                content: "";
+                display: inline-block;
+                width: 14px;
+                height: 0;
+                margin-right: 6px;
+                vertical-align: middle;
+                border-bottom: 2px dotted;
+            }
+
+            .legend .matched::before { border-color: var(--passed); }
+            .legend .missing::before { border-color: var(--error); }
+            .legend .unexpected::before { border-color: var(--failed); }
+
+            /* Expected / actual columns */
+            .columns {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+                height: 100%;
+            }
+
+            .column {
+                display: flex;
+                flex-direction: column;
+                min-width: 0;
+                min-height: 0;
+                border: 1px solid var(--border-soft);
+                border-radius: 5px;
+                background: #0b1019;
+            }
+
+            .column-head {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 7px 10px;
+                border-bottom: 1px solid var(--border-soft);
+                font-size: 10px;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+                color: #888fa1;
+            }
+
+            .column pre {
+                flex: 1;
+                margin: 0;
+                padding: 8px 10px;
+                overflow: auto;
+                font-family: var(--mono);
+                font-size: 11px;
+                line-height: 17px;
+                color: #b9c1d4;
+                user-select: text;
+            }
+
+            /* Inspections table */
+            table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+
+            th {
+                padding: 6px 8px;
+                border-bottom: 1px solid var(--border);
+                text-align: left;
+                font-size: 10px;
+                font-weight: 600;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+                color: #6f7790;
+            }
+
+            td {
+                padding: 7px 8px;
+                border-bottom: 1px solid #151b28;
+                vertical-align: top;
+            }
+
+            td.mono {
+                font-family: var(--mono);
+                font-size: 11px;
+                color: #9aa3b8;
+                white-space: nowrap;
+            }
+
+            .verdict {
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+                font-size: 11px;
+                white-space: nowrap;
+            }
+
+            .verdict.matched { color: var(--passed); }
+            .verdict.missing { color: var(--error); }
+            .verdict.unexpected { color: var(--failed); }
+
+            /* Timings: donut + legend */
+            .timings {
+                display: flex;
+                align-items: center;
+                gap: 28px;
+                padding: 8px 4px;
+            }
+
+            .donut {
+                width: 150px;
+                height: 150px;
+                flex: none;
+            }
+
+            .donut circle {
+                fill: none;
+                stroke-width: 16;
+                transition: stroke-dasharray 200ms ease;
+            }
+
+            .donut .track {
+                stroke: #151b28;
+            }
+
+            .donut-total {
+                font-family: var(--mono);
+                font-size: 15px;
+                fill: var(--text-strong);
+            }
+
+            .donut-caption {
+                font-size: 9px;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+                fill: var(--text-dim);
+            }
+
+            .legend-table {
+                display: grid;
+                grid-template-columns: auto auto auto;
+                column-gap: 18px;
+                row-gap: 9px;
+                align-items: center;
+            }
+
+            .legend-table .name {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .legend-table .swatch {
+                width: 9px;
+                height: 9px;
+                border-radius: 2px;
+            }
+
+            .legend-table .value {
+                font-family: var(--mono);
+                font-size: 11px;
+                text-align: right;
+                color: #c0c5d3;
+            }
+
+            .legend-table .share {
+                font-family: var(--mono);
+                font-size: 11px;
+                text-align: right;
+                color: var(--text-dim);
+            }
+
+            /* Group overview */
+            .group-list .test-line {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                height: 28px;
+                padding: 0 8px;
+                border-radius: 4px;
+                cursor: pointer;
+            }
+
+            .group-list .test-line:hover {
+                background: #4999ff12;
+            }
+
+            .group-list .test-line .path {
+                font-family: var(--mono);
+                font-size: 11px;
+                color: var(--text-dim);
+            }
+
+            .group-list .test-line .time {
+                margin-left: auto;
+                font-family: var(--mono);
+                font-size: 11px;
+                color: var(--text-faint);
+            }
+
+            .empty {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                height: 100%;
+                color: var(--text-dim);
+            }
+
+            .empty i {
+                font-size: 22px;
+                color: #39415a;
+            }
+
+            /* Localized menu (PopupMenu look) */
+            .menu {
+                position: fixed;
+                min-width: 190px;
+                padding: 5px;
+                border: 1px solid #2b334a;
+                border-radius: 6px;
+                background: linear-gradient(180deg, #121827 0%, #0e1421 100%);
+                box-shadow: 0 14px 30px rgba(0, 0, 0, 0.45);
+                z-index: 10;
+            }
+
+            .menu button {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                width: 100%;
+                padding: 6px 8px;
+                border: 0;
+                border-radius: 4px;
+                background: transparent;
+                color: #c7cede;
+                font-size: 11px;
+                text-align: left;
+                cursor: pointer;
+            }
+
+            .menu button:hover {
+                background: #1b2436;
+            }
+
+            .menu button i {
+                width: 12px;
+                color: #8f97aa;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="window">
+            <div class="bar header">
+                <span class="title">SynSuite</span>
+                <div class="summary" id="summary"></div>
+                <button class="icon-btn" title="Close"><i class="fa fa-close"></i></button>
+            </div>
+
+            <div class="bar toolbar">
+                <div class="split">
+                    <button class="btn primary" id="run-all"><i class="fa-solid fa-play"></i>Run all</button>
+                    <button class="btn primary" id="run-menu" title="More run options"><i class="fa-solid fa-chevron-down"></i></button>
+                </div>
+                <div class="segmented" id="filters">
+                    <button data-filter="all" class="active">All</button>
+                    <button data-filter="failed">Failed</button>
+                    <button data-filter="passed">Passed</button>
+                    <button data-filter="idle">Not run</button>
+                </div>
+                <label class="search">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input id="search" placeholder="Filter by path…" spellcheck="false">
+                </label>
+            </div>
+            <div class="progress"><div id="progress"></div></div>
+
+            <div class="main">
+                <div class="side">
+                    <div class="tree" id="tree" tabindex="0"></div>
+                </div>
+                <div class="detail" id="detail"></div>
+            </div>
+
+            <div class="bar statusbar">
+                <span id="status-left"></span>
+                <span class="spacer"></span>
+                <span id="status-right"></span>
+            </div>
+        </div>
+
+        <script>
+            // ── Data: same shape as SynSuiteTest + the last SynSuiteTestResult ────────
+
+            const tests = [
+                {
+                    id: "t1", group: "js.parser.statements", name: "IfElse", language: "javascript",
+                    description: "if / else with block bodies",
+                    options: {includeInspections: true, pluginIds: ["default.jsLang"]},
+                    code: "if (a) {\n  b();\n} else {\n  c();\n}\n",
+                    expected: {
+                        tree: "SynTreeImpl {\n  JsCodeBlock {\n    JsIfStatement {\n      Token('if'),\n      JsParenExpr { JsIdentifier { Token('a') } },\n      JsCodeBlock { JsExprStatement { JsCallExpr {...} } },\n      Token('else'),\n      JsCodeBlock { JsExprStatement { JsCallExpr {...} } }\n    }\n  }\n}",
+                        inspections: []
+                    },
+                    result: {status: "passed", timings: {lexer: 0.08, parser: 0.31, analysis: 0.22}}
+                },
+                {
+                    id: "t2", group: "js.parser.statements", name: "SwitchFallthrough", language: "javascript",
+                    description: "Case without break falls into the next one",
+                    options: {includeInspections: true, pluginIds: ["default.jsLang"]},
+                    code: "switch (x) {\n  case 1:\n    foo();\n  case 2:\n    bar();\n}\n",
+                    expected: {
+                        tree: "SynTreeImpl {\n  JsCodeBlock {\n    JsSwitchStatement {\n      Token('switch'),\n      JsSwitchCase { Token('case'), JsNumberLiteral { Token('1') } },\n      JsSwitchCase { Token('case'), JsNumberLiteral { Token('2') } }\n    }\n  }\n}",
+                        inspections: [
+                            {inspectionId: "javascript.inspections.switchCaseFallsThrough", message: "Switch case falls through", range: {start: 15, end: 22}}
+                        ]
+                    },
+                    result: {
+                        status: "failed", timings: {lexer: 0.11, parser: 0.52, analysis: 0.39},
+                        actual: {
+                            tree: "SynTreeImpl {\n  JsCodeBlock {\n    JsSwitchStatement {\n      Token('switch'),\n      JsSwitchCase { Token('case'), JsNumberLiteral { Token('1') }, JsExprStatement {...} },\n      JsSwitchCase { Token('case'), JsNumberLiteral { Token('2') }, JsExprStatement {...} }\n    }\n  }\n}",
+                            inspections: [
+                                {inspectionId: "javascript.inspections.switchCaseFallsThrough", message: "Switch case falls through", range: {start: 15, end: 22}},
+                                {inspectionId: "javascript.inspections.semanticAnalysis", message: "Unresolved reference 'foo'", range: {start: 27, end: 30}}
+                            ]
+                        }
+                    }
+                },
+                {
+                    id: "t3", group: "js.parser.statements", name: "ForOf", language: "javascript", description: "",
+                    options: {includeInspections: false, pluginIds: []},
+                    code: "for (const x of xs) {\n  log(x);\n}\n",
+                    expected: {tree: "SynTreeImpl { ... }", inspections: []},
+                    result: null
+                },
+                {
+                    id: "t4", group: "js.parser.expr", name: "ComplexChaining", language: "javascript",
+                    description: "Optional chaining mixed with calls and indexing",
+                    options: {includeInspections: true, pluginIds: ["default.jsLang"]},
+                    code: "a?.b.c()[d]?.(e).f;\n",
+                    expected: {tree: "SynTreeImpl { ... }", inspections: []},
+                    result: {status: "passed", timings: {lexer: 0.05, parser: 0.44, analysis: 0.12}}
+                },
+                {
+                    id: "t5", group: "js.parser.expr", name: "DeepNesting", language: "javascript",
+                    description: "Pathological nesting, guards the parser timeout",
+                    options: {includeInspections: false, pluginIds: []},
+                    code: "((((((((((((((((((((a))))))))))))))))))));\n",
+                    expected: {tree: "SynTreeImpl { ... }", inspections: []},
+                    result: {status: "error", timings: {lexer: 0.04, parser: 1000, analysis: 0}, errors: ["The parser timed out after 1000ms"]}
+                },
+                {
+                    id: "t6", group: "js.inspections", name: "ConstReassigned", language: "javascript", description: "",
+                    options: {includeInspections: true, pluginIds: ["default.jsLang"]},
+                    code: "const a = 1;\na = 2;\n",
+                    expected: {
+                        tree: "SynTreeImpl { ... }",
+                        inspections: [{inspectionId: "javascript.inspections.constVariableReassigned", message: "Cannot reassign constant 'a'", range: {start: 13, end: 14}}]
+                    },
+                    result: {
+                        status: "failed", timings: {lexer: 0.05, parser: 0.21, analysis: 0.18},
+                        actual: {tree: "SynTreeImpl { ... }", inspections: []}
+                    }
+                },
+                {
+                    id: "t7", group: "html.parser", name: "NestedTags", language: "html", description: "",
+                    options: {includeInspections: true, pluginIds: ["default.htmlLang"]},
+                    code: "<div><span>hi</span></div>\n",
+                    expected: {tree: "SynTreeImpl { ... }", inspections: []},
+                    result: {status: "passed", timings: {lexer: 0.06, parser: 0.18, analysis: 0.07}}
+                },
+                {
+                    id: "t8", group: "riscv.parser", name: "Labels", language: "riscv-assembly", description: "",
+                    options: {includeInspections: true, pluginIds: ["riscv-assembly-lang"]},
+                    code: "main:\n  li a0, 1\n  j end\nend:\n  ret\n",
+                    expected: {tree: "SynTreeImpl { ... }", inspections: []},
+                    result: null
+                }
+            ];
+
+            // ── State ─────────────────────────────────────────────────────────────
+
+            const state = {
+                selected: {type: "test", id: "t2"},     // or {type: "group", path}
+                expanded: new Set(["js", "js.parser", "js.parser.statements", "js.inspections"]),
+                filter: "all",
+                search: "",
+                tab: "inspections",
+                running: false,
+                lastRun: null
+            };
+
+            const STATUS_LABEL = {passed: "Passed", failed: "Failed", error: "Error", idle: "Not run", running: "Running"};
+            const STATUS_ICON = {passed: "fa-circle-check", failed: "fa-circle-xmark", error: "fa-triangle-exclamation", idle: "fa-circle"};
+            const STATUS_GLYPH = {
+                passed: "fa-solid fa-check",
+                failed: "fa-solid fa-xmark",
+                error: "fa-solid fa-triangle-exclamation",
+                idle: "fa-regular fa-circle",
+                running: "fa-solid fa-spinner fa-spin"
+            };
+            /** The status of a test, shown as its icon */
+            const statusIcon = status => `<i class="status-icon ${status} ${STATUS_GLYPH[status]}" title="${STATUS_LABEL[status]}"></i>`;
+
+            const $ = id => document.getElementById(id);
+            const statusOf = test => test.running ? "running" : test.result?.status ?? "idle";
+            const pathOf = test => test.group + "." + test.name;
+            const esc = s => s.replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"})[c]);
+            const totalTime = r => r ? r.timings.lexer + r.timings.parser + r.timings.analysis : 0;
+            const ms = v => v >= 100 ? Math.round(v) + "ms" : v.toFixed(2) + "ms";
+
+            function visibleTests() {
+                return tests.filter(t => {
+                    const status = statusOf(t);
+                    if (state.filter === "failed" && !["failed", "error"].includes(status)) return false;
+                    if (state.filter !== "all" && state.filter !== "failed" && status !== state.filter) return false;
+                    return !state.search || pathOf(t).toLowerCase().includes(state.search.toLowerCase());
+                });
+            }
+
+            /** Inspections compared as in SynSuiteTestResult: matched, missing (expected only), unexpected (actual only) */
+            function compareInspections(test) {
+                const key = i => `${i.inspectionId}@${i.range.start}:${i.range.end}#${i.message}`;
+                const actual = test.result?.actual?.inspections ?? test.expected.inspections;
+                const remaining = actual.map(key);
+                const rows = [];
+                for (const inspection of test.expected.inspections) {
+                    const index = remaining.indexOf(key(inspection));
+                    if (index === -1) rows.push({inspection, verdict: "missing"});
+                    else {
+                        remaining.splice(index, 1);
+                        rows.push({inspection, verdict: "matched"});
+                    }
+                }
+                for (const inspection of actual) {
+                    if (remaining.includes(key(inspection))) {
+                        remaining.splice(remaining.indexOf(key(inspection)), 1);
+                        rows.push({inspection, verdict: "unexpected"});
+                    }
+                }
+                return rows.sort((a, b) => a.inspection.range.start - b.inspection.range.start);
+            }
+
+            // ── Header & status bar ───────────────────────────────────────────────
+
+            function renderSummary() {
+                const counts = {passed: 0, failed: 0, error: 0, idle: 0};
+                tests.forEach(t => counts[statusOf(t) === "running" ? "idle" : statusOf(t)]++);
+                $("summary").innerHTML = Object.entries(counts)
+                    .map(([status, n]) => `<span class="summary-item ${n ? "" : "zero"}" title="${n} ${STATUS_LABEL[status].toLowerCase()}">${statusIcon(status)}${n}</span>`)
+                    .join("");
+
+                $("status-left").textContent = `${tests.length} tests · ${new Set(tests.map(t => t.group)).size} groups`;
+                $("status-right").textContent = state.running
+                    ? "Running…"
+                    : state.lastRun ? `Last run ${state.lastRun.time} · ${state.lastRun.count} tests in ${ms(state.lastRun.total)}` : "Not run yet";
+            }
+
+            // ── Tree ──────────────────────────────────────────────────────────────
+
+            function buildTree(list) {
+                const root = {path: "", children: new Map(), tests: []};
+                for (const test of list) {
+                    let node = root;
+                    test.group.split(".").forEach((segment, i, segments) => {
+                        const path = segments.slice(0, i + 1).join(".");
+                        if (!node.children.has(segment)) node.children.set(segment, {path, name: segment, children: new Map(), tests: []});
+                        node = node.children.get(segment);
+                    });
+                    node.tests.push(test);
+                }
+                return root;
+            }
+
+            function testsUnder(node) {
+                return [...node.tests, ...[...node.children.values()].flatMap(testsUnder)];
+            }
+
+            function highlight(text) {
+                if (!state.search) return esc(text);
+                const index = text.toLowerCase().indexOf(state.search.toLowerCase());
+                if (index === -1) return esc(text);
+                return esc(text.slice(0, index)) + `<span class="match">${esc(text.slice(index, index + state.search.length))}</span>` + esc(text.slice(index + state.search.length));
+            }
+
+            function renderTree() {
+                const list = visibleTests();
+                const tree = buildTree(list);
+                // Searching or filtering opens everything that matches
+                const forceOpen = !!state.search || state.filter !== "all";
+
+                const renderGroup = (node, depth) => {
+                    const all = testsUnder(node);
+                    const failures = all.filter(t => ["failed", "error"].includes(statusOf(t))).length;
+                    const open = forceOpen || state.expanded.has(node.path);
+                    const selected = state.selected.type === "group" && state.selected.path === node.path;
+                    return `<li class="${open ? "expanded" : ""}">
+                        <div class="row group ${selected ? "selected" : ""} ${failures ? "has-failures" : ""}" style="--depth:${depth}" data-group="${node.path}"
+                             title="${all.length} tests${failures ? ", " + failures + " failing" : ""}">
+                            <span class="caret"><i class="fa-solid fa-chevron-right"></i></span>
+                            <i class="icon fa-regular ${open ? "fa-folder-open" : "fa-folder"}"></i>
+                            <span class="label">${esc(node.name)}</span>
+                            <span class="count">${all.length}</span>
+                        </div>
+                        <ul style="--depth:${depth}">
+                            ${[...node.children.values()].sort((a, b) => a.name.localeCompare(b.name)).map(child => renderGroup(child, depth + 1)).join("")}
+                            ${node.tests.sort((a, b) => a.name.localeCompare(b.name)).map(test => renderTest(test, depth + 1)).join("")}
+                        </ul>
+                    </li>`;
+                };
+
+                const renderTest = (test, depth) => {
+                    const selected = state.selected.type === "test" && state.selected.id === test.id;
+                    return `<li><div class="row test ${selected ? "selected" : ""}" style="--depth:${depth}" data-test="${test.id}" title="${pathOf(test)}">
+                        <span class="caret"></span>
+                        ${statusIcon(statusOf(test))}
+                        <span class="label">${highlight(test.name)}</span>
+                    </div></li>`;
+                };
+
+                $("tree").innerHTML = list.length
+                    ? `<ul>${[...tree.children.values()].sort((a, b) => a.name.localeCompare(b.name)).map(node => renderGroup(node, 0)).join("")}</ul>`
+                    : `<div class="tree-empty">No test matches</div>`;
+            }
+
+            // ── Detail ────────────────────────────────────────────────────────────
+
+            function renderDetail() {
+                if (state.selected.type === "group") return renderGroupDetail(state.selected.path);
+                const test = tests.find(t => t.id === state.selected.id);
+                if (!test) {
+                    $("detail").innerHTML = `<div class="empty"><i class="fa-solid fa-flask"></i>Select a test</div>`;
+                    return;
+                }
+
+                const status = statusOf(test);
+                const rows = compareInspections(test);
+                const problems = rows.filter(r => r.verdict !== "matched").length;
+                const treeDiffers = test.result?.actual && test.result.actual.tree !== test.expected.tree;
+
+                const bannerText = {
+                    passed: `Passed in ${ms(totalTime(test.result))}`,
+                    failed: [treeDiffers && "the tree differs", problems && `${problems} inspection${problems > 1 ? "s differ" : " differs"}`].filter(Boolean).join(", "),
+                    error: test.result?.errors?.join(" · "),
+                    idle: "This test has not run yet",
+                    running: "Running…"
+                }[status];
+
+                $("detail").innerHTML = `
+                    <div class="detail-head">
+                        <div class="detail-path">${esc(test.group)}.<b>${esc(test.name)}</b></div>
+                        <div class="detail-title-row">
+                            ${statusIcon(status)}
+                            <span class="detail-name">${esc(test.name)}</span>
+                            <div class="detail-actions">
+                                <button class="btn" data-action="run" ${state.running ? "disabled" : ""}><i class="fa-solid fa-play"></i>Run</button>
+                                <button class="btn" data-action="accept" ${status === "failed" ? "" : "disabled"} title="Make the actual output the new expected snapshot"><i class="fa-solid fa-check"></i>Accept actual</button>
+                                <button class="icon-btn" data-action="open" title="Open the code in a new editor"><i class="fa-solid fa-up-right-from-square"></i></button>
+                                <button class="icon-btn danger" data-action="delete" title="Delete test"><i class="fa-regular fa-trash-can"></i></button>
+                            </div>
+                        </div>
+                        ${test.description ? `<div class="detail-description">${esc(test.description)}</div>` : ""}
+                        <div class="meta">
+                            <span class="chip"><i class="fa-solid fa-code"></i>${test.language}</span>
+                            <span class="chip"><i class="fa-solid fa-magnifying-glass"></i>${test.options.includeInspections ? test.options.pluginIds.join(", ") : "No inspections"}</span>
+                            ${test.result ? `<span class="chip"><i class="fa-regular fa-clock"></i>${ms(totalTime(test.result))}</span>` : ""}
+                        </div>
+                        <div class="banner ${status}"><i class="fa-solid ${STATUS_ICON[status] ?? "fa-spinner"}"></i>${STATUS_LABEL[status]}${bannerText ? " — " + esc(bannerText) : ""}</div>
+                    </div>
+                    <div class="tabs">
+                        ${tabButton("code", "Code")}
+                        ${tabButton("tree", "Tree", treeDiffers ? "≠" : "")}
+                        ${tabButton("inspections", "Inspections", problems || "")}
+                        ${tabButton("timings", "Timings")}
+                    </div>
+                    <div class="tab-body">${renderTab(test, rows)}</div>
+                `;
+            }
+
+            function tabButton(id, label, badge = "") {
+                return `<button class="tab ${state.tab === id ? "active" : ""}" data-tab="${id}">${label}${badge !== "" ? `<span class="tab-badge">${badge}</span>` : ""}</button>`;
+            }
+
+            function renderTab(test, rows) {
+                switch (state.tab) {
+                    case "code":
+                        return renderCode(test, rows);
+                    case "tree": {
+                        const actual = test.result?.actual?.tree ?? (test.result ? test.expected.tree : null);
+                        return `<div class="columns">
+                            <div class="column"><div class="column-head">Expected</div><pre>${esc(test.expected.tree)}</pre></div>
+                            <div class="column"><div class="column-head">Actual${actual === test.expected.tree ? ' <span style="color:var(--passed)">identical</span>' : ""}</div>
+                                <pre>${actual === null ? '<span style="color:var(--text-faint)">Run the test to see its output</span>' : esc(actual)}</pre></div>
+                        </div>`;
+                    }
+                    case "inspections":
+                        if (!rows.length) return `<div class="empty"><i class="fa-regular fa-circle-check"></i>No inspection expected nor reported</div>`;
+                        return `<table>
+                            <tr><th>Verdict</th><th>Inspection</th><th>Message</th><th>Range</th></tr>
+                            ${rows.map(({inspection, verdict}) => `<tr>
+                                <td><span class="verdict ${verdict}"><i class="fa-solid ${{matched: "fa-check", missing: "fa-minus", unexpected: "fa-plus"}[verdict]}"></i>${verdict}</span></td>
+                                <td class="mono">${esc(inspection.inspectionId.split(".").pop())}</td>
+                                <td>${esc(inspection.message)}</td>
+                                <td class="mono">${inspection.range.start}–${inspection.range.end}</td>
+                            </tr>`).join("")}
+                        </table>`;
+                    case "timings": {
+                        const t = test.result?.timings;
+                        if (!t) return `<div class="empty"><i class="fa-regular fa-clock"></i>No timings yet</div>`;
+                        return renderTimings([["Lexer", t.lexer, "#6f8fd0"], ["Parser", t.parser, "#9b82d6"], ["Analysis", t.analysis, "#5fa8b3"]]);
+                    }
+                }
+            }
+
+            /** Donut of the phases, each segment drawn as a dash of the same circle, with the total in the middle */
+            function renderTimings(phases) {
+                const radius = 56, circumference = 2 * Math.PI * radius, gap = 2;
+                const total = phases.reduce((sum, [, value]) => sum + value, 0) || 1;
+
+                let offset = 0;
+                const segments = phases.map(([label, value, color]) => {
+                    const length = value / total * circumference;
+                    // A thin gap between segments, unless the segment is too small to afford it
+                    const visible = Math.max(0, length - (length > gap * 2 ? gap : 0));
+                    const segment = `<circle r="${radius}" cx="75" cy="75" stroke="${color}"
+                        stroke-dasharray="${visible} ${circumference - visible}" stroke-dashoffset="${-offset}">
+                        <title>${label}: ${ms(value)}</title></circle>`;
+                    offset += length;
+                    return segment;
+                }).join("");
+
+                return `<div class="timings">
+                    <svg class="donut" viewBox="0 0 150 150">
+                        <g transform="rotate(-90 75 75)">
+                            <circle class="track" r="${radius}" cx="75" cy="75"></circle>
+                            ${segments}
+                        </g>
+                        <text class="donut-total" x="75" y="76" text-anchor="middle">${ms(total)}</text>
+                        <text class="donut-caption" x="75" y="92" text-anchor="middle">total</text>
+                    </svg>
+                    <div class="legend-table">
+                        ${phases.map(([label, value, color]) => `
+                            <span class="name"><span class="swatch" style="background:${color}"></span>${label}</span>
+                            <span class="value">${ms(value)}</span>
+                            <span class="share">${Math.round(value / total * 100)}%</span>`).join("")}
+                    </div>
+                </div>`;
+            }
+
+            /** Code with wavy underlines on the inspection ranges, colored by verdict */
+            function renderCode(test, rows) {
+                const marks = new Map();
+                rows.forEach(({inspection, verdict}) => marks.set(inspection.range.start, {end: inspection.range.end, verdict, title: inspection.message}));
+
+                let html = "", offset = 0, open = null;
+                for (const char of test.code) {
+                    if (open && offset === open.end) {
+                        html += "</span>";
+                        open = null;
+                    }
+                    if (!open && marks.has(offset)) {
+                        open = marks.get(offset);
+                        html += `<span class="problem ${open.verdict}" title="${esc(open.title)}">`;
+                    }
+                    html += esc(char);
+                    offset++;
+                }
+                if (open) html += "</span>";
+
+                const lines = html.replace(/\n$/, "").split("\n").map(line => `<span class="line">${line || " "}</span>`).join("");
+                return `<pre class="code">${lines}</pre>
+                    ${rows.length ? `<div class="legend"><span class="matched">matched</span><span class="missing">missing</span><span class="unexpected">unexpected</span></div>` : ""}`;
+            }
+
+            function renderGroupDetail(path) {
+                const list = tests.filter(t => t.group === path || t.group.startsWith(path + "."));
+                const failing = list.filter(t => ["failed", "error"].includes(statusOf(t)));
+                $("detail").innerHTML = `
+                    <div class="detail-head">
+                        <div class="detail-path">${esc(path)}</div>
+                        <div class="detail-title-row">
+                            <i class="fa-regular fa-folder-open" style="color:#8b9ccc"></i>
+                            <span class="detail-name">${esc(path.split(".").pop())}</span>
+                            <div class="detail-actions">
+                                <button class="btn" data-action="run-group" ${state.running ? "disabled" : ""}><i class="fa-solid fa-play"></i>Run group</button>
+                            </div>
+                        </div>
+                        <div class="banner ${failing.length ? "failed" : "passed"}">
+                            <i class="fa-solid ${failing.length ? "fa-circle-xmark" : "fa-circle-check"}"></i>
+                            ${failing.length ? `${failing.length} of ${list.length} tests failing` : `${list.length} tests, none failing`}
+                        </div>
+                    </div>
+                    <div class="tab-body group-list">
+                        ${list.map(t => `<div class="test-line" data-test="${t.id}">
+                            ${statusIcon(statusOf(t))}
+                            <span>${esc(t.name)}</span>
+                            <span class="path">${esc(t.group)}</span>
+                            <span class="time">${t.result ? ms(totalTime(t.result)) : "—"}</span>
+                        </div>`).join("")}
+                    </div>`;
+            }
+
+            function render() {
+                renderSummary();
+                renderTree();
+                renderDetail();
+            }
+
+            // ── Simulated runs ────────────────────────────────────────────────────
+
+            async function run(list) {
+                if (state.running || !list.length) return;
+                state.running = true;
+                const started = performance.now();
+
+                for (let i = 0; i < list.length; i++) {
+                    const test = list[i];
+                    test.running = true;
+                    render();
+                    await new Promise(r => setTimeout(r, 120 + Math.random() * 180));
+                    test.running = false;
+                    // Keep the mock statuses, a never-run test passes
+                    test.result ??= {status: "passed", timings: {lexer: 0.05, parser: 0.2 + Math.random() * 0.3, analysis: 0.1}};
+                    $("progress").style.width = ((i + 1) / list.length * 100) + "%";
+                }
+
+                state.running = false;
+                state.lastRun = {
+                    time: new Date().toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"}),
+                    count: list.length,
+                    total: list.reduce((sum, t) => sum + totalTime(t.result), 0)
+                };
+                render();
+                setTimeout(() => $("progress").style.width = "0", 400);
+            }
+
+            function showMenu(anchor, items) {
+                document.querySelector(".menu")?.remove();
+                const menu = document.createElement("div");
+                menu.className = "menu";
+                menu.innerHTML = items.map(([icon, label], i) => `<button data-index="${i}"><i class="fa-solid ${icon}"></i>${label}</button>`).join("");
+                document.body.appendChild(menu);
+                const rect = anchor.getBoundingClientRect();
+                menu.style.top = rect.bottom + 4 + "px";
+                menu.style.left = rect.left + "px";
+                menu.addEventListener("click", e => {
+                    const button = e.target.closest("button");
+                    if (!button) return;
+                    items[+button.dataset.index][2]();
+                    menu.remove();
+                });
+            }
+
+            document.addEventListener("pointerdown", e => {
+                const menu = document.querySelector(".menu");
+                if (menu && !menu.contains(e.target) && !e.target.closest("#run-menu")) menu.remove();
+            });
+
+            // ── Events ────────────────────────────────────────────────────────────
+
+            $("run-all").addEventListener("click", () => run(tests));
+            $("run-menu").addEventListener("click", e => showMenu(e.currentTarget, [
+                ["fa-rotate-right", "Run failed", () => run(tests.filter(t => ["failed", "error"].includes(statusOf(t))))],
+                ["fa-filter", "Run visible", () => run(visibleTests())],
+                ["fa-folder", "Run selected group", () => state.selected.type === "group" && run(tests.filter(t => t.group.startsWith(state.selected.path)))]
+            ]));
+
+            $("filters").addEventListener("click", e => {
+                const button = e.target.closest("[data-filter]");
+                if (!button) return;
+                state.filter = button.dataset.filter;
+                document.querySelectorAll("#filters button").forEach(b => b.classList.toggle("active", b === button));
+                render();
+            });
+
+            $("search").addEventListener("input", e => {
+                state.search = e.target.value.trim();
+                renderTree();
+            });
+
+            $("tree").addEventListener("click", e => {
+                const groupRow = e.target.closest("[data-group]");
+                const testRow = e.target.closest("[data-test]");
+                if (groupRow) {
+                    const path = groupRow.dataset.group;
+                    if (e.target.closest(".caret") || (state.selected.type === "group" && state.selected.path === path)) {
+                        state.expanded.has(path) ? state.expanded.delete(path) : state.expanded.add(path);
+                    }
+                    state.selected = {type: "group", path};
+                } else if (testRow) {
+                    state.selected = {type: "test", id: testRow.dataset.test};
+                }
+                render();
+            });
+
+            $("tree").addEventListener("keydown", e => {
+                const rows = [...$("tree").querySelectorAll(".row")].filter(r => r.offsetParent);
+                const index = rows.findIndex(r => r.classList.contains("selected"));
+                const target = e.key === "ArrowDown" ? rows[index + 1] : e.key === "ArrowUp" ? rows[index - 1] : null;
+                if (!target) return;
+                e.preventDefault();
+                state.selected = target.dataset.group ? {type: "group", path: target.dataset.group} : {type: "test", id: target.dataset.test};
+                render();
+                $("tree").focus();
+            });
+
+            $("detail").addEventListener("click", e => {
+                const tab = e.target.closest("[data-tab]");
+                if (tab) {
+                    state.tab = tab.dataset.tab;
+                    return renderDetail();
+                }
+                const line = e.target.closest(".test-line");
+                if (line) {
+                    state.selected = {type: "test", id: line.dataset.test};
+                    return render();
+                }
+                const action = e.target.closest("[data-action]")?.dataset.action;
+                const test = tests.find(t => t.id === state.selected.id);
+                switch (action) {
+                    case "run":
+                        return run([test]);
+                    case "run-group":
+                        return run(tests.filter(t => t.group === state.selected.path || t.group.startsWith(state.selected.path + ".")));
+                    case "accept":
+                        test.expected = test.result.actual;
+                        test.result = {...test.result, status: "passed", actual: undefined};
+                        return render();
+                    case "delete":
+                        tests.splice(tests.indexOf(test), 1);
+                        state.selected = {type: "group", path: test.group};
+                        return render();
+                    case "open":
+                        return alert("Would open the code of " + pathOf(test) + " in a new editor tab");
+                }
+            });
+
+            render();
+        </script>
+    </body>
+</html>

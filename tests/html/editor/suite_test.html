@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Shadow Studio - Syn Suite Panel</title>
+
+        <script src="https://kit.fontawesome.com/cb36336f7b.js" crossorigin="anonymous"></script>
+
+        <style>
+            :root {
+                --bg-main: #0d1117;
+                --bg-sidebar: #161b22;
+                --bg-card: #21262d;
+                --border-color: #30363d;
+                --ide-text-primary: #c9d1d9;
+                --text-muted: #8b949e;
+                --accent: #f78166;
+                --success: #2ea44f;
+                --error: #f85149;
+                --warning: #d29922;
+                --font-mono: 'Fira Code', Consolas, Monaco, monospace;
+            }
+
+            * {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+                background-color: var(--bg-main);
+                color: var(--ide-text-primary);
+                font-size: 14px;
+                height: 100vh;
+                display: flex;
+                overflow: hidden;
+            }
+
+            /* --- SIDEBAR --- */
+            .sidebar {
+                width: 320px;
+                background-color: var(--bg-sidebar);
+                border-right: 1px solid var(--border-color);
+                display: flex;
+                flex-direction: column;
+            }
+
+            .sidebar-header {
+                padding: 16px;
+                border-bottom: 1px solid var(--border-color);
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .sidebar-header h2 {
+                font-size: 16px;
+                font-weight: 600;
+            }
+
+            /* --- STREAMLINED MINIMALIST BUTTONS --- */
+            .btn {
+                background-color: transparent;
+                color: var(--text-muted);
+                border: 1px solid var(--border-color);
+                padding: 5px 10px;
+                border-radius: 4px; /* Matches standard modern IDE panels */
+                cursor: pointer;
+                font-weight: 500;
+                font-size: 12px;
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+            }
+
+            /* Hover behaviors focus on text clarity and subtle borders instead of bright backgrounds */
+            .btn:hover {
+                background-color: rgba(255, 255, 255, 0.05);
+                border-color: #8b949e;
+                color: var(--ide-text-primary);
+            }
+
+            /* Primary buttons rely on colored text or subtle indicators rather than solid block color */
+            .btn-primary {
+                color: #56d364; /* Green accent text color instead of background */
+                border-color: rgba(46, 164, 79, 0.4);
+            }
+
+            .btn-primary:hover {
+                background-color: rgba(46, 164, 79, 0.15);
+                border-color: #56d364;
+                color: #c4f3bf;
+            }
+
+            /* Secondary interactive utilities (like 'Accept Actual') */
+            .btn-secondary {
+                color: var(--accent);
+                border-color: rgba(247 129 102 / 0.30);
+            }
+
+            .btn-secondary:hover {
+                background-color: rgba(247, 129, 102, 0.15);
+                border-color: var(--accent);
+                color: #f6b5a5;
+            }
+
+            .test-list {
+                flex: 1;
+                overflow-y: auto;
+                padding: 12px;
+            }
+
+            .plugin-group {
+                margin-bottom: 16px;
+            }
+
+            .plugin-title {
+                font-size: 11px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                color: var(--text-muted);
+                margin-bottom: 6px;
+                font-weight: 700;
+            }
+
+            .test-item {
+                padding: 10px;
+                border-radius: 6px;
+                cursor: pointer;
+                margin-bottom: 4px;
+                border: 1px solid transparent;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .test-item:hover {
+                background-color: rgba(255, 255, 255, 0.03);
+            }
+
+            .test-item.active {
+                background-color: rgba(88, 166, 255, 0.1);
+                border-color: rgba(88, 166, 255, 0.4);
+            }
+
+            .test-info-meta {
+                display: flex;
+                flex-direction: column;
+                gap: 2px;
+            }
+
+            .test-key {
+                font-weight: 500;
+            }
+
+            .test-desc {
+                font-size: 12px;
+                color: var(--text-muted);
+            }
+
+            .badge {
+                font-size: 11px;
+                padding: 2px 6px;
+                border-radius: 20px;
+                font-weight: 600;
+            }
+
+            .badge-pass {
+                background: rgba(46, 164, 79, 0.2);
+                color: #56d364;
+            }
+
+            .badge-fail {
+                background: rgba(248, 81, 73, 0.2);
+                color: #ff7b72;
+            }
+
+            .badge-idle {
+                background: rgba(139, 148, 158, 0.2);
+                color: var(--text-muted);
+            }
+
+            /* --- MAIN CONTENT PANE --- */
+            .main-pane {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+                background-color: var(--bg-main);
+            }
+
+            .pane-header {
+                padding: 16px;
+                border-bottom: 1px solid var(--border-color);
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                background-color: var(--bg-sidebar);
+            }
+
+            .pane-tabs {
+                display: flex;
+                gap: 4px;
+                padding: 0 16px;
+                background-color: var(--bg-sidebar);
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            .tab {
+                padding: 10px 16px;
+                cursor: pointer;
+                border-bottom: 2px solid transparent;
+                color: var(--text-muted);
+                font-weight: 500;
+            }
+
+            .tab.active {
+                border-bottom-color: #f78166;
+                color: var(--ide-text-primary);
+            }
+
+            .pane-body {
+                flex: 1;
+                display: flex;
+                overflow: hidden;
+            }
+
+            .tab-content {
+                display: none;
+                width: 100%;
+                height: 100%;
+            }
+
+            .tab-content.active {
+                display: flex;
+            }
+
+            /* --- SPLIT GRID VIEW --- */
+            .split-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                width: 100%;
+                height: 100%;
+            }
+
+            .grid-column {
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+            }
+
+            .grid-column:first-child {
+                border-right: 1px solid var(--border-color);
+            }
+
+            .column-header {
+                padding: 8px 16px;
+                background-color: rgba(255, 255, 255, 0.02);
+                border-bottom: 1px solid var(--border-color);
+                font-size: 12px;
+                font-weight: 600;
+                color: var(--text-muted);
+                text-transform: uppercase;
+            }
+
+            .code-container {
+                flex: 1;
+                overflow: auto;
+                padding: 16px;
+                font-family: var(--font-mono);
+                font-size: 13px;
+                line-height: 1.6;
+                white-space: pre;
+                background-color: #05070a;
+            }
+
+            /* --- INSPECTIONS LIST --- */
+            .inspections-list {
+                padding: 16px;
+                overflow-y: auto;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .inspection-card {
+                background-color: var(--bg-card);
+                border: 1px solid var(--border-color);
+                border-left: 4px solid var(--warning);
+                border-radius: 6px;
+                padding: 12px;
+            }
+
+            .inspection-card.error {
+                border-left-color: var(--error);
+            }
+
+            .inspection-meta {
+                display: flex;
+                justify-content: space-between;
+                font-size: 11px;
+                color: var(--text-muted);
+                margin-bottom: 4px;
+            }
+
+            .inspection-key {
+                font-family: var(--font-mono);
+                color: var(--accent);
+            }
+
+            /* --- METRICS BAR --- */
+            .metrics-bar {
+                padding: 8px 16px;
+                background-color: var(--bg-sidebar);
+                border-top: 1px solid var(--border-color);
+                display: flex;
+                gap: 24px;
+                font-size: 12px;
+                color: var(--text-muted);
+            }
+
+            .metric span {
+                color: var(--ide-text-primary);
+                font-weight: 600;
+                font-family: var(--font-mono);
+            }
+
+            .diff-added {
+                color: #56d364;
+                background-color: rgba(46, 164, 79, 0.15);
+            }
+
+            .diff-removed {
+                color: #ff7b72;
+                background-color: rgba(248, 81, 73, 0.15);
+            }
+        </style>
+    </head>
+    <body>
+
+        <div class="sidebar">
+            <div class="sidebar-header" style="padding: 12px 16px; border-bottom: 1px solid var(--border-color);">
+                <h2 style="font-size: 13px; font-weight: 600; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px;">
+                    SynSuite Tests</h2>
+                <button class="btn btn-primary" onclick="runAllSelectedPluginTests()"><i class="fa-solid fa-play"
+                                                                                         style="color:#56d364"></i>Run
+                    All
+                </button>
+            </div>
+            <div class="test-list">
+                <div class="plugin-group">
+                    <div class="plugin-title">Plugin: js-destructuring-inspections</div>
+
+                    <div class="test-item active" onclick="selectTest('test_01')">
+                        <div class="test-info-meta">
+                            <span class="test-key">array_spread_middle</span>
+                            <span class="test-desc">Tests syntax error on middle spread element</span>
+                        </div>
+                        <span class="badge badge-fail" id="status-test_01">Fail</span>
+                    </div>
+
+                    <div class="test-item" onclick="selectTest('test_02')">
+                        <div class="test-info-meta">
+                            <span class="test-key">valid_destructuring</span>
+                            <span class="test-desc">Standard variable destructuring matching assignment</span>
+                        </div>
+                        <span class="badge badge-pass" id="status-test_02">Pass</span>
+                    </div>
+
+                    <div class="test-item" onclick="selectTest('test_03')">
+                        <div class="test-info-meta">
+                            <span class="test-key">invalid_assignment_target</span>
+                            <span class="test-desc">Validating object literal instead of binding patterns</span>
+                        </div>
+                        <span class="badge badge-idle" id="status-test_03">Idle</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-pane">
+            <!-- MAIN PANE HEADER -->
+            <div class="pane-header">
+                <div>
+                    <h2 id="current-test-title" style="font-size: 16px; font-weight: 500; margin-bottom: 2px;">
+                        array_spread_middle</h2>
+                    <p id="current-test-desc" style="color: var(--text-muted); font-size: 12px;">Tests syntax error on
+                        middle spread element</p>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn btn-secondary" onclick="patchExpectedSnapshot()"><i class="fa-solid fa-check"
+                                                                                           style="color:var(--accent)"></i>Accept Actual</button>
+                    <button class="btn btn-primary" onclick="runSingleTest()"><i class="fa-solid fa-play"
+                                                                                 style="color:#56d364"></i> Run Test</button>
+                </div>
+            </div>
+
+            <div class="pane-tabs">
+                <div class="tab active" onclick="switchTab('ast-tab')">AST Tree Hierarchy</div>
+                <div class="tab" onclick="switchTab('inspections-tab')">Inspections & Problems</div>
+                <div class="tab" onclick="switchTab('code-tab')">Source Code Snippet</div>
+            </div>
+
+            <div class="pane-body">
+
+                <div id="ast-tab" class="tab-content active">
+                    <div class="split-grid">
+                        <div class="grid-column">
+                            <div class="column-header">Expected Snapshot Tree</div>
+                            <div class="code-container" id="expected-ast">File
+                                BlockStatement
+                                VariableDeclaration
+                                VariableDeclarator
+                                ArrayBindingPattern
+                                BindingElement (x)
+                                <span class="diff-removed">RestElement (y)</span>
+                                BindingElement (z)
+                            </div>
+                        </div>
+                        <div class="grid-column">
+                            <div class="column-header">Actual Evaluated Tree</div>
+                            <div class="code-container" id="actual-ast">File
+                                BlockStatement
+                                VariableDeclaration
+                                VariableDeclarator
+                                ArrayBindingPattern
+                                BindingElement (x)
+                                <span class="diff-added">InvalidRestSpreadElement (y)</span>
+                                BindingElement (z)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="inspections-tab" class="tab-content">
+                    <div class="split-grid">
+                        <div class="grid-column">
+                            <div class="column-header">Expected Inspections</div>
+                            <div class="inspections-list" id="expected-inspections">
+                                <div class="inspection-card error">
+                                    <div class="inspection-meta">
+                                        <span class="inspection-key">REST_ELEMENT_MUST_BE_LAST</span>
+                                        <span>Ln 7, Col 9</span>
+                                    </div>
+                                    <div>A rest element must be last in a destructuring pattern.</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="grid-column">
+                            <div class="column-header">Actual Engine Output</div>
+                            <div class="inspections-list" id="actual-inspections">
+                                <div class="inspection-card error">
+                                    <div class="inspection-meta">
+                                        <span class="inspection-key">REST_ELEMENT_MUST_BE_LAST</span>
+                                        <span>Ln 7, Col 9</span>
+                                    </div>
+                                    <div>A rest element must be last in a destructuring pattern.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="code-tab" class="tab-content">
+                    <div class="code-container" id="source-code-view" style="width: 100%;">{\n let x = 1;\n let z;\n\n
+                        [x, ...y, z] = [1, 2, 3, 4];\n}
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="metrics-bar">
+                <div class="metric">Lexing time: <span id="metric-lex">0.12ms</span></div>
+                <div class="metric">Parsing time: <span id="metric-parse">0.45ms</span></div>
+                <div class="metric">Inspection Engine: <span id="metric-inspect">1.02ms</span></div>
+                <div class="metric" style="margin-left: auto;">Status: <span id="metric-status"
+                                                                             style="color: var(--error); font-weight: bold;">FAILED</span>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Mock MockData mapped to matches your SynSuiteParserTest & SynAutomatedTestResult structures
+            const mockTests = {
+                test_01: {
+                    key: "array_spread_middle",
+                    description: "Tests syntax error on middle spread element",
+                    code: "{\n  let x = 1;\n  let z;\n\n  [x, ...y, z] = [1, 2, 3, 4];\n}",
+                    expectedTree: "File\n  BlockStatement\n    VariableDeclaration\n      VariableDeclarator\n        ArrayBindingPattern\n          BindingElement (x)\n          RestElement (y)\n          BindingElement (z)",
+                    actualTree: "File\n  BlockStatement\n    VariableDeclaration\n      VariableDeclarator\n        ArrayBindingPattern\n          BindingElement (x)\n          InvalidRestSpreadElement (y)\n          BindingElement (z)",
+                    expectedInspections: [{
+                        key: "REST_ELEMENT_MUST_BE_LAST",
+                        msg: "A rest element must be last in a destructuring pattern.",
+                        loc: "Ln 7, Col 9"
+                    }],
+                    actualInspections: [{
+                        key: "REST_ELEMENT_MUST_BE_LAST",
+                        msg: "A rest element must be last in a destructuring pattern.",
+                        loc: "Ln 7, Col 9"
+                    }],
+                    metrics: {
+                        lex: "0.14ms",
+                        parse: "0.52ms",
+                        inspect: "0.88ms",
+                        status: "FAILED",
+                        statusColor: "var(--error)"
+                    }
+                },
+                test_02: {
+                    key: "valid_destructuring",
+                    description: "Standard variable destructuring matching assignment",
+                    code: "{\n  let [x, y] = [1, 2];\n}",
+                    expectedTree: "File\n  BlockStatement\n    VariableDeclaration\n      VariableDeclarator\n        ArrayBindingPattern\n          BindingElement (x)\n          BindingElement (y)",
+                    actualTree: "File\n  BlockStatement\n    VariableDeclaration\n      VariableDeclarator\n        ArrayBindingPattern\n          BindingElement (x)\n          BindingElement (y)",
+                    expectedInspections: [],
+                    actualInspections: [],
+                    metrics: {
+                        lex: "0.08ms",
+                        parse: "0.22ms",
+                        inspect: "0.41ms",
+                        status: "PASSED",
+                        statusColor: "var(--success)"
+                    }
+                },
+                test_03: {
+                    key: "invalid_assignment_target",
+                    description: "Validating object literal instead of binding patterns",
+                    code: "([x] = 1);",
+                    expectedTree: "File\n  ExpressionStatement\n    AssignmentExpression\n      ArrayLiteral",
+                    actualTree: "File\n  ExpressionStatement\n    AssignmentExpression\n      ArrayLiteral",
+                    expectedInspections: [],
+                    actualInspections: [],
+                    metrics: {
+                        lex: "0.00ms",
+                        parse: "0.00ms",
+                        inspect: "0.00ms",
+                        status: "IDLE",
+                        statusColor: "var(--text-muted)"
+                    }
+                }
+            };
+
+            function selectTest(id) {
+                // Update active sidebar state
+                document.querySelectorAll('.test-item').forEach(el => el.classList.remove('active'));
+                event.currentTarget.classList.add('active');
+
+                const test = mockTests[id];
+
+                // Core Text Headers
+                document.getElementById('current-test-title').innerText = test.key;
+                document.getElementById('current-test-desc').innerText = test.description;
+                document.getElementById('source-code-view').innerText = test.code;
+
+                // Handle Trees
+                if (test.key === "array_spread_middle") {
+                    // Keep the highlighted diff for illustration visibility
+                    document.getElementById('expected-ast').innerHTML = `File\n  BlockStatement\n    VariableDeclaration\n      VariableDeclarator\n        ArrayBindingPattern\n          BindingElement (x)\n          <span class="diff-removed">RestElement (y)</span>\n          BindingElement (z)`;
+                    document.getElementById('actual-ast').innerHTML = `File\n  BlockStatement\n    VariableDeclaration\n      VariableDeclarator\n        ArrayBindingPattern\n          BindingElement (x)\n          <span class="diff-added">InvalidRestSpreadElement (y)</span>\n          BindingElement (z)`;
+                } else {
+                    document.getElementById('expected-ast').innerText = test.expectedTree;
+                    document.getElementById('actual-ast').innerText = test.actualTree;
+                }
+
+                // Handle Inspections Rendering
+                renderInspectionsPane(test);
+
+                // Metrics Update
+                document.getElementById('metric-lex').innerText = test.metrics.lex;
+                document.getElementById('metric-parse').innerText = test.metrics.parse;
+                document.getElementById('metric-inspect').innerText = test.metrics.inspect;
+
+                const statusEl = document.getElementById('metric-status');
+                statusEl.innerText = test.metrics.status;
+                statusEl.style.color = test.metrics.statusColor;
+            }
+
+            function renderInspectionsPane(test) {
+                const expContainer = document.getElementById('expected-inspections');
+                const actContainer = document.getElementById('actual-inspections');
+
+                expContainer.innerHTML = '';
+                actContainer.innerHTML = '';
+
+                if (test.expectedInspections.length === 0) {
+                    expContainer.innerHTML = '<div style="color: var(--text-muted); padding:10px;">No Expected Problems</div>';
+                }
+                if (test.actualInspections.length === 0) {
+                    actContainer.innerHTML = '<div style="color: var(--text-muted); padding:10px;">No Problems Found</div>';
+                }
+
+                test.expectedInspections.forEach(i => {
+                    expContainer.innerHTML += `<div class="inspection-card error"><div class="inspection-meta"><span class="inspection-key">${i.key}</span><span>${i.loc}</span></div><div>${i.msg}</div></div>`;
+                });
+                test.actualInspections.forEach(i => {
+                    actContainer.innerHTML += `<div class="inspection-card error"><div class="inspection-meta"><span class="inspection-key">${i.key}</span><span>${i.loc}</span></div><div>${i.msg}</div></div>`;
+                });
+            }
+
+            function switchTab(tabId) {
+                document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+
+                event.currentTarget.classList.add('active');
+                document.getElementById(tabId).classList.add('active');
+            }
+
+            function runSingleTest() {
+                alert("Executing single test run loop through SynSuiteEngine...");
+            }
+
+            function runAllSelectedPluginTests() {
+                alert("Calling SynSuiteEngine.getInstance().runTests(pluginId)...");
+            }
+
+            function patchExpectedSnapshot() {
+                alert("Triggering SynSuiteEngine.getInstance().patchTest() with updated actual values snapshot serialization.");
+            }
+        </script>
+    </body>
+</html>

@@ -1,0 +1,1 @@
+import{d as e,fn as t}from"./Project-ffz7-_KD.js";import{t as n}from"./ShadowAppLoadedEvent-wA94M3lZ.js";var r=class extends t{app;name=`Finalizing`;priority=100;critical=!1;constructor(e){super(),this.app=e}async run(){e.setReady(!0),e.getMainEventBus().syncPublish(new n(this.app))}};export{r as AppReadyPhase};

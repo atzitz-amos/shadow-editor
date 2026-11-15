@@ -161,14 +161,6 @@ export class SynSuiteTestStore {
         return relocated;
     }
 
-    /** Lists the group explicitly if nothing implies it anymore, so that moving its content out keeps it */
-    private keepGroup(group: string) {
-        if (group === SynSuiteGroups.ROOT) return;
-        const implied = SynSuiteTestStore.groups.some(g => SynSuiteGroups.isWithin(g, group))
-            || this.getTestsIn(group, true).length > 0;
-        if (!implied) SynSuiteTestStore.groups = [...SynSuiteTestStore.groups, group];
-    }
-
     public add(test: SynSuiteTest): void {
         if (SynSuiteTestStore.tests.has(test.id)) {
             throw new Error(`A SynSuite test with id '${test.id}' already exists`);
@@ -217,6 +209,14 @@ export class SynSuiteTestStore {
 
     public setSnapshotDefaults(defaults: SynSuiteSnapshotDefaults): void {
         SynSuiteTestStore.snapshotDefaults = defaults;
+    }
+
+    /** Lists the group explicitly if nothing implies it anymore, so that moving its content out keeps it */
+    private keepGroup(group: string) {
+        if (group === SynSuiteGroups.ROOT) return;
+        const implied = SynSuiteTestStore.groups.some(g => SynSuiteGroups.isWithin(g, group))
+            || this.getTestsIn(group, true).length > 0;
+        if (!implied) SynSuiteTestStore.groups = [...SynSuiteTestStore.groups, group];
     }
 
     private notifyChanged(testId: string | null) {

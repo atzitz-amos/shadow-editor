@@ -53,9 +53,17 @@
     text-transform: none;
 }
 
-.ide-diff-stat-inserted { color: #7fae8a; }
-.ide-diff-stat-deleted { color: #d9837c; }
-.ide-diff-identical { color: #7fae8a; }
+.ide-diff-stat-inserted {
+    color: #7fae8a;
+}
+
+.ide-diff-stat-deleted {
+    color: #d9837c;
+}
+
+.ide-diff-identical {
+    color: #7fae8a;
+}
 
 /* Two panes, each scrolling on its own; their vertical scroll is kept in sync by the component */
 .ide-diff-panes {
@@ -130,8 +138,17 @@
     color: inherit;
 }
 
-.ide-diff-line.deleted .ide-diff-line-number::before { content: "−"; float: left; padding-left: 6px; }
-.ide-diff-line.inserted .ide-diff-line-number::before { content: "+"; float: left; padding-left: 6px; }
+.ide-diff-line.deleted .ide-diff-line-number::before {
+    content: "−";
+    float: left;
+    padding-left: 6px;
+}
+
+.ide-diff-line.inserted .ide-diff-line-number::before {
+    content: "+";
+    float: left;
+    padding-left: 6px;
+}
 
 /* No line on this side: the other side has lines it does not */
 .ide-diff-line.empty {
@@ -166,4 +183,15 @@
 
 .ide-diff-fold i {
     font-size: 10px;
+}
+
+/* The host of an IdeSideBySideDiff (see _CustomIdeDiff), which the diff fills */
+ide-diff {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+ide-diff > .ide-diff {
+    flex: 1;
 }

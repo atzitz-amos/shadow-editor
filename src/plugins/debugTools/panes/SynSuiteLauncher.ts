@@ -60,6 +60,13 @@ export class SynSuiteLauncher extends UIComponent {
         hint.append("snapshot the opened file");
     }
 
+    dispose(): void {
+        const bus = GlobalState.getMainEventBus();
+        bus.unsubscribe(this, SynSuiteTestsChangedEvent.SUBSCRIBER);
+        bus.unsubscribe(this, SynSuiteTestsRunEvent.SUBSCRIBER);
+        super.dispose();
+    }
+
     // The pane disposes and re-adds its tabs on every draw: subscribe on mount so that it pairs with dispose
     protected mount(parent: UIComponent) {
         super.mount(parent);
@@ -77,13 +84,6 @@ export class SynSuiteLauncher extends UIComponent {
             };
             this.redraw();
         });
-    }
-
-    dispose(): void {
-        const bus = GlobalState.getMainEventBus();
-        bus.unsubscribe(this, SynSuiteTestsChangedEvent.SUBSCRIBER);
-        bus.unsubscribe(this, SynSuiteTestsRunEvent.SUBSCRIBER);
-        super.dispose();
     }
 
     private statusOf(test: SynSuiteTest): SynSuiteDisplayStatus {

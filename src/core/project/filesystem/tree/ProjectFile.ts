@@ -6,6 +6,7 @@ import {URITargetType} from "../../../uri/URITargetType";
 import {FileSystem} from "../FileSystem";
 import {FileMetadata} from "../metadata/NodeMetadata";
 import {VFileNode} from "../metadata/VNode";
+import {ProjectBinaryFile} from "./ProjectBinaryFile";
 
 /**
  *
@@ -121,5 +122,9 @@ export class ProjectFile implements FileSystemEntry {
 
     isFile(): this is ProjectFile {
         return true;
+    }
+
+    isBinaryFile(): this is ProjectBinaryFile {
+        return false;
     }
 }

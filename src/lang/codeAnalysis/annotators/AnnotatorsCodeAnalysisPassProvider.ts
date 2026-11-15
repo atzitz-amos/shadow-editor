@@ -1,6 +1,5 @@
 import {CodeAnalysisPassProvider} from "../analysis/api/CodeAnalysisPassProvider";
 import {HighlightHolder} from "../../../editor/ui/highlighter/HighlightHolder";
-import {Editor} from "../../../editor/Editor";
 import {SynDocument} from "../../syntax/api/document/SynDocument";
 import {CodeAnalysisPass} from "../analysis/api/CodeAnalysisPass";
 import {ExtensionPoint} from "../../../core/plugins/extensionPoints/ExtensionPoint";

@@ -7,8 +7,8 @@ import {TokenCache} from "./TokenCache";
 import {Scheduler} from "../../../core/scheduler/Scheduler";
 import {GlobalState} from "../../../core/global/GlobalState";
 import {DocumentSaveRequestEvent} from "./events/DocumentSaveRequestEvent";
-import {UnsafeFlagsService} from "../../../core/sync/flags/UnsafeFlagsService";
-import {UnsafeFlags} from "../../../core/sync/flags/UnsafeFlags";
+import {UnsafeFlagsService} from "../../../core/persistence/flags/UnsafeFlagsService";
+import {UnsafeFlags} from "../../../core/persistence/flags/UnsafeFlags";
 import {TrackedRange} from "../coordinate/range/TrackedRange";
 import {UndoRedoActionStack} from "../undo/UndoRedoActionStack";
 import {HighlightHolder} from "../../ui/highlighter/HighlightHolder";
@@ -238,8 +238,8 @@ export class Document {
         return range;
     }
 
-    getTokenAt(offset: Offset) {
-        return this.tokenCache.getTokenAt(offset);
+    getTokenAt(offset: Offset, lean: 'left' | 'right' = 'right') {
+        return this.tokenCache.getTokenAt(offset, lean);
     }
 
     getModificationTimestamp() {

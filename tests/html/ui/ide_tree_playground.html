@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>IdeTree playground</title>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+        <script crossorigin="anonymous" src="https://kit.fontawesome.com/cb36336f7b.js"></script>
+        <link href="../../../src/core/ui/lib/lib.css" rel="stylesheet">
+        <style>
+            :root {
+                --ide-system-font: "Inter", "Segoe UI", sans-serif;
+                --ide-code-font: "JetBrains Mono", Consolas, monospace;
+            }
+
+            * {
+                box-sizing: border-box;
+                user-select: none;
+            }
+
+            body {
+                margin: 0;
+                min-height: 100vh;
+                display: flex;
+                gap: 28px;
+                justify-content: center;
+                align-items: flex-start;
+                padding: 40px 24px;
+                font-family: var(--ide-system-font), sans-serif;
+                color: #e3e6f0;
+                background: linear-gradient(160deg, #050609 0, #10131c 45%, #050609 100%);
+            }
+
+            .frame {
+                display: flex;
+                flex-direction: column;
+                width: 340px;
+                height: 540px;
+                overflow: hidden;
+                border: 1px solid #252d42;
+                border-radius: 7px;
+                background: linear-gradient(180deg, rgba(17, 23, 35, 0.97), rgba(12, 17, 27, 0.97));
+            }
+
+            .toolbar {
+                display: flex;
+                align-items: center;
+                gap: 2px;
+                padding: 8px 8px 8px 12px;
+                background: rgba(16, 22, 34, 0.85);
+                border-bottom: 1px solid #20283a;
+                font-size: 10px;
+                letter-spacing: 0.1em;
+                text-transform: uppercase;
+                color: #888fa1;
+            }
+
+            .toolbar .title {
+                margin-right: auto;
+            }
+
+            .body {
+                flex: 1;
+                overflow: auto;
+                padding: 6px;
+            }
+
+            .side {
+                display: flex;
+                flex-direction: column;
+                gap: 14px;
+                width: 280px;
+                font-size: 12px;
+                color: #8b95ad;
+            }
+
+            .side .row {
+                display: flex;
+                gap: 8px;
+                align-items: center;
+            }
+
+            #log {
+                font-family: var(--ide-code-font), monospace;
+                font-size: 11px;
+                white-space: pre-wrap;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="frame">
+            <div class="toolbar"><span class="title">Tests</span></div>
+            <div class="body" id="tree"></div>
+        </div>
+        <div class="side">
+            <div class="row" id="variants"><span>Variants:</span></div>
+            <div id="log">Actions show up here</div>
+        </div>
+
+        <script type="module">
+            import {IdeTree} from "../../../src/core/ui/lib/tree/IdeTree.ts";
+            import {IdeMenuButton} from "../../../src/core/ui/lib/buttons/IdeMenuButton.ts";
+            import {FaIcon} from "../../../src/core/ui/icons/FaIcon.ts";
+            import {UIVariant} from "../../../src/core/ui/lib/theme/UIVariant.ts";
+
+            const log = text => document.getElementById("log").textContent = text;
+
+            const STATUS = {
+                "js.parser.statements.IfStatement": "passed",
+                "js.parser.statements.SwitchFallthrough": "failed",
+                "js.parser.expr.ComplexChaining": "passed",
+                "js.parser.expr.ArrowFunctions": "idle",
+                "js.inspections.ConstReassigned": "passed",
+                "html.parser.NestedTags": "passed",
+                "riscv.parser.Labels": "failed"
+            };
+            const COLORS = {passed: "#3fb950", failed: "#f85149", idle: "#3a4152"};
+
+            // Groups are derived from the dotted paths: "js.parser" exists because a test lives under it
+            const model = {
+                getId: path => path,
+                getRoots: () => model.childrenOf(""),
+                isGroup: path => !(path in STATUS),
+                getChildren: path => model.childrenOf(path),
+                getLabel: path => path.split(".").pop(),
+                childrenOf(prefix) {
+                    const children = new Set();
+                    for (const path of Object.keys(STATUS)) {
+                        if (prefix && !path.startsWith(prefix + ".")) continue;
+                        const rest = prefix ? path.slice(prefix.length + 1) : path;
+                        children.add((prefix ? prefix + "." : "") + rest.split(".")[0]);
+                    }
+                    return [...children];
+                },
+                countLeaves: path => Object.keys(STATUS).filter(p => p === path || p.startsWith(path + ".")).length
+            };
+
+            const addMenu = path => menu => {
+                menu.addHeader("New in " + (path || "root"));
+                menu.addAction("Group", () => log(`add group in '${path}'`), FaIcon.regular("folder"));
+                menu.addAction("Test case", () => log(`add test in '${path}'`), FaIcon.solid("flask"));
+                menu.addSeparator();
+                menu.addAction("Snapshot from editor", () => log("snapshot"), FaIcon.solid("camera"));
+            };
+
+            const tree = new IdeTree(document.getElementById("tree"), model, {
+                compare: (a, b) => (model.isGroup(b) - model.isGroup(a)) || a.localeCompare(b),
+                getIcon: (path, expanded) => model.isGroup(path)
+                    ? (expanded ? "fa-regular fa-folder-open" : "fa-regular fa-folder")
+                    : "fa-solid fa-flask",
+                decorate: (path, el) => el.appendChild(model.isGroup(path)
+                    ? IdeTree.badge(model.countLeaves(path))
+                    : IdeTree.dot(COLORS[STATUS[path]], STATUS[path])),
+                rowActions: path => [
+                    ...(model.isGroup(path) ? [new IdeMenuButton(addMenu(path), {
+                        icon: FaIcon.solid("plus"), size: "small", tooltip: "New…"
+                    })] : []),
+                    IdeTree.actionButton("fa-regular fa-trash-can", "Delete", () => log(`delete '${path}'`), true)
+                ],
+                isInitiallyExpanded: (_, depth) => depth < 2,
+                onSelect: path => log("selected " + path),
+                onOpen: path => log("open " + path)
+            });
+            tree.draw();
+
+            // Toolbar: a ghost icon menu button, as in the mock
+            const toolbar = document.querySelector(".toolbar");
+            const addButton = new IdeMenuButton(menu => {
+                const selected = tree.getSelected();
+                const group = selected === null ? "" : model.isGroup(selected) ? selected : tree.getParentNode(selected) ?? "";
+                addMenu(group)(menu);
+            }, {icon: FaIcon.solid("plus"), tooltip: "New…"});
+            toolbar.appendChild(addButton.getUnderlyingElement());
+            addButton.draw();
+
+            // Other variants
+            const variants = document.getElementById("variants");
+            const variantButtons = [
+                new IdeMenuButton(addMenu("js"), {label: "New", icon: FaIcon.solid("plus"), variant: UIVariant.SECONDARY}),
+                new IdeMenuButton(addMenu("js"), {label: "Run", variant: UIVariant.PRIMARY, primaryAction: () => log("run all"), placement: "bottom-start"})
+            ];
+            for (const button of variantButtons) {
+                variants.appendChild(button.getUnderlyingElement());
+                button.draw();
+            }
+
+            window.tree = tree;
+            window.STATUS = STATUS;
+        </script>
+    </body>
+</html>

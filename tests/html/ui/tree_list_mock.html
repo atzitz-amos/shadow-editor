@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>IdeTreeList — design mock</title>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+        <script crossorigin="anonymous" src="https://kit.fontawesome.com/cb36336f7b.js"></script>
+        <style>
+            :root {
+                --ide-system-font: "Inter", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+                --ide-code-font: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+                --ide-btn-primary-bg: #4a76bc;
+
+                /* Tree tokens, tweakable from the mock controls */
+                --tree-row-height: 24px;
+                --tree-indent: 14px;
+            }
+
+            * {
+                box-sizing: border-box;
+                user-select: none;
+            }
+
+            body {
+                margin: 0;
+                min-height: 100vh;
+                display: flex;
+                gap: 28px;
+                align-items: flex-start;
+                justify-content: center;
+                padding: 40px 24px;
+                font-family: var(--ide-system-font), sans-serif;
+                font-size: 12px;
+                color: #e3e6f0;
+                background: radial-gradient(circle at 0 0, #1b202c 0, transparent 50%),
+                linear-gradient(160deg, #050609 0, #10131c 45%, #050609 100%);
+            }
+
+            /* ── Frame (same as the SynSuite popup / debug tools popup) ─────────── */
+
+            .mock-frame {
+                display: flex;
+                flex-direction: column;
+                width: 340px;
+                height: 560px;
+                overflow: hidden;
+                border: 1px solid #252d42;
+                border-radius: 7px;
+                background: linear-gradient(180deg, rgba(17, 23, 35, 0.97), rgba(12, 17, 27, 0.97));
+                box-shadow: 0 22px 60px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(199, 210, 255, 0.04) inset;
+            }
+
+            /* ── IdeTreeList ─────────────────────────────────────────────────────── */
+
+            .ide-tree-list {
+                display: flex;
+                flex-direction: column;
+                min-height: 0;
+                flex: 1;
+            }
+
+            .ide-tree-toolbar {
+                display: flex;
+                align-items: center;
+                gap: 2px;
+                padding: 8px 8px 8px 12px;
+                background: rgba(16, 22, 34, 0.85);
+                border-bottom: 1px solid #20283a;
+            }
+
+            .ide-tree-toolbar-title {
+                margin-right: auto;
+                font-size: 10px;
+                letter-spacing: 0.1em;
+                text-transform: uppercase;
+                color: #888fa1;
+            }
+
+            .ide-tree-toolbar-title span {
+                margin-left: 6px;
+                letter-spacing: 0;
+                color: #5c6375;
+            }
+
+            .ide-tree-toolbar-separator {
+                width: 1px;
+                height: 14px;
+                margin: 0 4px;
+                background: #262d43;
+            }
+
+            .ide-icon-button {
+                position: relative;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 24px;
+                height: 24px;
+                padding: 0;
+                border: 1px solid transparent;
+                border-radius: 4px;
+                background: transparent;
+                color: #8f97aa;
+                font-size: 11px;
+                cursor: pointer;
+                transition: color 120ms ease, background-color 120ms ease;
+            }
+
+            .ide-icon-button:hover:not(:disabled) {
+                background: #131a28;
+                color: #c8d0e4;
+            }
+
+            .ide-icon-button:disabled {
+                color: #3f4658;
+                cursor: default;
+            }
+
+            .ide-icon-button.danger:hover:not(:disabled) {
+                color: #f47067;
+                background: #2a0d0d80;
+            }
+
+            /* Button-menu: the corner triangle hints that the click opens a menu */
+            .ide-menu-button::after {
+                content: "";
+                position: absolute;
+                right: 2px;
+                bottom: 2px;
+                border-style: solid;
+                border-width: 0 0 4px 4px;
+                border-color: transparent transparent currentColor transparent;
+                opacity: 0.7;
+            }
+
+            .ide-menu-button.open {
+                background: #151d2d;
+                border-color: #2f3f63;
+                color: #d4dcf0;
+            }
+
+            .ide-tree-body {
+                flex: 1;
+                overflow: auto;
+                padding: 6px 6px 10px;
+            }
+
+            .ide-tree-body ul {
+                list-style: none;
+                margin: 0;
+                padding: 0;
+            }
+
+            .ide-tree-children {
+                position: relative;
+                display: none;
+            }
+
+            .ide-tree-item.expanded > .ide-tree-children {
+                display: block;
+            }
+
+            /* Indent guide, drawn under the caret of the parent group */
+            .show-guides .ide-tree-children::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                bottom: 4px;
+                left: calc(var(--depth) * var(--tree-indent) + 12px);
+                width: 1px;
+                background: #232a3b;
+            }
+
+            .show-guides .ide-tree-item.contains-selection > .ide-tree-children::before {
+                background: #34405c;
+            }
+
+            .ide-tree-row {
+                position: relative;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                height: var(--tree-row-height);
+                /* Indentation is padding on the row so that hover/selection span the whole width */
+                padding: 0 4px 0 calc(var(--depth) * var(--tree-indent) + 6px);
+                border-radius: 4px;
+                color: #a7aec2;
+                cursor: default;
+                outline: none;
+            }
+
+            .ide-tree-row:hover {
+                background: #4999ff12;
+            }
+
+            .ide-tree-row.selected {
+                background: #6793ff33;
+                color: #dfe5f5;
+            }
+
+            .ide-tree-list:not(:focus-within) .ide-tree-row.selected {
+                background: #6793ff1c;
+            }
+
+            .ide-tree-caret {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 12px;
+                font-size: 8px;
+                color: #6f7588;
+                transition: transform 120ms ease;
+            }
+
+            .ide-tree-item.expanded > .ide-tree-row .ide-tree-caret {
+                transform: rotate(90deg);
+            }
+
+            .ide-tree-icon {
+                width: 14px;
+                text-align: center;
+                font-size: 11px;
+            }
+
+            .ide-tree-item.group > .ide-tree-row .ide-tree-icon {
+                color: #8b9ccc;
+            }
+
+            .ide-tree-item.leaf > .ide-tree-row .ide-tree-icon {
+                color: #6f7588;
+            }
+
+            .ide-tree-label {
+                flex: 1;
+                min-width: 0;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            .ide-tree-item.group > .ide-tree-row .ide-tree-label {
+                color: #c4cadb;
+            }
+
+            /* "js.parser" when single-child groups are compacted */
+            .ide-tree-label .compact-separator {
+                color: #5c6375;
+                margin: 0 1px;
+            }
+
+            .ide-tree-count {
+                min-width: 18px;
+                padding: 0 5px;
+                border-radius: 8px;
+                background: #1a2132;
+                color: #7d859a;
+                font-size: 10px;
+                line-height: 15px;
+                text-align: center;
+            }
+
+            .hide-counts .ide-tree-count {
+                display: none;
+            }
+
+            .ide-tree-status {
+                width: 7px;
+                height: 7px;
+                margin: 0 5px;
+                border-radius: 50%;
+                flex-shrink: 0;
+            }
+
+            .ide-tree-status.passed { background: #3fb950; }
+            .ide-tree-status.failed { background: #f85149; box-shadow: 0 0 6px #f8514980; }
+            .ide-tree-status.idle { background: #3a4152; }
+
+            .hide-status .ide-tree-status {
+                display: none;
+            }
+
+            /* Inline actions, revealed on hover / selection; they replace the count and status */
+            .ide-tree-row-actions {
+                display: none;
+                align-items: center;
+                gap: 1px;
+            }
+
+            .ide-tree-row-actions .ide-icon-button {
+                width: 20px;
+                height: 20px;
+                font-size: 10px;
+            }
+
+            .ide-tree-row:hover .ide-tree-row-actions,
+            .ide-tree-row.selected .ide-tree-row-actions,
+            .ide-tree-row.menu-open .ide-tree-row-actions {
+                display: flex;
+            }
+
+            .ide-tree-row:hover :is(.ide-tree-count, .ide-tree-status),
+            .ide-tree-row.selected :is(.ide-tree-count, .ide-tree-status),
+            .ide-tree-row.menu-open :is(.ide-tree-count, .ide-tree-status) {
+                display: none;
+            }
+
+            .ide-tree-footer {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                min-height: 30px;
+                padding: 6px 12px;
+                border-top: 1px solid #20283a;
+                background: rgba(16, 22, 34, 0.85);
+                font-family: var(--ide-code-font), monospace;
+                font-size: 11px;
+                color: #6c7280;
+                overflow: hidden;
+                white-space: nowrap;
+            }
+
+            .ide-tree-footer .segment:last-child {
+                color: #c4cadb;
+            }
+
+            .ide-tree-footer .dot {
+                color: #3f4658;
+            }
+
+            /* ── Localized menu (same look as .ui-menu) ──────────────────────────── */
+
+            .ide-popup-menu {
+                position: fixed;
+                min-width: 190px;
+                padding: 5px;
+                border: 1px solid #2b334a;
+                border-radius: 6px;
+                background: linear-gradient(180deg, #121827 0%, #0e1421 100%);
+                box-shadow: 0 14px 30px rgba(0, 0, 0, 0.45);
+                z-index: 100;
+                animation: menu-in 90ms ease-out;
+            }
+
+            @keyframes menu-in {
+                from { opacity: 0; transform: translateY(-3px); }
+                to { opacity: 1; transform: none; }
+            }
+
+            .ide-popup-menu-header {
+                padding: 4px 8px 5px;
+                font-size: 10px;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+                color: #5c6375;
+            }
+
+            .ide-popup-menu-item {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                width: 100%;
+                padding: 6px 8px;
+                border: 0;
+                border-radius: 4px;
+                background: transparent;
+                color: #c7cede;
+                font-family: inherit;
+                font-size: 11px;
+                text-align: left;
+                cursor: pointer;
+            }
+
+            .ide-popup-menu-item i {
+                width: 12px;
+                text-align: center;
+                color: #8f97aa;
+            }
+
+            .ide-popup-menu-item .shortcut {
+                margin-left: auto;
+                font-size: 10px;
+                color: #6b7488;
+            }
+
+            .ide-popup-menu-item:hover,
+            .ide-popup-menu-item.active {
+                background: #1b2436;
+                color: #e3e8f5;
+            }
+
+            .ide-popup-menu-separator {
+                height: 1px;
+                margin: 4px 2px;
+                background: #232a3b;
+            }
+
+            /* ── Mock controls (not part of the component) ──────────────────────── */
+
+            .mock-controls {
+                width: 260px;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .mock-controls h1 {
+                margin: 0;
+                font-size: 13px;
+                font-weight: 600;
+                color: #d9deee;
+            }
+
+            .mock-controls p {
+                margin: 0;
+                color: #6c7280;
+                line-height: 1.5;
+            }
+
+            .mock-panel {
+                display: flex;
+                flex-direction: column;
+                gap: 7px;
+                padding: 10px 12px;
+                border: 1px solid #262d43;
+                border-radius: 5px;
+                background: #10151f;
+            }
+
+            .mock-panel label {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                color: #c0c2c8;
+                cursor: pointer;
+            }
+
+            .mock-panel input[type=checkbox], .mock-panel input[type=radio] {
+                margin: 0;
+                accent-color: var(--ide-btn-primary-bg);
+            }
+
+            .mock-log {
+                min-height: 60px;
+                font-family: var(--ide-code-font), monospace;
+                font-size: 11px;
+                color: #8b95ad;
+                white-space: pre-wrap;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="mock-frame">
+            <div class="ide-tree-list show-guides" id="tree">
+                <div class="ide-tree-toolbar">
+                    <div class="ide-tree-toolbar-title">Tests<span id="total"></span></div>
+                    <button class="ide-icon-button" data-action="expand-all" title="Expand all">
+                        <i class="fa-solid fa-angles-down"></i></button>
+                    <button class="ide-icon-button" data-action="collapse-all" title="Collapse all">
+                        <i class="fa-solid fa-angles-up"></i></button>
+                    <div class="ide-tree-toolbar-separator"></div>
+                    <button class="ide-icon-button ide-menu-button" data-action="add" title="New…">
+                        <i class="fa-solid fa-plus"></i></button>
+                    <button class="ide-icon-button danger" data-action="delete" title="Delete selection" disabled>
+                        <i class="fa-regular fa-trash-can"></i></button>
+                </div>
+                <div class="ide-tree-body">
+                    <ul id="tree-root" role="tree"></ul>
+                </div>
+                <div class="ide-tree-footer" id="footer"></div>
+            </div>
+        </div>
+
+        <div class="mock-controls">
+            <h1>IdeTreeList — mock</h1>
+            <p>Click to select, double click or ←/→ to collapse, ↑/↓ to move. The add buttons open a localized menu;
+                nothing is actually created or deleted.</p>
+            <div class="mock-panel">
+                <label><input type="checkbox" data-toggle="show-guides" checked> Indent guides</label>
+                <label><input type="checkbox" data-option="compact"> Compact single-child groups</label>
+                <label><input type="checkbox" data-toggle="hide-counts" data-inverted checked> Leaf counts on groups</label>
+                <label><input type="checkbox" data-toggle="hide-status" data-inverted checked> Status decoration on leaves</label>
+            </div>
+            <div class="mock-panel">
+                <label><input type="radio" name="density" value="22px"> Dense rows (22px)</label>
+                <label><input type="radio" name="density" value="24px" checked> Default rows (24px)</label>
+                <label><input type="radio" name="density" value="28px"> Comfortable rows (28px)</label>
+            </div>
+            <div class="mock-panel mock-log" id="log">Actions show up here</div>
+        </div>
+
+        <script>
+            const PATHS = {
+                "js.parser.statements.IfStatement": "passed",
+                "js.parser.statements.ForOfStatement": "passed",
+                "js.parser.statements.SwitchFallthrough": "failed",
+                "js.parser.expr.ComplexChaining": "passed",
+                "js.parser.expr.ArrowFunctions": "idle",
+                "js.parser.expr.TemplateLiterals": "passed",
+                "js.parser.destructuring.ArraySpreadMiddle": "failed",
+                "js.inspections.ConstReassigned": "passed",
+                "js.inspections.SwitchCaseFallsThrough": "passed",
+                "html.parser.NestedTags": "passed",
+                "html.parser.UnclosedTag": "idle",
+                "riscv.parser.Labels": "passed",
+                "riscv.inspections.UndefinedLabel": "passed"
+            };
+
+            const treeElement = document.getElementById("tree");
+            const rootElement = document.getElementById("tree-root");
+            const footer = document.getElementById("footer");
+            const logElement = document.getElementById("log");
+
+            const expanded = new Set(["js", "js.parser", "js.parser.statements", "js.parser.expr"]);
+            let selectedPath = "js.parser.statements.SwitchFallthrough";
+            let compact = false;
+            let openMenu = null;
+
+            function log(message) {
+                logElement.textContent = message;
+            }
+
+            function buildModel() {
+                const root = {path: "", name: "", children: new Map()};
+                for (const [path, status] of Object.entries(PATHS)) {
+                    const segments = path.split(".");
+                    let node = root;
+                    segments.forEach((segment, i) => {
+                        const childPath = segments.slice(0, i + 1).join(".");
+                        if (!node.children.has(segment)) {
+                            node.children.set(segment, {path: childPath, name: segment, children: new Map()});
+                        }
+                        node = node.children.get(segment);
+                    });
+                    node.status = status;
+                }
+                return root;
+            }
+
+            function countLeaves(node) {
+                if (node.children.size === 0) return 1;
+                let count = 0;
+                for (const child of node.children.values()) count += countLeaves(child);
+                return count;
+            }
+
+            function iconButton(icon, title, action, extraClass = "") {
+                return `<button class="ide-icon-button ${extraClass}" data-action="${action}" title="${title}" tabindex="-1"><i class="${icon}"></i></button>`;
+            }
+
+            function renderNode(node, depth) {
+                // Compacting merges a chain of groups that each have a single group child: js.parser.statements
+                const names = [node.name];
+                const mergedPaths = [node.path];
+                while (compact && node.children.size === 1) {
+                    const only = [...node.children.values()][0];
+                    if (only.children.size === 0) break;
+                    names.push(only.name);
+                    mergedPaths.push(only.path);
+                    node = only;
+                }
+                // A selected group that got merged is shown as the merged row
+                if (mergedPaths.includes(selectedPath)) selectedPath = node.path;
+
+                const isGroup = node.children.size > 0;
+                const li = document.createElement("li");
+                li.className = "ide-tree-item " + (isGroup ? "group" : "leaf");
+                li.dataset.path = node.path;
+                if (isGroup && expanded.has(node.path)) li.classList.add("expanded");
+                if (selectedPath.startsWith(node.path + ".")) li.classList.add("contains-selection");
+
+                const label = names.map(n => `<span>${n}</span>`).join(`<span class="compact-separator">.</span>`);
+                const row = document.createElement("div");
+                row.className = "ide-tree-row" + (node.path === selectedPath ? " selected" : "");
+                row.style.setProperty("--depth", depth);
+                row.tabIndex = node.path === selectedPath ? 0 : -1;
+                row.setAttribute("role", "treeitem");
+                row.innerHTML = `
+                    <span class="ide-tree-caret">${isGroup ? `<i class="fa-solid fa-chevron-right"></i>` : ""}</span>
+                    <i class="ide-tree-icon ${isGroup ? (li.classList.contains("expanded") ? "fa-regular fa-folder-open" : "fa-regular fa-folder") : "fa-solid fa-flask"}"></i>
+                    <span class="ide-tree-label">${label}</span>
+                    ${isGroup ? `<span class="ide-tree-count">${countLeaves(node)}</span>` : `<span class="ide-tree-status ${node.status}" title="${node.status}"></span>`}
+                    <span class="ide-tree-row-actions">
+                        ${isGroup ? iconButton("fa-solid fa-plus", "New in this group…", "add", "ide-menu-button") : ""}
+                        ${iconButton("fa-regular fa-trash-can", "Delete", "delete", "danger")}
+                    </span>
+                `;
+                li.appendChild(row);
+
+                if (isGroup) {
+                    const ul = document.createElement("ul");
+                    ul.className = "ide-tree-children";
+                    ul.setAttribute("role", "group");
+                    ul.style.setProperty("--depth", depth);
+                    for (const child of node.children.values()) ul.appendChild(renderNode(child, depth + 1));
+                    li.appendChild(ul);
+                }
+                return li;
+            }
+
+            function render(focus = false) {
+                const model = buildModel();
+                rootElement.innerHTML = "";
+                for (const child of model.children.values()) rootElement.appendChild(renderNode(child, 0));
+
+                document.getElementById("total").textContent = countLeaves(model);
+                treeElement.querySelector(".ide-tree-toolbar [data-action=delete]").disabled = !selectedPath;
+
+                footer.innerHTML = selectedPath
+                    ? selectedPath.split(".").map(s => `<span class="segment">${s}</span>`).join(`<span class="dot">.</span>`)
+                    : "No selection";
+
+                if (focus) rootElement.querySelector(".ide-tree-row.selected")?.focus();
+            }
+
+            function visibleRows() {
+                return [...rootElement.querySelectorAll(".ide-tree-row")].filter(row => row.offsetParent !== null);
+            }
+
+            function itemOf(row) {
+                return row.closest(".ide-tree-item");
+            }
+
+            function select(path, focus = true) {
+                selectedPath = path;
+                render(focus);
+            }
+
+            function toggle(path, open) {
+                const isOpen = expanded.has(path);
+                if (open === undefined) open = !isOpen;
+                if (open) expanded.add(path); else expanded.delete(path);
+                render(true);
+            }
+
+            // ── Localized menu ────────────────────────────────────────────────────
+
+            function closeMenu() {
+                if (!openMenu) return;
+                openMenu.element.remove();
+                openMenu.button.classList.remove("open");
+                openMenu.button.closest(".ide-tree-row")?.classList.remove("menu-open");
+                openMenu = null;
+            }
+
+            function showAddMenu(button, groupPath) {
+                if (openMenu?.button === button) return closeMenu();
+                closeMenu();
+
+                const menu = document.createElement("div");
+                menu.className = "ide-popup-menu";
+                menu.innerHTML = `
+                    <div class="ide-popup-menu-header">New in ${groupPath || "root"}</div>
+                    <button class="ide-popup-menu-item" data-type="group"><i class="fa-regular fa-folder"></i>Group</button>
+                    <button class="ide-popup-menu-item" data-type="test"><i class="fa-solid fa-flask"></i>Test case</button>
+                    <div class="ide-popup-menu-separator"></div>
+                    <button class="ide-popup-menu-item" data-type="snapshot"><i class="fa-solid fa-camera"></i>Snapshot from editor<span class="shortcut">Ctrl+Alt+T</span></button>
+                `;
+                document.body.appendChild(menu);
+
+                // Anchored under the button, right-aligned with it, flipped above if it does not fit
+                const anchor = button.getBoundingClientRect();
+                const size = menu.getBoundingClientRect();
+                let top = anchor.bottom + 4;
+                if (top + size.height > innerHeight - 8) top = anchor.top - size.height - 4;
+                menu.style.top = top + "px";
+                menu.style.left = Math.max(8, anchor.right - size.width) + "px";
+
+                button.classList.add("open");
+                button.closest(".ide-tree-row")?.classList.add("menu-open");
+
+                const items = [...menu.querySelectorAll(".ide-popup-menu-item")];
+                let active = 0;
+                const setActive = i => {
+                    active = (i + items.length) % items.length;
+                    items.forEach((item, j) => item.classList.toggle("active", j === active));
+                    items[active].focus();
+                };
+                setActive(0);
+
+                menu.addEventListener("keydown", e => {
+                    if (e.key === "ArrowDown") setActive(active + 1);
+                    else if (e.key === "ArrowUp") setActive(active - 1);
+                    else if (e.key === "Escape") {
+                        closeMenu();
+                        button.focus();
+                    } else return;
+                    e.preventDefault();
+                });
+                items.forEach((item, i) => {
+                    item.addEventListener("mouseenter", () => setActive(i));
+                    item.addEventListener("click", () => {
+                        log(`add ${item.dataset.type} in '${groupPath || "<root>"}'`);
+                        closeMenu();
+                    });
+                });
+
+                openMenu = {element: menu, button};
+            }
+
+            document.addEventListener("mousedown", e => {
+                if (openMenu && !openMenu.element.contains(e.target) && !openMenu.button.contains(e.target)) closeMenu();
+            });
+
+            // ── Tree interactions ─────────────────────────────────────────────────
+
+            rootElement.addEventListener("click", e => {
+                const row = e.target.closest(".ide-tree-row");
+                if (!row) return;
+                const item = itemOf(row);
+                const actionButton = e.target.closest("[data-action]");
+
+                if (actionButton?.dataset.action === "add") {
+                    // Re-rendering would detach the button, so the selection is updated in place
+                    rootElement.querySelectorAll(".ide-tree-row.selected").forEach(r => r.classList.remove("selected"));
+                    row.classList.add("selected");
+                    selectedPath = item.dataset.path;
+                    showAddMenu(actionButton, item.dataset.path);
+                    return;
+                }
+                if (actionButton?.dataset.action === "delete") {
+                    log(`delete '${item.dataset.path}'`);
+                    return;
+                }
+                if (e.target.closest(".ide-tree-caret") && item.classList.contains("group")) {
+                    toggle(item.dataset.path);
+                    return;
+                }
+                select(item.dataset.path);
+            });
+
+            rootElement.addEventListener("dblclick", e => {
+                const row = e.target.closest(".ide-tree-row");
+                if (!row || e.target.closest("[data-action]")) return;
+                const item = itemOf(row);
+                if (item.classList.contains("group")) toggle(item.dataset.path);
+                else log(`open '${item.dataset.path}'`);
+            });
+
+            rootElement.addEventListener("keydown", e => {
+                const row = e.target.closest(".ide-tree-row");
+                if (!row) return;
+                const item = itemOf(row);
+                const rows = visibleRows();
+                const index = rows.indexOf(row);
+                const isGroup = item.classList.contains("group");
+                const isExpanded = item.classList.contains("expanded");
+
+                switch (e.key) {
+                    case "ArrowDown":
+                        if (rows[index + 1]) select(itemOf(rows[index + 1]).dataset.path);
+                        break;
+                    case "ArrowUp":
+                        if (rows[index - 1]) select(itemOf(rows[index - 1]).dataset.path);
+                        break;
+                    case "ArrowRight":
+                        if (isGroup && !isExpanded) toggle(item.dataset.path, true);
+                        else if (isGroup) select(itemOf(rows[index + 1]).dataset.path);
+                        break;
+                    case "ArrowLeft":
+                        if (isGroup && isExpanded) toggle(item.dataset.path, false);
+                        else {
+                            const parent = item.parentElement.closest(".ide-tree-item");
+                            if (parent) select(parent.dataset.path);
+                        }
+                        break;
+                    case "Enter":
+                        if (isGroup) toggle(item.dataset.path); else log(`open '${item.dataset.path}'`);
+                        break;
+                    case "Delete":
+                        log(`delete '${item.dataset.path}'`);
+                        break;
+                    default:
+                        return;
+                }
+                e.preventDefault();
+            });
+
+            treeElement.querySelector(".ide-tree-toolbar").addEventListener("click", e => {
+                const button = e.target.closest("[data-action]");
+                if (!button) return;
+                switch (button.dataset.action) {
+                    case "expand-all":
+                        // Every proper prefix of a test path is a group
+                        Object.keys(PATHS).forEach(p => p.split(".").slice(0, -1)
+                            .forEach((_, i, s) => expanded.add(s.slice(0, i + 1).join("."))));
+                        render();
+                        break;
+                    case "collapse-all":
+                        expanded.clear();
+                        render();
+                        break;
+                    case "add": {
+                        // New items go next to the selection: in it for a group, beside it for a test case
+                        const selectedItem = rootElement.querySelector(".ide-tree-row.selected")?.closest(".ide-tree-item");
+                        const group = !selectedItem ? "" : selectedItem.classList.contains("group")
+                            ? selectedItem.dataset.path
+                            : selectedItem.dataset.path.split(".").slice(0, -1).join(".");
+                        showAddMenu(button, group);
+                        break;
+                    }
+                    case "delete":
+                        log(`delete '${selectedPath}'`);
+                        break;
+                }
+            });
+
+            // ── Mock controls ─────────────────────────────────────────────────────
+
+            document.querySelectorAll("[data-toggle]").forEach(input => {
+                input.addEventListener("change", () => {
+                    const on = input.hasAttribute("data-inverted") ? !input.checked : input.checked;
+                    treeElement.classList.toggle(input.dataset.toggle, on);
+                });
+            });
+            document.querySelector("[data-option=compact]").addEventListener("change", e => {
+                compact = e.target.checked;
+                render();
+            });
+            document.querySelectorAll("input[name=density]").forEach(input => {
+                input.addEventListener("change", () => document.documentElement.style.setProperty("--tree-row-height", input.value));
+            });
+
+            render();
+        </script>
+    </body>
+</html>

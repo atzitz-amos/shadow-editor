@@ -129,30 +129,6 @@ export class SynSuiteTestTree extends UIComponent {
         return run;
     }
 
-    private async doReload(): Promise<void> {
-        this.updatingTree = true;
-        try {
-            const filtering = this.context.state.isFiltering();
-            if (filtering && this.expansionBeforeFiltering === null) {
-                this.expansionBeforeFiltering = this.tree.getExpandedNodes();
-            }
-
-            await this.tree.refresh();
-
-            if (filtering) {
-                await this.tree.expandAll();
-            } else if (this.expansionBeforeFiltering !== null) {
-                // Back to the full tree: restore the expansion the user had before filtering
-                this.tree.collapseAll();
-                for (const node of this.expansionBeforeFiltering) await this.tree.expand(node);
-                this.expansionBeforeFiltering = null;
-            }
-            await this.syncSelection();
-        } finally {
-            this.updatingTree = false;
-        }
-    }
-
     /** Renders the rows again, after statuses changed */
     updateStatuses(): void {
         this.tree.updateAll();
@@ -180,6 +156,30 @@ export class SynSuiteTestTree extends UIComponent {
 
         const node = SynSuiteNodes.fromSelection(selection);
         if (this.tree.getNodeById(node) !== null) this.tree.select(node, false);
+    }
+
+    private async doReload(): Promise<void> {
+        this.updatingTree = true;
+        try {
+            const filtering = this.context.state.isFiltering();
+            if (filtering && this.expansionBeforeFiltering === null) {
+                this.expansionBeforeFiltering = this.tree.getExpandedNodes();
+            }
+
+            await this.tree.refresh();
+
+            if (filtering) {
+                await this.tree.expandAll();
+            } else if (this.expansionBeforeFiltering !== null) {
+                // Back to the full tree: restore the expansion the user had before filtering
+                this.tree.collapseAll();
+                for (const node of this.expansionBeforeFiltering) await this.tree.expand(node);
+                this.expansionBeforeFiltering = null;
+            }
+            await this.syncSelection();
+        } finally {
+            this.updatingTree = false;
+        }
     }
 
     // ---- organization ----

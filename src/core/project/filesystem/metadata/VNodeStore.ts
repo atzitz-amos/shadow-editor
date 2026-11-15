@@ -1,4 +1,4 @@
-import {createVDir, createVFile, VFileNode, VNode} from "./VNode";
+import {createVBinary, createVDir, createVFile, VBinaryNode, VContentNode, VFileNode, VNode} from "./VNode";
 import {Persisted} from "../../../persistence/objects/Persisted";
 
 /**
@@ -112,6 +112,26 @@ export class VNodeStore {
         ) as VFileNode;
     }
 
+    public createBinaryFile(id: string,
+                            name: string,
+                            parentId: string | null,
+                            createdAt: number,
+                            modifiedAt: number,
+                            deletedAt: number | null,
+                            size: number,
+                            mimeType: string): VBinaryNode {
+        return this.register(createVBinary(
+            id,
+            name,
+            parentId,
+            createdAt,
+            modifiedAt,
+            deletedAt,
+            size,
+            mimeType)
+        ) as VBinaryNode;
+    }
+
     public createDir(id: string,
                      name: string,
                      parentId: string | null,
@@ -158,7 +178,7 @@ export class VNodeStore {
 
     /** Size + modifiedAt in one go (one mutation instead of two for the persistence layer to observe). */
     public updateFile(id: string, size: number, modifiedAt: number): void {
-        const node = this.requireNode(id) as VFileNode;
+        const node = this.requireNode(id) as VContentNode;
         node.size = size;
         node.modifiedAt = modifiedAt;
     }
@@ -168,7 +188,7 @@ export class VNodeStore {
     }
 
     updateFileSize(id: string, length: number) {
-        (this.requireNode(id) as VFileNode).size = length;
+        (this.requireNode(id) as VContentNode).size = length;
     }
 
     private register(node: VNode) {

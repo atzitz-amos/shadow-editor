@@ -8,7 +8,7 @@ import {FaIcon} from "../../../core/ui/icons/FaIcon";
 
 
 export default class JsLang extends LanguageBase {
-    public static _instance: JsLang;
+    private static _instance: JsLang;
 
     private constructor() {
         super();

@@ -6,8 +6,8 @@ import {PersistedObject} from "../persistence/objects/PersistedObject";
 import {Serializer} from "../persistence/serializable/Serializer";
 import {Serialized} from "../persistence/serializable/Serializable";
 import {Deserializer} from "../persistence/serializable/Deserializer";
-import {UnsafeFlagsService} from "../sync/flags/UnsafeFlagsService";
-import {UnsafeFlags} from "../sync/flags/UnsafeFlags";
+import {UnsafeFlagsService} from "../persistence/flags/UnsafeFlagsService";
+import {UnsafeFlags} from "../persistence/flags/UnsafeFlags";
 
 
 /**

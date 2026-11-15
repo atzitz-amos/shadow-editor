@@ -4,6 +4,9 @@ import {Icon} from "../../icons/Icon";
 import {UIVariant} from "../theme/UIVariant";
 import {PopupMenu, PopupMenuBuilder, PopupMenuPlacement} from "../menu/impl/PopupMenu";
 import {KeybindContext} from "../../../keybinds/context/KeybindContext";
+import {UIComponentElement} from "../elements/UIComponentElement";
+import {CustomElementsRegistry} from "../CustomElementsRegistry";
+import {FaIcon} from "../../icons/FaIcon";
 
 export type IdeMenuButtonOptions = {
     icon?: Icon | null,
@@ -140,3 +143,72 @@ export class IdeMenuButton extends UIComponent {
         super.dispose();
     }
 }
+
+/**
+ * {@code <ide-menu-button label="Run" icon="play" tooltip="..." variant="primary" size="small" placement="bottom-end"
+ * indicator="false" menu-class="..." split disabled>}: an {@link IdeMenuButton} whose menu is filled by the
+ * {@code builder} property.
+ * <p>
+ * Split buttons dispatch a {@code primaryaction} event when their main part is clicked.
+ */
+class _CustomIdeMenuButton extends UIComponentElement<IdeMenuButton> {
+    static get observedAttributes() {
+        return ["label", "icon", "tooltip", "variant", "size", "placement", "indicator", "menu-class", "split", "disabled"];
+    }
+
+    get builder(): PopupMenuBuilder {
+        return this.menuBuilder;
+    }
+
+    set builder(builder: PopupMenuBuilder) {
+        this.menuBuilder = builder;
+        this.getComponent()?.setBuilder(builder);
+    }
+
+    get disabled(): boolean {
+        return this.hasAttribute("disabled");
+    }
+
+    set disabled(value: boolean) {
+        this.toggleAttribute("disabled", value);
+    }
+
+    open(): void {
+        this.getComponent()?.open();
+    }
+
+    close(): void {
+        this.getComponent()?.close();
+    }
+
+    attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null) {
+        if (name === "disabled") this.getComponent()?.setEnabled(newValue === null);
+        else super.attributeChangedCallback(name, oldValue, newValue);
+    }
+
+    disconnectedCallback() {
+        this.close();
+    }
+
+    protected createComponent(): IdeMenuButton {
+        const icon = this.getAttribute("icon");
+        const button = new IdeMenuButton(this.menuBuilder, {
+            icon: icon ? FaIcon.auto(icon) : null,
+            label: this.getAttribute("label"),
+            tooltip: this.getAttribute("tooltip"),
+            variant: (this.getAttribute("variant") as UIVariant | "ghost" | null) ?? undefined,
+            size: (this.getAttribute("size") as "small" | "normal" | null) ?? undefined,
+            placement: (this.getAttribute("placement") as PopupMenuPlacement | null) ?? undefined,
+            showIndicator: this.booleanAttribute("indicator"),
+            menuClassName: this.stringAttribute("menu-class"),
+            primaryAction: this.hasAttribute("split") ? () => this.dispatchEvent(new CustomEvent("primaryaction")) : null
+        });
+        if (this.disabled) button.setEnabled(false);
+        return button;
+    }
+
+    private menuBuilder: PopupMenuBuilder = () => {
+    };
+}
+
+CustomElementsRegistry.register("ide-menu-button", _CustomIdeMenuButton);

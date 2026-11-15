@@ -9,7 +9,7 @@ import {SerializableType} from "../../../persistence/serializable/Serializable";
 interface VNodeBase {
     readonly id: string;
 
-    kind: 'file' | 'directory';
+    kind: 'file' | 'binary' | 'directory';
 
     name: string;
     parentId: string | null;
@@ -30,7 +30,17 @@ export interface VFileNode extends VNodeBase {
 }
 
 
-export type VNode = VFileNode | VDirNode;
+/** A file whose content is raw bytes: never decoded as text, so never opened in an editor or searched. */
+export interface VBinaryNode extends VNodeBase {
+    kind: 'binary';
+    size: number;
+    mimeType: string;
+}
+
+/** Any node backed by a blob (text or binary). */
+export type VContentNode = VFileNode | VBinaryNode;
+
+export type VNode = VFileNode | VBinaryNode | VDirNode;
 
 export function createVFile(id: string,
                             name: string,
@@ -43,6 +53,27 @@ export function createVFile(id: string,
     return {
         id,
         kind: 'file' as const,
+        name,
+        parentId,
+        createdAt,
+        modifiedAt,
+        deletedAt,
+        size,
+        mimeType
+    } satisfies SerializableType;
+}
+
+export function createVBinary(id: string,
+                              name: string,
+                              parentId: string | null,
+                              createdAt: number,
+                              modifiedAt: number,
+                              deletedAt: number | null,
+                              size: number,
+                              mimeType: string): VBinaryNode {
+    return {
+        id,
+        kind: 'binary' as const,
         name,
         parentId,
         createdAt,

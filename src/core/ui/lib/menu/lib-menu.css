@@ -34,7 +34,7 @@
     color: #c8d0e4;
 }
 
-.ui-shortcut-badge {
+.ui-shortcut-badge, ide-shortcut {
     font-size: 10px;
     color: #8b95ad;
     letter-spacing: 0.02em;
@@ -230,7 +230,7 @@
     text-transform: uppercase;
     letter-spacing: 0.05em;
     user-select: none;
-    margin-left: 0px;
+    margin-left: 0;
 
     /* Fluidly shifts right when the back button space activates */
     transition: margin-left 0.18s cubic-bezier(0.4, 0, 0.2, 1);
@@ -322,6 +322,7 @@
     transform: translateX(-16px);
     pointer-events: none;
 }
+
 /* ---- Popup menu (anchored, see PopupMenu) ------------------------------- */
 
 .ui-popup-menu {
@@ -381,4 +382,15 @@
     height: 1px;
     margin: 4px 2px;
     background: #232a3b;
+}
+
+/* The host of a TabPane (see _CustomIdeTabs), which the pane fills */
+ide-tabs {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+ide-tab {
+    display: block;
 }

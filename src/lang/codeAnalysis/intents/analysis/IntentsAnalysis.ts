@@ -7,6 +7,7 @@ import {SynModTree} from "../../../codeGen/modification/SynModTree";
 import {Describable} from "../../../../core/ui/api/Describable";
 import {Icon} from "../../../../core/ui/icons/Icon";
 import {UndoStack} from "../../../../editor/core/undo/UndoStack";
+import {Logger} from "../../../../core/logging/Logger";
 
 export class ApplicableIntent implements Describable {
     constructor(public readonly intent: IntentBase, public readonly node: SynNode) {
@@ -29,9 +30,11 @@ export class ApplicableIntent implements Describable {
  */
 export class IntentsAnalysis {
 
+    private static readonly logger: Logger = Logger.for("IntentsAnalysis");
+
     public static async executeIntent(editor: Editor, intent: ApplicableIntent) {
         const document = SynDocumentManager.getOpenedSynDocument(editor);
-        const synMod = new SynModTree(document);
+        const synMod = new SynModTree(document.getTree());
         await intent.intent.execute(editor.getPrimaryCaret(), intent.node, synMod);
 
         UndoStack.undoableAction(editor, "applyIndent", () => {
@@ -48,10 +51,13 @@ export class IntentsAnalysis {
         const result: ApplicableIntent[] = [];
         while (element) {
             for (const intent of IntentsRegistry.getForLanguage(document.getLanguage())) {
-                if (intent.getTargetTypes().some(type => element instanceof type) && intent.isApplicable(caret, element)) {
-                    result.push(new ApplicableIntent(intent, element));
+                try {
+                    if (intent.getTargetTypes().some(type => element instanceof type) && intent.isApplicable(caret, element)) {
+                        result.push(new ApplicableIntent(intent, element));
+                    }
+                } catch (e) {
+                    this.logger.error(`Error checking applicability of intent ${intent.getId()} on node ${element.constructor.name}: ${e}`);
                 }
-
             }
             element = element.getParent()
         }

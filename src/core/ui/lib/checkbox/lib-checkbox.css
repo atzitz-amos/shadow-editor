@@ -1,0 +1,102 @@
+/* ---- Checkbox (see IdeCheckbox) ----------------------------------------- */
+
+/* The element is the checkbox: its content is the label, ::before the box and ::after the mark */
+ide-checkbox {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    vertical-align: middle;
+    color: var(--ide-text-primary);
+    font-family: var(--ide-system-font), sans-serif;
+    cursor: pointer;
+    user-select: none;
+}
+
+ide-checkbox:empty {
+    gap: 0;
+}
+
+ide-checkbox::before {
+    content: "";
+    flex: none;
+    box-sizing: border-box;
+    width: 14px;
+    height: 14px;
+    border: 1px solid var(--ide-btn-secondary-border);
+    border-radius: 3px;
+    background: var(--ide-btn-secondary-bg);
+    transition: background-color 0.12s ease, border-color 0.12s ease;
+}
+
+ide-checkbox:hover:not(:disabled)::before {
+    border-color: #56617c;
+    background: var(--ide-btn-secondary-hover);
+}
+
+ide-checkbox:is([checked], [indeterminate])::before {
+    border-color: var(--ide-btn-primary-bg);
+    background: var(--ide-btn-primary-bg);
+}
+
+ide-checkbox:is([checked], [indeterminate]):hover:not(:disabled)::before {
+    border-color: var(--ide-btn-primary-hover);
+    background: var(--ide-btn-primary-hover);
+}
+
+/* The tick, drawn as the bottom right corner of a rotated rectangle */
+ide-checkbox[checked]::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 5px;
+    box-sizing: border-box;
+    width: 4px;
+    height: 8px;
+    margin-top: -5px;
+    border: solid #ffffff;
+    border-width: 0 1.5px 1.5px 0;
+    transform: rotate(45deg);
+}
+
+/* Indeterminate wins over checked, as with native checkboxes */
+ide-checkbox[indeterminate]::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 3px;
+    width: 8px;
+    height: 2px;
+    margin-top: -1px;
+    border: 0;
+    border-radius: 1px;
+    background: #ffffff;
+    transform: none;
+}
+
+ide-checkbox:focus {
+    outline: none;
+}
+
+ide-checkbox:focus-visible::before {
+    outline: 2px solid var(--ide-accent-primary, #4a76bc);
+    outline-offset: 1px;
+}
+
+ide-checkbox:disabled {
+    color: var(--ide-text-disabled);
+    cursor: not-allowed;
+}
+
+ide-checkbox:disabled::before {
+    border-color: #262d3c;
+    background: var(--ide-bg-disabled);
+}
+
+ide-checkbox:disabled:is([checked], [indeterminate])::before {
+    background: #2c3953;
+}
+
+ide-checkbox:disabled::after {
+    opacity: 0.5;
+}

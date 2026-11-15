@@ -47,3 +47,27 @@
     gap: 3px !important;
     padding-left: 3px !important;
 }
+
+/* Auto complete */
+.autocomplete-popup {
+    padding: 0;
+    width: 300px;
+    border-radius: 5px;
+    max-height: 200px;
+    overflow: auto;
+}
+
+.autocomplete-popup-line {
+    font-family: var(--ide-system-font), sans-serif;
+    gap: 3px !important;
+    display: flex;
+    height: 25px;
+    padding: 2px 10px 2px 5px;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.autocomplete-item-details {
+    color: gray;
+    margin-left: 5px;
+}

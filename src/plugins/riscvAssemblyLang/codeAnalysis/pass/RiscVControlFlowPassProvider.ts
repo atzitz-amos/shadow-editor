@@ -1,4 +1,3 @@
-import {Editor} from "../../../../editor/Editor";
 import {CodeAnalysisPass} from "../../../../lang/codeAnalysis/analysis/api/CodeAnalysisPass";
 import {CodeAnalysisPassProvider} from "../../../../lang/codeAnalysis/analysis/api/CodeAnalysisPassProvider";
 import {SynDocument} from "../../../../lang/syntax/api/document/SynDocument";

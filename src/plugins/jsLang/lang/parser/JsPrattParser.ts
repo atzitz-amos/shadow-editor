@@ -426,9 +426,7 @@ export class JsPrattParser {
                 }
             }
             const propToken = this.builder.expect(JsLexicalGrammar.IDENTIFIER).orError("Expected property name");
-            if (propToken) {
-                marker.done(JsGrammar.MemberAccessExpr);
-            }
+            marker.done(JsGrammar.MemberAccessExpr);
             return;
         } else if (type === JsLexicalGrammar.LPAREN) {
             // Call expression

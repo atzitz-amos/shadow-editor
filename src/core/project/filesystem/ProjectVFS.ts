@@ -12,6 +12,8 @@ import {FileCreatedEvent} from "../events/FileCreatedEvent";
 import {UUIDHelper} from "../../../editor/utils/UUIDHelper";
 import {EntryRenamedEvent} from "../events/EntryRenamedEvent";
 import {EntryDeletedEvent} from "../events/EntryDeletedEvent";
+import {BinaryContent, ProjectBinaryFile} from "./tree/ProjectBinaryFile";
+import {BinaryFileCreatedEvent} from "../events/BinaryFileCreatedEvent";
 
 export type FileListing = { id: string, path: string };
 export type FileDump = { path: string, content: string };
@@ -53,6 +55,25 @@ export class ProjectVFS implements FileSystem {
         return typeof arg === "string" || Array.isArray(arg) || arg instanceof RelativePath;
     }
 
+    private static createEntry(fs: ProjectVFS, vNode: VNode): FileSystemEntry {
+        switch (vNode.kind) {
+            case "file":
+                return new ProjectFile(fs, vNode);
+            case "binary":
+                return new ProjectBinaryFile(fs, vNode);
+            case "directory":
+                return new ProjectDirectory(fs, vNode);
+        }
+    }
+
+    // ------------------------------------------------------------------ creation
+
+    private static describe(entry: FileSystemEntry): string {
+        if (entry.isDirectory()) return "a directory";
+        if (entry.isBinaryFile()) return "a binary file";
+        return "a text file";
+    }
+
     async init(): Promise<void> {
         this.blobsHandle = await this.virtualHandle.getDirectoryHandle("blobs", {create: true});
         this.rootVNode = this.vNodeStore.getRoot(this.name);
@@ -60,8 +81,6 @@ export class ProjectVFS implements FileSystem {
 
         this.childrenCache.set(this.root.getId(), this.root);
     }
-
-    // ------------------------------------------------------------------ creation
 
     getRoot(): ProjectDirectory {
         return this.root;
@@ -84,11 +103,11 @@ export class ProjectVFS implements FileSystem {
         return child;
     }
 
+    // ------------------------------------------------------------------ lookup
+
     createFile(parent: ProjectDirectory, name: string): ProjectFile;
 
     createFile(path: RelativePathInput, name: string): ProjectFile;
-
-    // ------------------------------------------------------------------ lookup
 
     createFile(arg: ProjectDirectory | RelativePathInput, name: string): ProjectFile {
         const parent = arg instanceof ProjectDirectory ? arg : this.getDir(arg);
@@ -103,6 +122,23 @@ export class ProjectVFS implements FileSystem {
         return child;
     }
 
+    createBinaryFile(parent: ProjectDirectory, name: string, mimeType?: string): ProjectBinaryFile;
+
+    createBinaryFile(path: RelativePathInput, name: string, mimeType?: string): ProjectBinaryFile;
+
+    createBinaryFile(arg: ProjectDirectory | RelativePathInput, name: string, mimeType = "application/octet-stream"): ProjectBinaryFile {
+        const parent = arg instanceof ProjectDirectory ? arg : this.getDir(arg);
+        const now = Date.now();
+        const id = UUIDHelper.newUUID();
+
+        const vNode = this.vNodeStore.createBinaryFile(id, name, parent.getId(), now, now, null, 0, mimeType);
+        const child = new ProjectBinaryFile(this, vNode);
+        this.childrenCache.set(id, child);
+
+        this.eventBus.syncPublish(new BinaryFileCreatedEvent(child));
+        return child;
+    }
+
     getEntry(path: RelativePathInput): FileSystemEntry {
         const vNode = this.resolveVNode(path);
         if (!vNode) throw new Error("No entry at path: " + RelativePath.of(path).toString());
@@ -113,7 +149,7 @@ export class ProjectVFS implements FileSystem {
     getEntryForVNode(vNode: VNode): FileSystemEntry {
         let entry = this.childrenCache.get(vNode.id);
         if (!entry) {
-            entry = vNode.kind === "file" ? new ProjectFile(this, vNode) : new ProjectDirectory(this, vNode);
+            entry = ProjectVFS.createEntry(this, vNode);
             this.childrenCache.set(vNode.id, entry);
         }
         return entry;
@@ -128,7 +164,7 @@ export class ProjectVFS implements FileSystem {
     getDir(path: RelativePathInput): ProjectDirectory {
         const node = this.getEntry(path);
         if (!(node instanceof ProjectDirectory)) {
-            throw new Error(`Expected a directory at path ${RelativePath.of(path)}, but found a file.`);
+            throw new Error(`Expected a directory at path ${RelativePath.of(path)}, but found ${ProjectVFS.describe(node)}.`);
         }
         return node;
     }
@@ -136,7 +172,15 @@ export class ProjectVFS implements FileSystem {
     getFile(path: RelativePathInput): ProjectFile {
         const node = this.getEntry(path);
         if (!(node instanceof ProjectFile)) {
-            throw new Error(`Expected a file at path ${RelativePath.of(path)}, but found a directory.`);
+            throw new Error(`Expected a text file at path ${RelativePath.of(path)}, but found ${ProjectVFS.describe(node)}.`);
+        }
+        return node;
+    }
+
+    getBinaryFile(path: RelativePathInput): ProjectBinaryFile {
+        const node = this.getEntry(path);
+        if (!(node instanceof ProjectBinaryFile)) {
+            throw new Error(`Expected a binary file at path ${RelativePath.of(path)}, but found ${ProjectVFS.describe(node)}.`);
         }
         return node;
     }
@@ -163,9 +207,22 @@ export class ProjectVFS implements FileSystem {
         return arg instanceof ProjectFile;
     }
 
+    isBinaryFile(entry: FileSystemEntry): boolean;
+
+    isBinaryFile(path: RelativePathInput): boolean;
+
+    isBinaryFile(arg: FileSystemEntry | RelativePathInput): boolean {
+        if (ProjectVFS.isPathInput(arg)) {
+            return this.resolveVNode(arg)?.kind === "binary";
+        }
+        return arg instanceof ProjectBinaryFile;
+    }
+
     isDirectory(entry: FileSystemEntry): boolean;
 
     isDirectory(path: RelativePathInput): boolean;
+
+    // ------------------------------------------------------------------ mutation
 
     isDirectory(arg: FileSystemEntry | RelativePathInput): boolean {
         if (ProjectVFS.isPathInput(arg)) {
@@ -173,8 +230,6 @@ export class ProjectVFS implements FileSystem {
         }
         return arg instanceof ProjectDirectory;
     }
-
-    // ------------------------------------------------------------------ mutation
 
     getPath(entry: FileSystemEntry): RelativePath {
         return RelativePath.of(this.vNodeStore.getPath(entry.getId()));
@@ -196,9 +251,9 @@ export class ProjectVFS implements FileSystem {
 
     renameEntry(entry: FileSystemEntry, newName: string): void;
 
-    renameEntry(path: RelativePathInput, newName: string): void;
-
     // ------------------------------------------------------------------ traversal
+
+    renameEntry(path: RelativePathInput, newName: string): void;
 
     renameEntry(arg: FileSystemEntry | RelativePathInput, newName: string): void {
         const entry = ProjectVFS.isPathInput(arg) ? this.getEntry(arg) : arg;
@@ -216,11 +271,11 @@ export class ProjectVFS implements FileSystem {
         return files;
     }
 
+    // ------------------------------------------------------------------ content
+
     getChildren(parent: ProjectDirectory): FileSystemEntry[] {
         return this.vNodeStore.getChildren(parent.getId()).map(vNode => this.getEntryForVNode(vNode));
     }
-
-    // ------------------------------------------------------------------ content
 
     async getFileContent(file: ProjectFile): Promise<FileSystemFileHandle> {
         this.assertFileExists(file);
@@ -229,27 +284,21 @@ export class ProjectVFS implements FileSystem {
 
     async write(file: ProjectFile, content: string): Promise<string> {
         this.assertFileExists(file);
-
-        const id = file.getId();
-        const bytes = ProjectVFS.encoder.encode(content);
-
-        const handle = await this.getBlobHandle(id);
-        const writable = await handle.createWritable();
-        try {
-            await writable.write(bytes);
-            await writable.close();
-        } catch (e) {
-            await writable.abort().catch(() => {
-            });
-            throw e;
-        }
-
-        this.vNodeStore.updateFile(id, bytes.byteLength, Date.now());
-
+        await this.writeBlob(file.getId(), ProjectVFS.encoder.encode(content));
         return content;
     }
 
+    async readBinary(file: ProjectBinaryFile): Promise<File> {
+        this.assertFileExists(file);
+        return (await this.getBlobHandle(file.getId())).getFile();
+    }
+
     // ------------------------------------------------------------------ bulk APIs (for workers / search)
+
+    async writeBinary(file: ProjectBinaryFile, content: BinaryContent): Promise<void> {
+        this.assertFileExists(file);
+        await this.writeBlob(file.getId(), content);
+    }
 
     /** Cheap metadata only: lets a worker read the blobs itself without content crossing the thread bridge. */
     listFiles(dir: ProjectDirectory = this.root): FileListing[] {
@@ -260,6 +309,8 @@ export class ProjectVFS implements FileSystem {
     getBlobsHandle(): FileSystemDirectoryHandle {
         return this.blobsHandle;
     }
+
+    // ------------------------------------------------------------------ internals
 
     /** Reads every file under `dir` with bounded parallelism and returns plain data (one bridge round trip via `$value()`). */
     async readAllTextFiles(dir: ProjectDirectory = this.root, concurrency = 16): Promise<FileDump[]> {
@@ -279,8 +330,6 @@ export class ProjectVFS implements FileSystem {
         await Promise.all(Array.from({length: Math.min(concurrency, files.length)}, () => lane()));
         return out;
     }
-
-    // ------------------------------------------------------------------ internals
 
     /** Pushes into a shared array instead of `files.push(...recursiveResult)`, which copies per level and can blow the stack. */
     private collectFiles(dir: ProjectDirectory, out: ProjectFile[]): void {
@@ -305,7 +354,24 @@ export class ProjectVFS implements FileSystem {
         return this.vNodeStore.resolvePath(rp.toString(), this.rootVNode.id) ?? null;
     }
 
-    private assertFileExists(file: ProjectFile): void {
+    /** Replaces the blob's content in one writable (nothing is visible until `close()`), then records size + mtime. */
+    private async writeBlob(id: string, content: BinaryContent): Promise<void> {
+        const handle = await this.getBlobHandle(id);
+        const writable = await handle.createWritable();
+        try {
+            await writable.write(content);
+            await writable.close();
+        } catch (e) {
+            await writable.abort().catch(() => {
+            });
+            throw e;
+        }
+
+        const size = content instanceof Blob ? content.size : content.byteLength;
+        this.vNodeStore.updateFile(id, size, Date.now());
+    }
+
+    private assertFileExists(file: ProjectFile | ProjectBinaryFile): void {
         if (!this.isLive(file.getId())) {
             throw new Error(`File ${file.getId()} does not exist in the VFS.`);
         }

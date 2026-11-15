@@ -100,7 +100,11 @@ export class TokenCache {
         return new StaticTokenStream(this.getTokens());
     }
 
-    getTokenAt(offset: Offset): Token | null {
+    /**
+     * The token containing `offset`. At the boundary between two tokens, `'right'` returns the token starting at
+     * `offset` and `'left'` the one ending at it.
+     */
+    getTokenAt(offset: Offset, lean: 'left' | 'right' = 'right'): Token | null {
         let lo = 0;
         let hi = this.tokens.length - 1;
         let exactMatchIdx = -1;
@@ -109,8 +113,13 @@ export class TokenCache {
             const mid = (lo + hi) >> 1;
             const r = this.tokens[mid].getRange();
 
-            if (offset >= r.start && offset < r.end) {
+            if (offset >= r.start && (lean === 'right' ? offset < r.end : offset <= r.end)) {
                 exactMatchIdx = mid;
+                // With 'left', both ends are inclusive, so at a boundary both neighbours match and the one the
+                // search lands on depends on the number of tokens: walk back to the left-most match.
+                if (lean === 'left') {
+                    while (exactMatchIdx > 0 && this.tokens[exactMatchIdx - 1].getRange().end >= offset) exactMatchIdx--;
+                }
                 break;
             }
 
@@ -121,21 +130,7 @@ export class TokenCache {
             }
         }
 
-        if (exactMatchIdx === -1) return null;
-
-        let matchedToken = this.tokens[exactMatchIdx];
-
-
-        // if (matchedToken.getType().shouldSkip && offset === matchedToken.getRange().start) {
-        //     for (let i = exactMatchIdx - 1; i >= 0; i--) {
-        //         if (!this.tokens[i].getType().shouldSkip) {
-        //             return this.tokens[i];
-        //         }
-        //     }
-        //     return null;
-        // }
-
-        return matchedToken;
+        return this.tokens[exactMatchIdx] ?? null;
     }
 
     // --------------------

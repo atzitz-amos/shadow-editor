@@ -14,7 +14,7 @@ import {Describable} from "../../../../core/ui/api/Describable";
 export class ContextActionsPopup<T extends Describable> extends EditorInlinePopup {
     private actionChosenCallback: ((selected: T | null) => void) | null = null;
 
-    public constructor(editor: Editor, private readonly elements: T[]) {
+    public constructor(editor: Editor, private elements: T[], private readonly focusList: boolean = true) {
         super(editor, "context-actions-popup", CloseOn.DEFAULT)
     }
 
@@ -31,18 +31,31 @@ export class ContextActionsPopup<T extends Describable> extends EditorInlinePopu
         // </div>`);
 
         const searchableList = new IdeSearchableList(this.getUnderlyingElement(), this.elements);
+        searchableList.setFocusOnClick(this.focusList);
         searchableList.setOnValueConfirmed(element => {
             if (this.actionChosenCallback) this.actionChosenCallback(element as T)
-        })
+        });
 
         this.addChild(searchableList);
         this.drawChildren();
 
-        setTimeout(() => searchableList.focus(), 0);
+        if (this.focusList) setTimeout(() => searchableList.focus(), 0);
+    }
+
+    /**
+     * Replaces the listed elements in place, keeping the selected one if it is still listed.
+     */
+    public setElements(elements: T[]): void {
+        this.elements = elements;
+        this.getList()?.setElements(elements);
+    }
+
+    public getList(): IdeSearchableList<T> | null {
+        return this.getChildren().find(child => child instanceof IdeSearchableList) as IdeSearchableList<T> | null;
     }
 
     clone(): UIComponent {
-        return new ContextActionsPopup(this.editor, this.elements);
+        return new ContextActionsPopup(this.editor, this.elements, this.focusList);
     }
 
 }

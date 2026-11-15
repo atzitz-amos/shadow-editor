@@ -1,0 +1,1 @@
+import{fn as e,z as t}from"./Project-ffz7-_KD.js";var n=class extends e{name=`Loading Plugins`;priority=10;critical=!0;async run(){await t.getInstance().beginAsync()}};export{n as PluginLoadPhase};

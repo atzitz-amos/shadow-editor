@@ -2,6 +2,8 @@ import {SynParentElement} from "./SynParentElement";
 import {LanguageBase} from "../../../LanguageBase";
 import {SynGlobalScope} from "../../../indexes/scope/SynGlobalScope";
 import {SynCodeBlock} from "../SynCodeBlock";
+import {Token} from "../../builder/tokens/Token";
+import {SynTokenNode} from "../../impl/SynTokenNode";
 
 /**
  * Represents a syntax tree in the language processing system. It acts as the root node of possibly multiple nodes.
@@ -19,4 +21,6 @@ export interface SynTree extends SynParentElement {
     getGlobalScope(): SynGlobalScope;
 
     getToplevelCodeblock(): SynCodeBlock;
+
+    getSynTokenFromToken(token: Token): SynTokenNode | undefined;
 }

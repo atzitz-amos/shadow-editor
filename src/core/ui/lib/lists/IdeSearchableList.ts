@@ -1,100 +1,102 @@
-import {UIComponentMixin} from "../../engine/components/UIComponent";
-import {Focusable} from "../../engine/mixins/Focusable";
-import {HTMLUtils} from "../../../../editor/utils/HTMLUtils";
-import {ValuedComponent} from "../../engine/mixins/ValuedComponent";
 import {Describable} from "../../api/Describable";
+import {UIComponentElement} from "../elements/UIComponentElement";
+import {CustomElementsRegistry} from "../CustomElementsRegistry";
+import {FaIcon} from "../../icons/FaIcon";
+import {IdeList} from "./IdeList";
+import {IdeIconListItem} from "./IdeIconListItem";
 
 /**
+ * An {@link IdeList} of {@link Describable}s, each shown as an {@link IdeIconListItem} and sorted by description.
  *
  * @author Atzitz Amos
  * @date 9/12/2026
  * @since 1.0.0
  */
-export class IdeSearchableList<T extends Describable> extends UIComponentMixin(Focusable, ValuedComponent<Describable>) {
-    private selectedIndex: number = 0;
-    private elements: T[];
-
+export class IdeSearchableList<T extends Describable> extends IdeList<T, IdeIconListItem<T>> {
     constructor(parent: HTMLElement, elements: T[]) {
-        super(HTMLUtils.createDiv("ide-searchable-list", parent));
-
-        this.elements = elements.toSorted((a, b) => a.getDescription().localeCompare(b.getDescription()));
-
-        this.addEventListener("click", e => {
-            this.focus();
-            e.stopPropagation();
-        });
-
-        this.addEventListener("keydown", e => {
-            if (e.key === "ArrowUp") {
-                e.preventDefault();
-                this.selectedIndex = this.selectedIndex === 0 ? this.elements.length - 1 : this.selectedIndex - 1;
-                this.updateSelected();
-            } else if (e.key === "ArrowDown") {
-                e.preventDefault();
-                this.selectedIndex = this.selectedIndex === this.elements.length - 1 ? 0 : this.selectedIndex + 1;
-                this.updateSelected();
-            } else if (e.key === "Enter") {
-                e.preventDefault();
-                const selectedElement = this.elements[this.selectedIndex];
-                if (selectedElement) {
-                    this.triggerValueConfirmed();
-                }
-            }
-        });
+        super(parent, IdeSearchableList.sorted(elements), element => new IdeIconListItem(element), "ide-searchable-list");
     }
 
-    getValue(): T | null {
-        return this.elements[this.selectedIndex] ?? null;
+    private static sorted<T extends Describable>(elements: T[]): T[] {
+        return elements.toSorted((a, b) => a.getDescription().localeCompare(b.getDescription()));
     }
 
-    public draw(): void {
-        if (this.elements.length === 0) {
-            this.setInnerHTML(`
-                <div class="ide-searchable-list-no-results">No results</div>
-            `)
-
-            return;
-        }
-
-        this.setInnerHTML("");
-
-        for (const element of this.elements) {
-            const row = HTMLUtils.createDiv("ide-searchable-list-row");
-            const icon_span = HTMLUtils.createElement("span.ide-searchable-list-row-icon", row);
-            const icon = element.getIcon?.();
-            if (icon) icon_span.appendChild(icon.toHTML());
-
-            const name_span = HTMLUtils.createElement("span.ide-searchable-list-row-name", row);
-            name_span.textContent = element.getDescription();
-            this.addHtmlElement(row);
-
-            row.addEventListener("click", e => {
-                this.selectedIndex = this.elements.indexOf(element);
-                this.updateSelected();
-                e.stopPropagation();
-            });
-
-            row.addEventListener("dblclick", e => {
-                this.selectedIndex = this.elements.indexOf(element);
-                this.updateSelected();
-                this.triggerValueConfirmed();
-                e.stopPropagation();
-            });
-        }
-        this.updateSelected();
-    }
-
-    private updateSelected() {
-        const rows = this.getUnderlyingElement().querySelectorAll(".ide-searchable-list-row");
-        rows.forEach((row, index) => {
-            if (index === this.selectedIndex) {
-                row.classList.add("selected");
-                row.scrollIntoView({block: "nearest"});
-            } else {
-                row.classList.remove("selected");
-            }
-        });
-
-        this.triggerValueChanged()
+    setElements(elements: T[]): void {
+        super.setElements(IdeSearchableList.sorted(elements));
     }
 }
+
+/** An item of an {@code <ide-searchable-list>} described by an {@code <ide-list-item>} child */
+export type IdeListItemElementDescription = Describable & { element: HTMLElement };
+
+/**
+ * {@code <ide-searchable-list>}: an {@link IdeSearchableList} of the {@code items} property, or else of its
+ * {@code <ide-list-item icon="file">Label</ide-list-item>} children.
+ * <p>
+ * Dispatches a {@code change} event when the selected item changes, and a {@code confirm} event when it is chosen
+ * (Enter or double click), both with the item as {@code detail.value}.
+ */
+class _CustomIdeSearchableList extends UIComponentElement<IdeSearchableList<Describable>> {
+    private explicitItems: Describable[] | null = null;
+    private readonly observer = new MutationObserver(records => {
+        const itemsChanged = records.some(record => record.type === "attributes" || record.type === "characterData"
+            || [...record.addedNodes, ...record.removedNodes].some(node => node.nodeName === "IDE-LIST-ITEM"));
+        if (itemsChanged && this.explicitItems === null) this.scheduleRebuild();
+    });
+
+    get items(): Describable[] {
+        return this.explicitItems ?? this.itemsFromChildren();
+    }
+
+    /** Overrides the {@code <ide-list-item>} children, null uses them again */
+    set items(items: Describable[] | null) {
+        this.explicitItems = items;
+        this.scheduleRebuild();
+    }
+
+    /** The selected item */
+    get value(): Describable | null {
+        return this.getComponent()?.getValue() ?? null;
+    }
+
+    focus(options?: FocusOptions) {
+        const list = this.getComponent();
+        if (list) list.focus();
+        else super.focus(options);
+    }
+
+    connectedCallback() {
+        super.connectedCallback();
+        this.observer.observe(this, {
+            childList: true,
+            subtree: true,
+            characterData: true,
+            attributes: true,
+            attributeFilter: ["icon"]
+        });
+    }
+
+    disconnectedCallback() {
+        this.observer.disconnect();
+    }
+
+    protected createComponent(): IdeSearchableList<Describable> {
+        const list = new IdeSearchableList(this, this.items);
+        list.setOnValueChanged(value => this.dispatchEvent(new CustomEvent("change", {detail: {value}})));
+        list.setOnValueConfirmed(value => this.dispatchEvent(new CustomEvent("confirm", {detail: {value}})));
+        return list;
+    }
+
+    private itemsFromChildren(): IdeListItemElementDescription[] {
+        return [...this.querySelectorAll<HTMLElement>(":scope > ide-list-item")].map(element => ({
+            element,
+            getDescription: () => element.textContent?.trim() ?? "",
+            getIcon: () => {
+                const icon = element.getAttribute("icon");
+                return icon ? FaIcon.auto(icon) : null;
+            }
+        }));
+    }
+}
+
+CustomElementsRegistry.register("ide-searchable-list", _CustomIdeSearchableList);

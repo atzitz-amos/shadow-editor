@@ -52,6 +52,10 @@ export class LangRegistry {
         }
     }
 
+    static getAssociatedLanguage(file: ProjectFile): LanguageBase | null {
+        return this.getInstance().getAssociatedLanguage(file);
+    }
+
     static getLanguageByKey(key: string): LanguageBase | null {
         return this.getInstance().getLanguageByKey(key);
     }

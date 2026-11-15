@@ -2,6 +2,8 @@ import {UIComponent} from "../../engine/components/UIComponent";
 import {HTMLUtils} from "../../../../editor/utils/HTMLUtils";
 import {SimpleDiff} from "../../../diff/simple/SimpleDiff";
 import {DiffChange} from "../../../diff/simple/DiffChange";
+import {UIComponentElement} from "../elements/UIComponentElement";
+import {CustomElementsRegistry} from "../CustomElementsRegistry";
 import {DiffResult} from "../../../diff/simple/DiffResult";
 
 export type IdeSideBySideDiffOptions = {
@@ -51,73 +53,6 @@ export class IdeSideBySideDiff extends UIComponent {
     constructor(private oldText: string, private newText: string, private readonly options: IdeSideBySideDiffOptions = {}) {
         super(HTMLUtils.createDiv("ide-diff"));
         this.result = this.compute();
-    }
-
-    setTexts(oldText: string, newText: string): void {
-        this.oldText = oldText;
-        this.newText = newText;
-        this.result = this.compute();
-        this.redraw();
-    }
-
-    getResult(): DiffResult<string> {
-        return this.result;
-    }
-
-    draw(): void {
-        const root = this.getUnderlyingElement();
-        root.innerHTML = "";
-
-        this.renderHeader(HTMLUtils.createDiv("ide-diff-header", root));
-
-        const panes = HTMLUtils.createDiv("ide-diff-panes", root);
-        const left = HTMLUtils.createDiv("ide-diff-lines", HTMLUtils.createDiv("ide-diff-pane", panes));
-        const right = HTMLUtils.createDiv("ide-diff-lines", HTMLUtils.createDiv("ide-diff-pane", panes));
-        IdeSideBySideDiff.syncVerticalScroll(left.parentElement!, right.parentElement!);
-
-        const addRows = (rows: Row[]) => rows.forEach(row => {
-            left.appendChild(IdeSideBySideDiff.renderLine(row.left));
-            right.appendChild(IdeSideBySideDiff.renderLine(row.right));
-        });
-
-        const segments = IdeSideBySideDiff.toSegments(this.result.getChanges());
-        const fold = (this.options.foldUnchanged ?? true) && !this.result.isIdentical();
-        const context = this.options.context ?? 3;
-
-        segments.forEach((segment, i) => {
-            // Keep the context next to the changes before and after, fold what is in between
-            const keepStart = i === 0 ? 0 : context;
-            const keepEnd = i === segments.length - 1 ? 0 : context;
-            const hidden = segment.rows.length - keepStart - keepEnd;
-
-            if (segment.changed || !fold || hidden < 2) {
-                addRows(segment.rows);
-                return;
-            }
-
-            addRows(segment.rows.slice(0, keepStart));
-            IdeSideBySideDiff.addFold(left, right, segment.rows.slice(keepStart, keepStart + hidden));
-            addRows(segment.rows.slice(keepStart + hidden));
-        });
-    }
-
-    private compute(): DiffResult<string> {
-        return SimpleDiff.diffLines(this.oldText, this.newText, {ignoreWhitespace: this.options.ignoreWhitespace});
-    }
-
-    private renderHeader(header: HTMLElement) {
-        HTMLUtils.createElement("span.ide-diff-title", header).textContent = this.options.oldTitle ?? "Before";
-
-        const right = HTMLUtils.createDiv("ide-diff-title-row", header);
-        HTMLUtils.createElement("span.ide-diff-title", right).textContent = this.options.newTitle ?? "After";
-
-        const stats = HTMLUtils.createElement("span.ide-diff-stats", right);
-        if (this.result.isIdentical()) {
-            HTMLUtils.createElement("span.ide-diff-identical", stats).textContent = "identical";
-        } else {
-            HTMLUtils.createElement("span.ide-diff-stat-inserted", stats).textContent = `+${this.result.getInsertedCount()}`;
-            HTMLUtils.createElement("span.ide-diff-stat-deleted", stats).textContent = `−${this.result.getDeletedCount()}`;
-        }
     }
 
     /** Scrolling one side vertically scrolls the other one along */
@@ -210,4 +145,130 @@ export class IdeSideBySideDiff extends UIComponent {
         leftFold.addEventListener("click", expand);
         rightFold.addEventListener("click", expand);
     }
+
+    setTexts(oldText: string, newText: string): void {
+        this.oldText = oldText;
+        this.newText = newText;
+        this.result = this.compute();
+        this.redraw();
+    }
+
+    getResult(): DiffResult<string> {
+        return this.result;
+    }
+
+    draw(): void {
+        const root = this.getUnderlyingElement();
+        root.innerHTML = "";
+
+        this.renderHeader(HTMLUtils.createDiv("ide-diff-header", root));
+
+        const panes = HTMLUtils.createDiv("ide-diff-panes", root);
+        const left = HTMLUtils.createDiv("ide-diff-lines", HTMLUtils.createDiv("ide-diff-pane", panes));
+        const right = HTMLUtils.createDiv("ide-diff-lines", HTMLUtils.createDiv("ide-diff-pane", panes));
+        IdeSideBySideDiff.syncVerticalScroll(left.parentElement!, right.parentElement!);
+
+        const addRows = (rows: Row[]) => rows.forEach(row => {
+            left.appendChild(IdeSideBySideDiff.renderLine(row.left));
+            right.appendChild(IdeSideBySideDiff.renderLine(row.right));
+        });
+
+        const segments = IdeSideBySideDiff.toSegments(this.result.getChanges());
+        const fold = (this.options.foldUnchanged ?? true) && !this.result.isIdentical();
+        const context = this.options.context ?? 3;
+
+        segments.forEach((segment, i) => {
+            // Keep the context next to the changes before and after, fold what is in between
+            const keepStart = i === 0 ? 0 : context;
+            const keepEnd = i === segments.length - 1 ? 0 : context;
+            const hidden = segment.rows.length - keepStart - keepEnd;
+
+            if (segment.changed || !fold || hidden < 2) {
+                addRows(segment.rows);
+                return;
+            }
+
+            addRows(segment.rows.slice(0, keepStart));
+            IdeSideBySideDiff.addFold(left, right, segment.rows.slice(keepStart, keepStart + hidden));
+            addRows(segment.rows.slice(keepStart + hidden));
+        });
+    }
+
+    private compute(): DiffResult<string> {
+        return SimpleDiff.diffLines(this.oldText, this.newText, {ignoreWhitespace: this.options.ignoreWhitespace});
+    }
+
+    private renderHeader(header: HTMLElement) {
+        HTMLUtils.createElement("span.ide-diff-title", header).textContent = this.options.oldTitle ?? "Before";
+
+        const right = HTMLUtils.createDiv("ide-diff-title-row", header);
+        HTMLUtils.createElement("span.ide-diff-title", right).textContent = this.options.newTitle ?? "After";
+
+        const stats = HTMLUtils.createElement("span.ide-diff-stats", right);
+        if (this.result.isIdentical()) {
+            HTMLUtils.createElement("span.ide-diff-identical", stats).textContent = "identical";
+        } else {
+            HTMLUtils.createElement("span.ide-diff-stat-inserted", stats).textContent = `+${this.result.getInsertedCount()}`;
+            HTMLUtils.createElement("span.ide-diff-stat-deleted", stats).textContent = `−${this.result.getDeletedCount()}`;
+        }
+    }
 }
+
+/**
+ * {@code <ide-diff old-title="Before" new-title="After" context="3" fold-unchanged="false" ignore-whitespace>}: an
+ * {@link IdeSideBySideDiff} of the {@code oldText} and {@code newText} properties, which can also be given as the
+ * {@code old-text} and {@code new-text} attributes.
+ */
+class _CustomIdeDiff extends UIComponentElement<IdeSideBySideDiff> {
+    private oldValue = "";
+    private newValue = "";
+
+    static get observedAttributes() {
+        return ["old-title", "new-title", "context", "fold-unchanged", "ignore-whitespace", "old-text", "new-text"];
+    }
+
+    get oldText(): string {
+        return this.oldValue;
+    }
+
+    set oldText(text: string) {
+        this.setTexts(text, this.newValue);
+    }
+
+    get newText(): string {
+        return this.newValue;
+    }
+
+    set newText(text: string) {
+        this.setTexts(this.oldValue, text);
+    }
+
+    setTexts(oldText: string, newText: string): void {
+        this.oldValue = oldText;
+        this.newValue = newText;
+        this.getComponent()?.setTexts(oldText, newText);
+    }
+
+    /** The diff currently shown, null until the element is connected */
+    getResult(): DiffResult<string> | null {
+        return this.getComponent()?.getResult() ?? null;
+    }
+
+    attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null) {
+        if (name === "old-text") this.oldText = newValue ?? "";
+        else if (name === "new-text") this.newText = newValue ?? "";
+        else super.attributeChangedCallback(name, oldValue, newValue);
+    }
+
+    protected createComponent(): IdeSideBySideDiff {
+        return new IdeSideBySideDiff(this.oldValue, this.newValue, {
+            oldTitle: this.stringAttribute("old-title"),
+            newTitle: this.stringAttribute("new-title"),
+            context: this.numberAttribute("context"),
+            foldUnchanged: this.booleanAttribute("fold-unchanged"),
+            ignoreWhitespace: this.booleanAttribute("ignore-whitespace")
+        });
+    }
+}
+
+CustomElementsRegistry.register("ide-diff", _CustomIdeDiff);

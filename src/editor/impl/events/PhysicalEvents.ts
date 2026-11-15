@@ -11,7 +11,7 @@ import {XYPoint} from "../../core/coordinate/XYPoint";
  * @date 10/22/2025
  * @since 1.0.0
  */
-export class KeyPressedEvent extends EditorEventBase {
+export class KeyPressedEvent extends EditorCancellableEventBase {
     public static readonly SUBSCRIBER = EventSubscriber.create(this);
 
     constructor(editor: Editor, private event: KeyboardEvent) {

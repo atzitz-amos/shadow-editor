@@ -1,0 +1,1 @@
+import{An as e,jn as t}from"./Project-ffz7-_KD.js";var n=class{shadow;static SUBSCRIBER=e.create(this);constructor(e){this.shadow=e}getShadowApp(){return this.shadow}getBubbleDirection(){return t.BUBBLE_BOTH}};export{n as t};

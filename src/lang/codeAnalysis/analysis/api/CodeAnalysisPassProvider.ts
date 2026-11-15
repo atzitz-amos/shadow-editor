@@ -1,4 +1,3 @@
-import {Editor} from "../../../../editor/Editor";
 import {SynDocument} from "../../../syntax/api/document/SynDocument";
 import {CodeAnalysisPass} from "./CodeAnalysisPass";
 

@@ -48,39 +48,6 @@ export class SynSuiteLegacyImporter {
     constructor(private readonly store: SynSuiteTestStore) {
     }
 
-    /**
-     * Looks for the old tests in the legacy database and imports them.
-     */
-    async importFromDatabase(): Promise<SynSuiteImportReport> {
-        const raw = await SynSuiteLegacyImporter.readLegacyValue();
-        if (raw === undefined) return {found: false, imported: 0, skipped: 0};
-        return this.importSerialized(raw);
-    }
-
-    /**
-     * Imports the old tests from their persisted form: the serialized map, or its JSON text.
-     */
-    importSerialized(raw: unknown): SynSuiteImportReport {
-        const serialized = SynSuiteLegacyImporter.unwrap(raw);
-        const byPlugin = new Deserializer().deserializeObject<Map<string, LegacyTest[]>>(serialized);
-
-        const report: SynSuiteImportReport = {found: true, imported: 0, skipped: 0};
-        const now = Date.now();
-
-        for (const tests of byPlugin.values()) {
-            for (const legacy of tests) {
-                const test = SynSuiteLegacyImporter.convert(legacy, now + report.imported);
-                if (this.store.find(SynSuiteGroups.of(test), test.name)) {
-                    report.skipped++;
-                    continue;
-                }
-                this.store.add(test);
-                report.imported++;
-            }
-        }
-        return report;
-    }
-
     private static convert(legacy: LegacyTest, createdAt: number): SynSuiteTest {
         const segments = legacy.key.split(".").map(segment => segment.replace(/[^A-Za-z0-9_$-]/g, "_") || "_");
         const name = segments.pop()!;
@@ -144,5 +111,38 @@ export class SynSuiteLegacyImporter {
         } finally {
             db.close();
         }
+    }
+
+    /**
+     * Looks for the old tests in the legacy database and imports them.
+     */
+    async importFromDatabase(): Promise<SynSuiteImportReport> {
+        const raw = await SynSuiteLegacyImporter.readLegacyValue();
+        if (raw === undefined) return {found: false, imported: 0, skipped: 0};
+        return this.importSerialized(raw);
+    }
+
+    /**
+     * Imports the old tests from their persisted form: the serialized map, or its JSON text.
+     */
+    importSerialized(raw: unknown): SynSuiteImportReport {
+        const serialized = SynSuiteLegacyImporter.unwrap(raw);
+        const byPlugin = new Deserializer().deserializeObject<Map<string, LegacyTest[]>>(serialized);
+
+        const report: SynSuiteImportReport = {found: true, imported: 0, skipped: 0};
+        const now = Date.now();
+
+        for (const tests of byPlugin.values()) {
+            for (const legacy of tests) {
+                const test = SynSuiteLegacyImporter.convert(legacy, now + report.imported);
+                if (this.store.find(SynSuiteGroups.of(test), test.name)) {
+                    report.skipped++;
+                    continue;
+                }
+                this.store.add(test);
+                report.imported++;
+            }
+        }
+        return report;
     }
 }

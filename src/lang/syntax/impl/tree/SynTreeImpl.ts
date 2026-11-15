@@ -8,6 +8,8 @@ import {LanguageBase} from "../../../LanguageBase";
 import {SynNodeVisitor} from "../../visitors/SynNodeVisitor";
 import {SynGlobalScope} from "../../../indexes/scope/SynGlobalScope";
 import {SynCodeBlock} from "../../api/SynCodeBlock";
+import {Token} from "../../builder/tokens/Token";
+import {SynTokenNode} from "../SynTokenNode";
 
 /**
  *
@@ -19,7 +21,6 @@ export class SynTreeImpl extends AbstractSynParentElement implements SynTree {
     private readonly range: TextRange;
     private readonly codeblock: SynCodeBlock;
     private readonly globalScope: SynGlobalScope;
-
     private readonly text: string;
 
     constructor(private readonly language: LanguageBase, children: SynNode[], private readonly document: SynDocument) {
@@ -47,6 +48,10 @@ export class SynTreeImpl extends AbstractSynParentElement implements SynTree {
 
     getSynDocument(): SynDocument {
         return this.document;
+    }
+
+    getSynTokenFromToken(token: Token): SynTokenNode | undefined {
+        return this.getAllTokensOfType(token.getType(), true).find(x => x.token === token);
     }
 
     getTextRange(): TextRange {

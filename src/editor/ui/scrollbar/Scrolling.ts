@@ -1,5 +1,6 @@
 import {View} from "../view/View";
 import {Document} from "../../core/document/Document";
+import {EditorScrolledEvent} from "../../impl/events/EditorScrolledEvent";
 
 export class Scrolling {
     private static readonly scrollListeners: ((view: View, doc: Document, x: number, y: number) => void)[] = [];
@@ -77,6 +78,7 @@ export class Scrolling {
         Scrolling.scrollListeners.forEach(l => l(this.view, this.view.getEditor().getOpenedDocument(), this.scrollX, this.scrollY));
 
         this.view.triggerRepaint();
+        this.publishScrolled();
     }
 
     /**
@@ -94,6 +96,7 @@ export class Scrolling {
             this.scrollX = targetX;
             this.scrollY = targetY;
             this.view.triggerRepaint();
+            this.publishScrolled();
         } else {
             this.startAnimation(targetX, targetY);
         }
@@ -179,6 +182,16 @@ export class Scrolling {
             this.scrollY = this.animEndY;
             this.view.triggerRepaint();
         }
+        this.publishScrolled();
+    }
+
+    /**
+     * Unlike the scroll listeners, which are given the target of an animated scroll once, this is published with
+     * the actual position on every change, so that whatever follows the scroll stays in sync with what is drawn.
+     */
+    private publishScrolled() {
+        const editor = this.view.getEditor();
+        editor.getEventBus().syncPublish(new EditorScrolledEvent(editor, this.scrollX, this.scrollY));
     }
 
     private easeOut(t: number): number {

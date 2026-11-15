@@ -22,7 +22,9 @@ import {
 import {
     InspectionsCodeAnalysisPassProvider
 } from "../../../../lang/codeAnalysis/inspections/analysis/InspectionsCodeAnalysisPassProvider";
-import {AnnotatorsCodeAnalysisPassProvider} from "../../../../lang/codeAnalysis/annotators/AnnotatorsCodeAnalysisPassProvider";
+import {
+    AnnotatorsCodeAnalysisPassProvider
+} from "../../../../lang/codeAnalysis/annotators/AnnotatorsCodeAnalysisPassProvider";
 import {InspectionsRegistry} from "../../../../lang/codeAnalysis/inspections/InspectionsRegistry";
 import {InspectionBase} from "../../../../lang/codeAnalysis/inspections/Inspection";
 import {ProblemsHolder} from "../../../../lang/codeAnalysis/inspections/problems/ProblemsHolder";

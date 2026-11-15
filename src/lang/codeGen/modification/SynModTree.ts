@@ -1,8 +1,9 @@
-import {SynDocument} from "../../syntax/api/document/SynDocument";
 import {SynModificationRecord} from "./SynModificationRecord";
 import {SynNode} from "../../syntax/api/SynNode";
 import {AbstractSynTemplate} from "../template/AbstractSynTemplate";
 import {TextRange} from "../../../editor/core/coordinate/range/TextRange";
+import {SynTree} from "../../syntax/api/tree/SynTree";
+import {SynPlaceholder} from "../placeholder/SynPlaceholder";
 
 /**
  *
@@ -19,7 +20,7 @@ export class SynModTree {
      */
     private readonly originals: { start: number, end: number, lengthDelta: number }[] = [];
 
-    constructor(private readonly synDocument: SynDocument) {
+    constructor(private readonly tree: SynTree) {
     }
 
     /**
@@ -29,11 +30,27 @@ export class SynModTree {
         this.applyModification(node.getTextRange(), template.getText());
     }
 
+    getText(): string {
+        let text = this.tree.getText();
+        for (const modification of this.modifications) {
+            text = text.slice(0, modification.range.start) + modification.text + text.slice(modification.range.end);
+        }
+        return text;
+    }
+
     /**
      * Replaces `node`'s text with a plain string.
      */
     replaceNodeWithText(node: SynNode, text: string): void {
         this.applyModification(node.getTextRange(), text);
+    }
+
+    replacePlaceholder(placeholder: SynPlaceholder, template: AbstractSynTemplate): void {
+        this.applyModification(placeholder.getTextRange(), template.getText());
+    }
+
+    replacePlaceholderWithText(placeholder: SynPlaceholder, text: string): void {
+        this.applyModification(placeholder.getTextRange(), text);
     }
 
     /**
@@ -43,15 +60,20 @@ export class SynModTree {
         this.applyModification(node.getTextRange(), "");
     }
 
+    /**
+     * The modifications, in the order they were recorded. They must be applied in that order and no other: each
+     * range is already shifted by the length change of the modifications recorded before it.
+     */
     getModifications(): SynModificationRecord[] {
         return this.modifications;
     }
 
     /**
      * Shared logic: modifications operate on the old version of the document, so a new one
-     * is checked for overlap against every existing modification and then shifted by the
-     * cumulative length delta of every modification that lies fully before it, so all
-     * modifications can be applied in document order.
+     * is shifted by the cumulative length delta of every existing modification that lies fully
+     * before it, so that all modifications can be applied in the order they were recorded.
+     * <p>
+     * Overlapping modifications are NOT checked for: it is up to the caller not to record any.
      */
     private applyModification(range: TextRange, text: string): void {
         const start = range.start;

@@ -177,6 +177,12 @@ export abstract class UIComponent implements Drawable, Disposable {
         }
     }
 
+    /** Draws a component that has no parent to draw it, allowing later calls to {@link redraw} */
+    public drawAsRoot(): void {
+        this.draw();
+        this.wasDrawn = true;
+    }
+
     protected addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void {
         this.getUnderlyingElement().addEventListener(type, listener, options);
     }

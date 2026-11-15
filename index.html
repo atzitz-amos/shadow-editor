@@ -57,13 +57,10 @@
             import {ProjectFilesPane} from "./src/app/ui/full/panes/projectFiles/ProjectFilesPane";
             import {SerializationUtils} from "./src/core/persistence/serializable/SerializationUtils";
             import {SimpleTooltipPopup} from "./src/editor/ui/popups/tooltip/SimpleTooltipPopup";
-            import {SettingBase} from "./src/core/settings/base/SettingBase";
             import {JsSynVisitor} from "./src/plugins/jsLang/lang/syntax/visitors/JsSynVisitor";
             import {SynRecursiveVisitor} from "./src/lang/syntax/visitors/SynRecursiveVisitor";
             import {SynLazyVisitorOptimizer} from "./src/lang/syntax/visitors/SynLazyVisitorOptimizer";
             import DebugToolsPlugin from "./src/plugins/debugTools/DebugToolsPlugin";
-            import {SourceRewriter} from "./src/lang/syntax/writer/SourceRewriter";
-            import {SynModificationTree} from "./src/lang/syntax/writer/template/SynModificationTree";
             import {IdeDialogUtilsCore} from "./src/core/ui/lib/dialog/utils/IdeDialogUtilsCore";
             import {FaIcon} from "./src/core/ui/icons/FaIcon";
             import {ProjectFilesPaneHelper} from "./src/app/ui/full/panes/projectFiles/ProjectFilesPaneHelper";
@@ -78,7 +75,6 @@
             import {TextBackground} from "./src/editor/ui/highlighter/style/TextBackground";
             import {ActionPopup} from "./src/core/ui/lib/dialog/action/ActionPopup";
             import {DebugToolsPopup} from "./src/plugins/debugTools/popup/DebugToolsPopup";
-            import {MainEditorChangedEvent} from "./src/app/ui/events/MainEditorChangedEvent";
             import {SynDocumentManager} from "./src/lang/syntax/manager/SynDocumentManager";
             import {LanguageParserDefinition} from "./src/lang/definitions/LanguageParserDefinition";
             import {JsWhitespaceScrambler} from "./src/plugins/debugTools/popup/codeStyle/JsWhitespaceScrambler";
@@ -97,20 +93,11 @@
             } from "./src/plugins/jsLang/lang/codeGen/template/JsFunctionParameterTemplate";
             import {JsExprTemplate} from "./src/plugins/jsLang/lang/codeGen/template/expr/JsExprTemplate";
             import {SynModTree} from "./src/lang/codeGen/modification/SynModTree";
-            import {JsSynTemplate} from "./src/plugins/jsLang/lang/codeGen/template/JsSynTemplate";
             import {LiveTemplateOverlay} from "./src/editor/ui/inline/live/LiveTemplateOverlay";
             import {LiveTemplateMode} from "./src/editor/core/live/LiveTemplateMode";
             import {LiveTemplate} from "./src/editor/core/live/LiveTemplate";
-            import {SearchProcessor} from "./src/core/search/SearchProcessor";
-            import {HTMLUtils} from "./src/editor/utils/HTMLUtils";
-            import {LightEditor} from "./src/editor/light/LightEditor";
-            import {DocumentView} from "./src/editor/core/document/view/DocumentView";
-            import {EditorDocumentManager} from "./src/editor/core/document/EditorDocumentManager";
-            import {LifecycleTerminatedEvent} from "./src/core/lifecycle/events/LifecycleTerminatedEvent";
-            import {IdeFindDialog} from "./src/app/ui/full/search/IdeFindDialog";
             import RiscVAssemblyLangPlugin from "./src/plugins/riscvAssemblyLang/RiscVAssemblyLangPlugin";
             import {RiscV32LexicalGrammar} from "./src/plugins/riscvAssemblyLang/lang/lexer/Riscv32LexicalGrammar";
-            import {DocumentViewManager} from "./src/editor/core/document/view/DocumentViewManager";
 
             window.QuickParseUtils = QuickParseUtils;
 
@@ -216,8 +203,6 @@
             window.SynASTElementImpl = SynASTElementImpl
             window.SimpleTooltipPopup = SimpleTooltipPopup;
             window.IdeDialogUtilsCore = IdeDialogUtilsCore;
-            window.SourceRewriter = SourceRewriter;
-            window.AbstractSynTemplate = JsSynTemplate;
 
             window.ProjectFilesPaneHelper = ProjectFilesPaneHelper;
 

@@ -4,9 +4,9 @@ import {HTMLUtils} from "../../../../editor/utils/HTMLUtils";
 import {SearchResult} from "../../../../core/search/SearchProcessor";
 import {HighlightedFragment} from "../../../../core/ui/lib/highlight/HighlightedFragment";
 import {TextAttributeKey} from "../../../../editor/ui/highlighter/style/TextAttributeKey";
-import JsLang from "../../../../plugins/jsLang/lang/JsLang";
 import {LogicalPosition} from "../../../../editor/core/coordinate/LogicalPosition";
 import {TextRange} from "../../../../editor/core/coordinate/range/TextRange";
+import {LangRegistry} from "../../../../lang/LangRegistry";
 
 /** Results rendered initially, and added per "show more". */
 const PAGE_SIZE = 50;
@@ -159,7 +159,8 @@ export class FindResultsListComponent extends UIComponentMixin(Focusable) {
 
         // Lexing and highlighting scale with the line length, so only the visible window is processed
         const {text, offset} = FindResultsListComponent.previewWindow(result);
-        const fragment = new HighlightedFragment(lineElement, text, JsLang.INSTANCE);
+        const language = LangRegistry.getAssociatedLanguage(result.file);
+        const fragment = new HighlightedFragment(lineElement, text, language);
         for (const range of result.appears) {
             const start = Math.max(range.start - offset, 0);
             const end = Math.min(range.end - offset, text.length);

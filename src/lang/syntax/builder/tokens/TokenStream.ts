@@ -131,7 +131,6 @@ export abstract class TokenStream {
 }
 
 export class StaticTokenStream extends TokenStream {
-
     private readonly tokens: Token[];
     private index: number = 0;
     private maxSeeked: number = 0;

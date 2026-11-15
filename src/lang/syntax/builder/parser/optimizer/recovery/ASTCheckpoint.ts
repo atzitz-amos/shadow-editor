@@ -20,6 +20,11 @@ export class ASTCheckpoint {
     constructor(private readonly name: string, private readonly args: any[], private readonly entryState: unknown[]) {
     }
 
+    // Omitted arguments take their defaults, so the argument lists must match in length too.
+    private static sameValues(a: unknown[], b: unknown[]) {
+        return a.length === b.length && a.every((value, index) => value === b[index]);
+    }
+
     /**
      * Whether a call recorded by `other` would parse the same text exactly as this one did.
      */
@@ -69,10 +74,5 @@ export class ASTCheckpoint {
         this.exitState = exitState;
         this.exitWasInvalid = exitWasInvalid;
         this.trailingTrivia = range.end - lastTokenOffset;
-    }
-
-    // Omitted arguments take their defaults, so the argument lists must match in length too.
-    private static sameValues(a: unknown[], b: unknown[]) {
-        return a.length === b.length && a.every((value, index) => value === b[index]);
     }
 }

@@ -25,6 +25,10 @@ export class SynLazyVisitorOptimizer {
         }
     }
 
+    private static warnOnError(visitor: SynNodeVisitor, node: SynNode, error: unknown, whileExiting: boolean) {
+        console.warn(`Visitor ${visitor.constructor.name} threw an error while ${whileExiting ? "exiting" : "visiting"} node ${node.constructor.name}: ${error}`);
+    }
+
     public visitNode(node: SynNode) {
         for (const [_, visitors] of this.visitors.entries().toArray().toSorted((a, b) => a[0] - b[0])) {
             this.visitWithVisitors(node, visitors);
@@ -51,10 +55,6 @@ export class SynLazyVisitorOptimizer {
                 this.onError(visitor, node, e, true);
             }
         }
-    }
-
-    private static warnOnError(visitor: SynNodeVisitor, node: SynNode, error: unknown, whileExiting: boolean) {
-        console.warn(`Visitor ${visitor.constructor.name} threw an error while ${whileExiting ? "exiting" : "visiting"} node ${node.constructor.name}: ${error}`);
     }
 }
 

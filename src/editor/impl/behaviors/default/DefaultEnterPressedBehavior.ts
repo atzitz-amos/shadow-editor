@@ -18,8 +18,11 @@ export class DefaultEnterPressedBehavior extends EnterPressedBehavior {
         const line = editor.getOpenedDocument().getLineAt(caret.getOffset());
 
         if (ModifierKeyHolder.isShiftPressed()) {
-            editor.insertText(line.getEnd(), "\n");
-            caret.moveToOffset(line.getEnd() + 1);
+            ModifierKeyHolder.getInstance().isShiftPressed = false;
+            UndoStack.undoableAction(editor, "enter", () => {
+                editor.insertText(line.getEnd(), "\n");
+                caret.moveToOffset(line.getEnd() + 1);
+            });
             return BehaviorHandlingMode.HANDLED;
         }
 

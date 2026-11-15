@@ -19,7 +19,13 @@ export class SynSuiteWindowContext {
     readonly runner: SynSuiteRunner = new SynSuiteRunner();
     readonly organizer: SynSuiteOrganizer = new SynSuiteOrganizer(this);
 
-    private notifyHandler: (message: string) => void = message => console.info(message);
+    get engine(): SynSuiteEngine {
+        return SynSuiteEngine.getInstance();
+    }
+
+    get store(): SynSuiteTestStore {
+        return this.engine.getStore();
+    }
 
     /** Where short messages for the user go, the status bar of the window */
     setNotifyHandler(handler: (message: string) => void): void {
@@ -28,14 +34,6 @@ export class SynSuiteWindowContext {
 
     notify(message: string): void {
         this.notifyHandler(message);
-    }
-
-    get engine(): SynSuiteEngine {
-        return SynSuiteEngine.getInstance();
-    }
-
-    get store(): SynSuiteTestStore {
-        return this.engine.getStore();
     }
 
     dispose(): void {
@@ -82,4 +80,6 @@ export class SynSuiteWindowContext {
         const selection = this.state.getSelection();
         return selection?.kind === "test" ? this.store.get(selection.id) : null;
     }
+
+    private notifyHandler: (message: string) => void = message => console.info(message);
 }

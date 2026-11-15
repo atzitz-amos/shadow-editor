@@ -11,6 +11,25 @@ export class DiffResult<T> {
     constructor(private readonly changes: readonly DiffChange<T>[]) {
     }
 
+    private static slice<T>(change: DiffChange<T>, start: number, end: number): DiffChange<T> {
+        return {
+            type: change.type,
+            oldIndex: change.oldIndex + start,
+            newIndex: change.newIndex + start,
+            items: change.items.slice(start, end)
+        };
+    }
+
+    private static toHunk<T>(changes: DiffChange<T>[]): DiffHunk<T> {
+        const first = changes[0];
+        let oldLength = 0, newLength = 0;
+        for (const change of changes) {
+            if (change.type !== "insert") oldLength += change.items.length;
+            if (change.type !== "delete") newLength += change.items.length;
+        }
+        return {oldStart: first.oldIndex, oldLength, newStart: first.newIndex, newLength, changes};
+    }
+
     /** Every run of the diff in order, equal runs included */
     getChanges(): readonly DiffChange<T>[] {
         return this.changes;
@@ -91,24 +110,5 @@ export class DiffResult<T> {
 
     private count(type: DiffChange<T>["type"]): number {
         return this.changes.filter(change => change.type === type).reduce((sum, change) => sum + change.items.length, 0);
-    }
-
-    private static slice<T>(change: DiffChange<T>, start: number, end: number): DiffChange<T> {
-        return {
-            type: change.type,
-            oldIndex: change.oldIndex + start,
-            newIndex: change.newIndex + start,
-            items: change.items.slice(start, end)
-        };
-    }
-
-    private static toHunk<T>(changes: DiffChange<T>[]): DiffHunk<T> {
-        const first = changes[0];
-        let oldLength = 0, newLength = 0;
-        for (const change of changes) {
-            if (change.type !== "insert") oldLength += change.items.length;
-            if (change.type !== "delete") newLength += change.items.length;
-        }
-        return {oldStart: first.oldIndex, oldLength, newStart: first.newIndex, newLength, changes};
     }
 }

@@ -1,7 +1,6 @@
 import {SynDocument} from "../../../syntax/api/document/SynDocument";
 import {ProblemsHolder} from "../problems/ProblemsHolder";
 import {CodeAnalysisPassProvider} from "../../analysis/api/CodeAnalysisPassProvider";
-import {Editor} from "../../../../editor/Editor";
 import {CodeAnalysisPass} from "../../analysis/api/CodeAnalysisPass";
 import {InspectionsCodeAnalysisPass} from "./InspectionsCodeAnalysisPass";
 import {InspectionsRegistry} from "../InspectionsRegistry";

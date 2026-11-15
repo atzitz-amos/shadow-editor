@@ -12,13 +12,19 @@ import {SynScopedElement} from "./SynScopedElement";
 export interface SynParentElement extends SynNode {
     childrenIterator(filter: (element: SynParentElement) => boolean): Iterable<SynParentElement>;
 
-    getImmediateChildrenAt(offset: number): SynNode | null;
+    getImmediateChildrenAt(offset: number, lean?: 'left' | 'right'): SynNode | null;
 
-    getDeepestChildAt(offset: number): SynNode | null;
+    /**
+     * At a boundary between two tokens, `'left'` (the default) returns the token ending at `offset`,
+     * `'right'` the token starting at it.
+     */
+    getDeepestChildAt(offset: number, lean?: 'left' | 'right'): SynNode | null;
 
     findFirstChildOfTypeAt<T extends SynParentElement>(type: Class<T>, offset: Offset): T | null;
 
     getEnclosingOfType<T extends SynParentElement>(type: Class<T>): T | null;
+
+    getEnclosingSuchThat(predicate: (element: SynParentElement) => boolean): SynParentElement | null;
 
     getAllChildrenOfType<T extends SynParentElement>(type: Class<T>, nested?: boolean): T[];
 

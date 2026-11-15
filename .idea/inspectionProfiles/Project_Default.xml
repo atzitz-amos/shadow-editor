@@ -2,6 +2,7 @@
   <profile version="1.0">
     <option name="myName" value="Project Default" />
     <inspection_tool class="CssUnresolvedCustomProperty" enabled="false" level="ERROR" enabled_by_default="false" />
+    <inspection_tool class="CssUnusedSymbol" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="DuplicatedCode" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
     <inspection_tool class="ES6ConvertVarToLetConst" enabled="true" level="INFORMATION" enabled_by_default="true" />
     <inspection_tool class="ES6MissingAwait" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
@@ -22,7 +23,7 @@
     <inspection_tool class="HtmlUnknownTag" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="myValues">
         <value>
-          <list size="16">
+          <list size="28">
             <item index="0" class="java.lang.String" itemvalue="nobr" />
             <item index="1" class="java.lang.String" itemvalue="noembed" />
             <item index="2" class="java.lang.String" itemvalue="comment" />
@@ -39,6 +40,18 @@
             <item index="13" class="java.lang.String" itemvalue="cc-edge" />
             <item index="14" class="java.lang.String" itemvalue="cc-movable" />
             <item index="15" class="java.lang.String" itemvalue="ide-button" />
+            <item index="16" class="java.lang.String" itemvalue="ide-checkbox" />
+            <item index="17" class="java.lang.String" itemvalue="ide-dropdown" />
+            <item index="18" class="java.lang.String" itemvalue="ide-searchable-list" />
+            <item index="19" class="java.lang.String" itemvalue="ide-list-item" />
+            <item index="20" class="java.lang.String" itemvalue="ide-shortcut" />
+            <item index="21" class="java.lang.String" itemvalue="ide-tabs" />
+            <item index="22" class="java.lang.String" itemvalue="ide-tab" />
+            <item index="23" class="java.lang.String" itemvalue="ide-donut-chart" />
+            <item index="24" class="java.lang.String" itemvalue="ide-donut-segment" />
+            <item index="25" class="java.lang.String" itemvalue="ide-option" />
+            <item index="26" class="java.lang.String" itemvalue="ide-diff" />
+            <item index="27" class="java.lang.String" itemvalue="ide-menu-button" />
           </list>
         </value>
       </option>
@@ -52,7 +65,7 @@
     </inspection_tool>
     <inspection_tool class="JSUnresolvedReference" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
     <inspection_tool class="JSUnusedGlobalSymbols" enabled="false" level="WARNING" enabled_by_default="false" />
-    <inspection_tool class="JSUnusedLocalSymbols" enabled="true" level="TEXT ATTRIBUTES" enabled_by_default="true" editorAttributes="NOT_USED_ELEMENT_ATTRIBUTES" />
+    <inspection_tool class="JSUnusedLocalSymbols" enabled="false" level="TEXT ATTRIBUTES" enabled_by_default="false" editorAttributes="NOT_USED_ELEMENT_ATTRIBUTES" />
     <inspection_tool class="PointlessBooleanExpressionJS" enabled="true" level="INFORMATION" enabled_by_default="true" />
     <inspection_tool class="TypeScriptAbstractClassConstructorCanBeMadeProtected" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
     <inspection_tool class="TypeScriptExplicitMemberType" enabled="false" level="INFORMATION" enabled_by_default="false" />

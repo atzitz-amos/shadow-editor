@@ -24,6 +24,7 @@ import {LatencyMonitor} from "../../editor/core/latency/LatencyMonitor";
 import {SynDocumentManager} from "../../lang/syntax/manager/SynDocumentManager";
 import {KeybindManager} from "../keybinds/KeybindManager";
 import {IntentsRegistry} from "../../lang/codeAnalysis/intents/analysis/IntentsRegistry";
+import {OnTheFlyCompletionService} from "../../editor/core/completion/OnTheFlyCompletionService";
 
 /**
  * Provides a single class that regroups all useful singletons and global services of the application
@@ -92,6 +93,10 @@ export class GlobalState {
 
     public static getLangRegistry(): LangRegistry {
         return LangRegistry.getInstance();
+    }
+
+    public static getCompletionService(): OnTheFlyCompletionService {
+        return OnTheFlyCompletionService.getInstance();
     }
 
     public static getSettingsManager() {

@@ -73,33 +73,41 @@ export abstract class AbstractSynParentElement implements SynParentElement {
         return siblings[index - 1];
     }
 
-    getImmediateChildrenAt(offset: number): SynNode | null {
+    /**
+     * Returns the child containing `offset`. At a boundary between two children, `'left'` returns the child
+     * ending at `offset` and `'right'` the child starting at it.
+     * <p>
+     * When `offset` falls in a gap between children, the next child is returned, which does NOT contain `offset`.
+     */
+    getImmediateChildrenAt(offset: number, lean: 'left' | 'right' = 'left'): SynNode | null {
         // Perform a binary search to find the child that contains the offset
         let left = 0;
         let right = this.children.length - 1;
 
         while (left <= right) {
-            const mid = Math.floor((left + right) / 2);
+            let mid = Math.floor((left + right) / 2);
             const child = this.children[mid];
             const range = child.getTextRange();
             if (offset < range.start) {
                 right = mid - 1;
-            } else if (offset > range.end) {
+            } else if (lean === 'right' ? offset >= range.end : offset > range.end) {
                 left = mid + 1;
             } else {
-                return child;
+                if (lean === 'left') {
+                    while (mid > 0 && this.children[mid - 1].getTextRange().end >= offset) mid--;
+                }
+                return this.children[mid];
             }
         }
-        if (left < this.children.length) {
+        if (left < this.children.length)
             return this.children[left];
-        }
         return null;
     }
 
-    getDeepestChildAt(offset: number): SynNode | null {
-        let child = this.getImmediateChildrenAt(offset);
+    getDeepestChildAt(offset: number, lean: 'left' | 'right' = 'left'): SynNode | null {
+        let child = this.getImmediateChildrenAt(offset, lean);
         while (child && child instanceof AbstractSynParentElement) {
-            const nextChild = child.getImmediateChildrenAt(offset);
+            const nextChild = child.getImmediateChildrenAt(offset, lean);
             if (!nextChild) {
                 break;
             }
@@ -111,6 +119,15 @@ export abstract class AbstractSynParentElement implements SynParentElement {
     getEnclosingOfType<T extends SynParentElement>(type: Class<T>): T | null {
         for (let parent = this.getParent(); parent !== null; parent = parent.getParent()) {
             if (parent instanceof type) {
+                return parent;
+            }
+        }
+        return null;
+    }
+
+    getEnclosingSuchThat(predicate: (element: SynParentElement) => boolean): SynParentElement | null {
+        for (let parent = this.getParent(); parent !== null; parent = parent.getParent()) {
+            if (predicate(parent)) {
                 return parent;
             }
         }

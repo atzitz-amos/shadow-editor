@@ -1,0 +1,71 @@
+/* ---- Dropdown (see IdeDropdown) ----------------------------------------- */
+
+/* The element is the field: the selected label and the arrow are drawn in its shadow root, see _CustomIdeDropdown */
+ide-dropdown {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-sizing: border-box;
+    height: 30px;
+    min-width: 120px;
+    padding: 0 10px 0 12px;
+    vertical-align: middle;
+    border: 1px solid var(--ide-btn-secondary-border);
+    border-radius: 4px;
+    background: var(--ide-btn-secondary-bg);
+    color: var(--ide-text-primary);
+    font-family: var(--ide-system-font), sans-serif;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.12s ease, border-color 0.12s ease;
+}
+
+ide-dropdown:hover:not(:disabled) {
+    background: var(--ide-btn-secondary-hover);
+}
+
+ide-dropdown:focus {
+    outline: none;
+}
+
+ide-dropdown:focus-visible,
+ide-dropdown[aria-expanded="true"] {
+    border-color: var(--ide-btn-primary-bg);
+}
+
+ide-dropdown:focus-visible {
+    box-shadow: 0 0 0 3px rgba(74, 118, 188, 0.25);
+}
+
+ide-dropdown::part(placeholder) {
+    color: #6c7280;
+}
+
+ide-dropdown:disabled {
+    border-color: transparent;
+    background: var(--ide-bg-disabled);
+    color: var(--ide-text-disabled);
+    cursor: not-allowed;
+}
+
+/* The list of options */
+.ide-dropdown-menu .ui-menu-action.selected {
+    color: #e3e8f5;
+}
+
+/* Columns of each row: [check] [icon] label */
+.ide-dropdown-menu .ide-dropdown-check {
+    display: inline-flex;
+    flex: none;
+    justify-content: center;
+    width: 10px;
+    font-size: 9px;
+    color: var(--ide-btn-primary-bg);
+}
+
+.ide-dropdown-menu .ui-menu-action > i,
+.ide-dropdown-menu .ide-dropdown-icon-placeholder {
+    flex: none;
+    width: 12px;
+    text-align: center;
+}

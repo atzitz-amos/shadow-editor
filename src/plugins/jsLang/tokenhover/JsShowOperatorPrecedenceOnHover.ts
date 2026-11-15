@@ -47,7 +47,7 @@ export default class JsShowOperatorPrecedenceOnHover extends TokenHoverAction {
         const codeblock = tree?.getChildren()[0];
         if (!codeblock || !(codeblock instanceof JsCodeBlock)) return;
 
-        const expr = codeblock.getDeepestChildAt(token.getRange().getStart())?.getParent();
+        const expr = codeblock.getDeepestChildAt(token.getRange().getStart(), 'right')?.getParent();
         if (!expr || !(expr instanceof JsBinaryExpr)) return;
 
         this.leftOverlay = new HighlightOverlay(expr.getLeft().getTextRange(), JsShowOperatorPrecedenceOnHover.HIGHLIGHT_ATTRIBUTE_KEY);
