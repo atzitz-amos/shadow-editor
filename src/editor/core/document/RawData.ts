@@ -1,154 +1,72 @@
 import {TextRange} from "../../../core/text/range/TextRange";
 
-class RopeNode {
-    weight: number;
-    left: RopeNode | null;
-    right: RopeNode | null;
-    value: string | null;
-
-    constructor(value: string | null = null, left: RopeNode | null = null, right: RopeNode | null = null) {
-        this.value = value;
-        this.left = left;
-        this.right = right;
-
-        if (value !== null) {
-            this.weight = value.length;
-        } else if (left) {
-            this.weight = left.getTotalWeight();
-        } else {
-            this.weight = 0;
-        }
-    }
-
-    isLeaf(): boolean {
-        return this.left === null && this.right === null;
-    }
-
-    getTotalWeight(): number {
-        if (this.isLeaf()) {
-            return this.value ? this.value.length : 0;
-        }
-        return (this.left ? this.left.getTotalWeight() : 0) + (this.right ? this.right.getTotalWeight() : 0);
-    }
-}
-
+/**
+ * The text of a document.
+ * <p>
+ * Backed by a plain string. The engine already represents the result of a concatenation or of a slice lazily, as a
+ * rope of its own, so an edit does not copy the whole text, and reading it back ({@link toString}) costs nothing:
+ * the view and the lexer do that on every repaint and on every edit.
+ * <p>
+ * This used to be a hand-written rope that was never rebalanced: each edit made the tree two levels deeper, so
+ * edits got slower as they accumulated, and its recursive traversals overflowed the stack after a few thousand of
+ * them. A structure replacing this one has to keep its depth bounded, whatever the number of edits.
+ */
 export class EditorRawData {
-    root: RopeNode;
+    private text: string;
 
     constructor(initialString: string = "") {
-        this.root = new RopeNode(initialString);
+        this.text = initialString;
     }
 
-    concat(rope: EditorRawData): void {
-        this.root = new RopeNode(null, this.root, rope.root);
-        this.root.weight = this.root.left!.getTotalWeight();
-    }
-
+    /**
+     * @throws Error if `i` is past the end of the text
+     */
     index(i: number): string {
-        return this._index(this.root, i);
+        if (i >= this.text.length) throw new Error("Index out of bounds");
+        return this.text[i];
     }
 
     toString(): string {
-        return this._toString(this.root);
+        return this.text;
     }
 
-    split(index: number): [EditorRawData, EditorRawData] {
-        const [left, right] = this._split(this.root, index);
-        const leftRope = new EditorRawData();
-        leftRope.root = left;
-        const rightRope = new EditorRawData();
-        rightRope.root = right;
-        return [leftRope, rightRope];
-    }
-
+    /** An `index` outside of the text is clamped to its closest end */
     insert(index: number, str: string): void {
-        const [left, right] = this.split(index);
-        const middle = new EditorRawData(str);
-        left.concat(middle);
-        left.concat(right);
-        this.root = left.root;
+        this.text = this.text.substring(0, index) + str + this.text.substring(index);
     }
 
+    /**
+     * Deletes up to `length` characters from `start`, fewer if the text ends before that.
+     * @returns the deleted text
+     */
     delete(start: number, length: number): string {
-        const [left, temp] = this.split(start);
-        const [value, right] = temp.split(length);
-        left.concat(right);
-        this.root = left.root;
-        return value.toString();
+        const from = Math.max(0, Math.min(start, this.text.length));
+        const to = Math.min(from + Math.max(0, length), this.text.length);
+
+        const deleted = this.text.substring(from, to);
+        this.text = this.text.substring(0, from) + this.text.substring(to);
+        return deleted;
     }
 
     length(): number {
-        return this.root.getTotalWeight();
+        return this.text.length;
     }
 
+    /**
+     * @throws Error if the range is not within the text
+     */
     substring(start: number, end?: number): string {
-        const len = this.length();
+        const len = this.text.length;
         if (end === undefined) {
             end = len;
         }
         if (start < 0 || end > len || start > end) {
             throw new Error("Invalid range for substring");
         }
-        return this._substring(this.root, start, end);
+        return this.text.substring(start, end);
     }
 
     getTextInRange(range: TextRange): string {
         return this.substring(range.start, range.end);
-    }
-
-    private _substring(node: RopeNode, start: number, end: number): string {
-        if (start >= end) return "";
-        if (node.isLeaf()) {
-            return node.value ? node.value.substring(start, end) : "";
-        }
-
-        const leftWeight = node.weight;
-        if (end <= leftWeight) {
-            return this._substring(node.left!, start, end);
-        } else if (start >= leftWeight) {
-            return this._substring(node.right!, start - leftWeight, end - leftWeight);
-        } else {
-            return this._substring(node.left!, start, leftWeight) +
-                this._substring(node.right!, 0, end - leftWeight);
-        }
-    }
-
-    private _index(node: RopeNode, i: number): string {
-        if (node.isLeaf()) {
-            if (!node.value || i >= node.value.length) throw new Error("Index out of bounds");
-            return node.value[i];
-        }
-
-        if (i < node.weight) {
-            return this._index(node.left!, i);
-        } else {
-            return this._index(node.right!, i - node.weight);
-        }
-    }
-
-    private _toString(node: RopeNode): string {
-        if (node.isLeaf()) {
-            return node.value ?? "";
-        }
-        return this._toString(node.left!) + this._toString(node.right!);
-    }
-
-    private _split(node: RopeNode, index: number): [RopeNode, RopeNode] {
-        if (node.isLeaf()) {
-            const leftStr = node.value!.substring(0, index);
-            const rightStr = node.value!.substring(index);
-            return [new RopeNode(leftStr), new RopeNode(rightStr)];
-        }
-
-        if (index < node.weight) {
-            const [leftSplit, rightSplit] = this._split(node.left!, index);
-            const newRight = new RopeNode(null, rightSplit, node.right);
-            return [leftSplit, newRight];
-        } else {
-            const [leftSplit, rightSplit] = this._split(node.right!, index - node.weight);
-            const newLeft = new RopeNode(null, node.left, leftSplit);
-            newLeft.weight = node.left!.getTotalWeight();
-            return [newLeft, rightSplit];
-        }
     }
 }

@@ -5,7 +5,7 @@ import {SearchResult} from "../../../../core/search/SearchProcessor";
 import {HighlightedFragment} from "../../../../core/ui/lib/highlight/HighlightedFragment";
 import {TextAttributeKey} from "../../../../editor/ui/highlighter/style/TextAttributeKey";
 import {LogicalPosition} from "../../../../editor/core/coordinate/LogicalPosition";
-import {TextRange} from "../../../../editor/core/coordinate/range/TextRange";
+import {TextRange} from "../../../../core/text/range/TextRange";
 import {LangRegistry} from "../../../../lang/LangRegistry";
 
 /** Results rendered initially, and added per "show more". */
