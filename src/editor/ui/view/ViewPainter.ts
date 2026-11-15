@@ -4,7 +4,7 @@ import {WidgetRenderer} from "../../core/components/WidgetRenderer";
 import {Gutter} from "../gutter/Gutter";
 import {ViewLayers} from "./ViewLayers";
 import {EditorScrollBar} from "../scrollbar/ScrollBar";
-import {HTMLUtils} from "../../utils/HTMLUtils";
+import {HTMLUtils} from "../../../core/utils/HTMLUtils";
 import {OverlayWidget} from "../inline/widget/overlay/OverlayWidget";
 
 /**

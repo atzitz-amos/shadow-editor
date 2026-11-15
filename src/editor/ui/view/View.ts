@@ -1,5 +1,5 @@
 import {Editor} from "../../Editor";
-import {HTMLUtils} from "../../utils/HTMLUtils";
+import {HTMLUtils} from "../../../core/utils/HTMLUtils";
 import {Scrolling, ScrollMode} from "../scrollbar/Scrolling";
 import {RenderedLineData} from "../../core/components/WidgetRenderer";
 import {LogicalPosition} from "../../core/coordinate/LogicalPosition";
@@ -10,7 +10,7 @@ import {ViewPropertiesManager} from "./properties/ViewPropertiesManager";
 import {Critical} from "../../../core/critical/Critical";
 import {XYPoint} from "../../core/coordinate/XYPoint";
 import {EditorKeyContextManager} from "../../core/keycontext/EditorKeyContextManager";
-import {TextRange} from "../../core/coordinate/range/TextRange";
+import {TextRange} from "../../../core/text/range/TextRange";
 import {CaretMovementFlags} from "../../core/caret/Caret";
 import {DocumentView} from "../../core/document/view/DocumentView";
 

@@ -1,6 +1,6 @@
 import {UIComponent, UIComponentMixin} from "../../engine/components/UIComponent";
 import {Focusable} from "../../engine/mixins/Focusable";
-import {HTMLUtils} from "../../../../editor/utils/HTMLUtils";
+import {HTMLUtils} from "../../../utils/HTMLUtils";
 import {Icon} from "../../icons/Icon";
 import {ContextMenuElement} from "../menu/impl/ContextMenu";
 import {ContextResolver} from "../../../keybinds/context/ContextResolver";

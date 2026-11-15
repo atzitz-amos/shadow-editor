@@ -1,5 +1,5 @@
 import {UIComponentMixin} from "../../../../../../core/ui/engine/components/UIComponent";
-import {HTMLUtils} from "../../../../../../editor/utils/HTMLUtils";
+import {HTMLUtils} from "../../../../../../core/utils/HTMLUtils";
 import {Project} from "../../../../../../core/project/Project";
 import {ActiveProjectHelper} from "../../../../../../core/global/ActiveProjectHelper";
 import {Focusable} from "../../../../../../core/ui/engine/mixins/Focusable";
@@ -10,7 +10,6 @@ import {ContextMenuElement} from "../../../../../../core/ui/lib/menu/impl/Contex
 import {ProjectDirectory} from "../../../../../../core/project/filesystem/tree/ProjectDirectory";
 import {Key} from "../../../../../../core/keybinds/Keybind";
 import {ProjectFilesPaneHelper} from "../ProjectFilesPaneHelper";
-import {KeybindManager} from "../../../../../../core/keybinds/KeybindManager";
 import {NewEntryChooseTypeDialog} from "../dialog/NewEntryChooseTypeDialog";
 import {IdeDialogUtilsCore} from "../../../../../../core/ui/lib/dialog/utils/IdeDialogUtilsCore";
 import {FileSystemEntry} from "../../../../../../core/project/filesystem/tree/FileSystemEntry";
@@ -25,7 +24,6 @@ import {ProjectFilesContextMenuActionGroup} from "../actions/ProjectFilesContext
  */
 export class ProjectFilesTree extends UIComponentMixin(Focusable) {
     private static readonly NEW_ACTION_SHORTCUT = {key: Key.INSERT, alt: true};
-    private static readonly DELETE_ACTION_SHORTCUT = {key: Key.DELETE};
 
     private currentProject: Project | null = null;
     private filesTree: FileSystemTree;
@@ -99,16 +97,8 @@ export class ProjectFilesTree extends UIComponentMixin(Focusable) {
             this.filesTree = new FileSystemTree(this.getUnderlyingElement(), this.currentProject.getFS().getRoot());
             this.filesTree.setFileOpenedHandler(file => this.openFile(file));
             this.filesTree.setEntrySelectedHandler(entry => ProjectFilesPaneHelper.setSelected(entry))
-            this.filesTree.setKeydownHandler((event, entry) => {
-                if (KeybindManager.eventMatchesKeybind(ProjectFilesTree.NEW_ACTION_SHORTCUT, event)) {
-                    if (!(entry instanceof ProjectDirectory)) {
-                        entry = entry.getParent()!;
-                    }
-                    this.handleNew(entry as ProjectDirectory);
-                } else if (KeybindManager.eventMatchesKeybind(ProjectFilesTree.DELETE_ACTION_SHORTCUT, event)) {
-                    this.deleteEntry(entry);
-                }
-            });
+            // No key handling here: New, Rename and Delete are actions, run by the KeybindManager with the entry of
+            // the focused row as context (see ProjectFilesContextMenuActionGroup).
             this.filesTree.setContextMenu((contextMenu) => {
                 contextMenu.setGroup(ProjectFilesContextMenuActionGroup.INSTANCE);
             });
@@ -154,7 +144,7 @@ export class ProjectFilesTree extends UIComponentMixin(Focusable) {
 
         // contextMenu.addAction("Delete", () => {
         //     this.deleteEntry(directory);
-        // }, null, ProjectFilesTree.DELETE_ACTION_SHORTCUT);
+        // }, null, {key: Key.DELETE});
     }
 
     private async handleNew(entry: ProjectDirectory) {

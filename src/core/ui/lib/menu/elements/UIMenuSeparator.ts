@@ -1,5 +1,5 @@
 import {UIMenuElement} from "./UIMenuElement";
-import {HTMLUtils} from "../../../../../editor/utils/HTMLUtils";
+import {HTMLUtils} from "../../../../utils/HTMLUtils";
 
 /**
  *

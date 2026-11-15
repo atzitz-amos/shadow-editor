@@ -1,5 +1,5 @@
 import {UIComponent} from "../../../../../core/ui/engine/components/UIComponent";
-import {HTMLUtils} from "../../../../../editor/utils/HTMLUtils";
+import {HTMLUtils} from "../../../../../core/utils/HTMLUtils";
 import {SynSuiteGroups} from "../../../../../app/testLib/lang/suite/SynSuiteTest";
 import {SynSuiteTestStatus} from "../../../../../app/testLib/lang/suite/SynSuiteTestResult";
 import {SynSuiteWindowContext} from "../SynSuiteWindowContext";

@@ -1,7 +1,7 @@
 import {ShadowUI} from "../ShadowUI";
 import {ShadowTaskbar} from "./layout/taskbar/ShadowTaskbar";
 import {SFooter} from "./layout/footer/SFooter";
-import {HTMLUtils} from "../../../editor/utils/HTMLUtils";
+import {HTMLUtils} from "../../../core/utils/HTMLUtils";
 import {SLeftActionRail} from "./layout/rail/SLeftActionRail";
 import {SEditorWorkspace} from "./layout/workspace/SEditorWorkspace";
 import {GlobalState} from "../../../core/global/GlobalState";
@@ -11,6 +11,9 @@ import {UICommonKeys} from "../../core/UICommonKeys";
 import {IdeDialog} from "../../../core/ui/lib/dialog/IdeDialog";
 import {UIHooks} from "../../../core/ui/engine/listeners/hooks/UIHooks";
 import {UICommonHooks} from "../../core/UICommonHooks";
+import {ContextResolver} from "../../../core/keybinds/context/ContextResolver";
+import {CommonDataKeys} from "../../../core/keybinds/context/data/CommonDataKeys";
+import {KeybindManager} from "../../../core/keybinds/KeybindManager";
 
 
 /**
@@ -95,6 +98,17 @@ export class FullShadowUI implements ShadowUI {
     addEventListeners() {
         GlobalState.getMainEventBus().syncPublish(new UIResizeEvent());
         window.addEventListener("resize", () => {
+        });
+
+        // Keybinds outside of editors: the project tree, the tabs, a pane... An editor dispatches its own keys
+        // (see Editor.onKeyDown), so those are left alone here or they would run twice.
+        document.addEventListener("keydown", event => {
+            if (event.defaultPrevented) return;
+
+            const ctx = ContextResolver.fromEvent(event);
+            if (ctx.has(CommonDataKeys.EDITOR)) return;
+
+            if (KeybindManager.getInstance().onKeydown(ctx)) event.preventDefault();
         });
     }
 

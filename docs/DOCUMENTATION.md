@@ -112,23 +112,17 @@ export default class MyPlugin extends EditorPlugin {
 
 `registerPhase()` returns `false` and logs a warning if registration is already locked.
 
-> [!NOTE]
-> There is also a `startupPhase` extension point, but extensions are only contributed when their plugin is enabled,
-> and plugins are enabled after startup. A phase contributed that way arrives after registration is locked and is
-> rejected. Use `onLoadAsync()`.
-
 ### 2.3 Running code once the app is ready
 
-The app is ready when `ShadowApp.launch()` resolves. Code that cannot await that call subscribes to
-`ShadowAppLoadedEvent`, after checking that it hasn't been published already:
+The app is ready when `ShadowApp.launch()` resolves. Code that cannot await that call uses `whenAppReady()`:
 
 ```typescript
-if (GlobalState.isReady()) {
-    start();
-} else {
-    GlobalState.getMainEventBus().subscribe(this, ShadowAppLoadedEvent.SUBSCRIBER, () => start());
-}
+GlobalState.whenAppReady(() => {
+    // Runs once startup completed, or right away if it already has
+});
 ```
+
+`ShadowAppLoadedEvent` is published at the same moment, and `GlobalState.isReady()` tells whether it has been.
 
 An `Editor` can only be created once the app is ready: its constructor throws otherwise.
 
@@ -508,7 +502,7 @@ document.getLanguage();
 The editor converts between them: `offsetToLogical()`, `logicalToOffset()`, `offsetToVisual()`, `visualToXY()`,
 `xyToNearestLogical()`...
 
-A [`TextRange`](../src/editor/core/coordinate/range/TextRange.ts) is a pair of offsets, with `start` and `end`.
+A [`TextRange`](../src/core/text/range/TextRange.ts) is a pair of offsets, with `start` and `end`.
 
 ### 5.4 Modifying a document
 
@@ -748,7 +742,6 @@ loaded, otherwise the name isn't known yet and contributions to it are skipped.
 | `panes`               | `AbstractPane`                                                                            | Add a pane to the IDE shell                                                     |
 | `settings/pane`       | `SettingsPaneBase`                                                                        | Add a page to the settings dialog                                               |
 | `projectFiles`        | `FileSystemEntryType`                                                                     | Add an entry type to the "New..." dialog of the project tree                    |
-| `startupPhase`        | `AbstractStartupPhase`                                                                    | See the note in [Adding a phase](#22-adding-a-phase)                            |
 
 Bundled examples:
 
@@ -1312,8 +1305,7 @@ until one of them runs:
 2. Lowest `priority` first (a `Keybind` has an optional `priority`, 0 by default)
 3. Most specific first: a binding that pins a modifier comes before one that leaves it open
 
-A candidate is skipped when its context descriptor doesn't apply, when its required data is missing, or when it
-calls `ctx.abort()`.
+A candidate is skipped when its required data is missing, or when it calls `ctx.abort()`.
 
 ### 12.3 Where an action applies
 
@@ -1339,9 +1331,10 @@ getRequiredKeys(): DataKey<unknown>[] {
 ```
 
 > [!NOTE]
-> Key and mouse events are currently sent to the `KeybindManager` by editors only. A keybinding is therefore
-> triggered while an editor has the focus, whatever its descriptor. Elsewhere, actions are run from menus and
-> buttons, and components handle their own keys: the project tree handles `Alt+Insert` and `Delete` itself.
+> The descriptor only matters through the data keys it implies. An editor sends its own key and mouse events to the
+> `KeybindManager`; key presses anywhere else are sent by the UI shell, with the context of the focused element.
+> An action bound to a key therefore runs wherever its required data is available: `Shift+F6` renames the entry
+> of the focused row of the project tree, and does nothing in an editor.
 
 ### 12.4 Contextual data
 
@@ -1404,7 +1397,8 @@ ContextResolver.register(this.branchListElement, {
 ```
 
 When an event occurs, the context is assembled from the providers registered on the target element and on its
-ancestors. `ContextResolver.registerGlobal()` registers a provider that is consulted after those, for values that
+ancestors, closest first, so a value provided by an element shadows the one of an ancestor.
+`ContextResolver.registerGlobal()` registers a provider that is consulted after those, for values that
 don't depend on where the event comes from.
 
 ### 12.5 Action groups
@@ -1641,7 +1635,6 @@ such as `GlobalState`, `editor`, `getSynDocument()` and `highlight(start, end)`.
 ## 16. Known limitations
 
 - `ShadowUIFactory.singleEditorUI()` is not implemented. Only the full IDE UI can be created.
-- The `startupPhase` extension point cannot be used as is, see [Adding a phase](#22-adding-a-phase).
 - `src/plugins/git` contains the beginning of Git support (reading a repository) but has no plugin class yet, so it
   is not loaded.
 - `WorkspaceRestorePhase` exists but is empty and is not part of the startup sequence.

@@ -1,4 +1,4 @@
-import {TextRange} from "../../coordinate/range/TextRange";
+import {TextRange} from "../../../../core/text/range/TextRange";
 import {UndoFrameAction} from "./UndoFrameAction";
 import {Document} from "../../document/Document";
 import {Editor} from "../../../Editor";

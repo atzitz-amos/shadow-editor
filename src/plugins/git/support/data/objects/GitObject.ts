@@ -1,5 +1,5 @@
 import {ObjectType} from "./ObjectType";
-import {StringUtils} from "../../../../../editor/utils/StringUtils";
+import {StringUtils} from "../../../../../core/utils/StringUtils";
 
 /**
  *

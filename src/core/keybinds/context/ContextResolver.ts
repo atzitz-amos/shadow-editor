@@ -59,13 +59,16 @@ export class ContextResolver {
     }
 
     public static resolve(element: Element | null): DataContext {
-        const providers: ContextProvider[] = [...this.globalProviders];
+        // Closest first: a value provided by the element itself shadows the one of an ancestor, and the global
+        // providers only answer for what none of them provides.
+        const providers: ContextProvider[] = [];
         let current: Element | null = element;
         while (current) {
             const provider = this.providers.get(current as HTMLElement);
-            if (provider) providers.unshift(provider);
+            if (provider) providers.push(provider);
             current = current.parentElement;
         }
+        providers.push(...this.globalProviders);
 
         const resolver: DataResolver = (key) => {
             for (const provider of providers) {

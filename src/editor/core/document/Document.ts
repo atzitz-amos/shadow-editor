@@ -1,6 +1,6 @@
 import {EditorRawData} from "./RawData";
 import {LineData} from "./LineData";
-import {TextRange} from "../coordinate/range/TextRange";
+import {TextRange} from "../../../core/text/range/TextRange";
 import {LanguageBase} from "../../../lang/LanguageBase";
 import {ProjectFile} from "../../../core/project/filesystem/tree/ProjectFile";
 import {TokenCache} from "./TokenCache";
@@ -9,7 +9,7 @@ import {GlobalState} from "../../../core/global/GlobalState";
 import {DocumentSaveRequestEvent} from "./events/DocumentSaveRequestEvent";
 import {UnsafeFlagsService} from "../../../core/persistence/flags/UnsafeFlagsService";
 import {UnsafeFlags} from "../../../core/persistence/flags/UnsafeFlags";
-import {TrackedRange} from "../coordinate/range/TrackedRange";
+import {TrackedRange} from "../../../core/text/range/TrackedRange";
 import {UndoRedoActionStack} from "../undo/UndoRedoActionStack";
 import {HighlightHolder} from "../../ui/highlighter/HighlightHolder";
 import {DocumentModificationEvent} from "./events/DocumentModificationEvent";

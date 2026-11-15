@@ -1,7 +1,7 @@
 import {Token} from "../../../lang/syntax/builder/tokens/Token";
 import {StaticTokenStream, TokenStream} from "../../../lang/syntax/builder/tokens/TokenStream";
 import {TokenType} from "../../../lang/syntax/builder/tokens/TokenType";
-import {TextRange} from "../coordinate/range/TextRange";
+import {TextRange} from "../../../core/text/range/TextRange";
 
 /**
  * A cache for the incremental parser that stores the current tokens and their states.

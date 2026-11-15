@@ -1,8 +1,8 @@
-import {TrackedRange} from "../../../core/coordinate/range/TrackedRange";
+import {TrackedRange} from "../../../../core/text/range/TrackedRange";
 import {Editor} from "../../../Editor";
 import {Overlay} from "../widget/overlay/Overlay";
 import {OverlayWidget} from "../widget/overlay/OverlayWidget";
-import {TextRange} from "../../../core/coordinate/range/TextRange";
+import {TextRange} from "../../../../core/text/range/TextRange";
 
 /**
  *

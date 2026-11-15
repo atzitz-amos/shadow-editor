@@ -1,4 +1,4 @@
-import {HTMLUtils} from "../../../../../../editor/utils/HTMLUtils";
+import {HTMLUtils} from "../../../../../../core/utils/HTMLUtils";
 import {UIComponent} from "../../../../../../core/ui/engine/components/UIComponent";
 import {UIHooks} from "../../../../../../core/ui/engine/listeners/hooks/UIHooks";
 import {ITab} from "../../../../../core/tabs/ITab";
@@ -27,8 +27,9 @@ export class SEditorTabs extends UIComponent {
         super(HTMLUtils.createDiv("column-tabs", root));
 
         ContextResolver.registerGlobal({
+            // undefined rather than null when no tab is open: null would count as a value being provided
             provide: key => key == CommonDataKeys.OPENED_EDITOR_TAB
-                ? this.activeTab
+                ? this.activeTab ?? undefined
                 : undefined
         });
 

@@ -1,6 +1,6 @@
 import {UIComponent} from "../../engine/components/UIComponent";
 import {Key, Keybind} from "../../../keybinds/Keybind";
-import {HTMLUtils} from "../../../../editor/utils/HTMLUtils";
+import {HTMLUtils} from "../../../utils/HTMLUtils";
 import {CustomElementsRegistry} from "../CustomElementsRegistry";
 import {KeybindManager} from "../../../keybinds/KeybindManager";
 

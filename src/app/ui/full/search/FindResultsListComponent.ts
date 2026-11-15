@@ -1,6 +1,6 @@
 import {UIComponentMixin} from "../../../../core/ui/engine/components/UIComponent";
 import {Focusable} from "../../../../core/ui/engine/mixins/Focusable";
-import {HTMLUtils} from "../../../../editor/utils/HTMLUtils";
+import {HTMLUtils} from "../../../../core/utils/HTMLUtils";
 import {SearchResult} from "../../../../core/search/SearchProcessor";
 import {HighlightedFragment} from "../../../../core/ui/lib/highlight/HighlightedFragment";
 import {TextAttributeKey} from "../../../../editor/ui/highlighter/style/TextAttributeKey";

@@ -9,7 +9,7 @@ import {VNode} from "./metadata/VNode";
 import {VNodeStore} from "./metadata/VNodeStore";
 import {DirectoryCreatedEvent} from "../events/DirectoryCreatedEvent";
 import {FileCreatedEvent} from "../events/FileCreatedEvent";
-import {UUIDHelper} from "../../../editor/utils/UUIDHelper";
+import {UUIDHelper} from "../../utils/UUIDHelper";
 import {EntryRenamedEvent} from "../events/EntryRenamedEvent";
 import {EntryDeletedEvent} from "../events/EntryDeletedEvent";
 import {BinaryContent, ProjectBinaryFile} from "./tree/ProjectBinaryFile";

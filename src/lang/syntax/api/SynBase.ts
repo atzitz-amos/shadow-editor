@@ -1,4 +1,4 @@
-import {HasRange, TextRange} from "../../../editor/core/coordinate/range/TextRange";
+import {HasRange, TextRange} from "../../../core/text/range/TextRange";
 import {SynNodeVisitor} from "../visitors/SynNodeVisitor";
 
 /**

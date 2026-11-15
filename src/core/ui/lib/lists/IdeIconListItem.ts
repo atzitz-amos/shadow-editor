@@ -1,5 +1,5 @@
 import {UIComponent} from "../../engine/components/UIComponent";
-import {HTMLUtils} from "../../../../editor/utils/HTMLUtils";
+import {HTMLUtils} from "../../../utils/HTMLUtils";
 import {Describable} from "../../api/Describable";
 
 /**

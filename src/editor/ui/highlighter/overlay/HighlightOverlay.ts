@@ -1,9 +1,9 @@
-import {TrackedRange} from "../../../core/coordinate/range/TrackedRange";
+import {TrackedRange} from "../../../../core/text/range/TrackedRange";
 import {Editor} from "../../../Editor";
 import {Overlay} from "../../inline/widget/overlay/Overlay";
 import {OverlayWidget} from "../../inline/widget/overlay/OverlayWidget";
 import {TextAttributeKey} from "../style/TextAttributeKey";
-import {TextRange} from "../../../core/coordinate/range/TextRange";
+import {TextRange} from "../../../../core/text/range/TextRange";
 import {HighlightTextEffects} from "../effects/HighlightTextEffects";
 
 /**

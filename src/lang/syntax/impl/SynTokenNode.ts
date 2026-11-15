@@ -1,4 +1,4 @@
-import {TextRange} from "../../../editor/core/coordinate/range/TextRange";
+import {TextRange} from "../../../core/text/range/TextRange";
 import {Token} from "../builder/tokens/Token";
 import {ASTGrammar, ASTType} from "../builder/parser/nodes/ASTGrammar";
 import {SynNode} from "../api/SynNode";

@@ -1,5 +1,5 @@
 import {AbstractDialog} from "../../../core/ui/lib/dialog/IdeDialog";
-import {HTMLUtils} from "../../../editor/utils/HTMLUtils";
+import {HTMLUtils} from "../../../core/utils/HTMLUtils";
 import {Persisted} from "../../../core/persistence/objects/Persisted";
 import {DebugToolTab} from "./DebugToolTab";
 import {ASTTreeTab} from "./astTree/ASTTreeTab";

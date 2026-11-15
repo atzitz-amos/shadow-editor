@@ -1,6 +1,6 @@
 import {UIComponent} from "../../../../core/ui/engine/components/UIComponent";
 import {CodeCompletionPresentation} from "../../../../lang/codeCompletion/item/presentation/CodeCompletionPresentation";
-import {HTMLUtils} from "../../../utils/HTMLUtils";
+import {HTMLUtils} from "../../../../core/utils/HTMLUtils";
 
 /**
  *

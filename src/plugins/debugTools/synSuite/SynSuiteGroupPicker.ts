@@ -1,5 +1,5 @@
 import {UIComponent} from "../../../core/ui/engine/components/UIComponent";
-import {HTMLUtils} from "../../../editor/utils/HTMLUtils";
+import {HTMLUtils} from "../../../core/utils/HTMLUtils";
 import {IdeTree} from "../../../core/ui/lib/tree/IdeTree";
 import {IdeTreeModel} from "../../../core/ui/lib/tree/IdeTreeModel";
 import {IdeMenuButton} from "../../../core/ui/lib/buttons/IdeMenuButton";

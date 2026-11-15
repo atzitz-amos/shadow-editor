@@ -1,7 +1,7 @@
 import {SynASTElement} from "../../syntax/api/tree/SynASTElement";
 import {SynModificationRecord} from "../modification/SynModificationRecord";
 import {LanguageBase} from "../../LanguageBase";
-import {TextRange} from "../../../editor/core/coordinate/range/TextRange";
+import {TextRange} from "../../../core/text/range/TextRange";
 
 export interface TemplateModificationObserver {
     onTemplateChanged(template: AbstractSynTemplate, mod: SynModificationRecord): void;

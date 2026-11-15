@@ -3,7 +3,7 @@ import {GlobalState} from "../../core/global/GlobalState";
 import {ShadowAppLoadedEvent} from "../events/ShadowAppLoadedEvent";
 import {ShadowUI} from "./ShadowUI";
 import {FullShadowUI} from "./full/FullShadowUI";
-import {HTMLUtils} from "../../editor/utils/HTMLUtils";
+import {HTMLUtils} from "../../core/utils/HTMLUtils";
 import {ShadowUILoadedEvent} from "../events/ShadowUILoadedEvent";
 import {CustomElementsLoader} from "../../core/ui/lib/CustomElementsLoader";
 

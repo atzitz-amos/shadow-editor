@@ -1,4 +1,4 @@
-import {HTMLUtils} from "../../../../../../editor/utils/HTMLUtils";
+import {HTMLUtils} from "../../../../../../core/utils/HTMLUtils";
 import {SynSuiteDetailTab, SynSuiteDetailTabs, SynSuiteInspectionRow, SynSuiteTestView} from "../SynSuiteDetailTab";
 import {SynSuiteDetailTabId} from "../../SynSuiteWindowState";
 

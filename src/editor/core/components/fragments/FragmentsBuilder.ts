@@ -1,5 +1,5 @@
 import {FragmentEvent} from "./FragmentEvent";
-import {TextRange} from "../../coordinate/range/TextRange";
+import {TextRange} from "../../../../core/text/range/TextRange";
 import {WidgetManager} from "../WidgetManager";
 import {Fragment} from "./Fragment";
 import {FragmentsBuilder as CoreFragmentsBuilder} from "../../../../core/highlighter/FragmentsBuilder";

@@ -1,4 +1,4 @@
-import {HTMLUtils} from "../../../../../../editor/utils/HTMLUtils";
+import {HTMLUtils} from "../../../../../../core/utils/HTMLUtils";
 import {UIComponent} from "../../../../../../core/ui/engine/components/UIComponent";
 import {UIHooks} from "../../../../../../core/ui/engine/listeners/hooks/UIHooks";
 import {IPane} from "../../../../../core/panes/pane/IPane";

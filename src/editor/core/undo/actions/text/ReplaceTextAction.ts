@@ -1,7 +1,7 @@
 import {Editor} from "../../../../Editor";
 import {Caret} from "../../../caret/Caret";
 import {TextEditAction} from "./TextEditAction";
-import {TextRange} from "../../../coordinate/range/TextRange";
+import {TextRange} from "../../../../../core/text/range/TextRange";
 
 /**
  *

@@ -1,4 +1,4 @@
-import {Serializable, SerializableType} from "../../../../core/persistence/serializable/Serializable";
+import {Serializable, SerializableType} from "../../persistence/serializable/Serializable";
 
 export type HasRange = { getTextRange(): TextRange };
 

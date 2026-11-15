@@ -1,5 +1,5 @@
 import {UIComponent} from "../../engine/components/UIComponent";
-import {HTMLUtils} from "../../../../editor/utils/HTMLUtils";
+import {HTMLUtils} from "../../../utils/HTMLUtils";
 import {SimpleDiff} from "../../../diff/simple/SimpleDiff";
 import {DiffChange} from "../../../diff/simple/DiffChange";
 import {UIComponentElement} from "../elements/UIComponentElement";

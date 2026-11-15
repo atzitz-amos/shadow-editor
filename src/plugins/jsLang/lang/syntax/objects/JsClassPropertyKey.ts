@@ -1,7 +1,7 @@
 import {JsIdentifier} from "../literal/JsIdentifier";
 import {SynTokenNode} from "../../../../../lang/syntax/impl/SynTokenNode";
 import {JsExpr} from "../expr/JsExpr";
-import {TextRange} from "../../../../../editor/core/coordinate/range/TextRange";
+import {TextRange} from "../../../../../core/text/range/TextRange";
 
 /**
  *

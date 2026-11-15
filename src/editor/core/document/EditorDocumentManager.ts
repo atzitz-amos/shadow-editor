@@ -1,7 +1,7 @@
 import {LangRegistry} from "../../../lang/LangRegistry";
 import {ProjectFile} from "../../../core/project/filesystem/tree/ProjectFile";
 import {Document, DocumentListener} from "./Document";
-import {UUIDHelper} from "../../utils/UUIDHelper";
+import {UUIDHelper} from "../../../core/utils/UUIDHelper";
 import {Service} from "../../../core/threaded/service/Service";
 import {GlobalState} from "../../../core/global/GlobalState";
 import {DocumentModificationEvent} from "./events/DocumentModificationEvent";

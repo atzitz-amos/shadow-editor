@@ -5,7 +5,7 @@ import {ProblemsHolder} from "../problems/ProblemsHolder";
 import {InspectionBase} from "../Inspection";
 import {InlineInspection} from "../../../../editor/ui/inline/inspection/InlineInspection";
 import {SynDocument} from "../../../syntax/api/document/SynDocument";
-import {HTMLUtils} from "../../../../editor/utils/HTMLUtils";
+import {HTMLUtils} from "../../../../core/utils/HTMLUtils";
 
 /**
  *

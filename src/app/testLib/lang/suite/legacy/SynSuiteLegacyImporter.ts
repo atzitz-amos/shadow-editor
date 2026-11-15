@@ -1,6 +1,6 @@
 import {Deserializer} from "../../../../../core/persistence/serializable/Deserializer";
 import {Serialized} from "../../../../../core/persistence/serializable/Serializable";
-import {UUIDHelper} from "../../../../../editor/utils/UUIDHelper";
+import {UUIDHelper} from "../../../../../core/utils/UUIDHelper";
 import {SynSuiteGroups, SynSuiteTest} from "../SynSuiteTest";
 import {SynSuiteTestStore} from "../SynSuiteTestStore";
 

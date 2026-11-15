@@ -1,5 +1,5 @@
 import {SynASTElement} from "../../api/tree/SynASTElement";
-import {TextRange} from "../../../../editor/core/coordinate/range/TextRange";
+import {TextRange} from "../../../../core/text/range/TextRange";
 import {ASTNode} from "../../builder/parser/nodes/ASTNode";
 import {EditorURI} from "../../../../core/uri/EditorURI";
 import {SynNodeVisitor} from "../../visitors/SynNodeVisitor";

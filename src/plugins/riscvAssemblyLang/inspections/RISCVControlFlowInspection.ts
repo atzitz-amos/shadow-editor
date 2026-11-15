@@ -9,7 +9,7 @@ import {RISCVProgram} from "../lang/syntax/RISCVProgram";
 import {RISCVControlFlowLabelledBlockNode} from "../codeAnalysis/controlFlow/node/RISCVControlFlowLabelledBlockNode";
 import {ControlFlowGraph} from "../codeAnalysis/controlFlow/ControlFlowGraph";
 import {RISCVControlFlowRetNode} from "../codeAnalysis/controlFlow/node/RISCVControlFlowRetNode";
-import {TextRange} from "../../../editor/core/coordinate/range/TextRange";
+import {TextRange} from "../../../core/text/range/TextRange";
 import {RISCVControlFlowNode} from "../codeAnalysis/controlFlow/node/RISCVControlFlowNode";
 
 /**

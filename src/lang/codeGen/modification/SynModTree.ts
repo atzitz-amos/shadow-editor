@@ -1,7 +1,7 @@
 import {SynModificationRecord} from "./SynModificationRecord";
 import {SynNode} from "../../syntax/api/SynNode";
 import {AbstractSynTemplate} from "../template/AbstractSynTemplate";
-import {TextRange} from "../../../editor/core/coordinate/range/TextRange";
+import {TextRange} from "../../../core/text/range/TextRange";
 import {SynTree} from "../../syntax/api/tree/SynTree";
 import {SynPlaceholder} from "../placeholder/SynPlaceholder";
 

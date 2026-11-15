@@ -1,4 +1,4 @@
-import {TextRange} from "../../../editor/core/coordinate/range/TextRange";
+import {TextRange} from "../../../core/text/range/TextRange";
 import {Document} from "../../../editor/core/document/Document";
 import {CompletionTriggerHandler} from "../../../lang/codeCompletion/session/trigger/CompletionTriggerHandler";
 import {LanguageBase} from "../../../lang/LanguageBase";

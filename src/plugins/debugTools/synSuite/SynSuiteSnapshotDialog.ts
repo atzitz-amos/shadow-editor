@@ -1,5 +1,5 @@
 import {AbstractDialog, IdeResultDialog} from "../../../core/ui/lib/dialog/IdeDialog";
-import {HTMLUtils} from "../../../editor/utils/HTMLUtils";
+import {HTMLUtils} from "../../../core/utils/HTMLUtils";
 import {Editor} from "../../../editor/Editor";
 import {SynSuiteEngine, SynSuiteError} from "../../../app/testLib/lang/suite/SynSuiteEngine";
 import {SynSuiteGroups, SynSuiteTest, SynSuiteTestOptions} from "../../../app/testLib/lang/suite/SynSuiteTest";

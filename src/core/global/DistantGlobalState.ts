@@ -9,8 +9,8 @@ import type {ActionManager} from "../actions/ActionManager";
 import type {Editor} from "../../editor/Editor";
 import {Ref, RefUtils} from "../threaded/tcsp/ref/RefUtils";
 import {EventBus} from "../events/EventBus";
-import {PaneManager} from "../../app/core/panes/PaneManager";
-import {TabsManager} from "../../app/core/tabs/TabsManager";
+import type {PaneManager} from "../../app/core/panes/PaneManager";
+import type {TabsManager} from "../../app/core/tabs/TabsManager";
 import {SyncService} from "../sync/sync/SyncService";
 
 /**

@@ -1,5 +1,5 @@
 import {Fragment} from "../../core/components/fragments/Fragment";
-import {TextRange} from "../../core/coordinate/range/TextRange";
+import {TextRange} from "../../../core/text/range/TextRange";
 import {OverlayWidget} from "../inline/widget/overlay/OverlayWidget";
 import {HighlightHolder} from "./HighlightHolder";
 import {TextAttributeKey} from "./style/TextAttributeKey";

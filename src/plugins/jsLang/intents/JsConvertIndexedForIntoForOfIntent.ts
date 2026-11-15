@@ -13,7 +13,7 @@ import {JsMemberAccessExpr} from "../lang/syntax/expr/JsMemberAccessExpr";
 import {JsArrayAccessExpr} from "../lang/syntax/expr/JsArrayAccessExpr";
 import {JsVariableDeclaration} from "../lang/syntax/statements/JsVariableDeclaration";
 import {JsStatementTemplate} from "../lang/codeGen/template/JsStatementTemplate";
-import {TextRange} from "../../../editor/core/coordinate/range/TextRange";
+import {TextRange} from "../../../core/text/range/TextRange";
 import {JsLexicalGrammar} from "../lang/lexer/JsLexicalGrammar";
 import {JsPostfixOp} from "../lang/syntax/expr/JsPostfixOp";
 import {JsPrefixOp} from "../lang/syntax/expr/JsPrefixOp";

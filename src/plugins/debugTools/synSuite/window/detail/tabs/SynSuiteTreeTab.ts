@@ -1,4 +1,4 @@
-import {HTMLUtils} from "../../../../../../editor/utils/HTMLUtils";
+import {HTMLUtils} from "../../../../../../core/utils/HTMLUtils";
 import {SynSuiteDetailTab, SynSuiteTestView} from "../SynSuiteDetailTab";
 import {SynSuiteDetailTabId} from "../../SynSuiteWindowState";
 import {IdeSideBySideDiff} from "../../../../../../core/ui/lib/diff/IdeSideBySideDiff";

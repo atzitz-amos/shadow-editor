@@ -1,5 +1,5 @@
 import {UIComponent} from "../../engine/components/UIComponent";
-import {HTMLUtils} from "../../../../editor/utils/HTMLUtils";
+import {HTMLUtils} from "../../../utils/HTMLUtils";
 import {Icon} from "../../icons/Icon";
 import {UIVariant} from "../theme/UIVariant";
 import {PopupMenu, PopupMenuBuilder, PopupMenuPlacement} from "../menu/impl/PopupMenu";

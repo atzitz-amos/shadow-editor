@@ -1,9 +1,9 @@
 import {View} from "./ui/view/View";
-import {TextRange} from "./core/coordinate/range/TextRange";
+import {TextRange} from "../core/text/range/TextRange";
 import {Caret, CaretModel, CaretMovementFlags} from "./core/caret/Caret";
 import {ModifierKeyHolder} from "../core/keybinds/Keybind";
 
-import {HTMLUtils} from "./utils/HTMLUtils";
+import {HTMLUtils} from "../core/utils/HTMLUtils";
 import {Document, DocumentListener} from "./core/document/Document";
 import {WidgetManager} from "./core/components/WidgetManager";
 import {LogicalPosition} from "./core/coordinate/LogicalPosition";
@@ -35,6 +35,7 @@ import {StandardBehaviorManagerProvider} from "./impl/behaviors/StandardBehavior
 import {EditorCharTypedContext} from "./core/behaviors/context/EditorCharTypedContext";
 import {DocumentView} from "./core/document/view/DocumentView";
 import {EditorDocumentChangedEvent} from "./impl/events/EditorDocumentChangedEvent";
+import {EditorLanguageChanged} from "./core/lang/events/EditorLanguageChanged";
 import {CodeAnalysisService} from "../lang/codeAnalysis/analysis/CodeAnalysisService";
 import {DocumentModificationEvent} from "./core/document/events/DocumentModificationEvent";
 import {EditorReadonlyMode} from "./core/behaviors/readonly/EditorReadonlyMode";
@@ -157,6 +158,9 @@ export class Editor {
         this.behaviorManager.setLanguage(language);
 
         this.codeAnalysisService.restart();
+
+        // Published asynchronously: the constructor calls this before the editor is fully built
+        this.eventBus.asyncPublish(new EditorLanguageChanged(this, language));
     }
 
     /**

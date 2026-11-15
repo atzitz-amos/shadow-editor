@@ -4,7 +4,7 @@ import {View} from "../View";
 import {EditorAttachedEvent} from "../../../impl/events/EditorAttachedEvent";
 import {SettingChangedEvent} from "../../../../core/settings/events/SettingChangedEvent";
 import {ViewVisualPropertiesChangedEvent} from "./ViewVisualPropertiesChangedEvent";
-import {HTMLUtils} from "../../../utils/HTMLUtils";
+import {HTMLUtils} from "../../../../core/utils/HTMLUtils";
 import {SettingBase} from "../../../../core/settings/base/SettingBase";
 
 

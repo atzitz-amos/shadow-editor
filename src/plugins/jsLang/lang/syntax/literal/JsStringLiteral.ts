@@ -1,7 +1,7 @@
 import {JsLiteral} from "./JsLiteral";
 import {SynNodeVisitor} from "../../../../../lang/syntax/visitors/SynNodeVisitor";
 import {JsSynVisitor} from "../visitors/JsSynVisitor";
-import {TextRange} from "../../../../../editor/core/coordinate/range/TextRange";
+import {TextRange} from "../../../../../core/text/range/TextRange";
 
 /**
  *

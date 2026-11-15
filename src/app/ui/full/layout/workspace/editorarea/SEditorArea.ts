@@ -1,4 +1,4 @@
-import {HTMLUtils} from "../../../../../../editor/utils/HTMLUtils";
+import {HTMLUtils} from "../../../../../../core/utils/HTMLUtils";
 import {SEditorAreaHeader} from "./SEditorAreaHeader";
 import {SEditorTabs} from "./SEditorTabs";
 import {SMainEditorView} from "./SMainEditorView";

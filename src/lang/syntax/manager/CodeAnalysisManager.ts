@@ -1,7 +1,7 @@
 import {CodeAnalysisPass} from "../../codeAnalysis/analysis/api/CodeAnalysisPass";
 import {SynDocument} from "../api/document/SynDocument";
 import {SynNodeVisitor} from "../visitors/SynNodeVisitor";
-import {CollectionUtils} from "../../../editor/utils/collection/CollectionUtils";
+import {CollectionUtils} from "../../../core/utils/collection/CollectionUtils";
 import {SynLazyVisitorOptimizer} from "../visitors/SynLazyVisitorOptimizer";
 import {ExtensionPoint} from "../../../core/plugins/extensionPoints/ExtensionPoint";
 import {

@@ -8,7 +8,7 @@ import {JsForOfStatement} from "../lang/syntax/statements/JsForOfStatement";
 import {JsVariableDeclaration} from "../lang/syntax/statements/JsVariableDeclaration";
 import {JsIdentifier} from "../lang/syntax/literal/JsIdentifier";
 import {JsLexicalGrammar} from "../lang/lexer/JsLexicalGrammar";
-import {TextRange} from "../../../editor/core/coordinate/range/TextRange";
+import {TextRange} from "../../../core/text/range/TextRange";
 import {JsStatementTemplate} from "../lang/codeGen/template/JsStatementTemplate";
 import {JsDeclarator} from "../lang/syntax/statements/JsDeclarator";
 import {JsCodeBlockTemplate} from "../lang/codeGen/template/JsCodeBlockTemplate";

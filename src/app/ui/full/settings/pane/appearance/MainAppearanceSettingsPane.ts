@@ -2,7 +2,7 @@ import {UIComponent} from "../../../../../../core/ui/engine/components/UICompone
 import {SettingsPaneBase} from "../../../../../core/settings/SettingsPaneBase";
 import {SettingsPaneGroup} from "../../../../../core/settings/SettingsPaneGroup";
 import {AppearanceSettingsGroup} from "./AppearanceSettingsGroup";
-import {HTMLUtils} from "../../../../../../editor/utils/HTMLUtils";
+import {HTMLUtils} from "../../../../../../core/utils/HTMLUtils";
 
 class MainAppearanceSettingsPaneComponent extends UIComponent {
 

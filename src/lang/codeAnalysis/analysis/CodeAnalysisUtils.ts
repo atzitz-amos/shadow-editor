@@ -2,7 +2,7 @@ import {SynDocument} from "../../syntax/api/document/SynDocument";
 import {CodeAnalysisPass} from "./api/CodeAnalysisPass";
 import {SynLazyVisitorOptimizer, VisitorErrorHandler} from "../../syntax/visitors/SynLazyVisitorOptimizer";
 import {SynNodeVisitor} from "../../syntax/visitors/SynNodeVisitor";
-import {CollectionUtils} from "../../../editor/utils/collection/CollectionUtils";
+import {CollectionUtils} from "../../../core/utils/collection/CollectionUtils";
 
 /**
  *

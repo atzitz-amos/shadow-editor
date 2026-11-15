@@ -1,6 +1,6 @@
 import {AbstractAction} from "../../../../../../core/actions/AbstractAction";
 import {KeybindContext} from "../../../../../../core/keybinds/context/KeybindContext";
-import {Keybind} from "../../../../../../core/keybinds/Keybind";
+import {Key, Keybind} from "../../../../../../core/keybinds/Keybind";
 import {CommonDataKeys} from "../../../../../../core/keybinds/context/data/CommonDataKeys";
 import {DataKey} from "../../../../../../core/keybinds/context/data/DataKey";
 import {ProjectFilesContextMenuActionGroup} from "./ProjectFilesContextMenuActionGroup";
@@ -54,7 +54,7 @@ export class ProjectFilesNewEntryAction extends AbstractAction {
     }
 
     getDefaultKeybinding(): Keybind | null {
-        return null;
+        return {key: Key.INSERT, alt: true};
     }
 
     getRequiredKeys(): DataKey<unknown>[] {

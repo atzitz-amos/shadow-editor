@@ -1,11 +1,11 @@
 import {Overlay} from "../widget/overlay/Overlay";
 import {HoverPopupFrame} from "../../popups/builder/HoverPopupFrame";
-import {TextRange} from "../../../core/coordinate/range/TextRange";
+import {TextRange} from "../../../../core/text/range/TextRange";
 import {Editor} from "../../../Editor";
 import {SimpleTooltipBuilder} from "../../popups/tooltip/SimpleTooltipBuilder";
 import {OverlayWidget} from "../widget/overlay/OverlayWidget";
 import {InspectionSeverity} from "../../../../lang/codeAnalysis/inspections/InspectionSeverity";
-import {TrackedRange} from "../../../core/coordinate/range/TrackedRange";
+import {TrackedRange} from "../../../../core/text/range/TrackedRange";
 
 /**
  *

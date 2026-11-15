@@ -1,5 +1,5 @@
 import {DebugToolTab} from "../DebugToolTab";
-import {HTMLUtils} from "../../../../editor/utils/HTMLUtils";
+import {HTMLUtils} from "../../../../core/utils/HTMLUtils";
 import {GlobalState} from "../../../../core/global/GlobalState";
 import {CaretMovedEvent} from "../../../../editor/core/caret/events/CaretMovedEvent";
 import {Editor} from "../../../../editor/Editor";
@@ -13,7 +13,7 @@ import {CodeStyleManager} from "../../../../lang/codeStyle/manager/CodeStyleMana
 import JsLang from "../../../jsLang/lang/JsLang";
 import {DocumentModificationUtils} from "../../../../editor/core/document/utils/DocumentModificationUtils";
 import {JsWhitespaceScrambler} from "./JsWhitespaceScrambler";
-import {TextRange} from "../../../../editor/core/coordinate/range/TextRange";
+import {TextRange} from "../../../../core/text/range/TextRange";
 import {EditorHighlighterUtils} from "../../../../editor/ui/highlighter/overlay/EditorHighlighterUtils";
 import {TextAttributeKey} from "../../../../editor/ui/highlighter/style/TextAttributeKey";
 import {TextBackground} from "../../../../editor/ui/highlighter/style/TextBackground";

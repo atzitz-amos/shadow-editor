@@ -1,7 +1,7 @@
 import {LanguageBase} from "../../../../../lang/LanguageBase";
 import JsLang from "../../JsLang";
 import {AbstractSynTemplate} from "../../../../../lang/codeGen/template/AbstractSynTemplate";
-import {TextRange} from "../../../../../editor/core/coordinate/range/TextRange";
+import {TextRange} from "../../../../../core/text/range/TextRange";
 
 /**
  *

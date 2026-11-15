@@ -1,7 +1,7 @@
 import {UIComponent, UIComponentMixin} from "../../engine/components/UIComponent";
 import {Focusable} from "../../engine/mixins/Focusable";
 import {ValuedComponent} from "../../engine/mixins/ValuedComponent";
-import {HTMLUtils} from "../../../../editor/utils/HTMLUtils";
+import {HTMLUtils} from "../../../utils/HTMLUtils";
 
 /**
  * A vertical list of elements, each shown by a component, one of which is selected.

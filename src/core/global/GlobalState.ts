@@ -41,10 +41,11 @@ export class GlobalState {
 
     public static init(app: ShadowApp): void {
         this.shadowApp = app;
-        this.callbacks.forEach(callback => callback());
-        this.callbacks = [];
     }
 
+    /**
+     * Runs the callback once the app is ready, that is when startup completed. Runs it right away if it already is.
+     */
     public static whenAppReady(callback: () => void) {
         if (this._isReady) callback();
         else this.callbacks.push(callback);
@@ -153,6 +154,12 @@ export class GlobalState {
 
     public static setReady(flag: boolean) {
         this._isReady = flag;
+        if (!flag) return;
+
+        // Emptied first: a callback registering another one runs it right away, since the app is ready by now
+        const callbacks = this.callbacks;
+        this.callbacks = [];
+        callbacks.forEach(callback => callback());
     }
 
     public static isReady(): boolean {

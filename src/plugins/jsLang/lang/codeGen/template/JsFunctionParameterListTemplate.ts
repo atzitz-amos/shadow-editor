@@ -5,7 +5,7 @@ import JsLang from "../../JsLang";
 import {JsParser} from "../../parser/JsParser";
 import {JsFunctionParameterTemplate} from "./JsFunctionParameterTemplate";
 import {SynASTElement} from "../../../../../lang/syntax/api/tree/SynASTElement";
-import {TextRange} from "../../../../../editor/core/coordinate/range/TextRange";
+import {TextRange} from "../../../../../core/text/range/TextRange";
 import {SynTokenNode} from "../../../../../lang/syntax/impl/SynTokenNode";
 import {JsLexicalGrammar} from "../../lexer/JsLexicalGrammar";
 

@@ -1,9 +1,9 @@
 import {AbstractDialog} from "../../../../../core/ui/lib/dialog/IdeDialog";
-import {HTMLUtils} from "../../../../../editor/utils/HTMLUtils";
+import {HTMLUtils} from "../../../../../core/utils/HTMLUtils";
 import {SettingsPaneRegistry} from "../../../../core/settings/SettingsPaneRegistry";
 import {SettingsPaneBase} from "../../../../core/settings/SettingsPaneBase";
 import {SettingsPaneGroup} from "../../../../core/settings/SettingsPaneGroup";
-import {CollectionUtils} from "../../../../../editor/utils/collection/CollectionUtils";
+import {CollectionUtils} from "../../../../../core/utils/collection/CollectionUtils";
 
 /**
  *

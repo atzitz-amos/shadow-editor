@@ -1,16 +1,16 @@
 import {ServiceImpl} from "../threaded/service/Service";
 import {Logger, UseLogger} from "../logging/Logger";
-import {AbstractStartupPhase, StartupPhase} from "./startup/StartupPhase";
+import {StartupPhase} from "./startup/StartupPhase";
 import {StartupProgressEvent} from "./events/StartupProgressEvent";
 import {StartupFailedEvent} from "./events/StartupFailedEvent";
 import {EventBus} from "../events/EventBus";
-import {ShadowApp} from "../../app/ShadowApp";
+// Type-only: workers load this module through @Service / @DistantService, and must not load the app with it
+import type {ShadowApp} from "../../app/ShadowApp";
 import {LifecycleStartedEvent} from "./events/LifecycleStartedEvent";
 import {ProcessManager} from "../threaded/process/manager/ProcessManager";
 import {DistantServiceImpl} from "../threaded/service/DistantService";
 import {PersistedObject} from "../persistence/objects/PersistedObject";
 import {PersistenceModel} from "../persistence/PersistenceModel";
-import {ExtensionPoint} from "../plugins/extensionPoints/ExtensionPoint";
 
 /**
  * The lifecycle of the application, manages the persistence of PersistedObject,
@@ -22,9 +22,6 @@ import {ExtensionPoint} from "../plugins/extensionPoints/ExtensionPoint";
  */
 @UseLogger("Lifecycle")
 export class Lifecycle {
-    private static readonly startupEP = new ExtensionPoint("startupPhase", AbstractStartupPhase)
-        .onContribute((plugin, phase) => Lifecycle.getInstance().registerPhase(phase));
-
     private static _instance: Lifecycle;
     declare private readonly logger: Logger;
 
@@ -88,7 +85,8 @@ export class Lifecycle {
      * Phases are sorted by priority and executed in order.
      *
      * Note: Phases can only be registered before startup begins or during the PluginLoadPhase.
-     * After PluginLoadPhase completes, phase registration is locked.
+     * After PluginLoadPhase completes, phase registration is locked. A plugin registers its phases from
+     * {@link EditorPlugin.onLoadAsync}, which runs during that phase whether the plugin gets enabled or not.
      *
      * @param phase The startup phase to register
      * @returns true if the phase was registered, false if registration is locked

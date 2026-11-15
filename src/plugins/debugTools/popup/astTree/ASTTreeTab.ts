@@ -1,5 +1,5 @@
 import {DebugToolTab} from "../DebugToolTab";
-import {HTMLUtils} from "../../../../editor/utils/HTMLUtils";
+import {HTMLUtils} from "../../../../core/utils/HTMLUtils";
 import {GlobalState} from "../../../../core/global/GlobalState";
 import {Editor} from "../../../../editor/Editor";
 import {CaretMovedEvent} from "../../../../editor/core/caret/events/CaretMovedEvent";
@@ -14,7 +14,7 @@ import {SynErrorNode} from "../../../../lang/syntax/impl/SynErrorNode";
 import {SynTokenNode} from "../../../../lang/syntax/impl/SynTokenNode";
 import {DocumentModificationEvent} from "../../../../editor/core/document/events/DocumentModificationEvent";
 import {EditorHighlighterUtils} from "../../../../editor/ui/highlighter/overlay/EditorHighlighterUtils";
-import {TextRange} from "../../../../editor/core/coordinate/range/TextRange";
+import {TextRange} from "../../../../core/text/range/TextRange";
 import {TextAttributeKey} from "../../../../editor/ui/highlighter/style/TextAttributeKey";
 import {TextBackground} from "../../../../editor/ui/highlighter/style/TextBackground";
 import {SynDocumentManager} from "../../../../lang/syntax/manager/SynDocumentManager";

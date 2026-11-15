@@ -1,4 +1,4 @@
-import {HTMLUtils} from "../../../../../../editor/utils/HTMLUtils";
+import {HTMLUtils} from "../../../../../../core/utils/HTMLUtils";
 import {UIComponent} from "../../../../../../core/ui/engine/components/UIComponent";
 import {ActiveProjectHelper} from "../../../../../../core/global/ActiveProjectHelper";
 import {ProjectFilesPaneHelper} from "../../../panes/projectFiles/ProjectFilesPaneHelper";

@@ -1,7 +1,7 @@
 import {WidgetManager} from "./WidgetManager";
-import {TextRange} from "../coordinate/range/TextRange";
+import {TextRange} from "../../../core/text/range/TextRange";
 import {FragmentsBuilder} from "./fragments/FragmentsBuilder";
-import {HTMLUtils} from "../../utils/HTMLUtils";
+import {HTMLUtils} from "../../../core/utils/HTMLUtils";
 import {FragmentSpanRenderer} from "../../../core/highlighter/FragmentSpanRenderer";
 
 

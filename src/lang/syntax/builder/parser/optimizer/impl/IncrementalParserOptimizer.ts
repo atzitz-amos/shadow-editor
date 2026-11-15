@@ -3,7 +3,7 @@ import {ASTCheckpoint} from "../recovery/ASTCheckpoint";
 import {SynASTElementImpl} from "../../../../impl/tree/SynASTElementImpl";
 import {SynNode} from "../../../../api/SynNode";
 import {StatefulSnapshot} from "../api/Stateful";
-import {TextRange} from "../../../../../../editor/core/coordinate/range/TextRange";
+import {TextRange} from "../../../../../../core/text/range/TextRange";
 
 /**
  *

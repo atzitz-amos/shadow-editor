@@ -1,4 +1,4 @@
-import {HTMLUtils} from "../../../../../editor/utils/HTMLUtils";
+import {HTMLUtils} from "../../../../../core/utils/HTMLUtils";
 import {TaskbarPulse} from "./TaskbarPulse";
 import {UIComponent} from "../../../../../core/ui/engine/components/UIComponent";
 

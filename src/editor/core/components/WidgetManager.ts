@@ -1,4 +1,4 @@
-import {TextRange} from "../coordinate/range/TextRange";
+import {TextRange} from "../../../core/text/range/TextRange";
 import {GutterComponent} from "../../ui/gutter/components/GutterComponent";
 import {GutterLine} from "../../ui/gutter/components/GutterLine";
 import {Editor} from "../../Editor";

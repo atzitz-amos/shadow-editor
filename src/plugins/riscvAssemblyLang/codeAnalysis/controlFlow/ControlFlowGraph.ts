@@ -1,5 +1,5 @@
 import {RISCVControlFlowLabelledBlockNode} from "./node/RISCVControlFlowLabelledBlockNode";
-import {DefaultRegistry} from "../../../../editor/utils/collection/DefaultRegistry";
+import {DefaultRegistry} from "../../../../core/utils/collection/DefaultRegistry";
 import {RISCVControlFlowNode} from "./node/RISCVControlFlowNode";
 import {RISCVControlFlowBranchNode} from "./node/RISCVControlFlowBranchNode";
 import {RISCVControlFlowBlockNode} from "./node/RISCVControlFlowBlockNode";

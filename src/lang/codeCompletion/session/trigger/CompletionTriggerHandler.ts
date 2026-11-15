@@ -1,6 +1,6 @@
 import {LanguageBase} from "../../../LanguageBase";
 import {Document} from "../../../../editor/core/document/Document";
-import {TextRange} from "../../../../editor/core/coordinate/range/TextRange";
+import {TextRange} from "../../../../core/text/range/TextRange";
 
 /**
  *

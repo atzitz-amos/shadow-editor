@@ -1,5 +1,4 @@
-import {GlobalState} from "../../../global/GlobalState";
-import {UUIDHelper} from "../../../../editor/utils/UUIDHelper";
+import {UUIDHelper} from "../../../utils/UUIDHelper";
 import {ThreadedUtils} from "../../ThreadedUtils";
 import {Logger} from "../../../logging/logger/LoggerCore";
 
@@ -21,7 +20,8 @@ export class TRefRegistry {
     private readonly pinned = new Set<string>();
 
     public constructor() {
-        this.pin("GlobalState", GlobalState);
+        // GlobalState is pinned by the main thread (see ShadowGlobal): importing it here would load the whole app,
+        // UI included, into every worker.
         this.pin("Logger", Logger);
         if (ThreadedUtils.isMainThread()) this.pin("window", window);
     }
@@ -62,7 +62,8 @@ export class TRefRegistry {
         this.objects.delete(id);
     }
 
-    private pin(name: string, value: unknown): void {
+    /** Registers a permanent root under a fixed name: it is never freed by a remote proxy being collected. */
+    pin(name: string, value: unknown): void {
         this.objects.set(name, value);
         this.pinned.add(name);
     }

@@ -3,7 +3,7 @@ import {ILexer} from "./ILexer";
 import {Token} from "../tokens/Token";
 import {DocumentModificationEvent} from "../../../../editor/core/document/events/DocumentModificationEvent";
 import {Document} from "../../../../editor/core/document/Document";
-import {TextRange} from "../../../../editor/core/coordinate/range/TextRange";
+import {TextRange} from "../../../../core/text/range/TextRange";
 
 /**
  * An abstract class for incremental lexers that support re-lexing of modified text ranges.

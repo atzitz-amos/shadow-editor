@@ -148,7 +148,9 @@ These are the default bindings.
 | `Ctrl+Backspace`            | Delete the word before the caret                    |
 | `Ctrl+Shift+F`              | Search Everywhere                                   |
 | `Ctrl+Alt+S`                | Open settings                                       |
+| `Ctrl+F4`                   | Close the current tab (some browsers reserve this key) |
 | `Alt+Insert`                | New file or directory (project tree)                |
+| `Shift+F6`                  | Rename the selected entry (project tree)            |
 | `Delete`                    | Delete the selected entry (project tree)            |
 | `Ctrl+Alt+,`                | Toggle the debug tools popup                        |
 | `Ctrl+Shift+Alt+T`          | Open the SynSuite window                            |

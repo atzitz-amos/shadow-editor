@@ -1,6 +1,6 @@
 import {Document} from "../Document";
 import {Caret, CaretMovementFlags} from "../../caret/Caret";
-import {TrackedRange} from "../../coordinate/range/TrackedRange";
+import {TrackedRange} from "../../../../core/text/range/TrackedRange";
 import {UndoStack} from "../../undo/UndoStack";
 
 /**

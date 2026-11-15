@@ -1,4 +1,4 @@
-import {TextRange} from "../../editor/core/coordinate/range/TextRange";
+import {TextRange} from "../text/range/TextRange";
 import {Fragment} from "../../editor/core/components/fragments/Fragment";
 import {FragmentEvent, FragmentType} from "../../editor/core/components/fragments/FragmentEvent";
 

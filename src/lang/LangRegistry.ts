@@ -15,7 +15,7 @@ import {TokenHoverAction} from "./codeAnalysis/tokenhover/TokenHoverAction";
 import {SmartInlineEnterAction} from "./codeAnalysis/smart/enter/SmartInlineEnterAction";
 import {ILexer} from "./syntax/builder/lexer/ILexer";
 import {HighlighterBase} from "./highlighter/HighlighterBase";
-import {CollectionUtils} from "../editor/utils/collection/CollectionUtils";
+import {CollectionUtils} from "../core/utils/collection/CollectionUtils";
 import {IncrementalHighlighter} from "./highlighter/IncrementalHighlighter";
 
 export class LangRegistry {

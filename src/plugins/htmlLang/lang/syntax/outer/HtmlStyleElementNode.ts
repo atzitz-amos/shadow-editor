@@ -1,5 +1,5 @@
 import {ASTNode} from "../../../../../lang/syntax/builder/parser/nodes/ASTNode";
-import {TextRange} from "../../../../../editor/core/coordinate/range/TextRange";
+import {TextRange} from "../../../../../core/text/range/TextRange";
 import {HtmlElementNode} from "../nodes/HtmlElementNode";
 
 /**

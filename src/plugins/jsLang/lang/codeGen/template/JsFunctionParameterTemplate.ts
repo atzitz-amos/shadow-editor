@@ -5,7 +5,7 @@ import {JsParser} from "../../parser/JsParser";
 import {JsFunctionParameter} from "../../syntax/statements/JsFunctionParameterList";
 import {JsExprTemplate} from "./expr/JsExprTemplate";
 import {JsFunctionParameterListTemplate} from "./JsFunctionParameterListTemplate";
-import {TextRange} from "../../../../../editor/core/coordinate/range/TextRange";
+import {TextRange} from "../../../../../core/text/range/TextRange";
 import {JsGrammar} from "../../parser/JsGrammar";
 
 /**

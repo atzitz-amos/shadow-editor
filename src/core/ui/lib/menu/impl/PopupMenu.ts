@@ -1,5 +1,5 @@
 import {UIMenu} from "../UIMenu";
-import {HTMLUtils} from "../../../../../editor/utils/HTMLUtils";
+import {HTMLUtils} from "../../../../utils/HTMLUtils";
 import {KeybindContext} from "../../../../keybinds/context/KeybindContext";
 import {UIMenuAction} from "../elements/UIMenuAction";
 import {UIMenuSeparator} from "../elements/UIMenuSeparator";

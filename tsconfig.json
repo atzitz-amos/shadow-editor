@@ -6,7 +6,7 @@
     "experimentalDecorators": false,
     "strict": true,
     "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": false,
+    "forceConsistentCasingInFileNames": true,
     "strictPropertyInitialization": false,
     "noImplicitAny": false,
     "outDir": "dist",

@@ -1,5 +1,5 @@
 import {AbstractDialog} from "../../../../core/ui/lib/dialog/IdeDialog";
-import {HTMLUtils} from "../../../../editor/utils/HTMLUtils";
+import {HTMLUtils} from "../../../../core/utils/HTMLUtils";
 import {GlobalState} from "../../../../core/global/GlobalState";
 import {Scheduler} from "../../../../core/scheduler/Scheduler";
 import {SearchProcessor, SearchResult} from "../../../../core/search/SearchProcessor";
@@ -10,7 +10,7 @@ import {EditorDocumentManager} from "../../../../editor/core/document/EditorDocu
 import {EditorHighlighterUtils} from "../../../../editor/ui/highlighter/overlay/EditorHighlighterUtils";
 import {TextAttributeKey} from "../../../../editor/ui/highlighter/style/TextAttributeKey";
 import {TextBackground} from "../../../../editor/ui/highlighter/style/TextBackground";
-import {TextRange} from "../../../../editor/core/coordinate/range/TextRange";
+import {TextRange} from "../../../../core/text/range/TextRange";
 import {LogicalPosition} from "../../../../editor/core/coordinate/LogicalPosition";
 import {URINavigationManager} from "../../../../core/uri/URINavigationManager";
 import {CaretMovementFlags} from "../../../../editor/core/caret/Caret";

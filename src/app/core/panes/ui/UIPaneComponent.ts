@@ -1,5 +1,5 @@
 import {UIComponent} from "../../../../core/ui/engine/components/UIComponent";
-import {HTMLUtils} from "../../../../editor/utils/HTMLUtils";
+import {HTMLUtils} from "../../../../core/utils/HTMLUtils";
 import {IPane} from "../pane/IPane";
 import {PaneDockPosition} from "../pane/PaneDockPosition";
 import {UIHooks} from "../../../../core/ui/engine/listeners/hooks/UIHooks";

@@ -2,7 +2,7 @@ import {InlineWidget} from "../InlineWidget";
 import {Editor} from "../../../../Editor";
 import {Overlay} from "./Overlay";
 import {HTMLSpanView} from "../../view/HTMLSpanView";
-import {TrackedRange} from "../../../../core/coordinate/range/TrackedRange";
+import {TrackedRange} from "../../../../../core/text/range/TrackedRange";
 
 /**
  * Represents an overlay UI component in the editor. Overlays are displayed above the text content

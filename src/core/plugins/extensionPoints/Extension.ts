@@ -14,7 +14,6 @@ type KnownExtensionPoint =
     | "panes"
     | "settings/pane"
     | "projectFiles"
-    | "startupPhase"
     | "codeAnalysis/pass";
 
 /**

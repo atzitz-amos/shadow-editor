@@ -1,7 +1,7 @@
 import {FragmentSpanRenderer} from "./FragmentSpanRenderer";
 import {FragmentsBuilder} from "./FragmentsBuilder";
 import {Fragment} from "../../editor/core/components/fragments/Fragment";
-import {TextRange} from "../../editor/core/coordinate/range/TextRange";
+import {TextRange} from "../text/range/TextRange";
 
 export type SimpleHighlighterOptions = {
     lineClassName?: string;

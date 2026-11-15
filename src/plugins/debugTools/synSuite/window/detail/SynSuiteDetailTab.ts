@@ -2,7 +2,7 @@ import {SynSuiteInspection, SynSuiteTest} from "../../../../../app/testLib/lang/
 import {SynSuiteInspectionVerdict, SynSuiteTestResult} from "../../../../../app/testLib/lang/suite/SynSuiteTestResult";
 import {SynSuiteDisplayStatus} from "../SynSuiteStatus";
 import {SynSuiteDetailTabId} from "../SynSuiteWindowState";
-import {HTMLUtils} from "../../../../../editor/utils/HTMLUtils";
+import {HTMLUtils} from "../../../../../core/utils/HTMLUtils";
 
 /**
  * A test as shown in the detail pane: the test, its last result and its current status.

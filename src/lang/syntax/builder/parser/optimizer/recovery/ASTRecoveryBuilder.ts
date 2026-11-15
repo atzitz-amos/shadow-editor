@@ -3,7 +3,7 @@ import {SynDocument} from "../../../../api/document/SynDocument";
 import {LanguageBase} from "../../../../../LanguageBase";
 import {KillSignal} from "../../../../../../core/utils/KillSignal";
 import {ASTCheckpoint} from "./ASTCheckpoint";
-import {TextRange} from "../../../../../../editor/core/coordinate/range/TextRange";
+import {TextRange} from "../../../../../../core/text/range/TextRange";
 import {ASTRecoveryInfo} from "./ASTRecoveryInfo";
 import {SynNode} from "../../../../api/SynNode";
 

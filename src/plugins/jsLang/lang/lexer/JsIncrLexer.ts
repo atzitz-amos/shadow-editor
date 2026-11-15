@@ -8,7 +8,7 @@ import {Token} from "../../../../lang/syntax/builder/tokens/Token";
 import {Source} from "../../../../lang/syntax/builder/tokens/TokenStream";
 import {JsLexicalGrammar} from "./JsLexicalGrammar";
 import {TokenType} from "../../../../lang/syntax/builder/tokens/TokenType";
-import {TextRange} from "../../../../editor/core/coordinate/range/TextRange";
+import {TextRange} from "../../../../core/text/range/TextRange";
 
 export default class JsIncrLexer extends IncrementalLexer {
     tokenize(input: Source): Token {

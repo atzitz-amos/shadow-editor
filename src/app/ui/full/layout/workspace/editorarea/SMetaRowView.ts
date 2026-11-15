@@ -1,4 +1,4 @@
-import {HTMLUtils} from "../../../../../../editor/utils/HTMLUtils";
+import {HTMLUtils} from "../../../../../../core/utils/HTMLUtils";
 import {GlobalState} from "../../../../../../core/global/GlobalState";
 import {CaretMovedEvent} from "../../../../../../editor/core/caret/events/CaretMovedEvent";
 import {UIComponent} from "../../../../../../core/ui/engine/components/UIComponent";
@@ -7,11 +7,14 @@ import {LanguageBase} from "../../../../../../lang/LanguageBase";
 import {EditorLanguageChanged} from "../../../../../../editor/core/lang/events/EditorLanguageChanged";
 import {EditorModeChangedEvent} from "../../../../../../editor/core/behaviors/events/EditorModeChangedEvent";
 import {IEditorMode} from "../../../../../../editor/core/behaviors/mode/IEditorMode";
+import {Editor} from "../../../../../../editor/Editor";
+import {MainEditorChangedEvent} from "../../../../events/MainEditorChangedEvent";
 
 export class SMetaRowView extends UIComponent {
     private language: string = "Plain Text";
     private lineCol: string = "Ln 0, Col 0";
     private mode: IEditorMode | null = null;
+    private mainEditor: Editor | null = null;
 
     constructor(root: HTMLElement) {
         super(HTMLUtils.createDiv("editor-meta-row", root));
@@ -24,8 +27,14 @@ export class SMetaRowView extends UIComponent {
             if (event.getCaret().isPrimary) this.updateCaretPosition(event.getNewPosition().row, event.getNewPosition().col);
         });
 
+        // The row describes the main editor only: other editors (dialogs, previews) publish these events as well
+        GlobalState.getMainEventBus().subscribe(this, MainEditorChangedEvent.SUBSCRIBER, (event: MainEditorChangedEvent) => {
+            this.mainEditor = event.getNewEditor();
+            if (this.mainEditor) this.updateLanguage(this.mainEditor.getCurrentLanguage());
+        });
+
         GlobalState.getMainEventBus().subscribe(this, EditorLanguageChanged.SUBSCRIBER, (event: EditorLanguageChanged) => {
-            this.updateLanguage(event.getLanguage());
+            if (event.getEditor() === this.mainEditor) this.updateLanguage(event.getLanguage());
         });
 
         GlobalState.getMainEventBus().subscribe(this, EditorModeChangedEvent.SUBSCRIBER, (event: EditorModeChangedEvent) => {

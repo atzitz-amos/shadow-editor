@@ -1,6 +1,6 @@
 import {Launchable} from "../../Launchable";
 import {ThreadedUtils} from "../../ThreadedUtils";
-import {GlobalState} from "../../../global/GlobalState";
+import {EventBus} from "../../../events/EventBus";
 import {WebWorkerCreatedEvent} from "../../events/WebWorkerCreatedEvent";
 import {WebWorkerRequestArrivedEvent} from "../../events/WebWorkerRequestArrivedEvent";
 import {WebWorkerRequestFailedEvent} from "../../events/WebWorkerRequestFailedEvent";
@@ -23,23 +23,23 @@ export class WCP {
             launchable.getWorkerScriptPath(),
             worker,
             (closedRemote, reason) => {
-                GlobalState.getMainEventBus().syncPublish(new WebWorkerTerminateEvent(closedRemote, reason));
+                EventBus.getMainEventBus().syncPublish(new WebWorkerTerminateEvent(closedRemote, reason));
             },
             (requestRemote, message) => {
                 const requestId = message.requestId ?? "unknown";
-                GlobalState.getMainEventBus().syncPublish(
+                EventBus.getMainEventBus().syncPublish(
                     new WebWorkerRequestArrivedEvent(requestRemote, requestId, message.portId, message.endpoint)
                 );
             },
             (requestRemote, message, delayMs) => {
                 const requestId = message.requestId ?? "unknown";
-                GlobalState.getMainEventBus().syncPublish(
+                EventBus.getMainEventBus().syncPublish(
                     new WebWorkerRequestSucceededEvent(requestRemote, requestId, message.portId, message.endpoint, delayMs)
                 );
             },
             (requestRemote, message, error, delayMs) => {
                 const requestId = message.requestId ?? "unknown";
-                GlobalState.getMainEventBus().syncPublish(
+                EventBus.getMainEventBus().syncPublish(
                     new WebWorkerRequestFailedEvent(
                         requestRemote,
                         requestId,
@@ -64,7 +64,7 @@ export class WCP {
 
         worker.postMessage({type: "init", scriptPath: launchable.getWorkerScriptPath()});
 
-        GlobalState.getMainEventBus().syncPublish(new WebWorkerCreatedEvent(remote));
+        EventBus.getMainEventBus().syncPublish(new WebWorkerCreatedEvent(remote));
 
         return remote;
     }

@@ -1,6 +1,6 @@
 import {Spacing, SpacingRule} from "./SpacingRule";
 import {TokenType} from "../../syntax/builder/tokens/TokenType";
-import {DefaultRegistry} from "../../../editor/utils/collection/DefaultRegistry";
+import {DefaultRegistry} from "../../../core/utils/collection/DefaultRegistry";
 import {TokenStream} from "../../syntax/builder/tokens/TokenStream";
 import {SynTree} from "../../syntax/api/tree/SynTree";
 import {SynTreeTokenJumper} from "../utils/SynTreeTokenJumper";

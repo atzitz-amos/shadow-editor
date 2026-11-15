@@ -1,4 +1,4 @@
-import {HTMLUtils} from "../../../../../../editor/utils/HTMLUtils";
+import {HTMLUtils} from "../../../../../../core/utils/HTMLUtils";
 import {SEditorBreadcrumbs} from "./SEditorBreadcrumbs";
 import {UIComponent} from "../../../../../../core/ui/engine/components/UIComponent";
 

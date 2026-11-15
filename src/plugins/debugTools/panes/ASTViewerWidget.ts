@@ -1,5 +1,5 @@
 import {UIComponent} from "../../../core/ui/engine/components/UIComponent";
-import {HTMLUtils} from "../../../editor/utils/HTMLUtils";
+import {HTMLUtils} from "../../../core/utils/HTMLUtils";
 import {SynNode} from "../../../lang/syntax/api/SynNode";
 import {SynASTElementImpl} from "../../../lang/syntax/impl/tree/SynASTElementImpl";
 import {SynFileImpl} from "../../../lang/syntax/impl/filesystem/SynFileImpl";

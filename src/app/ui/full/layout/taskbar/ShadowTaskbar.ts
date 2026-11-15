@@ -1,4 +1,4 @@
-import {HTMLUtils} from "../../../../../editor/utils/HTMLUtils";
+import {HTMLUtils} from "../../../../../core/utils/HTMLUtils";
 import {TaskbarBrand} from "./TaskbarBrand";
 import {TaskbarSearchBar} from "./TaskbarSearchBar";
 import {TaskbarTopbarActions} from "./TaskbarTopbarActions";

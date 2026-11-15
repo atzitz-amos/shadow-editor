@@ -6,7 +6,7 @@ import {KillSignalTriggeredError, TimeoutKillSignal} from "../../../../core/util
 import {UseLogger} from "../../../../core/logging/logger/LoggerDecorators";
 import {Logger} from "../../../../core/logging/logger/LoggerCore";
 import {Editor} from "../../../../editor/Editor";
-import {UUIDHelper} from "../../../../editor/utils/UUIDHelper";
+import {UUIDHelper} from "../../../../core/utils/UUIDHelper";
 import {Scheduler} from "../../../../core/scheduler/Scheduler";
 import {PluginManager} from "../../../../core/plugins/PluginManager";
 import {SynDocumentImpl} from "../../../../lang/syntax/impl/document/SynDocumentImpl";

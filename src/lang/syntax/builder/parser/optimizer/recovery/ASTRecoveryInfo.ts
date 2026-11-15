@@ -1,4 +1,4 @@
-import {TextRange} from "../../../../../../editor/core/coordinate/range/TextRange";
+import {TextRange} from "../../../../../../core/text/range/TextRange";
 import {ASTCheckpoint} from "./ASTCheckpoint";
 
 /**

@@ -1,5 +1,5 @@
 import {Document} from "../Document";
-import {TextRange} from "../../coordinate/range/TextRange";
+import {TextRange} from "../../../../core/text/range/TextRange";
 import {EventBase} from "../../../../core/events/EventBase";
 import {BubbleDirection} from "../../../../core/events/BubbleDirection";
 import {EventSubscriber} from "../../../../core/events/EventSubscriber";

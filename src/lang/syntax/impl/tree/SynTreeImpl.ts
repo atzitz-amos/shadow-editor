@@ -1,6 +1,6 @@
 import {SynTree} from "../../api/tree/SynTree";
 import {AbstractSynParentElement} from "./AbstractSynParentElement";
-import {TextRange} from "../../../../editor/core/coordinate/range/TextRange";
+import {TextRange} from "../../../../core/text/range/TextRange";
 import {EditorURI} from "../../../../core/uri/EditorURI";
 import {SynDocument} from "../../api/document/SynDocument";
 import {SynNode} from "../../api/SynNode";

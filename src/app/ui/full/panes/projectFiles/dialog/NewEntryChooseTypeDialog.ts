@@ -1,6 +1,6 @@
 import {AbstractDialog, IdeResultDialog} from "../../../../../../core/ui/lib/dialog/IdeDialog";
 import {FileSystemEntryType} from "../../../../../core/projectFiles/entryType/FileSystemEntryType";
-import {HTMLUtils} from "../../../../../../editor/utils/HTMLUtils";
+import {HTMLUtils} from "../../../../../../core/utils/HTMLUtils";
 import {FileSystemEntryTypesRegistry} from "../../../../../core/projectFiles/entryType/FileSystemEntryTypesRegistry";
 import {IdeSearchableList} from "../../../../../../core/ui/lib/lists/IdeSearchableList";
 

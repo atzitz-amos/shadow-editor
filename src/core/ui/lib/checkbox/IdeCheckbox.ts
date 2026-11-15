@@ -1,5 +1,5 @@
 import {ValuedComponent} from "../../engine/mixins/ValuedComponent";
-import {HTMLUtils} from "../../../../editor/utils/HTMLUtils";
+import {HTMLUtils} from "../../../utils/HTMLUtils";
 import {IdeControlElement} from "../elements/IdeControlElement";
 import {CustomElementsRegistry} from "../CustomElementsRegistry";
 

@@ -1,6 +1,6 @@
 import {View} from "./View";
 import {Caret} from "../../core/caret/Caret";
-import {HTMLUtils} from "../../utils/HTMLUtils";
+import {HTMLUtils} from "../../../core/utils/HTMLUtils";
 import {CaretRemovedEvent} from "../../core/caret/events/CaretRemovedEvent";
 import {CaretAddedEvent} from "../../core/caret/events/CaretAddedEvent";
 import {UIComponent} from "../../../core/ui/engine/components/UIComponent";

@@ -1,7 +1,7 @@
 import {ProjectFile} from "../project/filesystem/tree/ProjectFile";
 import {ProjectDirectory} from "../project/filesystem/tree/ProjectDirectory";
 import {GlobalState} from "../global/GlobalState";
-import {TextRange} from "../../editor/core/coordinate/range/TextRange";
+import {TextRange} from "../text/range/TextRange";
 import {LogicalPosition} from "../../editor/core/coordinate/LogicalPosition";
 import {Scheduler} from "../scheduler/Scheduler";
 

@@ -1,5 +1,5 @@
 import {HighlightOverlay} from "./HighlightOverlay";
-import {TextRange} from "../../../core/coordinate/range/TextRange";
+import {TextRange} from "../../../../core/text/range/TextRange";
 import {Editor} from "../../../Editor";
 import {TextAttributeKey} from "../style/TextAttributeKey";
 import {HighlightTextEffects} from "../effects/HighlightTextEffects";

@@ -1,7 +1,7 @@
 import {Editor} from "../../../Editor";
 import {HTMLView} from "./HTMLView";
 import {HTMLViewUtils} from "./HTMLViewUtils";
-import {HTMLUtils} from "../../../utils/HTMLUtils";
+import {HTMLUtils} from "../../../../core/utils/HTMLUtils";
 import {TextAttributeKey} from "../../highlighter/style/TextAttributeKey";
 import {HighlightTextEffects} from "../../highlighter/effects/HighlightTextEffects";
 

@@ -3,7 +3,7 @@ import {Token} from "../../tokens/Token";
 import {Marker, TokenStreamMarker} from "./Marker";
 import {SynTokenNode} from "../../../impl/SynTokenNode";
 import {TokenType} from "../../tokens/TokenType";
-import {TextRange} from "../../../../../editor/core/coordinate/range/TextRange";
+import {TextRange} from "../../../../../core/text/range/TextRange";
 import {SynErrorNode} from "../../../impl/SynErrorNode";
 import {ASTGrammar, ASTGrammarRole, ASTType} from "../nodes/ASTGrammar";
 import {TokenExpectation} from "./TokenExpectation";

@@ -1,5 +1,5 @@
 import {Document} from "./Document";
-import {TextRange} from "../coordinate/range/TextRange";
+import {TextRange} from "../../../core/text/range/TextRange";
 import {IndentUtils} from "../../../lang/syntax/utils/IndentUtils";
 
 export class LineData {

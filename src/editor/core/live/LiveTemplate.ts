@@ -1,7 +1,7 @@
-import {TextRange} from "../coordinate/range/TextRange";
+import {TextRange} from "../../../core/text/range/TextRange";
 import {LiveTemplateMode} from "./LiveTemplateMode";
 import {Editor} from "../../Editor";
-import {TrackedRange} from "../coordinate/range/TrackedRange";
+import {TrackedRange} from "../../../core/text/range/TrackedRange";
 
 /**
  *

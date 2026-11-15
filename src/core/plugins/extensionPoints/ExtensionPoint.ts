@@ -1,5 +1,5 @@
 import {EditorPlugin} from "../loader/Plugin";
-import {CollectionUtils} from "../../../editor/utils/collection/CollectionUtils";
+import {CollectionUtils} from "../../utils/collection/CollectionUtils";
 
 export class ExtensionPoint<T> {
     private static readonly registry = new Map<string | null, ExtensionPoint<any>[]>();

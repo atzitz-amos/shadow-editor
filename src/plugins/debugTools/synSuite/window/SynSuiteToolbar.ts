@@ -1,5 +1,5 @@
 import {UIComponent} from "../../../../core/ui/engine/components/UIComponent";
-import {HTMLUtils} from "../../../../editor/utils/HTMLUtils";
+import {HTMLUtils} from "../../../../core/utils/HTMLUtils";
 import {IdeMenuButton} from "../../../../core/ui/lib/buttons/IdeMenuButton";
 import {FaIcon} from "../../../../core/ui/icons/FaIcon";
 import {UIVariant} from "../../../../core/ui/lib/theme/UIVariant";

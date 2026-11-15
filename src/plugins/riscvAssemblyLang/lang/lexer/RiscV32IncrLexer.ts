@@ -3,7 +3,7 @@ import {RiscV32LexicalGrammar} from "./RiscV32LexicalGrammar";
 import {TokenType} from "../../../../lang/syntax/builder/tokens/TokenType";
 import {Source} from "../../../../lang/syntax/builder/tokens/TokenStream";
 import {IncrementalLexer} from "../../../../lang/syntax/builder/lexer/IncrementalLexer";
-import {TextRange} from "../../../../editor/core/coordinate/range/TextRange";
+import {TextRange} from "../../../../core/text/range/TextRange";
 
 const isDigit = (c: string | null) => !!c && c >= '0' && c <= '9';
 const isIdentStart = (c: string | null) => !!c && /^[A-Za-z_$]$/.test(c);

@@ -1,4 +1,4 @@
-import {UUIDHelper} from "../../../../editor/utils/UUIDHelper";
+import {UUIDHelper} from "../../../utils/UUIDHelper";
 import {WConnection} from "../connection/WConnection";
 import {WCPInboundRequest} from "../connection/WCPInboundRequest";
 import {WCPEndpoint} from "../model/WCPEndpoint";

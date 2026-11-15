@@ -1,5 +1,5 @@
 import {UIComponent} from "../../engine/components/UIComponent";
-import {HTMLUtils} from "../../../../editor/utils/HTMLUtils";
+import {HTMLUtils} from "../../../utils/HTMLUtils";
 import {UIComponentElement} from "../elements/UIComponentElement";
 import {CustomElementsRegistry} from "../CustomElementsRegistry";
 

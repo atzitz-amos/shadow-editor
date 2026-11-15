@@ -3,7 +3,7 @@ import {KeybindContext} from "../../../core/keybinds/context/KeybindContext";
 import {Key, Keybind} from "../../../core/keybinds/Keybind";
 import {LiveTemplate} from "../../../editor/core/live/LiveTemplate";
 import {JsLexicalGrammar} from "../lang/lexer/JsLexicalGrammar";
-import {TextRange} from "../../../editor/core/coordinate/range/TextRange";
+import {TextRange} from "../../../core/text/range/TextRange";
 
 /**
  *

@@ -1,5 +1,5 @@
 import {Icon} from "./Icon";
-import {HTMLUtils} from "../../../editor/utils/HTMLUtils";
+import {HTMLUtils} from "../../utils/HTMLUtils";
 
 type FaIconFamily = "fa-solid" | "fa-regular" | "fa-brands";
 

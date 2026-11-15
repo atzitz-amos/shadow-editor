@@ -1,7 +1,7 @@
 import {CodeCompletionItem} from "../item/CodeCompletionItem";
-import {TextRange} from "../../../editor/core/coordinate/range/TextRange";
+import {TextRange} from "../../../core/text/range/TextRange";
 import {Document} from "../../../editor/core/document/Document";
-import {TrackedRange} from "../../../editor/core/coordinate/range/TrackedRange";
+import {TrackedRange} from "../../../core/text/range/TrackedRange";
 import type {CompletionInfo} from "../manager/CompletionUtils";
 
 /**

@@ -241,10 +241,13 @@ export class KeybindManager {
      * within `run()` to signal it isn't actually applicable right now
      * (e.g. cursor isn't in a class body), which falls through to the
      * next candidate on the same key.
+     *
+     * Whether an action is offered at all only depends on its required data keys: the default ones are derived
+     * from its context descriptor (see {@link AbstractAction.getRequiredKeys}), and an action declaring its own
+     * (a file of the project tree, a tab...) has to run where no editor or pane is involved.
      */
     private dispatch(candidates: ResolvedBinding[], ctx: KeybindContext): boolean {
         for (const {action} of candidates) {
-            if (!ctx.applies(action.getKeybindContext())) continue;
             if (!action.isApplicable(ctx)) continue;
 
             try {

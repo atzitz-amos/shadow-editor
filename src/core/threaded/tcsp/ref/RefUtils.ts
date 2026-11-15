@@ -1,5 +1,5 @@
 import {ThreadedRefEngine} from "./ThreadedRefEngine";
-import {UUIDHelper} from "../../../../editor/utils/UUIDHelper";
+import {UUIDHelper} from "../../../utils/UUIDHelper";
 import {isRefMarker, Primitive, Wire} from "./RefProtocol";
 
 export type Constructor<T = any> = new (...args: any[]) => T;

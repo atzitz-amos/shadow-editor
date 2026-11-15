@@ -1,7 +1,7 @@
 import {TokenStream} from "../tokens/TokenStream";
 import {DocumentModificationEvent} from "../../../../editor/core/document/events/DocumentModificationEvent";
 import {Document} from "../../../../editor/core/document/Document";
-import {TextRange} from "../../../../editor/core/coordinate/range/TextRange";
+import {TextRange} from "../../../../core/text/range/TextRange";
 
 /**
  * Represents a lexer interface for tokenizing source code.

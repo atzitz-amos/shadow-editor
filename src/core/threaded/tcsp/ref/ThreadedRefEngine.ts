@@ -1,6 +1,7 @@
 import {TRefRegistry} from "./TRefRegistry";
 import {Service} from "../../service/Service";
-import {GlobalState} from "../../../global/GlobalState";
+// Not GlobalState: this module is loaded by workers too, and GlobalState imports the whole app, UI included
+import {EventBus} from "../../../events/EventBus";
 import {WebWorkerCreatedEvent} from "../../events/WebWorkerCreatedEvent";
 import {WCP} from "../../wcp/api/WCP";
 import {WConnection} from "../../wcp/connection/WConnection";
@@ -99,8 +100,15 @@ export class ThreadedRefEngine {
 
     // ------------------------------------------------------------------ server side (main thread)
 
+    /**
+     * Makes an object of the main thread addressable by name from workers, see {@link RefUtils.createRef}.
+     */
+    public pinRoot(name: string, value: unknown): void {
+        this.registry.pin(name, value);
+    }
+
     public begin(): void {
-        GlobalState.getMainEventBus().subscribe(this, WebWorkerCreatedEvent.SUBSCRIBER, ev => {
+        EventBus.getMainEventBus().subscribe(this, WebWorkerCreatedEvent.SUBSCRIBER, ev => {
             this.setupRemote(ev.getRemote());
         });
     }

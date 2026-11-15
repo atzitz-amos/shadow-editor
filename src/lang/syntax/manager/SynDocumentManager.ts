@@ -1,12 +1,12 @@
 import {Document} from "../../../editor/core/document/Document";
 import {SynDocument} from "../api/document/SynDocument";
-import {CollectionUtils} from "../../../editor/utils/collection/CollectionUtils";
+import {CollectionUtils} from "../../../core/utils/collection/CollectionUtils";
 import {SynDocumentImpl} from "../impl/document/SynDocumentImpl";
 import {SynFile} from "../api/filesystem/SynFile";
 import {Service, ServiceImpl} from "../../../core/threaded/service/Service";
 import {SynFileImpl} from "../impl/filesystem/SynFileImpl";
 import {DocumentModificationEvent} from "../../../editor/core/document/events/DocumentModificationEvent";
-import {TextRange} from "../../../editor/core/coordinate/range/TextRange";
+import {TextRange} from "../../../core/text/range/TextRange";
 import {ASTRecoveryInfo} from "../builder/parser/optimizer/recovery/ASTRecoveryInfo";
 import {ASTRecoveryBuilder} from "../builder/parser/optimizer/recovery/ASTRecoveryBuilder";
 import {EmptyKillSignal, TimeoutKillSignal} from "../../../core/utils/KillSignal";

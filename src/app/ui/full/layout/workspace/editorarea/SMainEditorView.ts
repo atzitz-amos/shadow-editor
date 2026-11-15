@@ -1,4 +1,4 @@
-import {HTMLUtils} from "../../../../../../editor/utils/HTMLUtils";
+import {HTMLUtils} from "../../../../../../core/utils/HTMLUtils";
 import {Editor} from "../../../../../../editor/Editor";
 import {GlobalState} from "../../../../../../core/global/GlobalState";
 import {UIResizeEvent} from "../../../../../core/events/UIResizeEvent";

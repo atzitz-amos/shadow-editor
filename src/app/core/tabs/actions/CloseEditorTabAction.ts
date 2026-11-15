@@ -14,7 +14,9 @@ import {EditorTabContextMenuActionGroup} from "./EditorTabContextMenuActionGroup
  */
 export class CloseEditorTabAction extends AbstractAction {
     run(ctx: KeybindContext): void | Promise<void> {
-        const tab = ctx.require(CommonDataKeys.SELECTED_EDITOR_TAB);
+        // The tab the event comes from (its context menu), the active one otherwise (the keybind)
+        ctx.getEvent().preventDefault();
+        const tab = ctx.get(CommonDataKeys.SELECTED_EDITOR_TAB) ?? ctx.require(CommonDataKeys.OPENED_EDITOR_TAB);
         TabsManager.getInstance().close(tab);
     }
 
@@ -31,7 +33,11 @@ export class CloseEditorTabAction extends AbstractAction {
     }
 
     getRequiredKeys(): DataKey<unknown>[] {
-        return [CommonDataKeys.SELECTED_EDITOR_TAB];
+        return [];
+    }
+
+    isApplicable(ctx: KeybindContext): boolean {
+        return ctx.has(CommonDataKeys.SELECTED_EDITOR_TAB) || ctx.has(CommonDataKeys.OPENED_EDITOR_TAB);
     }
 
     addToGroups() {

@@ -1,5 +1,5 @@
 import {UIComponent} from "../../../core/ui/engine/components/UIComponent";
-import {HTMLUtils} from "../../../editor/utils/HTMLUtils";
+import {HTMLUtils} from "../../../core/utils/HTMLUtils";
 import {GlobalState} from "../../../core/global/GlobalState";
 import {IdeDialogUtilsCore} from "../../../core/ui/lib/dialog/utils/IdeDialogUtilsCore";
 import {SynSuiteEngine} from "../../../app/testLib/lang/suite/SynSuiteEngine";

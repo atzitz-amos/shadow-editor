@@ -2,8 +2,8 @@ import {Caret} from "./Caret";
 import {ModifierKeyHolder} from "../../../core/keybinds/Keybind";
 import {Editor} from "../../Editor";
 import {LogicalPosition} from "../coordinate/LogicalPosition";
-import {TextRange} from "../coordinate/range/TextRange";
-import {TrackedRange} from "../coordinate/range/TrackedRange";
+import {TextRange} from "../../../core/text/range/TextRange";
+import {TrackedRange} from "../../../core/text/range/TrackedRange";
 
 
 export enum SelectionDirection {

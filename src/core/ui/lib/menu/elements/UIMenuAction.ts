@@ -1,6 +1,6 @@
 import {Icon} from "../../../icons/Icon";
 import {Keybind} from "../../../../keybinds/Keybind";
-import {HTMLUtils} from "../../../../../editor/utils/HTMLUtils";
+import {HTMLUtils} from "../../../../utils/HTMLUtils";
 import {ShortcutBadge} from "../../keybind/ShortcutBadge";
 import {UIMenuElement} from "./UIMenuElement";
 import {UIMenu} from "../UIMenu";

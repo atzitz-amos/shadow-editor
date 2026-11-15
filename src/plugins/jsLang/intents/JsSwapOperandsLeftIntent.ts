@@ -8,7 +8,7 @@ import {JsFunctionParameterList} from "../lang/syntax/statements/JsFunctionParam
 import {Caret, CaretMovementFlags} from "../../../editor/core/caret/Caret";
 import {JsArgumentList} from "../lang/syntax/expr/JsArgumentList";
 import {JsBinaryExprTemplate} from "../lang/codeGen/template/expr/JsBinaryExprTemplate";
-import {TextRange} from "../../../editor/core/coordinate/range/TextRange";
+import {TextRange} from "../../../core/text/range/TextRange";
 import {JsFunctionParameterListTemplate} from "../lang/codeGen/template/JsFunctionParameterListTemplate";
 import {JsArgumentListTemplate} from "../lang/codeGen/template/JsArgumentListTemplate";
 

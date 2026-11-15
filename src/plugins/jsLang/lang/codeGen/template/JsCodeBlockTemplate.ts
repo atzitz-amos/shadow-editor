@@ -5,7 +5,7 @@ import {JsParser} from "../../parser/JsParser";
 import {JsCodeBlock} from "../../syntax/JsCodeBlock";
 import {JsStatement} from "../../syntax/statements/JsStatement";
 import {JsStatementTemplate} from "./JsStatementTemplate";
-import {TextRange} from "../../../../../editor/core/coordinate/range/TextRange";
+import {TextRange} from "../../../../../core/text/range/TextRange";
 
 /**
  *

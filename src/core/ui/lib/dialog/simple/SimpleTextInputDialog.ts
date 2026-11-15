@@ -1,5 +1,5 @@
 import {AbstractDialog, IdeResultDialog} from "../IdeDialog";
-import {HTMLUtils} from "../../../../../editor/utils/HTMLUtils";
+import {HTMLUtils} from "../../../../utils/HTMLUtils";
 import {Icon} from "../../../icons/Icon";
 
 /**

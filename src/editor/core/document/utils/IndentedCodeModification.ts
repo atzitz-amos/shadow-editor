@@ -1,6 +1,6 @@
 import {Document} from "../Document";
 import {IndentUtils} from "../../../../lang/syntax/utils/IndentUtils";
-import {Arrays} from "../../../utils/Arrays";
+import {Arrays} from "../../../../core/utils/Arrays";
 
 /**
  *

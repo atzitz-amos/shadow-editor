@@ -1,7 +1,7 @@
 import {CustomElementsRegistry} from "../CustomElementsRegistry";
 import {UIComponent} from "../../engine/components/UIComponent";
 import {UIVariant} from "../theme/UIVariant";
-import {HTMLUtils} from "../../../../editor/utils/HTMLUtils";
+import {HTMLUtils} from "../../../utils/HTMLUtils";
 import {IdeControlElement} from "../elements/IdeControlElement";
 
 export class IdeButton extends UIComponent {

@@ -1,6 +1,6 @@
 import {InlinePopup} from "./InlinePopup";
 import {Editor} from "../../Editor";
-import {HTMLUtils} from "../../utils/HTMLUtils";
+import {HTMLUtils} from "../../../core/utils/HTMLUtils";
 import {EditorKeysHelper} from "../../core/keycontext/EditorKeysHelper";
 import {CloseOn} from "../../../core/ui/api/Closeable";
 import {UIComponentMixin} from "../../../core/ui/engine/components/UIComponent";

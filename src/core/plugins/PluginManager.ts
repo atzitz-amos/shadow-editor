@@ -54,10 +54,9 @@ export class PluginManager {
         this.logger.info("Successfully registered plugin: " + name);
         for (let i = 0; i < this.waitingEnable.length; i++) {
             if (plugin instanceof this.waitingEnable[i]) {
-                loadedPlugin.enable(); // TODO: EnableContext
+                // Same path as enable(): the extension points of the plugin have to be contributed as well
+                this.doEnable(loadedPlugin);
                 this.waitingEnable.splice(i, 1);
-
-                this.logger.info("Enabled plugin '" + name + "' from waiting list.");
                 break;
             }
         }

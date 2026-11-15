@@ -1,5 +1,5 @@
 import {FormattingNode} from "./FormattingNode";
-import {TextRange} from "../../../../editor/core/coordinate/range/TextRange";
+import {TextRange} from "../../../../core/text/range/TextRange";
 
 /**
  *

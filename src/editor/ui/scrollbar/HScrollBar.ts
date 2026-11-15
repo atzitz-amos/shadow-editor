@@ -1,7 +1,7 @@
 import {Component} from "../../core/components/Component";
 import {Editor} from "../../Editor";
 import {View} from "../view/View";
-import {HTMLUtils} from "../../utils/HTMLUtils";
+import {HTMLUtils} from "../../../core/utils/HTMLUtils";
 import {ScrollMode} from "./Scrolling";
 
 

@@ -1,4 +1,4 @@
-import {HTMLUtils} from "../../../../../editor/utils/HTMLUtils";
+import {HTMLUtils} from "../../../../utils/HTMLUtils";
 import {UIMenu} from "../UIMenu";
 import {KeybindContext} from "../../../../keybinds/context/KeybindContext";
 import {ContextResolver} from "../../../../keybinds/context/ContextResolver";

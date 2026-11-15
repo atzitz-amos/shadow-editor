@@ -1,4 +1,4 @@
-import {TextRange} from "../../../../editor/core/coordinate/range/TextRange";
+import {TextRange} from "../../../../core/text/range/TextRange";
 import {EditorURI} from "../../../../core/uri/EditorURI";
 import {ProjectFile} from "../../../../core/project/filesystem/tree/ProjectFile";
 import {ProblemsHolder} from "../../../codeAnalysis/inspections/problems/ProblemsHolder";
