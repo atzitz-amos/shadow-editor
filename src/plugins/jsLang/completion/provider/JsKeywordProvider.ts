@@ -14,6 +14,7 @@ import {SimpleMultilineCodeCompletion} from "../../../../lang/codeCompletion/ite
 import {JsIfStatement} from "../../lang/syntax/statements/JsIfStatement";
 import {JsSynUtils} from "../../lang/syntax/utils/JsSynUtils";
 import {JsFunction} from "../../lang/syntax/api/JsFunction";
+import {FaIcon} from "../../../../core/ui/icons/FaIcon";
 
 /**
  *

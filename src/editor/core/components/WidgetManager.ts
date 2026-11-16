@@ -117,6 +117,11 @@ export class WidgetManager {
         this.overlays = newOverlays;
     }
 
+    getCustomHighlighter() {
+        const mode = this.editor.getBehaviorManager().getCurrentMode();
+        return mode ? mode.getCustomHighlighter() : null;
+    }
+
     private cleanupStaleOverlays() {
         let newOverlays: OverlayWidget[] = [];
         for (let overlay of this.overlays) {

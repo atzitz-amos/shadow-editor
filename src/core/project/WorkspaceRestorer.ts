@@ -6,6 +6,7 @@ import {WorkspaceManager} from "./workspace/WorkspaceManager";
 import {ProjectFile} from "./filesystem/tree/ProjectFile";
 import {TabsManager} from "../../app/core/tabs/TabsManager";
 import {EditorTabsHelper} from "../../app/core/tabs/EditorTabsHelper";
+import {Logger} from "../logging/logger/LoggerCore";
 
 /**
  *
@@ -15,6 +16,7 @@ import {EditorTabsHelper} from "../../app/core/tabs/EditorTabsHelper";
  */
 @Service
 export class WorkspaceRestorer {
+    private static readonly logger: Logger = Logger.for("WorkspaceRestorer");
     private static readonly instance: WorkspaceRestorer = new WorkspaceRestorer();
 
     public static getInstance(): WorkspaceRestorer {
@@ -37,11 +39,16 @@ export class WorkspaceRestorer {
 
             workspace.clear();
 
+            // A tab that cannot be restored is dropped, without preventing the others from being restored
             for (const tab of tabs.values()) {
-                const file = project.getFS().getEntryById(tab.fileId) as ProjectFile;
-                const iTab = await EditorTabsHelper.newTab(file);
-                if (tab.tabId === activeId)
-                    TabsManager.getInstance().setActive(iTab);
+                try {
+                    const file = project.getFS().getEntryById(tab.fileId) as ProjectFile;
+                    const iTab = await EditorTabsHelper.newTab(file);
+                    if (iTab && tab.tabId === activeId)
+                        TabsManager.getInstance().setActive(iTab);
+                } catch (e) {
+                    WorkspaceRestorer.logger.error(`Could not restore the tab of file ${tab.fileId}`, e);
+                }
             }
         }, 500);
     }

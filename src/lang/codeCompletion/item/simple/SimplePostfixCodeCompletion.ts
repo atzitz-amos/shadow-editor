@@ -4,6 +4,7 @@ import {SynParentElement} from "../../../syntax/api/tree/SynParentElement";
 import {CodeCompletionItem} from "../CodeCompletionItem";
 import {CodeCompletionPresentation} from "../presentation/CodeCompletionPresentation";
 import {SimpleCodeCompletionPresentation} from "../presentation/SimpleCodeCompletionPresentation";
+import {Icon} from "../../../../core/ui/icons/Icon";
 
 /**
  *
@@ -12,6 +13,8 @@ import {SimpleCodeCompletionPresentation} from "../presentation/SimpleCodeComple
  * @since 1.0.0
  */
 export class SimplePostfixCodeCompletion extends CodeCompletionItem {
+    private icon: Icon | null = null;
+
     /**
      * @param value the completed text, which is what the prefix is matched against
      * @param postfix inserted right after `value`
@@ -29,11 +32,16 @@ export class SimplePostfixCodeCompletion extends CodeCompletionItem {
     }
 
     getPresentation(): CodeCompletionPresentation {
-        return new SimpleCodeCompletionPresentation(this.value, "", this.postfix.replace("$CARET", "").trim(), null);
+        return new SimpleCodeCompletionPresentation(this.value, "", this.postfix.replace("$CARET", "").trim(), this.icon);
     }
 
     isStillApplicable(text: string): boolean {
         return this.value.startsWith(text);
+    }
+
+    withIcon(icon: Icon) {
+        this.icon = icon;
+        return this;
     }
 
     apply(parent: SynParentElement, placeholder: SynPlaceholder, synModTree: SynModTree): void {

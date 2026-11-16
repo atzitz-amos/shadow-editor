@@ -98,6 +98,11 @@
             import {LiveTemplate} from "./src/editor/core/live/LiveTemplate";
             import RiscVAssemblyLangPlugin from "./src/plugins/riscvAssemblyLang/RiscVAssemblyLangPlugin";
             import {RiscV32LexicalGrammar} from "./src/plugins/riscvAssemblyLang/lang/lexer/RiscV32LexicalGrammar";
+            import {EditorModeEx} from "./src/editor/core/behaviors/mode/EditorModeEx";
+            import {FragmentSpanRenderer} from "./src/core/highlighter/FragmentSpanRenderer";
+            import {FocusedModeHighlighter} from "./src/lang/highlighter/custom/FocusedModeHighlighter";
+            import {JsFunctionStatement} from "./src/plugins/jsLang/lang/syntax/statements/JsFunctionStatement";
+            import {Scheduler} from "./src/core/scheduler/Scheduler";
 
             window.QuickParseUtils = QuickParseUtils;
 
@@ -242,6 +247,34 @@
                 }, 0);
 
                 window.editor = ui.getMainEditor();
+
+                let _highlightedRange;
+                let _currFunc = -1;
+
+                Scheduler.after(2000, () => {
+                    _highlightedRange = GlobalState.getMainEditor().getOpenedDocument().getFullRange();
+                    GlobalState.getMainEditor().getBehaviorManager().enterMode(
+                        new class extends EditorModeEx {
+                            getCustomHighlighter() {
+                                return new FocusedModeHighlighter(_highlightedRange)
+                            }
+                        }
+                    )
+                })
+
+                window.highlightNextFunction = () => {
+                    _currFunc++;
+                    const tree = getSynDocument().getTree();
+                    const funcs = tree.getAllChildrenOfType(JsFunctionStatement, true);
+                    if (_currFunc >= funcs.length) {
+                        _currFunc = -1;
+                        _highlightedRange = GlobalState.getMainEditor().getOpenedDocument().getFullRange();
+                    } else {
+                        _highlightedRange = funcs[_currFunc].getTextRange();
+                    }
+
+                    GlobalState.getMainEditor().repaintView();
+                }
 
                 window.project = project;
                 window.ActiveProjectHelper = ActiveProjectHelper;

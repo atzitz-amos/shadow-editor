@@ -55,6 +55,12 @@
     border-radius: 5px;
     max-height: 200px;
     overflow: auto;
+    cursor: default;
+}
+
+.autocomplete-item-left {
+    gap: 5px;
+    align-items: center;
 }
 
 .autocomplete-popup-line {

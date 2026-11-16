@@ -1,5 +1,6 @@
 import {IBehaviorProvider} from "../IBehaviorProvider";
 import {Editor} from "../../../Editor";
+import {ICustomHighlighter} from "../../../../lang/highlighter/custom/ICustomHighlighter";
 
 /**
  *
@@ -8,7 +9,7 @@ import {Editor} from "../../../Editor";
  * @since 1.0.0
  */
 export interface IEditorMode extends IBehaviorProvider {
-    getCustomRenderer(): any | null;
+    getCustomHighlighter(): ICustomHighlighter | null;
 
     getDisplayName(): string;
 

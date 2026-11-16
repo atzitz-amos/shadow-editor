@@ -5,7 +5,9 @@ import {ProjectDirectory} from "./tree/ProjectDirectory";
 import {ProjectFile} from "./tree/ProjectFile";
 import {GlobalState} from "../../global/GlobalState";
 import {EventBus} from "../../events/EventBus";
-import {VNode} from "./metadata/VNode";
+import {VContentNode, VNode} from "./metadata/VNode";
+import {FileContentLostError} from "./FileContentLostError";
+import {Logger} from "../../logging/logger/LoggerCore";
 import {VNodeStore} from "./metadata/VNodeStore";
 import {DirectoryCreatedEvent} from "../events/DirectoryCreatedEvent";
 import {FileCreatedEvent} from "../events/FileCreatedEvent";
@@ -26,6 +28,7 @@ export type FileDump = { path: string, content: string };
  */
 export class ProjectVFS implements FileSystem {
     private static readonly encoder = new TextEncoder();
+    private static readonly logger: Logger = Logger.for("ProjectVFS");
 
     private readonly name: string;
 
@@ -41,7 +44,10 @@ export class ProjectVFS implements FileSystem {
     /** One entry object per VNode id. Filled lazily and cleaned up on delete. */
     private readonly childrenCache = new Map<string, FileSystemEntry>();
 
-    /** OPFS blob handles are stable, so each lookup only has to happen once per file. */
+    /**
+     * OPFS blob handles, so that each lookup usually happens once per file. Only handles found on disk are cached, and
+     * a handle whose file disappears afterwards is dropped by the next read or write that fails on it.
+     */
     private readonly blobHandles = new Map<string, Promise<FileSystemFileHandle>>();
 
     constructor(name: string, virtualHandle: FileSystemDirectoryHandle) {
@@ -277,9 +283,9 @@ export class ProjectVFS implements FileSystem {
         return this.vNodeStore.getChildren(parent.getId()).map(vNode => this.getEntryForVNode(vNode));
     }
 
-    async getFileContent(file: ProjectFile): Promise<FileSystemFileHandle> {
+    async getFileContent(file: ProjectFile): Promise<File> {
         this.assertFileExists(file);
-        return this.getBlobHandle(file.getId());
+        return this.readBlob(file.getId());
     }
 
     async write(file: ProjectFile, content: string): Promise<string> {
@@ -290,7 +296,7 @@ export class ProjectVFS implements FileSystem {
 
     async readBinary(file: ProjectBinaryFile): Promise<File> {
         this.assertFileExists(file);
-        return (await this.getBlobHandle(file.getId())).getFile();
+        return this.readBlob(file.getId());
     }
 
     // ------------------------------------------------------------------ bulk APIs (for workers / search)
@@ -322,8 +328,7 @@ export class ProjectVFS implements FileSystem {
             while (next < files.length) {
                 const i = next++;
                 const file = files[i];
-                const handle = await this.getBlobHandle(file.getId());
-                out[i] = {path: this.getPath(file).toString(), content: await (await handle.getFile()).text()};
+                out[i] = {path: this.getPath(file).toString(), content: await (await this.readBlob(file.getId())).text()};
             }
         };
 
@@ -356,8 +361,7 @@ export class ProjectVFS implements FileSystem {
 
     /** Replaces the blob's content in one writable (nothing is visible until `close()`), then records size + mtime. */
     private async writeBlob(id: string, content: BinaryContent): Promise<void> {
-        const handle = await this.getBlobHandle(id);
-        const writable = await handle.createWritable();
+        const writable = await this.withBlobHandle(id, true, handle => handle.createWritable());
         try {
             await writable.write(content);
             await writable.close();
@@ -377,14 +381,67 @@ export class ProjectVFS implements FileSystem {
         }
     }
 
-    private getBlobHandle(id: string): Promise<FileSystemFileHandle> {
-        let handle = this.blobHandles.get(id);
-        if (!handle) {
-            handle = this.blobsHandle.getFileHandle(id, {create: true});
-            handle.catch(() => this.blobHandles.delete(id)); // don't cache failures
-            this.blobHandles.set(id, handle);
+    /**
+     * Reads the stored content of a file.
+     * <p>
+     * A file whose metadata records no content may have no blob yet (it was created and never saved), and reads as
+     * empty. A file recording some content must have it stored.
+     *
+     * @throws FileContentLostError when the metadata records some content, but the blob is missing or empty
+     */
+    private async readBlob(id: string): Promise<File> {
+        const expectedSize = (this.vNodeStore.getById(id) as VContentNode).size;
+
+        let file: File;
+        try {
+            file = await this.withBlobHandle(id, false, handle => handle.getFile());
+        } catch (e) {
+            if (!ProjectVFS.isNotFound(e)) throw e;
+            if (expectedSize > 0) throw this.contentLost(id, expectedSize);
+
+            file = await this.withBlobHandle(id, true, handle => handle.getFile());
         }
+
+        if (file.size === 0 && expectedSize > 0) throw this.contentLost(id, expectedSize);
+        return file;
+    }
+
+    /**
+     * Runs `operation` on the blob handle of a file. If it fails because the blob was removed after its handle was
+     * cached, the handle is looked up again and `operation` retried once.
+     *
+     * @param create whether a missing blob is created (writes) or reported by a NotFoundError (reads)
+     */
+    private async withBlobHandle<T>(id: string, create: boolean, operation: (handle: FileSystemFileHandle) => Promise<T>): Promise<T> {
+        const cached = this.blobHandles.get(id);
+        if (cached) {
+            try {
+                return await operation(await cached);
+            } catch (e) {
+                if (!ProjectVFS.isNotFound(e)) throw e;
+                if (this.blobHandles.get(id) === cached) this.blobHandles.delete(id);
+            }
+        }
+        return operation(await this.lookupBlobHandle(id, create));
+    }
+
+    private lookupBlobHandle(id: string, create: boolean): Promise<FileSystemFileHandle> {
+        const handle = this.blobsHandle.getFileHandle(id, {create});
+        this.blobHandles.set(id, handle);
+        handle.catch(() => {
+            if (this.blobHandles.get(id) === handle) this.blobHandles.delete(id); // don't cache failures
+        });
         return handle;
+    }
+
+    private contentLost(id: string, expectedSize: number): FileContentLostError {
+        const error = new FileContentLostError(id, this.vNodeStore.getPath(id), expectedSize);
+        ProjectVFS.logger.error(error.message);
+        return error;
+    }
+
+    private static isNotFound(e: unknown): boolean {
+        return e instanceof DOMException && e.name === "NotFoundError";
     }
 
     /** The store soft-deletes, so getById still returns deleted nodes. */

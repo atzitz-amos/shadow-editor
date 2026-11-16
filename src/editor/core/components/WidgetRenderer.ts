@@ -54,7 +54,15 @@ export class WidgetRenderer {
         const textContent = this.manager.getDocument().getTextContent()
         const events = FragmentsBuilder.build(range, this.manager);
 
+        const customHighlighter = this.manager.getCustomHighlighter();
+
         return FragmentSpanRenderer.render(textContent, range, events, {
+            getOverriddenStyle: !customHighlighter ? undefined : fragment => {
+                if (customHighlighter.allowHighlighting(fragment))
+                    return fragment.getFragmentStyle();
+                else
+                    return customHighlighter.getDefaultHighlighting(fragment);
+            },
             renderInlay: event => {
                 const inlayRecord = this.manager.getInlayManager().getInlayAt(event.pos)!;
                 const span = document.createElement('span');

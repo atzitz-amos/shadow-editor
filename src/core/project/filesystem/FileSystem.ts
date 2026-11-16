@@ -66,10 +66,15 @@ export interface FileSystem {
 
     getChildren(parent: ProjectDirectory): FileSystemEntry[];
 
-    getFileContent(file: ProjectFile): Promise<FileSystemFileHandle>;
+    /**
+     * A snapshot of the stored content of a file, read lazily.
+     * @throws FileContentLostError when the metadata records some content but none is stored
+     */
+    getFileContent(file: ProjectFile): Promise<File>;
 
     write(file: ProjectFile, content: string): Promise<string>;
 
+    /** @throws FileContentLostError when the metadata records some content but none is stored */
     readBinary(file: ProjectBinaryFile): Promise<File>;
 
     writeBinary(file: ProjectBinaryFile, content: BinaryContent): Promise<void>;
