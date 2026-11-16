@@ -2,6 +2,7 @@ import {IEditorMode} from "./IEditorMode";
 import {EditorBehavior} from "../EditorBehavior";
 import {CtrlDeleteBehavior} from "../behavior/CtrlDeleteBehavior";
 import {Editor} from "../../../Editor";
+import {ICustomHighlighter} from "../../../../lang/highlighter/custom/ICustomHighlighter";
 
 /**
  *
@@ -10,7 +11,7 @@ import {Editor} from "../../../Editor";
  * @since 1.0.0
  */
 export abstract class EditorModeEx implements IEditorMode {
-    getCustomRenderer(): any | null {
+    getCustomHighlighter(): ICustomHighlighter | null {
         return null;
     }
 

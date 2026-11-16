@@ -1,4 +1,6 @@
 import {Serializable, SerializableType} from "../../persistence/serializable/Serializable";
+import {Document} from "../../../editor/core/document/Document";
+import {TrackedRange} from "./TrackedRange";
 
 export type HasRange = { getTextRange(): TextRange };
 

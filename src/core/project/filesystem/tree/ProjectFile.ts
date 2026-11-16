@@ -86,10 +86,11 @@ export class ProjectFile implements FileSystemEntry {
     /**
      * Always reflects what is on disk, but only pays for reading + decoding the text when the file actually changed.
      * (`getFile()` is a cheap snapshot; `text()` is the expensive part.)
+     *
+     * @throws FileContentLostError when the stored content is missing, see {@link FileSystem.getFileContent}
      */
     async getTextContent(): Promise<string> {
-        const handle = await this.fs.getFileContent(this);
-        const file = await handle.getFile();
+        const file = await this.fs.getFileContent(this);
 
         const stamp = `${file.lastModified}:${file.size}`;
         if (this.cachedContent === null || this.cacheStamp !== stamp) {

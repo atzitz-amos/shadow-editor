@@ -1583,7 +1583,8 @@ IdeDialogUtilsCore.closeDialog(MyDialog);
 
 The shell is built from [`UIComponent`](../src/core/ui/engine/components/UIComponent.ts)s, each wrapping one DOM
 element and holding child components. `src/core/ui/lib` contains the reusable ones: buttons, checkboxes, dropdowns,
-lists, trees, tabs, menus, dialogs, charts and a side-by-side diff view. Icons are created with `FaIcon`
+lists, trees, tabs, menus, dialogs, charts and a side-by-side diff view. Most of them can also be written as HTML
+tags, see [13.6](#136-custom-elements). Icons are created with `FaIcon`
 (`FaIcon.solid("code")`, `FaIcon.brands("fa-js").colored("#f7df1e")`).
 
 Components react to UI changes through hooks rather than through the event bus:
@@ -1596,6 +1597,283 @@ protected onAnyPaneShown(pane: IPane): void {
 ```
 
 `@UIHooks.react` cannot be used on `#private` methods.
+
+### 13.6 Custom elements
+
+The toolkit defines ten HTML elements, so that markup given to `setInnerHTML`, or written in a dialog template, can
+contain controls without building components by hand:
+
+```typescript
+buttons.innerHTML = `<ide-button secondary>Cancel</ide-button><ide-button primary>Confirm</ide-button>`;
+```
+
+| Element                 | Content                                         | State and events                                          | Component           |
+|-------------------------|-------------------------------------------------|-----------------------------------------------------------|---------------------|
+| `<ide-button>`          | Its label                                       | `click`                                                   | `IdeButton`         |
+| `<ide-checkbox>`        | Its label                                       | `checked`, `input`, `change`                              | `IdeCheckbox`       |
+| `<ide-dropdown>`        | `<ide-option>` children                         | `value`, `input`, `change`                                | `IdeDropdown`       |
+| `<ide-menu-button>`     | None, the menu comes from the `builder` property | `primaryaction`                                          | `IdeMenuButton`     |
+| `<ide-tabs>`            | `<ide-tab>` children                            | `selected`, `change`                                      | `TabPane`           |
+| `<ide-searchable-list>` | `<ide-list-item>` children, or `items`          | `value`, `change`, `confirm`                              | `IdeSearchableList` |
+| `<ide-code>`            | The code to highlight                           |                                                           | `HighlightedFragment` |
+| `<ide-shortcut>`        | None                                            |                                                           | `ShortcutBadge`     |
+| `<ide-diff>`            | None, the texts are properties                  | `getResult()`                                             | `IdeSideBySideDiff` |
+| `<ide-donut-chart>`     | `<ide-donut-segment>` children, or `segments`   |                                                           | `IdeDonutChart`     |
+
+The component column names the class to use from code instead. Each component is what the element shows, so both
+behave the same.
+
+#### Registration and styles
+
+`ShadowUIFactory` calls `CustomElementsLoader.ensureLoaded()` before it builds the UI. The loader imports every file
+found directly in a folder of `src/core/ui/lib` (`src/core/ui/lib/<folder>/<file>.ts`), and each file defines its
+element with `CustomElementsRegistry.register(name, constructor)`, which skips a name that is already defined, as
+happens on a hot reload. Nothing is defined in a worker, which has no DOM.
+
+The styles are in the `lib-*.css` file of each folder, imported by
+[`src/core/ui/lib/lib.css`](../src/core/ui/lib/lib.css).
+
+To add an element, put its file directly in a folder of `src/core/ui/lib`, as a file nested deeper is not imported by
+the loader, and add its stylesheet to `lib.css`. An element written into the page before its definition is loaded
+stays a plain unknown element until then, and gets its behavior once the definition is registered.
+
+#### Two kinds of elements
+
+**Controls** (`<ide-button>`, `<ide-checkbox>`, `<ide-dropdown>`) extend
+[`IdeControlElement`](../src/core/ui/lib/elements/IdeControlElement.ts). The element is itself the control: there is
+no native `<button>` or `<input>` inside, so its class list, style and content can be changed like those of any
+element. They behave like native controls:
+
+- They can be focused with Tab, and set their ARIA `role`.
+- `disabled` (attribute or property) removes them from the tab order. It also stops clicks before any listener sees
+  them, and makes `:disabled` match in CSS.
+- They are form-associated: inside a `<form>`, a control with a `name` submits its value.
+
+**Component hosts** (all the other elements but `<ide-shortcut>`) extend
+[`UIComponentElement`](../src/core/ui/lib/elements/UIComponentElement.ts). The element creates its component from its
+attributes when it is first connected, and appends the component's element as its own child. `getComponent()`
+returns that component, or null before the element is connected.
+
+When an attribute it observes changes, the host disposes of the component and creates a new one. Several attribute
+changes made in a row cause a single rebuild, at the next microtask. A rebuild loses whatever state is not held in
+an attribute, such as the unchanged lines a user expanded in a diff.
+
+In attributes, a number that does not parse is ignored. A boolean attribute is true when it is present, unless its
+value is `"false"`.
+
+An `icon` attribute is the name of a Font Awesome icon, with or without its `fa-` prefix, such as `icon="play"` or
+`icon="fa-file-code"`. It is a solid icon, unless the name is in the short list of brands known to `FaIcon.auto()`,
+such as `github`.
+
+#### `<ide-button>`
+
+```html
+<ide-button primary>Run</ide-button>
+<ide-button secondary disabled><i class="fa-solid fa-trash"></i>Delete</ide-button>
+```
+
+- **Variant:** `primary` is the accent button. `secondary`, the default, is the bordered button. `ghost` removes
+  the background and border.
+- **Keyboard:** Enter and Space click the button.
+- **From code:** [`IdeButton`](../src/core/ui/lib/buttons/IdeButton.ts) creates a native `button.ide-btn` with the
+  same look: `new IdeButton("Run", UIVariant.PRIMARY)`. It has `onClick()`, `setText()`, `enable()` and `disable()`.
+
+#### `<ide-checkbox>`
+
+```html
+<ide-checkbox checked name="wrap">Wrap long lines</ide-checkbox>
+```
+
+- **Attributes:** `checked`, `indeterminate` (the "some selected" state), `disabled`, and `name`. `value` is what
+  the form submits, and defaults to `"on"`.
+- **Toggling:** clicking or pressing Space toggles it and clears `indeterminate`. It then dispatches `input` and
+  `change`, which see the new `checked`, as with a native checkbox.
+- **From code:** [`IdeCheckbox`](../src/core/ui/lib/checkbox/IdeCheckbox.ts) is a `ValuedComponent<boolean>`. It is
+  created with `new IdeCheckbox(parent, "Wrap long lines", true)`. It has `isChecked()`, `setChecked()`,
+  `setIndeterminate()`, `setEnabled()`, `setLabel()` and `setOnValueChanged(callback)`.
+
+#### `<ide-dropdown>`
+
+```html
+<ide-dropdown value="lf" name="lineEnding">
+    <ide-option value="lf">LF</ide-option>
+    <ide-option value="crlf" icon="microsoft">CRLF</ide-option>
+    <ide-option disabled>CR</ide-option>
+</ide-dropdown>
+```
+
+- **Value:** the selected option is the one whose value matches `value`. An option without a `value` uses its text.
+  Without a `value` attribute, the first option is selected, unless `placeholder` is set: then nothing is, and the
+  placeholder is shown.
+- **Children:** options can be added, removed or edited at any time, and the field is updated.
+- **Opening:** a click, Enter, Space or Alt+Down opens a `PopupMenu` listing the enabled options, with the selected
+  one checked.
+- **Keyboard:** while the list is closed, Up, Down, Home and End change the selection directly, as with a native
+  `<select>`.
+- **Events:** picking another option sets `value` and dispatches `input` and `change`.
+- **Properties:** `value`, `options`, `selectedOption` and `selectedIndex`. The methods are `open()`, `close()`,
+  `toggle()` and `isOpen()`.
+- **Styling:** the field is drawn in a shadow root, so that the children only hold the options. It is styled through
+  `::part(label)`, `::part(placeholder)` and `::part(arrow)`.
+- **From code:** [`IdeDropdown`](../src/core/ui/lib/dropdown/IdeDropdown.ts) is a `ValuedComponent<string>`. It is
+  created with `new IdeDropdown(parent, [{value: "lf", label: "LF"}, {value: "crlf", icon: "microsoft"}], "lf")`. It
+  has `setItems()`, `setValue()`, `setPlaceholder()` and `setEnabled()`. `getValue()` is null while nothing is
+  selected.
+
+#### `<ide-menu-button>`
+
+```html
+<ide-menu-button label="Run" icon="play" variant="primary" split></ide-menu-button>
+```
+
+```typescript
+const button = element.querySelector("ide-menu-button")!;
+button.builder = menu => menu
+    .addAction("Run tests", () => runTests(), FaIcon.solid("vial"))
+    .addSeparator()
+    .addAction("Run with coverage", () => runTests({coverage: true}));
+button.addEventListener("primaryaction", () => runTests());
+```
+
+The button opens a `PopupMenu` anchored to it. The `builder` property fills the menu every time it opens, so the
+menu always reflects the current state. If the builder adds nothing, the menu does not open.
+
+- **Attributes:** `label`, `icon`, `tooltip`, `size` (`small` or `normal`) and `disabled`.
+- **`variant`:** `ghost`, the default, is a borderless toolbar button. The others are `primary` and `secondary`.
+- **`placement`:** where the menu opens, `bottom-end` by default. The others are `bottom-start`, `top-start` and
+  `top-end`.
+- **`menu-class`:** a CSS class added to the menu.
+- **`indicator="false"`:** hides the small corner triangle.
+- **`split`:** the button is split in two. The main part dispatches `primaryaction`, and only the arrow opens the
+  menu.
+- **Keyboard:** Down opens the menu, unless the button is split.
+- **Methods:** `open()` and `close()`. Changing `disabled` does not rebuild the button.
+- **From code:** [`IdeMenuButton`](../src/core/ui/lib/buttons/IdeMenuButton.ts) is created with
+  `new IdeMenuButton(builder, options)`. Its options mirror the attributes, `primaryAction` is a callback instead of
+  an event, and a `context` callback gives the `KeybindContext` passed to the actions of the menu.
+
+#### `<ide-tabs>`
+
+```html
+<ide-tabs selected="tree">
+    <ide-tab tab-id="tree" label="Tree">...</ide-tab>
+    <ide-tab tab-id="tokens" label="Tokens" tooltip="Output of the lexer" tooltip-position="top">...</ide-tab>
+</ide-tabs>
+```
+
+- **Tabs:** each `<ide-tab>` child becomes a tab, and is moved into the content area of the `TabPane`.
+- **Ids:** a tab without `tab-id` is identified by its position.
+- **Appending:** a tab appended later is added to the pane.
+- **Selection:** setting `selected` (attribute or property) selects a tab. Selecting a tab, by a click or from code,
+  updates `selected` and dispatches `change` with the id as `detail.id`.
+- **From code:** [`TabPane`](../src/core/ui/lib/tabs/TabPane.ts) has `addTab(id, label, component, tooltip?,
+  tooltipPosition?)`, `selectTab()`, `getSelectedTabId()` and `onTabSelected(listener)`.
+
+#### `<ide-searchable-list>`
+
+```html
+<ide-searchable-list>
+    <ide-list-item icon="file-code">main.js</ide-list-item>
+    <ide-list-item icon="file-lines">README.md</ide-list-item>
+</ide-searchable-list>
+```
+
+The list shows items with an icon, sorted by their text. The selection moves with Up and Down, wrapping around at
+both ends, or by clicking an item. Enter or a double click confirms it.
+
+- **Items:** setting the `items` property to an array of `Describable`s (`getDescription()` and `getIcon()`)
+  replaces the children. Setting it back to null uses the children again.
+- **Children:** while the children are used, adding, removing or editing an `<ide-list-item>` rebuilds the list.
+- **Events:** `change` when the selection changes, and `confirm` when an item is chosen, both with the item as
+  `detail.value`. For a child, that item carries the `<ide-list-item>` element as `detail.value.element`.
+- **Value:** the `value` property is the selected item, and `focus()` focuses the list.
+- **Searching:** the list does not filter itself. The caller replaces the items when the search text changes, and can
+  forward the keys of its own input to `IdeList.onKeyDown()`.
+- **From code:** [`IdeSearchableList`](../src/core/ui/lib/lists/IdeSearchableList.ts) is created with
+  `new IdeSearchableList(parent, elements)`, and its contents are replaced with `setElements()`. Its base class,
+  `IdeList`, takes any element type, with a function creating the component of each element.
+
+#### `<ide-code>`
+
+```html
+<ide-code lang="javascript">const answer = 42;</ide-code>
+```
+
+- **Highlighting:** the text content is highlighted with the lexer and highlighter of the language whose key is
+  `lang`. Language keys are `javascript`, `html` and `riscv-assembly`. Any other `lang` shows plain text.
+- **Changing the text:** set `textContent`, the `code` property, or edit the children in any way: the element
+  highlights it again right after. The `code` property returns the text without the highlighting markup.
+- **From code:** [`HighlightedFragment`](../src/core/ui/lib/highlight/HighlightedFragment.ts) is created with
+  `new HighlightedFragment(parent, text, language)`. It adds `addHighlight(range, key)` and
+  `setCustomHighlighter()`.
+
+#### `<ide-shortcut>`
+
+```typescript
+container.innerHTML = `
+    <ide-shortcut keys="Ctrl+Shift+F"></ide-shortcut>
+    <ide-shortcut action="${CloseEditorTabAction.getID()}"></ide-shortcut>`;
+```
+
+The element is the badge of a keybind. The keybind is given either directly by `keys`, or by `action` as the
+keybind of the action with that id, including the user's rebinding. Action ids are generated, so read them from
+`getID()` instead of writing them out.
+
+- **Parsing `keys`:** modifiers and a key are separated by `+`, in any case. The key is a `Key` value (`ArrowUp`), a
+  `Key` name (`ARROW_UP`) or the label the badge shows (`↑`, `Space`). Text that cannot be parsed is shown as is.
+- **Updates:** the badge is computed when the element is connected and when one of its attributes changes. It does
+  not follow a keybind changed later.
+- **From code:** `ShortcutBadge.format(keybind)` and `ShortcutBadge.parse(text)` convert between a `Keybind` and its
+  text.
+
+#### `<ide-diff>`
+
+```html
+<ide-diff old-title="Saved" new-title="Current" context="2" ignore-whitespace></ide-diff>
+```
+
+```typescript
+const diff = element.querySelector("ide-diff")!;
+diff.setTexts(savedText, currentText);
+diff.getResult()?.getInsertedCount();
+```
+
+The two texts are shown side by side, line by line. Deleted and inserted lines are highlighted, and a deletion
+followed by an insertion is aligned as a modified block.
+
+- **Scrolling:** both sides scroll vertically together, and horizontally on their own.
+- **Header:** the header shows the titles, and the counts of inserted and deleted lines.
+- **Texts:** `oldText` and `newText` (properties, or the `old-text` and `new-text` attributes) hold the texts.
+  `setTexts()` sets both and computes the diff once.
+- **Folding:** long runs of unchanged lines are folded into a row the user can expand, keeping `context` lines (3 by
+  default) around each change. `fold-unchanged="false"` disables folding.
+- **`ignore-whitespace`:** lines are compared without their leading and trailing whitespace.
+- **Result:** `getResult()` returns the `DiffResult` shown. It has `getChanges()`, `isIdentical()`,
+  `getInsertedCount()` and `getDeletedCount()`.
+- **From code:** [`IdeSideBySideDiff`](../src/core/ui/lib/diff/IdeSideBySideDiff.ts) is created with
+  `new IdeSideBySideDiff(oldText, newText, options)`.
+
+#### `<ide-donut-chart>`
+
+```html
+<ide-donut-chart caption="tests">
+    <ide-donut-segment label="Passed" value="12" color="#7fae8a"></ide-donut-segment>
+    <ide-donut-segment label="Failed" value="3" color="#c76b6b"></ide-donut-segment>
+</ide-donut-chart>
+```
+
+The chart is a ring with one segment per value, clockwise from the top. The total is shown in its center, and a
+legend lists the label, value and share of each segment. Hovering a segment or its legend row fades the others, and
+shows its value in the center.
+
+- **Attributes:** `size` is the diameter (150 px by default), `thickness` the ring width (16), and `gap` the space
+  between segments (2). `caption` is the text under the total (`"total"` by default), and `legend="false"` hides the
+  legend.
+- **Segments:** setting the `segments` property to an array of `{label, value, color}` takes precedence over the
+  children. Editing the children updates the chart.
+- **`format`:** this property, a function of a number, formats the values.
+- **From code:** [`IdeDonutChart`](../src/core/ui/lib/charts/IdeDonutChart.ts) is created with
+  `new IdeDonutChart(segments, options)` and updated with `setSegments()`.
 
 ---
 

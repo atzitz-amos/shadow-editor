@@ -1,8 +1,10 @@
 import {TextRange} from "../text/range/TextRange";
 import {Fragment} from "../../editor/core/components/fragments/Fragment";
 import {FragmentEvent, FragmentType} from "../../editor/core/components/fragments/FragmentEvent";
+import {FragmentStyle} from "./FragmentStyle";
 
 export type FragmentSpanRendererOptions = {
+    getOverriddenStyle?: (fragment: Fragment) => FragmentStyle;
     renderInlay?: (event: FragmentEvent) => HTMLSpanElement;
     onSpanStyled?: (span: HTMLSpanElement, fragment: Fragment) => void;
 };
@@ -29,7 +31,8 @@ export class FragmentSpanRenderer {
             for (const activeFragment of sortedActive) {
                 if (activeFragment.type !== FragmentType.INLAY) {
                     const fragment = activeFragment.getFragment();
-                    fragment.getFragmentStyle().applyStyle(span);
+                    const style = options.getOverriddenStyle ? options.getOverriddenStyle(fragment) : fragment.getFragmentStyle();
+                    style.applyStyle(span);
                     for (const className of fragment.getClassList()) {
                         span.classList.add(className);
                     }

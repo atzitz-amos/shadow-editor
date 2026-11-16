@@ -8,4 +8,8 @@ import {UIComponent} from "../engine/components/UIComponent";
  */
 export abstract class Icon extends UIComponent {
     abstract toHTML(): HTMLElement;
+
+    toHTMLString(): string {
+        return this.toHTML().outerHTML;
+    }
 }

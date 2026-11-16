@@ -21,8 +21,8 @@ export class AutocompletePopupLine extends UIComponent {
         const source = this.presentation.getSource();
 
         this.setInnerHTML(`
-            ${icon ? icon.toHTML() : ""}
             <div class="autocomplete-item-left">
+                ${icon ? icon.toHTMLString() : ""}
                 <span class="autocomplete-item-title">${title}</span>
                 <span class="autocomplete-item-details">${details}</span>
             </div>

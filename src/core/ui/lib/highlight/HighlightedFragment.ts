@@ -20,18 +20,21 @@ export class HighlightedFragment extends UIComponent {
     private readonly holder: HighlightHolder;
     private readonly text: string;
 
-    constructor(parent: HTMLElement | null, fragment: string, language: LanguageBase | null) {
+    constructor(parent: HTMLElement | null, fragment: string, private readonly language: LanguageBase | null) {
         super(HTMLUtils.createElement("div.highlighted-fragment", parent ?? undefined));
         this.text = fragment;
+        this.holder = new DocumentAgnosticHighlightHolder(0);
 
-        const holder = new DocumentAgnosticHighlightHolder(0);
-        if (language !== null) {
-            const lexer = LangRegistry.getLexer(language);
-            const stream = lexer.lexAllToTokens(fragment);
-            LangRegistry.getHighlighter(language).highlight(stream, holder);
+        this.build();
+    }
+
+    private build() {
+        this.holder.clear();
+        if (this.language !== null) {
+            const lexer = LangRegistry.getLexer(this.language);
+            const stream = lexer.lexAllToTokens(this.text);
+            LangRegistry.getHighlighter(this.language).highlight(stream, this.holder);
         }
-
-        this.holder = holder;
     }
 
     addHighlight(range: TextRange, key: TextAttributeKey, className?: string[]) {

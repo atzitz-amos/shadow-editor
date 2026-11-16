@@ -1,4 +1,5 @@
 import {TextRange} from "./TextRange";
+import {Document} from "../../../editor/core/document/Document";
 
 /**
  * Represents a tracked range in the editor.
@@ -21,6 +22,15 @@ export class TrackedRange extends TextRange {
 
     static of(range: TextRange) {
         return new TrackedRange(range.getStart(), range.getEnd());
+    }
+
+    static ofTracked(document: Document, range: TextRange) {
+        return TrackedRange.of(range).tracked(document);
+    }
+
+    tracked(document: Document): TrackedRange {
+        document.addTrackedRange(this);
+        return this;
     }
 
     invalidate() {

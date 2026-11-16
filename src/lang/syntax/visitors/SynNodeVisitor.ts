@@ -2,7 +2,6 @@ import {SynTokenNode} from "../impl/SynTokenNode";
 import {SynErrorNode} from "../impl/SynErrorNode";
 import {SynASTElement} from "../api/tree/SynASTElement";
 import {SynFile} from "../api/filesystem/SynFile";
-import {AbstractSynTemplate} from "../writer/template/AbstractSynTemplate";
 import {SynNode} from "../api/SynNode";
 import {SynTree} from "../api/tree/SynTree";
 import {SynCodeBlock} from "../api/SynCodeBlock";
@@ -33,10 +32,6 @@ export class SynNodeVisitor {
     }
 
     visitFile(file: SynFile): void {
-    }
-
-    visitTemplate(template: AbstractSynTemplate): void {
-        this.visitNode(template);
     }
 
     visitElement(element: SynASTElement): void {
