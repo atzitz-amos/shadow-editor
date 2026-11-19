@@ -1,5 +1,5 @@
 import {URITargetFromString, URITargetType} from "./URITargetType";
-import {TextRange} from "../text/range/TextRange";
+import {TextRange} from "../../text/range/TextRange";
 
 
 /**
@@ -83,6 +83,20 @@ export class EditorURI {
      * */
     selectedRegion(range: TextRange, newTarget?: URITargetType): EditorURI {
         return new EditorURI(this.getPath() + "#selected:" + range.start + "-" + range.end, newTarget ?? this.target);
+    }
+
+    getSelectedRegion(): TextRange | null {
+        const anchor = this.getAnchor();
+        if (anchor.startsWith("selected:")) {
+            const rangeStr = anchor.substring("selected:".length);
+            const [startStr, endStr] = rangeStr.split("-");
+            const start = parseInt(startStr);
+            const end = parseInt(endStr);
+            if (!isNaN(start) && !isNaN(end)) {
+                return new TextRange(start, end);
+            }
+        }
+        return null;
     }
 
     toString(): string {

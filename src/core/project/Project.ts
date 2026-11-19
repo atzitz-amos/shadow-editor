@@ -1,6 +1,6 @@
-import {URILocatedResource} from "../uri/URILocatedResource";
-import {EditorURI} from "../uri/EditorURI";
-import {URITargetType} from "../uri/URITargetType";
+import {URILocatedResource} from "../navigation/uri/URILocatedResource";
+import {EditorURI} from "../navigation/uri/EditorURI";
+import {URITargetType} from "../navigation/uri/URITargetType";
 import {GlobalState} from "../global/GlobalState";
 import {ProjectFileSystemLoadedEvent} from "./events/ProjectFileSystemLoadedEvent";
 import {Serializable, SerializableType} from "../persistence/serializable/Serializable";

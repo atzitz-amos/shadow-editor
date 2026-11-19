@@ -57,7 +57,7 @@
 
 /* Splash screen error state */
 
-.shadow-splash-error, .shadow-splash-warning {
+.shadow-splash-error, .shadow-splash-warning, .shadow-splash-permission-modal {
     margin-top: 20px;
     padding: 20px;
     border-radius: 8px;
@@ -162,3 +162,47 @@
     line-height: 1.5;
 }
 
+
+.shadow-splash-permission-modal {
+    background: #4968741a;
+    border: 1px solid #69789b;
+}
+
+.shadow-splash-permission-modal-description {
+    color: #c0c0c0;
+    font-size: 16px;
+    margin-bottom: 12px;
+    word-break: break-word;
+    font-family: var(--ide-system-font), sans-serif;
+}
+
+.shadow-splash-permission-modal-features-list {
+    padding-left: 15px;
+    margin-bottom: 20px;
+}
+
+.shadow-splash-permission-modal-item {
+    font-size: 14px;
+    margin-bottom: 4px;
+    word-break: break-word;
+    align-items: center;
+    color: #919191;
+}
+
+.shadow-splash-permission-modal-item-error {
+    font-family: var(--ide-system-font), sans-serif;
+    color: #ff6b6b;
+    font-size: 14px;
+    margin-bottom: 4px;
+    word-break: break-word;
+    padding-left: 32px;
+}
+
+.shadow-splash-permission-modal-item-error code, .shadow-splash-permission-modal-item-label code {
+    font-family: var(--ide-code-font), monospace;
+}
+
+.shadow-splash-permission-modal-buttons {
+    display: flex;
+    gap: 20px;
+}

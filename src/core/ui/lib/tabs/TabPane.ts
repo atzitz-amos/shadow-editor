@@ -44,8 +44,11 @@ export class TabPane extends UIComponent {
             this.activeTabId = id;
         }
 
+        // Before the pane is drawn, draw() renders everything once. After, only what the new tab changes is rendered
+        if (!this.wasDrawn) return;
         this.renderTabsNav();
-        this.updateTabVisibility();
+        if (this.activeTabId === id) this.updateTabVisibility();
+        else content.getUnderlyingElement().style.display = "none";
     }
 
     public selectTab(id: string): void {
@@ -73,6 +76,7 @@ export class TabPane extends UIComponent {
     }
 
     public draw(): void {
+        this.wasDrawn = true;
         this.renderTabsNav();
         this.updateTabVisibility();
     }
@@ -101,9 +105,9 @@ export class TabPane extends UIComponent {
 
             this.tabNavElement.appendChild(tabButton);
         }
-        this.drawChildren();
     }
 
+    /** Shows the selected tab and hides the others. Only the shown tab is drawn, hidden tabs are drawn once selected */
     private updateTabVisibility(): void {
         for (const tab of this.tabs) {
             const isCurrent = tab.id === this.activeTabId;

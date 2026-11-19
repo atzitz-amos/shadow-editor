@@ -22,12 +22,13 @@ export class DebugToolsPaneComponent extends UIPaneComponent {
 
         this.astViewerWidget = new ASTViewerWidget();
         this.synSuiteLauncher = new SynSuiteLauncher();
-        this.init();
+        this.tabs = this.createTabs();
     }
 
     draw(): void {
-        this.setInnerHTML("");
-        this.init();
+        // Hiding the pane disposes its content, which is created again when it is shown. Otherwise the tabs are kept:
+        // recreating them on every draw would draw the widgets they hold again
+        if (this.tabs.isDisposed()) this.tabs = this.createTabs();
         this.drawChildren();
     }
 
@@ -39,12 +40,11 @@ export class DebugToolsPaneComponent extends UIPaneComponent {
         this.astViewerWidget.onCaretMoved(offset);
     }
 
-    private init() {
-        this.tabs = new TabPane();
-        this.tabs.addTab("ast-viewer", "AST Viewer", this.astViewerWidget);
-        this.tabs.addTab("syn-suite", "Syn Suite", this.synSuiteLauncher);
-
-        this.addChild(this.tabs);
+    private createTabs(): TabPane {
+        const tabs = new TabPane();
+        tabs.addTab("ast-viewer", "AST Viewer", this.astViewerWidget);
+        tabs.addTab("syn-suite", "Syn Suite", this.synSuiteLauncher);
+        this.addChild(tabs);
+        return tabs;
     }
-
 }

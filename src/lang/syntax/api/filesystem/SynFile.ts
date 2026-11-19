@@ -1,4 +1,4 @@
-import {URILocatedResource} from "../../../../core/uri/URILocatedResource";
+import {URILocatedResource} from "../../../../core/navigation/uri/URILocatedResource";
 import {RelativePath} from "../../../../core/project/filesystem/path/RelativePath";
 import {ProjectFile} from "../../../../core/project/filesystem/tree/ProjectFile";
 import {SynDocument} from "../document/SynDocument";

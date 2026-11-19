@@ -12,7 +12,7 @@ import {TextAttributeKey} from "../../../../editor/ui/highlighter/style/TextAttr
 import {TextBackground} from "../../../../editor/ui/highlighter/style/TextBackground";
 import {TextRange} from "../../../../core/text/range/TextRange";
 import {LogicalPosition} from "../../../../editor/core/coordinate/LogicalPosition";
-import {URINavigationManager} from "../../../../core/uri/URINavigationManager";
+import {URINavigationManager} from "../../../../core/navigation/URINavigationManager";
 import {CaretMovementFlags} from "../../../../editor/core/caret/Caret";
 
 const MAX_PREVIEW_HIGHLIGHTS = 1000;

@@ -1,5 +1,5 @@
 import {TextRange} from "../../../../core/text/range/TextRange";
-import {EditorURI} from "../../../../core/uri/EditorURI";
+import {EditorURI} from "../../../../core/navigation/uri/EditorURI";
 import {SynDocument} from "../../api/document/SynDocument";
 import {SynNode} from "../../api/SynNode";
 import {SynParentElement} from "../../api/tree/SynParentElement";

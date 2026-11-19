@@ -4,7 +4,7 @@ import {TabsManager} from "./TabsManager";
 import {EditorTab} from "./EditorTab";
 import {EditorDocumentManager} from "../../../editor/core/document/EditorDocumentManager";
 import {ActiveProjectHelper} from "../../../core/global/ActiveProjectHelper";
-import {EditorURI} from "../../../core/uri/EditorURI";
+import {EditorURI} from "../../../core/navigation/uri/EditorURI";
 import {DocumentViewManager} from "../../../editor/core/document/view/DocumentViewManager";
 import {FileContentLostError} from "../../../core/project/filesystem/FileContentLostError";
 import {IdeDialogUtilsCore} from "../../../core/ui/lib/dialog/utils/IdeDialogUtilsCore";

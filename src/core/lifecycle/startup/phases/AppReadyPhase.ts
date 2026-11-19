@@ -2,6 +2,7 @@ import {AbstractStartupPhase} from "../StartupPhase";
 import {GlobalState} from "../../../global/GlobalState";
 import {ShadowAppLoadedEvent} from "../../../../app/events/ShadowAppLoadedEvent";
 import {ShadowApp} from "../../../../app/ShadowApp";
+import {NavigatorFeaturesManager} from "../../../features/request/NavigatorFeaturesManager";
 
 /**
  * Final phase that marks the application as ready.
@@ -21,6 +22,8 @@ export class AppReadyPhase extends AbstractStartupPhase {
     }
 
     async run(): Promise<void> {
+        await NavigatorFeaturesManager.showPermissionModal();
+
         GlobalState.setReady(true);
         GlobalState.getMainEventBus().syncPublish(new ShadowAppLoadedEvent(this.app));
     }

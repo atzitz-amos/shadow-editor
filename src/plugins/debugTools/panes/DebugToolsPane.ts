@@ -4,7 +4,6 @@ import {UIPaneComponent} from "../../../app/core/panes/ui/UIPaneComponent";
 import {Icon} from "../../../core/ui/icons/Icon";
 import {FaIcon} from "../../../core/ui/icons/FaIcon";
 import {GlobalState} from "../../../core/global/GlobalState";
-import {SynTreeChangedEvent} from "../../../lang/events/SynTreeChangedEvent";
 import {DebugToolsPaneComponent} from "./DebugToolsPaneComponent";
 import {CaretMovedEvent} from "../../../editor/core/caret/events/CaretMovedEvent";
 import {SynDocumentManager} from "../../../lang/syntax/manager/SynDocumentManager";
@@ -30,7 +29,7 @@ export default class DebugToolsPane extends AbstractPane {
     }
 
     onHide() {
-        GlobalState.getMainEventBus().unsubscribe(this, SynTreeChangedEvent.SUBSCRIBER);
+        GlobalState.getMainEventBus().unsubscribe(this, SynEditorTreeChangedEvent.SUBSCRIBER);
         GlobalState.getMainEventBus().unsubscribe(this, CaretMovedEvent.SUBSCRIBER);
     }
 

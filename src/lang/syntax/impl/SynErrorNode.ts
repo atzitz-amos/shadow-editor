@@ -1,8 +1,8 @@
 import {TextRange} from "../../../core/text/range/TextRange";
 import {ASTGrammar, ASTType} from "../builder/parser/nodes/ASTGrammar";
 import {SynNode} from "../api/SynNode";
-import {EditorURI} from "../../../core/uri/EditorURI";
-import {URITargetType} from "../../../core/uri/URITargetType";
+import {EditorURI} from "../../../core/navigation/uri/EditorURI";
+import {URITargetType} from "../../../core/navigation/uri/URITargetType";
 import {SynNodeVisitor} from "../visitors/SynNodeVisitor";
 import {SynDocument} from "../api/document/SynDocument";
 import {SynLeafElement} from "../api/tree/SynLeafElement";

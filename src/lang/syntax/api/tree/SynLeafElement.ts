@@ -1,4 +1,4 @@
-import {EditorURI} from "../../../../core/uri/EditorURI";
+import {EditorURI} from "../../../../core/navigation/uri/EditorURI";
 import {TextRange} from "../../../../core/text/range/TextRange";
 import {SynNodeVisitor} from "../../visitors/SynNodeVisitor";
 import {SynDocument} from "../document/SynDocument";

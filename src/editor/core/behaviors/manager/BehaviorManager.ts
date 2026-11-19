@@ -101,6 +101,14 @@ export class BehaviorManager {
         return this.languageLayerDisabled ? null : this.languageLayer;
     }
 
+    /**
+     * Whether the mode is in the stack, current or not. A mode gets {@link IEditorMode.onExit} both when it leaves
+     * the stack and when another mode is entered on top of it: this tells them apart.
+     */
+    hasMode(mode: IEditorMode): boolean {
+        return this.modeStack.includes(mode);
+    }
+
     getCurrentMode(): IEditorMode | null {
         if (this.modeStack.length === 0) return null;
         return this.modeStack[this.modeStack.length - 1];

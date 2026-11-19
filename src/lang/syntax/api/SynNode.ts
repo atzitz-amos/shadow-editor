@@ -1,5 +1,5 @@
 import {SynASTElement} from "./tree/SynASTElement";
-import {URILocatedResource} from "../../../core/uri/URILocatedResource";
+import {URILocatedResource} from "../../../core/navigation/uri/URILocatedResource";
 import {SynDocument} from "./document/SynDocument";
 import {SynParentElement} from "./tree/SynParentElement";
 import {SynBase} from "./SynBase";

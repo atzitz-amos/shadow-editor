@@ -1,4 +1,4 @@
-import {CriticalErrorRenderer} from "./renderer/CriticalErrorRenderer";
+import {CriticalErrorRendererWidget} from "./renderer/CriticalErrorRendererWidget";
 
 /**
  * Method decorator that catches any exception thrown by the decorated method
@@ -43,7 +43,7 @@ export function Critical<This, Args extends any[], Return>(
                 return result.catch((error: unknown) => {
                     const err = error instanceof Error ? error : new Error(String(error));
                     console.error(`[Critical] ${source}:`, err);
-                    CriticalErrorRenderer.showOverlay(source, err);
+                    CriticalErrorRendererWidget.showOverlay(source, err);
                 });
             }
 
@@ -51,7 +51,7 @@ export function Critical<This, Args extends any[], Return>(
         } catch (error: unknown) {
             const err = error instanceof Error ? error : new Error(String(error));
             console.error(`[Critical] ${source}:`, err);
-            CriticalErrorRenderer.showOverlay(source, err);
+            CriticalErrorRendererWidget.showOverlay(source, err);
         }
     };
 }

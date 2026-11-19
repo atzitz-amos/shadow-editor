@@ -128,6 +128,63 @@ export class View {
         this.scrolling.scrollTo(targetX, targetY, ScrollMode.Smooth);
     }
 
+    /**
+     * Scrolls as little as possible for the whole range to be visible, with `margin` lines above and below it. Does
+     * nothing when it already is.
+     * <p>
+     * A range taller or wider than the view cannot be shown whole: only its start has to be visible, and is brought to
+     * the top left when it is not. Along the width, a range on several lines only needs its start to be visible.
+     *
+     * @param margin lines kept between the range and the top or bottom of the view, when there is room for them
+     */
+    ensureRangeVisible(range: TextRange, margin: number = 1, mode: ScrollMode = ScrollMode.Smooth) {
+        const start = this.editor.offsetToLogical(range.start);
+        const end = this.editor.offsetToLogical(range.end);
+
+        const targetLine = View.scrollTargetFor(
+            start.row, end.row, this.scrolling.scrollYLines, this.getVisualLineCount(), margin);
+
+        // Same horizontal margin as when scrolling to the caret
+        const endCol = start.row === end.row ? end.col : start.col;
+        const targetCol = View.scrollTargetFor(
+            start.col, endCol, this.scrolling.scrollXChars, this.getVisualCharCount(), View.HORIZONTAL_SCROLL_MARGIN);
+
+        if (targetLine === null && targetCol === null) return; // already visible
+
+        const targetX = targetCol !== null ? targetCol * this.getCharSize() : this.scrolling.scrollX;
+        const targetY = targetLine !== null ? targetLine * this.getLineHeight() : this.scrolling.scrollY;
+
+        // Clamped to the content by scrollTo
+        this.scrolling.scrollTo(targetX, targetY, mode);
+    }
+
+    /** Characters kept between the caret and the left or right of the view, see {@link scrollIntoViewAlongX} */
+    private static readonly HORIZONTAL_SCROLL_MARGIN = 2;
+
+    /**
+     * Where to scroll along one axis for the units `from` to `to` (lines or characters) to be visible, with
+     * `margin` units around them.
+     *
+     * @param first the first visible unit
+     * @param count how many units are visible
+     * @returns the new first visible unit, or null when no scrolling is needed
+     */
+    private static scrollTargetFor(from: number, to: number, first: number, count: number, margin: number): number | null {
+        // A margin larger than half the viewport can't be satisfied on both sides
+        const m = Math.max(0, Math.min(margin, Math.floor((count - 1) / 2)));
+        const last = first + count - 1;
+
+        const startVisible = from >= first + m && from <= last - m;
+        if (startVisible && to <= last - m) return null;
+
+        // Too large to fit: only its start has to be visible
+        if (to - from + 1 + 2 * m > count) return startVisible ? null : Math.max(0, from - m);
+
+        return from < first + m
+            ? Math.max(0, from - m)                 // before the view: aligned at its start
+            : Math.max(0, to - (count - 1) + m);    // after the view: aligned at its end
+    }
+
     getEditor(): Editor {
         return this.editor;
     }

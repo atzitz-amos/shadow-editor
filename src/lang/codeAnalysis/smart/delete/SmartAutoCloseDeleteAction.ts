@@ -19,19 +19,20 @@ export abstract class SmartAutoCloseDeleteAction extends SmartInlineDeleteAction
     abstract shouldDelete(char: string, trailingChar: string): boolean;
 
     isApplicable(ctx: EditorDeleteContext): boolean {
-        return ctx.getDeleteCount() < 0
+        return ctx.getCaretOffset() > 0
+            && ctx.getDeleteCount() < 0
             && !ctx.hasSelectionActive()
             && this.closeables[ctx.getDeleteText()] !== undefined
             && ctx.getTrailingChar() === this.closeables[ctx.getDeleteText()];
     }
 
     invoke(ctx: EditorDeleteContext): BehaviorHandlingMode {
+        if (ctx.getCaretOffset() === 0) return BehaviorHandlingMode.FORWARD;
+
         if (this.shouldDelete(ctx.getDeleteText(), ctx.getTrailingChar() ?? '')) {
             const editor = ctx.getEditor();
             const offset = ctx.getDeleteOffset();
             const count = ctx.getDeleteCount();
-
-            console.log(offset + count, offset + 1);
 
             editor.deleteAt(offset + count, -count + 1);
 

@@ -368,7 +368,7 @@ To show settings in the settings dialog, contribute a [settings pane](#132-setti
 
 ### 3.7 URIs
 
-[`EditorURI`](../src/core/uri/EditorURI.ts) identifies a resource of the editor with the syntax
+[`EditorURI`](../src/core/navigation/uri/EditorURI.ts) identifies a resource of the editor with the syntax
 `<target>://<path>#<anchor>`. Files, directories, projects and syntax documents expose a `getURI()`. To open what a
 URI points to:
 

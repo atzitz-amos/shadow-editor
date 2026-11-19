@@ -2,9 +2,9 @@ import {ShadowAppLoadedEvent} from "../../events/ShadowAppLoadedEvent";
 import {EventBus} from "../../../core/events/EventBus";
 import {StartupProgressEvent} from "../../../core/lifecycle/events/StartupProgressEvent";
 import {StartupFailedEvent} from "../../../core/lifecycle/events/StartupFailedEvent";
-import {CriticalErrorRenderer} from "../../../core/critical/renderer/CriticalErrorRenderer";
 import {ShadowUIFactory} from "../ShadowUIFactory";
 import {Scheduler} from "../../../core/scheduler/Scheduler";
+import {CriticalErrorRendererWidget} from "../../../core/critical/renderer/CriticalErrorRendererWidget";
 
 /**
  *
@@ -16,6 +16,8 @@ export class LaunchComponent {
     // Minimum time (ms) the splash screen should be visible
     private static readonly MIN_SPLASH_DURATION = 800;
 
+    private static currentInstance: LaunchComponent | null = null;
+
     // Splash screen elements
     private splashOverlay: HTMLElement | null = null;
     private progressBar: HTMLElement | null = null;
@@ -23,10 +25,22 @@ export class LaunchComponent {
     private splashCreatedAt: number = 0;
 
     constructor(private ui: ShadowUIFactory) {
+        if (LaunchComponent.currentInstance) {
+            throw new Error("LaunchComponent instance already exists. Use LaunchComponent.showSplashScreen() instead.");
+        }
+        LaunchComponent.currentInstance = this;
+    }
+
+    public static getCurrentInstance(): LaunchComponent | null {
+        return LaunchComponent.currentInstance;
     }
 
     public static showSplashScreen(ui: ShadowUIFactory) {
         new LaunchComponent(ui).display();
+    }
+
+    public getSplashElement(): HTMLElement | null {
+        return this.splashOverlay ? this.splashOverlay.querySelector('.shadow-splash-content') : null;
     }
 
     private createSplashScreen(): void {
@@ -81,7 +95,7 @@ export class LaunchComponent {
                 }
 
                 // Delegate error rendering to CriticalErrorRenderer
-                CriticalErrorRenderer.renderStartupError(content, event.getPhase(), event.getError());
+                CriticalErrorRendererWidget.renderStartupError(content, event.getPhase().name, event.getError());
             }
 
             // Unsubscribe from further events since we're staying on error screen

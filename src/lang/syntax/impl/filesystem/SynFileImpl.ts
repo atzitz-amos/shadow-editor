@@ -1,4 +1,4 @@
-import {EditorURI} from "../../../../core/uri/EditorURI";
+import {EditorURI} from "../../../../core/navigation/uri/EditorURI";
 import {ProjectFile} from "../../../../core/project/filesystem/tree/ProjectFile";
 import {RelativePath} from "../../../../core/project/filesystem/path/RelativePath";
 import {SynNodeVisitor} from "../../visitors/SynNodeVisitor";

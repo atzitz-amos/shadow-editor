@@ -20,12 +20,12 @@ export class TrackedRange extends TextRange {
         this.greedyLeft = isGreedyLeft;
     }
 
-    static of(range: TextRange) {
-        return new TrackedRange(range.getStart(), range.getEnd());
+    static of(range: TextRange, isGreedyLeft: boolean = false, isGreedyRight: boolean = false) {
+        return new TrackedRange(range.getStart(), range.getEnd(), isGreedyLeft, isGreedyRight);
     }
 
-    static ofTracked(document: Document, range: TextRange) {
-        return TrackedRange.of(range).tracked(document);
+    static ofTracked(document: Document, range: TextRange, isGreedyLeft: boolean = false, isGreedyRight: boolean = false) {
+        return TrackedRange.of(range, isGreedyLeft, isGreedyRight).tracked(document);
     }
 
     tracked(document: Document): TrackedRange {

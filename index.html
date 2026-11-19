@@ -42,7 +42,7 @@
             import {ASTBuilder} from "./src/lang/syntax/builder/parser/builder/ASTBuilder";
             import {ShadowApp} from "./src/app/ShadowApp";
             import {RelativePath} from "./src/core/project/filesystem/path/RelativePath";
-            import {EditorURI} from "./src/core/uri/EditorURI";
+            import {EditorURI} from "./src/core/navigation/uri/EditorURI";
             import {JsCodeBlock} from "./src/plugins/jsLang/lang/syntax/JsCodeBlock";
             import {JsDeclarator} from "./src/plugins/jsLang/lang/syntax/statements/JsDeclarator";
             import {JsIdentifier} from "./src/plugins/jsLang/lang/syntax/literal/JsIdentifier";
@@ -104,6 +104,8 @@
             import {JsFunctionStatement} from "./src/plugins/jsLang/lang/syntax/statements/JsFunctionStatement";
             import {Scheduler} from "./src/core/scheduler/Scheduler";
             import {TrackedRange} from "./src/core/text/range/TrackedRange";
+            import {CriticalErrorRendererWidget} from "./src/core/critical/renderer/CriticalErrorRendererWidget";
+            import {EditorNavigationMode} from "./src/editor/core/navigation/EditorNavigationMode";
 
             window.QuickParseUtils = QuickParseUtils;
 
@@ -212,6 +214,8 @@
 
             window.ProjectFilesPaneHelper = ProjectFilesPaneHelper;
 
+            window.EditorNavigationMode = EditorNavigationMode;
+
             // Main entry point - launch the app and wait for startup to complete
             const app = await ShadowApp.launch(true);
             window.app = app;
@@ -248,36 +252,6 @@
                 }, 0);
 
                 window.editor = ui.getMainEditor();
-
-                let _highlightedRange;
-                let _currFunc = -1;
-
-                Scheduler.after(2000, () => {
-                    const doc = GlobalState.getMainEditor().getOpenedDocument();
-                    _highlightedRange = TrackedRange.ofTracked(doc, doc.getFullRange());
-                    GlobalState.getMainEditor().getBehaviorManager().enterMode(
-                        new class extends EditorModeEx {
-                            getCustomHighlighter() {
-                                return new FocusedModeHighlighter(_highlightedRange)
-                            }
-                        }
-                    )
-                })
-
-                window.highlightNextFunction = () => {
-                    _currFunc++;
-                    const tree = getSynDocument().getTree();
-                    const funcs = tree.getAllChildrenOfType(JsFunctionStatement, true);
-                    const doc = GlobalState.getMainEditor().getOpenedDocument();
-                    if (_currFunc >= funcs.length) {
-                        _currFunc = -1;
-                        _highlightedRange = TrackedRange.ofTracked(doc, doc.getFullRange());
-                    } else {
-                        _highlightedRange = TrackedRange.ofTracked(doc, funcs[_currFunc].getTextRange());
-                    }
-
-                    GlobalState.getMainEditor().repaintView();
-                }
 
                 window.project = project;
                 window.ActiveProjectHelper = ActiveProjectHelper;

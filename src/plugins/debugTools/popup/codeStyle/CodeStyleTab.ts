@@ -82,6 +82,7 @@ export class CodeStyleTab extends DebugToolTab {
                 <div class="file-info">
                     <div>Language: <span class="language-info"></span></div>
                     <div>Caret Offset: <span class="caret-offset"></span></div>
+                    <div>Selection: <span class="selection-info"></span></div>
                     <button class="ide-btn scramble-btn" primary>Scramble file</button>
                 </div>
                 <div class="main-info">
@@ -133,6 +134,13 @@ export class CodeStyleTab extends DebugToolTab {
 
         this.element!.querySelector(".file-info .language-info")!.textContent = language?.getDisplayName() ?? "Plain Text";
         this.element!.querySelector(".file-info .caret-offset")!.textContent = offset?.toString();
+        const selectionModel = editor.getPrimaryCaret().getSelectionModel();
+        const selectionElement = this.element!.querySelector(".file-info .selection-info")!;
+        if (selectionModel.isSelectionActive) {
+            selectionElement.parentElement!.style.display = "block";
+            selectionElement.textContent = `${selectionModel.getActualStart()} - ${selectionModel.getActualEnd()} (${selectionModel.getSelectionLength()} chars)`;
+        }
+        else selectionElement.parentElement!.style.display = "none";
 
         if (language === JsLang.INSTANCE) {
             (<HTMLElement>this.element!.querySelector(".file-info .scramble-btn")).style.display = "block";
@@ -252,7 +260,13 @@ export class CodeStyleTab extends DebugToolTab {
 
     private updateFormattingBlocks(editor: Editor, manager: CodeStyleManager, element: Element) {
         const visitor = manager.getFormattingBlockVisitor()!;
-        const block = visitor.format(SynDocumentManager.getOpenedSynDocument(editor).getTree(), editor.getOpenedDocument().getTokenCache().createTokenStream());
+        const document = SynDocumentManager.getOpenedSynDocument(editor);
+        if (document.getText().length >= 50_000) {
+            element.innerHTML = "<span>File too large</span>";
+            return;
+        }
+
+        const block = visitor.format(document.getTree(), editor.getOpenedDocument().getTokenCache().createTokenStream());
 
         element.innerHTML = "";
         this.buildFormattingTreeRecursive(block, element as HTMLElement).classList.add("popup-tree");

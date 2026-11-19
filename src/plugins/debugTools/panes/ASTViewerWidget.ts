@@ -5,7 +5,6 @@ import {SynASTElementImpl} from "../../../lang/syntax/impl/tree/SynASTElementImp
 import {SynFileImpl} from "../../../lang/syntax/impl/filesystem/SynFileImpl";
 import {SynTokenNode} from "../../../lang/syntax/impl/SynTokenNode";
 import {SynErrorNode} from "../../../lang/syntax/impl/SynErrorNode";
-import {SynRecursiveIterator} from "../../../lang/syntax/visitors/SynRecursiveIterator";
 import {Editor} from "../../../editor/Editor";
 import {SynDocument} from "../../../lang/syntax/api/document/SynDocument";
 import {SynTreeImpl} from "../../../lang/syntax/impl/tree/SynTreeImpl";
@@ -28,9 +27,13 @@ export class ASTViewerWidget extends UIComponent {
     private scrollTop: number = 0;
     private scrollLeft: number = 0;
 
+    /** Paths of the collapsed nodes, see {@link SynTreeNode.getPath} */
     private collapsedNodes: Set<string> = new Set();
 
     private followingElement: HTMLElement | null;
+
+    /** Whether the view is behind its document. Until it changes, drawing again (such as when the tab is shown) keeps the view */
+    private stale: boolean = true;
 
     constructor() {
         super(HTMLUtils.createDiv("ast-viewer-widget"));
@@ -68,9 +71,15 @@ export class ASTViewerWidget extends UIComponent {
     }
 
     public draw(): void {
+        if (!this.stale) return;
+        this.stale = false;
+
         this.setInnerHTML("");
         if (!this.synDocument) {
             this.setInnerHTML(`<div class="ast-viewer-placeholder">No file loaded</div>`);
+            return;
+        } else if (this.synDocument.getText().length >= 50_000) {
+            this.setInnerHTML(`<div class="ast-viewer-placeholder">File too large to display AST</div>`);
             return;
         }
         const header = HTMLUtils.createElement("header.ast-viewer-header");
@@ -94,11 +103,12 @@ export class ASTViewerWidget extends UIComponent {
 
         const body = HTMLUtils.createDiv("ast-viewer-body");
 
+        // Built before being attached: thousands of nodes added to the live document one by one cost several times more
         this.addChild(new SynTreeNode(this, body, this.synDocument.getTree()));
+        this.drawChildren();
 
         this.addHtmlElement(header);
         this.addHtmlElement(body);
-        this.drawChildren();
 
         // Restore scroll position after redraw
         body.scrollTop = this.scrollTop;
@@ -116,29 +126,26 @@ export class ASTViewerWidget extends UIComponent {
 
         this.synDocument = synDocument;
         this.editor = editor;
-        if (this.synDocument) {
-            let newCollapsedNodes = new Set<string>();
-            for (const node of new SynRecursiveIterator(this.synDocument.getTree())) {
-                if (this.wasCollapsed(node)) {
-                    newCollapsedNodes.add(node.toTreeRepr());
-                }
-            }
-            this.collapsedNodes = newCollapsedNodes;
-        }
 
+        this.stale = true;
         this.draw();
     }
 
-    wasCollapsed(node: SynNode) {
-        if (!(node instanceof SynASTElementImpl)) return false;
-        return this.collapsedNodes.has(node.toTreeRepr());
+    /** Disposing removes the view, which has to be built again when the widget is drawn next */
+    public dispose(): void {
+        super.dispose();
+        this.stale = true;
     }
 
-    setCollapsed(node: SynNode, b: boolean) {
+    wasCollapsed(path: string) {
+        return this.collapsedNodes.has(path);
+    }
+
+    setCollapsed(path: string, b: boolean) {
         if (b) {
-            this.collapsedNodes.add(node.toTreeRepr());
+            this.collapsedNodes.add(path);
         } else {
-            this.collapsedNodes.delete(node.toTreeRepr());
+            this.collapsedNodes.delete(path);
         }
     }
 
@@ -167,10 +174,18 @@ class SynTreeNode extends UIComponent {
 
     private body: HTMLElement;
 
-    public constructor(private readonly component: ASTViewerWidget, root: HTMLElement, private readonly node: SynNode, private readonly tag: string | null = null) {
+    /**
+     * Identifies the node across parses, so that it stays collapsed after the document changes: the index and type of
+     * each node from the root to it. Unlike the text of the node, it is cheap and does not change with edits inside it.
+     */
+    private readonly path: string;
+
+    public constructor(private readonly component: ASTViewerWidget, root: HTMLElement, private readonly node: SynNode,
+                       private readonly tag: string | null = null, parentPath: string | null = null, index: number = 0) {
         super(HTMLUtils.createElement("div.syn-tree-node", root));
 
-        this.collapsed = component.wasCollapsed(node);
+        this.path = (parentPath === null ? "" : parentPath + "/" + index + ":") + node.constructor.name;
+        this.collapsed = component.wasCollapsed(this.path);
     }
 
     drawElement(): void {
@@ -204,9 +219,9 @@ class SynTreeNode extends UIComponent {
         this.addHtmlElement(title);
 
         this.body = HTMLUtils.createDiv("syn-tree-node-body");
-        for (const child of this.node.getChildren()) {
-            this.addChild(new SynTreeNode(this.component, this.body, child, this.getTagForChild(child)));
-        }
+        this.node.getChildren().forEach((child, index) => {
+            this.addChild(new SynTreeNode(this.component, this.body, child, this.getTagForChild(child), this.path, index));
+        });
         const closing = HTMLUtils.createDiv("syn-tree-node-closing");
 
         closing.innerText = `}`;
@@ -255,11 +270,7 @@ class SynTreeNode extends UIComponent {
 
     setCollapsed(b: boolean) {
         this.collapsed = b;
-        if (this.collapsed) {
-            this.component.setCollapsed(this.node, true);
-        } else {
-            this.component.setCollapsed(this.node, false);
-        }
+        this.component.setCollapsed(this.path, b);
         this.draw();
     }
 

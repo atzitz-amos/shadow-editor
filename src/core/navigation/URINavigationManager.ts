@@ -1,5 +1,5 @@
-import {EditorURI} from "./EditorURI";
-import {URITargetType} from "./URITargetType";
+import {EditorURI} from "./uri/EditorURI";
+import {URITargetType} from "./uri/URITargetType";
 import {UseLogger} from "../logging/logger/LoggerDecorators";
 import {Logger} from "../logging/logger/LoggerCore";
 import {EditorTabsHelper} from "../../app/core/tabs/EditorTabsHelper";

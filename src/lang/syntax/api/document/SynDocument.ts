@@ -1,5 +1,5 @@
-import {URILocatedResource} from "../../../../core/uri/URILocatedResource";
-import {EditorURI} from "../../../../core/uri/EditorURI";
+import {URILocatedResource} from "../../../../core/navigation/uri/URILocatedResource";
+import {EditorURI} from "../../../../core/navigation/uri/EditorURI";
 import {TokenStream} from "../../builder/tokens/TokenStream";
 import {ProblemsHolder} from "../../../codeAnalysis/inspections/problems/ProblemsHolder";
 import {TextRange} from "../../../../core/text/range/TextRange";

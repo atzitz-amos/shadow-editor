@@ -5,7 +5,7 @@ import {ActiveProjectHelper} from "../../../../../../core/global/ActiveProjectHe
 import {Focusable} from "../../../../../../core/ui/engine/mixins/Focusable";
 import {FileSystemTree} from "../../../../../../core/ui/lib/filesystem/FileSystemTree";
 import {ProjectFile} from "../../../../../../core/project/filesystem/tree/ProjectFile";
-import {URINavigationManager} from "../../../../../../core/uri/URINavigationManager";
+import {URINavigationManager} from "../../../../../../core/navigation/URINavigationManager";
 import {ContextMenuElement} from "../../../../../../core/ui/lib/menu/impl/ContextMenu";
 import {ProjectDirectory} from "../../../../../../core/project/filesystem/tree/ProjectDirectory";
 import {Key} from "../../../../../../core/keybinds/Keybind";
